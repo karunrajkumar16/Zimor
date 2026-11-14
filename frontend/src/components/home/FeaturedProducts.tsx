@@ -20,11 +20,11 @@ export const FeaturedProducts: React.FC = () => {
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
 
   return (
-    <section className="pt-10 sm:pt-16 pb-12 sm:pb-16 bg-white" aria-label="Our Collection">
+    <section className="pt-8 sm:pt-16 pb-10 sm:pb-16 bg-white" aria-label="Our Collection">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header — Left Aligned, Clean & Compact */}
-        <div className="mb-6 sm:mb-8">
-          <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-brand-700 font-bold mb-1.5 font-sans">
+        <div className="mb-4 sm:mb-8">
+          <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-brand-700 font-bold mb-1 font-sans">
             Curated Silhouettes
           </p>
           <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-normal text-ink tracking-tight leading-none">
@@ -33,7 +33,7 @@ export const FeaturedProducts: React.FC = () => {
         </div>
 
         {/* Curated 4 Product Grid (4 columns on desktop, 2 columns on mobile/tablet) */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-7">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6 lg:gap-7">
           {FEATURED_PRODUCTS.map((product) => (
             <ProductCard
               key={product.id}

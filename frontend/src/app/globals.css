@@ -32,18 +32,28 @@
   }
 
   /* Eliminate 300ms mobile touch delay */
-  a, button, input, select, textarea {
+  a,
+  button,
+  input,
+  select,
+  textarea {
     touch-action: manipulation;
   }
 
   /* Button Typography — Clean modern sans-serif (Miraggio lifestyle standard) */
-  button, .btn, [role="button"], a.btn {
+  button,
+  .btn,
+  [role="button"],
+  a.btn {
     font-family: 'Montserrat', system-ui, -apple-system, sans-serif !important;
     letter-spacing: 0em !important;
     text-transform: none !important;
   }
 
-  h1, h2, h3, .font-heading {
+  h1,
+  h2,
+  h3,
+  .font-heading {
     letter-spacing: -0.015em;
   }
 }
@@ -95,6 +105,7 @@ html.lenis body {
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
+
 .scrollbar-none {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -120,6 +131,7 @@ html.lenis body {
   from {
     width: 0%;
   }
+
   to {
     width: 100%;
   }
@@ -134,6 +146,7 @@ html.lenis body {
   html {
     scroll-behavior: auto;
   }
+
   *,
   *::before,
   *::after {

@@ -54,6 +54,10 @@ module.exports = {
         'lift': '0 8px 24px rgba(22, 20, 19, 0.08)',
         'drawer': '-4px 0 24px rgba(22, 20, 19, 0.12)',
       },
+      aspectRatio: {
+        '3/4': '3 / 4',
+        '4/5': '4 / 5',
+      },
     },
   },
   plugins: [],

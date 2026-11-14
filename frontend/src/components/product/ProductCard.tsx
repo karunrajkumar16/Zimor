@@ -60,40 +60,37 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
   return (
     <div className="group flex flex-col relative bg-transparent overflow-hidden transition-all duration-300">
-      {/* Visual Image Container — Clean neutral light background matching reference */}
-      <div
-        className="relative w-full aspect-square bg-[#F6F6F6] rounded-xs overflow-hidden flex items-center justify-center min-h-[220px] sm:min-h-[280px]"
-        style={{ aspectRatio: '1 / 1' }}
-      >
+      {/* Visual Image Container — Proportionate, compact on mobile, never full-screen */}
+      <div className="relative w-full aspect-square max-h-[145px] sm:max-h-none bg-transparent overflow-hidden flex items-center justify-center">
         <Link href={`/product/${product.slug}`} className="block w-full h-full relative">
           <Image
             src={product.images[selectedImageIndex]?.url || product.images[0]?.url}
             alt={product.images[selectedImageIndex]?.alt || product.name}
             fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-contain p-4 sm:p-6 md:p-7 transition-transform duration-500 ease-out group-hover:scale-105"
+            sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
+            className="object-contain p-2.5 sm:p-4 transition-transform duration-500 ease-out group-hover:scale-105"
           />
           {product.images.length > 1 && (
             <Image
               src={product.images[1]?.url}
               alt={`${product.name} alternate view`}
               fill
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-contain p-4 sm:p-6 md:p-7 absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out"
+              sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
+              className="object-contain p-2.5 sm:p-4 absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out"
             />
           )}
         </Link>
 
-        {/* Top Left: Clean Red Discount Text (matching reference "20% OFF") */}
+        {/* Top Left: Clean Red Discount Text */}
         {discountPercent > 0 && (
-          <div className="absolute top-3 left-3 sm:top-3.5 sm:left-3.5 z-10 pointer-events-none">
-            <span className="text-[#BA3C3C] text-[11px] sm:text-xs font-semibold tracking-wider uppercase font-sans">
+          <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10 pointer-events-none">
+            <span className="text-[#BA3C3C] text-[9.5px] sm:text-[11px] font-semibold tracking-wider uppercase font-sans">
               {discountPercent}% OFF
             </span>
           </div>
         )}
 
-        {/* Top Right: Delicate Outline Heart Icon (matching reference "♡") */}
+        {/* Top Right: Delicate Outline Heart Icon */}
         <button
           type="button"
           onClick={(e) => {
@@ -101,18 +98,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             e.stopPropagation();
             toggleWishlist(product.id);
           }}
-          className="absolute top-3 right-3 sm:top-3.5 sm:right-3.5 z-10 text-ink/80 hover:text-ink transition-colors p-1"
+          className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10 text-ink/70 hover:text-ink transition-colors p-1"
           aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
         >
           <Heart
-            className={`w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[1.4] transition-all ${
-              inWishlist ? 'fill-[#BA3C3C] text-[#BA3C3C]' : 'text-ink/80 hover:text-ink'
+            className={`w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[1.3] transition-all ${
+              inWishlist ? 'fill-[#BA3C3C] text-[#BA3C3C]' : 'text-ink/70 hover:text-ink'
             }`}
           />
         </button>
 
         {/* Bottom Right: Quick Actions */}
-        <div className="absolute bottom-3 right-3 sm:bottom-3.5 sm:right-3.5 z-10 flex items-center gap-1.5">
+        <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 z-10 flex items-center gap-1.5">
           {onQuickView && (
             <button
               type="button"
@@ -121,15 +118,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 e.stopPropagation();
                 onQuickView(product);
               }}
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.1)] hidden sm:flex items-center justify-center text-ink hover:scale-110 active:scale-95 transition-all opacity-0 group-hover:opacity-100"
+              className="w-7 h-7 sm:w-8.5 sm:h-8.5 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] hidden sm:flex items-center justify-center text-ink hover:scale-110 active:scale-95 transition-all opacity-0 group-hover:opacity-100"
               aria-label={`Quick view ${product.name}`}
               title="Quick view"
             >
-              <Eye className="w-4 h-4 text-ink" />
+              <Eye className="w-3.5 h-3.5 text-ink" />
             </button>
           )}
 
-          {/* White Floating Circular Quick-Add Button with Bag+ Icon */}
+          {/* White Floating Circular Quick-Add Button */}
           <button
             type="button"
             onClick={(e) => {
@@ -137,7 +134,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               e.stopPropagation();
               addItem(product, 1);
             }}
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.1)] flex items-center justify-center text-ink hover:scale-110 active:scale-95 transition-all group/btn"
+            className="w-7 h-7 sm:w-8.5 sm:h-8.5 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center justify-center text-ink hover:scale-110 active:scale-95 transition-all group/btn"
             aria-label={`Add ${product.name} to bag`}
             title="Quick add to bag"
           >
@@ -145,10 +142,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth="1.6"
+              strokeWidth="1.5"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-ink group-hover/btn:text-[#BA3C3C] transition-colors"
+              className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-ink group-hover/btn:text-[#BA3C3C] transition-colors"
             >
               <path d="M6 2L3 6v14a2 2 0 0 0 2 2h7" />
               <path d="M3 6h18" />
@@ -161,34 +158,34 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       </div>
 
       {/* Details Container below Image Container */}
-      <div className="pt-2.5 sm:pt-3 space-y-0.5">
+      <div className="pt-1.5 sm:pt-2.5 space-y-0.5">
         {/* Line 1: Product Name */}
         <Link
           href={`/product/${product.slug}`}
-          className="block text-sm sm:text-[15px] font-medium text-ink hover:text-brand-700 transition-colors line-clamp-1"
+          className="block text-xs sm:text-[14px] font-medium text-ink hover:text-brand-700 transition-colors line-clamp-1"
         >
           {title}
         </Link>
 
         {/* Line 2: Subtitle / Colorway name */}
-        <p className="text-xs sm:text-[13px] text-ink-muted line-clamp-1">
+        <p className="text-[10px] sm:text-[12px] text-ink-muted line-clamp-1">
           {subtitle}
         </p>
 
         {/* Line 3: Price (left) and Color Swatches + Count (right) */}
-        <div className="flex items-center justify-between pt-1">
-          {/* Prices: Strikethrough original + Red discounted price */}
-          <div className="flex items-baseline gap-1.5 font-sans">
-            <span className="text-xs sm:text-[13px] text-ink-faint line-through">
+        <div className="flex items-center justify-between pt-0.5">
+          {/* Prices */}
+          <div className="flex items-baseline gap-1 font-sans">
+            <span className="text-[10.5px] sm:text-xs text-ink-faint line-through">
               ₹{product.compareAtPrice.toLocaleString('en-IN')}
             </span>
-            <span className="text-xs sm:text-[13px] font-semibold text-[#BA3C3C]">
+            <span className="text-[11px] sm:text-[13px] font-semibold text-[#BA3C3C]">
               ₹{product.price.toLocaleString('en-IN')}
             </span>
           </div>
 
           {/* Color Swatch Dots + Count */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             {product.colors.map((color, idx) => (
               <button
                 key={color.name}
@@ -198,7 +195,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   e.stopPropagation();
                   setSelectedImageIndex(idx % product.images.length);
                 }}
-                className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border transition-transform ${
+                className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full border transition-transform ${
                   selectedImageIndex === idx % product.images.length
                     ? 'ring-1 ring-offset-1 ring-ink border-white scale-110'
                     : 'border-black/20 hover:scale-125'
@@ -208,7 +205,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 aria-label={`Select color ${color.name}`}
               />
             ))}
-            <span className="text-[10px] sm:text-[11px] text-ink-muted font-sans font-normal ml-0.5">
+            <span className="text-[9px] sm:text-[10px] text-ink-muted font-sans font-normal ml-0.5">
               +{product.colors.length}
             </span>
           </div>

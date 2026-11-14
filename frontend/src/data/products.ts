@@ -93,12 +93,12 @@ export const PRODUCTS: Product[] = [
     numReviews: 6,
     images: [
       {
-        url: '/products/delo-3.jpg',
-        alt: 'ZIMOR Delo Tote Noir edition side and wristlet detail',
-      },
-      {
         url: '/products/delo-1.jpg',
         alt: 'ZIMOR Delo Tote Noir structured silhouette',
+      },
+      {
+        url: '/products/delo-3.jpg',
+        alt: 'ZIMOR Delo Tote Noir edition side and wristlet detail',
       },
       {
         url: '/products/delo-2.jpg',
