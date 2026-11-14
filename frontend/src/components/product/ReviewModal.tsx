@@ -327,7 +327,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
 
               <button
                 type="submit"
-                className="w-full bg-brand-700 hover:bg-brand-800 text-white font-semibold text-xs uppercase tracking-luxury py-3 rounded transition-colors"
+                className="w-full bg-brand-700 hover:bg-brand-800 text-white font-sans font-medium text-sm tracking-normal py-3 rounded transition-colors"
               >
                 Submit Verified Review
               </button>

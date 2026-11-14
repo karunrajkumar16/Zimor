@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Laptop, Sparkles, Briefcase } from 'lucide-react';
@@ -63,10 +63,31 @@ const PILLARS: PolenePillar[] = [
 
 export const LifestyleDiscovery: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
   const craftVideoRef = useRef<HTMLVideoElement>(null);
   const isVisibleRef = useRef(false);
   // Parallax element references for the inner images ONLY (Containers are fixed, locked & borderless)
   const imgRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [activeMobileIndex, setActiveMobileIndex] = useState(0);
+
+  const handleTrackScroll = () => {
+    if (!trackRef.current) return;
+    const { scrollLeft, clientWidth } = trackRef.current;
+    if (clientWidth === 0) return;
+    const firstCard = trackRef.current.firstElementChild as HTMLElement;
+    const cardWidth = firstCard?.clientWidth || clientWidth * 0.82;
+    const gap = 14;
+    const index = Math.round(scrollLeft / (cardWidth + gap));
+    setActiveMobileIndex(Math.min(PILLARS.length - 1, Math.max(0, index)));
+  };
+
+  const scrollToPillar = (idx: number) => {
+    if (!trackRef.current) return;
+    const cardEl = trackRef.current.children[idx] as HTMLElement;
+    if (cardEl) {
+      cardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  };
 
   // Smooth, scroll-driven window parallax: only active when section is in viewport
   useEffect(() => {
@@ -137,25 +158,25 @@ export const LifestyleDiscovery: React.FC = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} className="pt-6 sm:pt-10 pb-0 bg-canvas content-auto" aria-label="Shop by Profession and Lifestyle">
+    <section ref={sectionRef} className="pt-10 sm:pt-16 pb-0 bg-canvas content-auto" aria-label="Shop by Profession and Lifestyle">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="mb-6 sm:mb-10">
-          <p className="text-[11px] sm:text-xs uppercase tracking-[0.25em] text-brand-700 font-bold mb-1.5">
+          <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-brand-700 font-bold mb-1.5 font-sans">
             Find Your Everyday Match
           </p>
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
             <div>
-              <h2 className="font-serif text-[34px] sm:text-[42px] lg:text-[48px] font-normal text-ink tracking-tight leading-[1.12]">
+              <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-normal text-ink tracking-tight leading-tight">
                 Shop by Profession & Lifestyle
               </h2>
-              <p className="text-xs sm:text-sm text-ink-secondary mt-1 font-light max-w-xl">
+              <p className="text-xs sm:text-sm text-ink-secondary mt-1 font-light max-w-xl leading-relaxed">
                 Select your daily routine to explore the silhouette engineered for your workday carry, tech protection, and transit agility.
               </p>
             </div>
             <Link
               href="/shop"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-ink hover:text-brand-700 transition-colors shrink-0"
+              className="inline-flex items-center gap-1.5 font-sans text-xs sm:text-sm font-medium tracking-normal text-ink hover:text-brand-700 transition-colors shrink-0"
             >
               <span>Explore All Silhouettes</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -163,14 +184,28 @@ export const LifestyleDiscovery: React.FC = () => {
           </div>
         </div>
 
-        {/* 3-Column Editorial Photography Grid: All 3 Cards Borderless with Uniform Clean Design */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 sm:gap-3 lg:gap-4 mb-8 sm:mb-12">
+        {/* Editorial Photography Cards:
+            - Mobile: Comfortable horizontal swipable carousel with natural peek (~68vw) & snap
+            - Desktop: Pure 3-Column Luxury Grid (md:grid-cols-3) */}
+        <div
+          ref={trackRef}
+          onScroll={handleTrackScroll}
+          className="flex md:grid md:grid-cols-3 overflow-x-auto md:overflow-visible snap-x snap-mandatory scroll-smooth no-scrollbar gap-3 sm:gap-4 lg:gap-4 pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 mb-3 sm:mb-8 md:mb-12"
+          style={{
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            WebkitOverflowScrolling: 'touch',
+            touchAction: 'pan-x pan-y',
+            overscrollBehaviorX: 'contain',
+            overscrollBehaviorY: 'auto',
+          }}
+        >
           {PILLARS.map((pillar, idx) => {
             return (
               <Link
                 key={pillar.id}
                 href={pillar.href}
-                className="group relative h-[480px] sm:h-[560px] lg:h-[640px] w-full rounded-xs overflow-hidden text-left transition-all duration-500 cursor-pointer block border-none outline-none ring-0 shadow-none hover:shadow-lg"
+                className="group relative h-[380px] sm:h-[460px] md:h-[520px] lg:h-[600px] w-[68vw] min-w-[245px] max-w-[290px] sm:w-[320px] sm:max-w-none md:w-full shrink-0 snap-start rounded-xl md:rounded-xs overflow-hidden text-left transition-all duration-500 cursor-pointer block border-none outline-none ring-0 shadow-sm hover:shadow-lg"
               >
                 {/* Inner Image Canvas: Oversized & Translates Smoothly Inside the Locked Fixed Container */}
                 <div
@@ -183,7 +218,7 @@ export const LifestyleDiscovery: React.FC = () => {
                     src={pillar.editorialImage}
                     alt={pillar.name}
                     fill
-                    sizes="(max-width: 768px) 100vw, 33vw"
+                    sizes="(max-width: 768px) 70vw, 33vw"
                     className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
                     priority={pillar.id === 'corporate-executive'}
                   />
@@ -193,30 +228,30 @@ export const LifestyleDiscovery: React.FC = () => {
                 <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-transparent to-black/85 group-hover:from-black/60 group-hover:to-black/90 transition-opacity duration-300 pointer-events-none" />
 
                 {/* Top Title: 1-2 Word Representative Category Title */}
-                <div className="absolute top-5 sm:top-6 left-5 sm:left-6 z-10 pointer-events-none drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.85)]">
-                  <h4 className="font-sans font-bold text-white text-lg sm:text-xl lg:text-[22px] tracking-tight leading-tight">
+                <div className="absolute top-4 sm:top-5 left-4 sm:left-5 z-10 pointer-events-none drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.85)]">
+                  <h4 className="font-sans font-bold text-white text-base sm:text-lg lg:text-xl tracking-tight leading-tight">
                     {pillar.topTitle}
                   </h4>
                 </div>
 
-                {/* Bottom Overlay Content with About-Brand Style Bold Sans Typography */}
-                <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6 text-white z-10 space-y-2 pointer-events-none drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.85)]">
-                  <p className="font-sans text-[10px] sm:text-[11px] uppercase tracking-[0.22em] text-white/80 font-medium">
+                {/* Bottom Overlay Content */}
+                <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 text-white z-10 space-y-1.5 sm:space-y-2 pointer-events-none drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.85)]">
+                  <p className="font-sans text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-white/80 font-medium">
                     {pillar.eyebrow}
                   </p>
-                  <h3 className="font-sans font-bold text-white text-xl sm:text-2xl lg:text-[26px] leading-tight tracking-tight">
+                  <h3 className="font-sans font-bold text-white text-lg sm:text-xl lg:text-2xl leading-tight tracking-tight">
                     {pillar.name}
                   </h3>
-                  <p className="font-sans text-xs sm:text-[13px] text-white/90 font-normal leading-relaxed">
+                  <p className="font-sans text-[11px] sm:text-xs text-white/90 font-normal leading-relaxed line-clamp-1 sm:line-clamp-none">
                     {pillar.subtitle}
                   </p>
 
                   {/* Bottom Action Line: Unified design for all 3 cards */}
-                  <div className="pt-3 border-t border-white/20 flex items-center justify-between text-xs pointer-events-auto">
-                    <span className="font-sans font-medium text-white/90 flex items-center gap-1 group-hover:text-white">
+                  <div className="pt-2 sm:pt-2.5 border-t border-white/20 flex items-center justify-between text-xs pointer-events-auto">
+                    <span className="font-sans font-medium text-white/90 flex items-center gap-1 group-hover:text-white text-[11px] sm:text-xs">
                       <span>{pillar.silhouette}</span>
                     </span>
-                    <span className="inline-flex items-center gap-1 font-sans text-[11px] uppercase tracking-wider font-semibold text-white/90 group-hover:text-white group-hover:translate-x-1 transition-all">
+                    <span className="inline-flex items-center gap-1 font-sans text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold text-white/90 group-hover:text-white group-hover:translate-x-1 transition-all">
                       <span>Explore</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </span>
@@ -225,6 +260,21 @@ export const LifestyleDiscovery: React.FC = () => {
               </Link>
             );
           })}
+        </div>
+
+        {/* Mobile Slide Position Indicators (01 / 02 / 03) */}
+        <div className="flex md:hidden items-center justify-center gap-2 mb-8 -mt-1">
+          {PILLARS.map((pillar, idx) => (
+            <button
+              key={pillar.id}
+              type="button"
+              onClick={() => scrollToPillar(idx)}
+              className={`h-1.5 transition-all duration-300 rounded-full ${
+                activeMobileIndex === idx ? 'w-8 bg-ink' : 'w-2 bg-line hover:bg-ink-muted'
+              }`}
+              aria-label={`Go to slide ${pillar.number} - ${pillar.topTitle}`}
+            />
+          ))}
         </div>
       </div>
 
@@ -277,9 +327,9 @@ export const LifestyleDiscovery: React.FC = () => {
             {/* Underlined Call to Action */}
             <Link
               href="/about"
-              className="font-sans text-xs uppercase tracking-[0.22em] font-medium text-ink hover:text-brand-700 underline underline-offset-8 transition-colors"
+              className="font-sans text-xs sm:text-sm font-medium tracking-normal text-ink hover:text-brand-700 underline underline-offset-8 transition-colors"
             >
-              DISCOVER MORE
+              Discover More
             </Link>
           </div>
         </div>

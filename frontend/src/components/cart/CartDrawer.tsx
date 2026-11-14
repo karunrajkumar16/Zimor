@@ -45,7 +45,7 @@ export const CartDrawer: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
+    <div data-lenis-prevent-modal className="fixed inset-0 z-50 overflow-hidden">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
@@ -79,7 +79,7 @@ export const CartDrawer: React.FC = () => {
           </div>
 
           {/* Cart Items List */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+          <div data-lenis-prevent-modal className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
             {items.length === 0 ? (
               <div className="text-center py-16 space-y-4">
                 <div className="w-16 h-16 mx-auto rounded-full bg-canvas-alt flex items-center justify-center text-ink-muted">
@@ -94,7 +94,7 @@ export const CartDrawer: React.FC = () => {
                 <Link
                   href="/shop"
                   onClick={closeCartDrawer}
-                  className="inline-block bg-ink hover:bg-brand-800 text-white text-xs font-semibold uppercase tracking-wider py-3 px-6 rounded transition-colors"
+                  className="inline-block bg-ink hover:bg-brand-800 text-white font-sans text-sm font-medium tracking-normal py-3 px-6 rounded transition-colors"
                 >
                   Explore Workbags
                 </Link>
@@ -316,7 +316,7 @@ export const CartDrawer: React.FC = () => {
                 <Link
                   href="/checkout"
                   onClick={closeCartDrawer}
-                  className="w-full bg-brand-700 hover:bg-brand-800 text-white py-3.5 px-4 rounded font-semibold text-xs uppercase tracking-luxury flex items-center justify-center gap-2 transition-colors shadow-sm"
+                  className="w-full bg-brand-700 hover:bg-brand-800 text-white py-3.5 px-4 rounded font-sans font-medium text-sm tracking-normal flex items-center justify-center gap-2 transition-colors shadow-sm"
                 >
                   <span>Proceed to Checkout</span>
                   <ArrowRight className="w-4 h-4" />

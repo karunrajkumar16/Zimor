@@ -300,7 +300,7 @@ export default function CheckoutPage() {
                   <button
                     type="button"
                     onClick={() => setStep(2)}
-                    className="bg-brand-700 hover:bg-brand-800 text-white font-semibold text-xs uppercase tracking-luxury py-3 px-8 rounded flex items-center gap-2 transition-colors"
+                    className="bg-brand-700 hover:bg-brand-800 text-white font-sans font-medium text-sm tracking-normal py-3 px-8 rounded flex items-center gap-2 transition-colors"
                   >
                     <span>Continue to Shipping Method</span>
                     <ArrowRight className="w-4 h-4" />
@@ -383,7 +383,7 @@ export default function CheckoutPage() {
                   <button
                     type="button"
                     onClick={() => setStep(3)}
-                    className="bg-brand-700 hover:bg-brand-800 text-white font-semibold text-xs uppercase tracking-luxury py-3 px-8 rounded flex items-center gap-2 transition-colors"
+                    className="bg-brand-700 hover:bg-brand-800 text-white font-sans font-medium text-sm tracking-normal py-3 px-8 rounded flex items-center gap-2 transition-colors"
                   >
                     <span>Continue to Payment</span>
                     <ArrowRight className="w-4 h-4" />
@@ -535,7 +535,7 @@ export default function CheckoutPage() {
                   <button
                     type="submit"
                     disabled={isPlacingOrder}
-                    className="bg-brand-700 hover:bg-brand-800 text-white font-semibold text-xs uppercase tracking-luxury py-4 px-8 rounded flex items-center gap-2 transition-colors shadow-sm disabled:opacity-50"
+                    className="bg-brand-700 hover:bg-brand-800 text-white font-sans font-medium text-sm tracking-normal py-4 px-8 rounded flex items-center gap-2 transition-colors shadow-sm disabled:opacity-50"
                   >
                     {isPlacingOrder ? (
                       <span>Placing Your Order...</span>

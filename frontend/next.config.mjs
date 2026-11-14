@@ -3,6 +3,16 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
+  allowedDevOrigins: ['192.168.0.103', 'localhost:3000'],
+  async redirects() {
+    return [
+      {
+        source: '/profession',
+        destination: '/shop?section=profession#profession',
+        permanent: true,
+      },
+    ];
+  },
   images: {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],

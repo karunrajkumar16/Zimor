@@ -9,17 +9,20 @@ import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { MobileNav } from './MobileNav';
 import { PRODUCTS } from '@/data/products';
+import { useLenisScroll } from './SmoothScroll';
 
 export const Header: React.FC = () => {
   const pathname = usePathname();
   const { itemCount, openCartDrawer } = useCart();
   const { wishlistCount } = useWishlist();
+  const { lenis } = useLenisScroll();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isShopHovered, setIsShopHovered] = useState(false);
   const [isAboutHovered, setIsAboutHovered] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isProfessionActive, setIsProfessionActive] = useState(false);
 
   const isHome = pathname === '/';
 
@@ -37,8 +40,94 @@ export const Header: React.FC = () => {
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
+
+  // Intelligent active section observer for /shop
+  useEffect(() => {
+    if (pathname !== '/shop') {
+      setIsProfessionActive(false);
+      return;
+    }
+
+    const checkActiveSection = () => {
+      if (typeof window === 'undefined') return;
+      const hash = window.location.hash;
+      if (
+        hash === '#profession' ||
+        hash === '#shop-by-profession' ||
+        hash === '#corporate-executive' ||
+        hash === '#tech-transit' ||
+        hash === '#creative-studio'
+      ) {
+        setIsProfessionActive(true);
+        return;
+      }
+
+      const el = document.getElementById('profession');
+      if (el) {
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.offsetHeight : 80;
+        const rect = el.getBoundingClientRect();
+        // If the top of the profession section is touching or past the header
+        if (rect.top <= headerHeight + 10 && rect.bottom >= headerHeight) {
+          setIsProfessionActive(true);
+          return;
+        }
+      }
+      setIsProfessionActive(false);
+    };
+
+    checkActiveSection();
+    window.addEventListener('scroll', checkActiveSection, { passive: true });
+    window.addEventListener('hashchange', checkActiveSection);
+    return () => {
+      window.removeEventListener('scroll', checkActiveSection);
+      window.removeEventListener('hashchange', checkActiveSection);
+    };
+  }, [pathname]);
+
+  const isShopActive = pathname === '/shop' && !isProfessionActive;
+
+  const handleShopBagsClick = (e: React.MouseEvent) => {
+    if (pathname === '/shop') {
+      e.preventDefault();
+      setIsShopHovered(false);
+      if (lenis) {
+        lenis.scrollTo(0, { duration: 0.8 });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      window.history.pushState(null, '', '/shop');
+      setIsProfessionActive(false);
+    }
+  };
+
+  const handleProfessionClick = (e: React.MouseEvent) => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('scroll_to_profession', 'true');
+    }
+    if (pathname === '/shop') {
+      e.preventDefault();
+      const el = document.getElementById('profession');
+      if (el) {
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.offsetHeight : 80;
+        if (lenis) {
+          lenis.scrollTo(el, { offset: -headerHeight, duration: 1.0 });
+        } else {
+          const rect = el.getBoundingClientRect();
+          const targetScroll = rect.top + window.scrollY - headerHeight;
+          window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+        }
+        window.history.pushState(null, '', '/shop?section=profession#profession');
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
+        setIsProfessionActive(true);
+      }
+    }
+  };
 
   const isTransparent = isHome && !isScrolled;
 
@@ -58,13 +147,13 @@ export const Header: React.FC = () => {
         className={`sticky top-0 z-40 transition-all duration-300 ease-in-out ${
           isTransparent
             ? 'bg-transparent text-white'
-            : 'bg-white/95 backdrop-blur-md text-ink border-b border-line shadow-xs'
+            : 'bg-white/95 backdrop-blur-md text-ink shadow-xs'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-[1fr_auto_1fr] items-center h-16 sm:h-20">
-            {/* COLUMN 1: LEFT NAVIGATION (Kept exactly as existing) */}
-            <div className="flex items-center justify-start">
+            {/* COLUMN 1: LEFT NAVIGATION */}
+            <div className="flex items-center justify-start lg:justify-center">
               {/* Mobile Menu Trigger */}
               <button
                 type="button"
@@ -77,8 +166,8 @@ export const Header: React.FC = () => {
                 <Menu className="w-5 h-5 stroke-[1.5]" />
               </button>
 
-              {/* Left Nav Links */}
-              <nav className="hidden lg:flex items-center gap-6 xl:gap-8 text-[11px] uppercase tracking-[0.18em] font-bold">
+              {/* Left Nav Links — Miraggio Modern Clean Sans Typography */}
+              <nav className="hidden lg:flex items-center gap-8 xl:gap-10 2xl:gap-12 font-sans text-[13px] xl:text-[13.5px] font-medium tracking-normal text-ink">
                 {/* Shop Bags ⌵ */}
                 <div
                   className="relative"
@@ -87,54 +176,59 @@ export const Header: React.FC = () => {
                 >
                   <Link
                     href="/shop"
-                    className={`inline-flex items-center gap-1 py-1.5 transition-opacity ${
+                    onClick={handleShopBagsClick}
+                    className={`header-nav-link relative inline-flex items-center gap-1.5 py-1.5 transition-colors whitespace-nowrap ${
                       isTransparent
-                        ? 'text-white hover:opacity-75'
-                        : pathname === '/shop'
-                        ? 'text-ink font-extrabold'
-                        : 'text-ink hover:opacity-60'
+                        ? 'text-white hover:text-white/80'
+                        : isShopActive
+                        ? 'text-ink font-semibold after:content-[\'\'] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-ink'
+                        : 'text-ink/80 hover:text-ink'
                     }`}
                   >
                     <span>Shop Bags</span>
                     <ChevronDown
-                      className={`w-2.5 h-2.5 stroke-[2] transition-transform duration-200 ${
+                      className={`w-3.5 h-3.5 stroke-[1.8] transition-transform duration-200 ${
                         isShopHovered ? 'rotate-180' : ''
                       } ${isTransparent ? 'text-white/80' : 'text-ink-muted'}`}
                     />
                   </Link>
 
-                  {/* Dropdown Menu — Exact Typography & Sizing from ca-fune.com */}
+                  {/* Dropdown Menu — Miraggio Clean Typography & Sizing */}
                   {isShopHovered && (
-                    <div className="absolute top-full left-0 w-[340px] pt-2 z-50">
+                    <div className="absolute top-full left-0 w-[360px] pt-2 z-50">
                       <div className="bg-white border border-line shadow-lift p-5 rounded-xs text-ink animate-in fade-in-50 duration-150">
                         <div className="grid grid-cols-2 gap-6 text-left normal-case">
                           {/* Column 1: BY TYPES */}
                           <div>
-                            <p className="font-sans font-bold text-[10.5px] uppercase tracking-[0.18em] text-ink mb-2.5">
+                            <p className="font-sans font-semibold text-[11px] uppercase tracking-[0.1em] text-ink-muted/80 mb-2.5">
                               BY TYPES
                             </p>
-                            <div className="space-y-1.5">
+                            <div className="space-y-1">
                               <Link
                                 href="/shop"
-                                className="font-serif text-[12px] font-normal text-ink/85 hover:text-ink hover:underline underline-offset-4 transition-all block py-0.5"
+                                onClick={() => setIsShopHovered(false)}
+                                className="header-dropdown-link font-sans text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
                               >
                                 All Handbags
                               </Link>
                               <Link
                                 href="/shop?category=tote-bags"
-                                className="font-serif text-[12px] font-normal text-ink/85 hover:text-ink hover:underline underline-offset-4 transition-all block py-0.5"
+                                onClick={() => setIsShopHovered(false)}
+                                className="header-dropdown-link font-sans text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
                               >
                                 Tote Bags
                               </Link>
                               <Link
                                 href="/shop?category=laptop-bags"
-                                className="font-serif text-[12px] font-normal text-ink/85 hover:text-ink hover:underline underline-offset-4 transition-all block py-0.5"
+                                onClick={() => setIsShopHovered(false)}
+                                className="header-dropdown-link font-sans text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
                               >
                                 Shoulder Bags
                               </Link>
                               <Link
                                 href="/shop?category=shoulder-bags"
-                                className="font-serif text-[12px] font-normal text-ink/85 hover:text-ink hover:underline underline-offset-4 transition-all block py-0.5"
+                                onClick={() => setIsShopHovered(false)}
+                                className="header-dropdown-link font-sans text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
                               >
                                 Crossbody &amp; Slings
                               </Link>
@@ -143,31 +237,35 @@ export const Header: React.FC = () => {
 
                           {/* Column 2: BY OCCASIONS */}
                           <div>
-                            <p className="font-sans font-bold text-[10.5px] uppercase tracking-[0.18em] text-ink mb-2.5">
+                            <p className="font-sans font-semibold text-[11px] uppercase tracking-[0.1em] text-ink-muted/80 mb-2.5">
                               BY OCCASIONS
                             </p>
-                            <div className="space-y-1.5">
+                            <div className="space-y-1">
                               <Link
-                                href="/profession#corporate"
-                                className="font-serif text-[12px] font-normal text-ink/85 hover:text-ink hover:underline underline-offset-4 transition-all block py-0.5"
+                                href="/shop?section=profession#corporate-executive"
+                                onClick={() => setIsShopHovered(false)}
+                                className="header-dropdown-link font-sans text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
                               >
                                 Work
                               </Link>
                               <Link
-                                href="/profession#commute"
-                                className="font-serif text-[12px] font-normal text-ink/85 hover:text-ink hover:underline underline-offset-4 transition-all block py-0.5"
+                                href="/shop?section=profession#tech-transit"
+                                onClick={() => setIsShopHovered(false)}
+                                className="header-dropdown-link font-sans text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
                               >
                                 Travel
                               </Link>
                               <Link
-                                href="/profession#essentials"
-                                className="font-serif text-[12px] font-normal text-ink/85 hover:text-ink hover:underline underline-offset-4 transition-all block py-0.5"
+                                href="/shop?section=profession#creative-studio"
+                                onClick={() => setIsShopHovered(false)}
+                                className="header-dropdown-link font-sans text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
                               >
                                 Essentials
                               </Link>
                               <Link
                                 href="/gifting"
-                                className="font-serif text-[12px] font-normal text-ink/85 hover:text-ink hover:underline underline-offset-4 transition-all block py-0.5"
+                                onClick={() => setIsShopHovered(false)}
+                                className="header-dropdown-link font-sans text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
                               >
                                 Gift
                               </Link>
@@ -181,30 +279,17 @@ export const Header: React.FC = () => {
 
                 {/* Shop by Profession */}
                 <Link
-                  href="/profession"
-                  className={`inline-flex items-center py-1.5 transition-opacity whitespace-nowrap ${
+                  href="/shop?section=profession#profession"
+                  onClick={handleProfessionClick}
+                  className={`header-nav-link relative inline-flex items-center py-1.5 transition-colors whitespace-nowrap ${
                     isTransparent
-                      ? 'text-white hover:opacity-75'
-                      : pathname === '/profession'
-                      ? 'text-ink font-extrabold'
-                      : 'text-ink hover:opacity-60'
+                      ? 'text-white hover:text-white/80'
+                      : isProfessionActive
+                      ? 'text-ink font-semibold after:content-[\'\'] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-ink'
+                      : 'text-ink/80 hover:text-ink'
                   }`}
                 >
                   Shop by Profession
-                </Link>
-
-                {/* Gifting & Occasions */}
-                <Link
-                  href="/gifting"
-                  className={`inline-flex items-center py-1.5 transition-opacity whitespace-nowrap ${
-                    isTransparent
-                      ? 'text-white hover:opacity-75'
-                      : pathname === '/gifting'
-                      ? 'text-brand-700 font-extrabold'
-                      : 'text-ink hover:opacity-60'
-                  }`}
-                >
-                  Gifting &amp; Occasions
                 </Link>
               </nav>
             </div>
@@ -231,8 +316,8 @@ export const Header: React.FC = () => {
 
             {/* COLUMN 3: RIGHT NAVIGATION & RIGHT-ALIGNED ACTION ICONS */}
             <div className="flex items-center justify-end w-full">
-              {/* Right Nav Links: Evenly distributed relative to center logo and left nav */}
-              <nav className="hidden lg:flex items-center gap-6 xl:gap-8 text-[11px] uppercase tracking-[0.18em] font-bold">
+              {/* Right Nav Links — Miraggio Modern Clean Sans Typography */}
+              <nav className="hidden lg:flex items-center gap-8 xl:gap-10 2xl:gap-12 font-sans text-[13px] xl:text-[13.5px] font-medium tracking-normal text-ink">
                 {/* About Us ⌵ */}
                 <div
                   className="relative"
@@ -241,17 +326,17 @@ export const Header: React.FC = () => {
                 >
                   <Link
                     href="/about"
-                    className={`inline-flex items-center gap-1 py-1.5 transition-opacity whitespace-nowrap ${
+                    className={`header-nav-link relative inline-flex items-center gap-1.5 py-1.5 transition-colors whitespace-nowrap ${
                       isTransparent
-                        ? 'text-white hover:opacity-75'
+                        ? 'text-white hover:text-white/80'
                         : pathname === '/about'
-                        ? 'text-ink font-extrabold'
-                        : 'text-ink hover:opacity-60'
+                        ? 'text-ink font-semibold after:content-[\'\'] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-ink'
+                        : 'text-ink/80 hover:text-ink'
                     }`}
                   >
                     <span>About Us</span>
                     <ChevronDown
-                      className={`w-2.5 h-2.5 stroke-[2] transition-transform duration-200 ${
+                      className={`w-3.5 h-3.5 stroke-[1.8] transition-transform duration-200 ${
                         isAboutHovered ? 'rotate-180' : ''
                       } ${isTransparent ? 'text-white/80' : 'text-ink-muted'}`}
                     />
@@ -260,25 +345,25 @@ export const Header: React.FC = () => {
                   {isAboutHovered && (
                     <div className="absolute top-full left-0 w-56 pt-2 z-50">
                       <div className="bg-white border border-line shadow-lift p-5 rounded-xs text-ink animate-in fade-in-50 duration-150">
-                        <p className="font-sans font-bold text-[10.5px] uppercase tracking-[0.18em] text-ink mb-2.5">
+                        <p className="font-sans font-semibold text-[11px] uppercase tracking-[0.1em] text-ink-muted/80 mb-2.5">
                           OUR ATELIER
                         </p>
-                        <div className="space-y-1.5 text-left normal-case">
+                        <div className="space-y-1 text-left normal-case">
                           <Link
                             href="/about"
-                            className="font-serif text-[12px] font-normal text-ink/85 hover:text-ink hover:underline underline-offset-4 transition-all block py-0.5"
+                            className="header-dropdown-link font-sans text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
                           >
                             Our Story &amp; Heritage
                           </Link>
                           <Link
                             href="/about#craft"
-                            className="font-serif text-[12px] font-normal text-ink/85 hover:text-ink hover:underline underline-offset-4 transition-all block py-0.5"
+                            className="header-dropdown-link font-sans text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
                           >
                             Cruelty-Free Craft
                           </Link>
                           <Link
                             href="/about#reviews"
-                            className="font-serif text-[12px] font-normal text-ink/85 hover:text-ink hover:underline underline-offset-4 transition-all block py-0.5"
+                            className="header-dropdown-link font-sans text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
                           >
                             Verified Client Reviews
                           </Link>
@@ -291,12 +376,12 @@ export const Header: React.FC = () => {
                 {/* Contact Us */}
                 <Link
                   href="/contact"
-                  className={`inline-flex items-center py-1.5 transition-opacity whitespace-nowrap ${
+                  className={`header-nav-link relative inline-flex items-center py-1.5 transition-colors whitespace-nowrap ${
                     isTransparent
-                      ? 'text-white hover:opacity-75'
+                      ? 'text-white hover:text-white/80'
                       : pathname === '/contact'
-                      ? 'text-ink font-extrabold'
-                      : 'text-ink hover:opacity-60'
+                      ? 'text-ink font-semibold after:content-[\'\'] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-ink'
+                      : 'text-ink/80 hover:text-ink'
                   }`}
                 >
                   Contact Us
@@ -304,7 +389,7 @@ export const Header: React.FC = () => {
               </nav>
 
               {/* Action Icons in Cafuné sequence: User, Search, Wishlist, Bag (Far Right) */}
-              <div className="flex items-center gap-4 sm:gap-4.5 xl:gap-5 ml-6 lg:ml-7 xl:ml-9">
+              <div className="flex items-center gap-4 sm:gap-4.5 xl:gap-5 ml-6 lg:ml-8 xl:ml-12 2xl:ml-14">
                 {/* 1. User / Account (Hidden on phone view, accessible via drawer) */}
                 <Link
                   href="/account"

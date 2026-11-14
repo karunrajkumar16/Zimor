@@ -151,7 +151,7 @@ export const AboutZimor: React.FC = () => {
       {/* 2-Row Grid: Fourth Image & Fifth Image share Row 2 for identical ending surface */}
       <div className="w-full grid grid-cols-2 md:grid-cols-12 md:grid-rows-[360px_390px] gap-1 sm:gap-1.5 md:gap-2 md:h-[750px] p-0 bg-white">
         {/* TILE 1 (Cols 1-5, Row 1): Prominent Heading & Editorial Story Panel — Creed Boutique Editorial Styling */}
-        <div className="col-span-2 md:col-start-1 md:col-end-6 md:row-start-1 md:row-end-2 min-h-[320px] md:min-h-0 bg-white p-6 sm:p-8 lg:p-9 xl:p-10 flex flex-col justify-between border border-line/40 md:border-none">
+        <div className="col-span-2 md:col-start-1 md:col-end-6 md:row-start-1 md:row-end-2 min-h-[320px] md:min-h-0 bg-white p-6 sm:p-8 lg:p-9 xl:p-10 flex flex-col justify-between">
           <div className="space-y-4 sm:space-y-4.5">
             <div>
               <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.28em] text-brand-700 font-semibold mb-2">
@@ -181,10 +181,10 @@ export const AboutZimor: React.FC = () => {
             </div>
           </div>
 
-          <div className="pt-4 sm:pt-5 border-t border-line/50">
+          <div className="pt-4 sm:pt-5">
             <Link
               href="/about"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-neutral-950 text-white text-[11px] sm:text-xs uppercase tracking-wider font-medium shadow-xs hover:bg-neutral-900 transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-neutral-950 text-white font-sans text-xs sm:text-[13px] font-medium tracking-normal shadow-xs hover:bg-neutral-900 transition-colors"
             >
               <span>The Zimor Story</span>
               <ArrowRight className="w-3.5 h-3.5" />

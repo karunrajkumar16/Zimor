@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -11,8 +13,7 @@
   }
 
   html {
-    scroll-behavior: smooth;
-    font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+    font-family: 'Montserrat', 'Inter', system-ui, -apple-system, sans-serif;
     color: var(--ink-primary);
     background-color: var(--canvas-bg);
     text-rendering: optimizeLegibility;
@@ -26,7 +27,8 @@
     color: var(--ink-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
+    overflow-x: clip;
+    font-family: 'Montserrat', 'Inter', system-ui, -apple-system, sans-serif;
   }
 
   /* Eliminate 300ms mobile touch delay */
@@ -34,9 +36,59 @@
     touch-action: manipulation;
   }
 
+  /* Button Typography — Clean modern sans-serif (Miraggio lifestyle standard) */
+  button, .btn, [role="button"], a.btn {
+    font-family: 'Montserrat', system-ui, -apple-system, sans-serif !important;
+    letter-spacing: 0em !important;
+    text-transform: none !important;
+  }
+
   h1, h2, h3, .font-heading {
     letter-spacing: -0.015em;
   }
+}
+
+/* Miraggio-Style Modern Clean Header Typography */
+.header-nav-link {
+  font-family: 'Montserrat', system-ui, -apple-system, sans-serif !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  letter-spacing: 0.01em !important;
+}
+
+.header-dropdown-link {
+  font-family: 'Montserrat', system-ui, -apple-system, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  letter-spacing: 0em !important;
+}
+
+/* =========================================================================
+   LENIS SMOOTH SCROLL ENGINE (Anonmee / Apple Butter-Smooth Momentum)
+   ========================================================================= */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+/* Modals & drawers isolate scroll to prevent background leakage */
+.lenis [data-lenis-prevent-modal],
+[data-lenis-prevent-modal] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
 }
 
 /* Custom scrollbar utility */
@@ -53,10 +105,9 @@
   background-color: #F3EFEA;
 }
 
-/* Modern Content-Visibility optimization for below-the-fold sections */
+/* Section stability — prevents scroll-height recalculations and micro-stutters during momentum scrolling */
 .content-auto {
-  content-visibility: auto;
-  contain-intrinsic-size: 1px 600px;
+  content-visibility: visible;
 }
 
 /* Hardware-accelerated rendering hints */

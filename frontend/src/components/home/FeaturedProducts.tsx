@@ -24,16 +24,16 @@ export const FeaturedProducts: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header — Left Aligned, Clean & Compact */}
         <div className="mb-6 sm:mb-8">
-          <p className="text-[11px] sm:text-xs uppercase tracking-[0.25em] text-brand-700 font-bold mb-1.5">
+          <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-brand-700 font-bold mb-1.5 font-sans">
             Curated Silhouettes
           </p>
-          <h2 className="font-serif text-[34px] sm:text-[42px] lg:text-[48px] font-normal text-ink tracking-tight leading-none">
+          <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-normal text-ink tracking-tight leading-none">
             Our Collection
           </h2>
         </div>
 
         {/* Curated 4 Product Grid (4 columns on desktop, 2 columns on mobile/tablet) */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-7">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-7">
           {FEATURED_PRODUCTS.map((product) => (
             <ProductCard
               key={product.id}
@@ -47,7 +47,7 @@ export const FeaturedProducts: React.FC = () => {
         <div className="mt-12 sm:mt-16 text-center">
           <Link
             href="/shop"
-            className="group inline-flex items-center justify-center gap-3 px-10 py-3.5 sm:px-14 sm:py-4 rounded-full border border-ink text-ink hover:bg-ink hover:text-white transition-all duration-300 text-xs sm:text-[13px] uppercase tracking-luxury font-medium shadow-xs hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
+            className="group inline-flex items-center justify-center gap-2.5 px-8 py-3.5 sm:px-12 sm:py-4 rounded-full border border-ink text-ink hover:bg-ink hover:text-white transition-all duration-300 font-sans text-[13.5px] sm:text-sm font-medium tracking-normal shadow-xs hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
           >
             <span>View All Bags</span>
             <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1.5" />

@@ -197,6 +197,65 @@ function ShopContent() {
     return '';
   }, [selectedCategory, selectedProfession, selectedColor]);
 
+  // Smooth scroll to targeted section (#profession or ?section=profession) on mount
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const isProfession =
+      window.location.hash.includes('profession') ||
+      window.location.hash.includes('corporate') ||
+      window.location.hash.includes('tech-transit') ||
+      window.location.hash.includes('creative') ||
+      searchParams.get('section') === 'profession' ||
+      sessionStorage.getItem('scroll_to_profession') === 'true';
+
+    if (isProfession) {
+      sessionStorage.removeItem('scroll_to_profession');
+      const targetHash = window.location.hash ? window.location.hash.slice(1) : 'profession';
+      let attempts = 0;
+      const pollAndScroll = () => {
+        const el = document.getElementById(targetHash) || document.getElementById('profession');
+        if (el) {
+          const header = document.querySelector('header');
+          const headerHeight = header ? header.offsetHeight : 80;
+          const rect = el.getBoundingClientRect();
+          if (Math.abs(rect.top - headerHeight) > 5) {
+            const targetScroll = rect.top + window.scrollY - headerHeight;
+            window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+          }
+        } else if (attempts < 20) {
+          attempts++;
+          setTimeout(pollAndScroll, 60);
+        }
+      };
+      // Progressive ticks to align perfectly once DOM and images are ready
+      setTimeout(pollAndScroll, 60);
+      setTimeout(pollAndScroll, 250);
+      return;
+    }
+
+    if (window.location.hash) {
+      const hash = window.location.hash.slice(1);
+      let attempts = 0;
+      const pollAndScroll = () => {
+        const el = document.getElementById(hash);
+        if (el) {
+          const header = document.querySelector('header');
+          const headerHeight = header ? header.offsetHeight : 80;
+          const rect = el.getBoundingClientRect();
+          if (Math.abs(rect.top - headerHeight) > 5) {
+            const targetScroll = rect.top + window.scrollY - headerHeight;
+            window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+          }
+        } else if (attempts < 20) {
+          attempts++;
+          setTimeout(pollAndScroll, 60);
+        }
+      };
+      setTimeout(pollAndScroll, 60);
+    }
+  }, [searchParams]);
+
   return (
     <div className="bg-white text-ink min-h-screen">
       {/* =========================================================================
@@ -420,7 +479,12 @@ function ShopContent() {
       {/* =========================================================================
           SECTION 2: SHOP BY PROFESSION & LIFESTYLE
           ========================================================================= */}
-      <section className="pt-14 sm:pt-20 pb-16 sm:pb-24 bg-[#FAF8F5] border-t border-line" aria-label="Shop by Profession and Lifestyle">
+      <section
+        id="profession"
+        className="pt-8 sm:pt-12 pb-16 sm:pb-24 bg-[#FAF8F5] border-t border-line scroll-mt-0"
+        aria-label="Shop by Profession and Lifestyle"
+      >
+        <span id="shop-by-profession" className="sr-only" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Main Section Header */}
           <div className="mb-12 sm:mb-16">
@@ -441,7 +505,11 @@ function ShopContent() {
               const IconComp = subsection.icon;
 
               return (
-                <div key={subsection.id} className="pt-8 sm:pt-10 border-t border-line/70">
+                <div
+                  key={subsection.id}
+                  id={subsection.id}
+                  className="pt-8 sm:pt-10 border-t border-line/70 scroll-mt-20 sm:scroll-mt-24"
+                >
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10 items-stretch">
                     {/* LEFT HALF (lg:col-span-6): TOP LEFT HORIZONTAL FRAMELESS IMAGE + BOTTOM LEFT PRODUCT CARDS */}
                     <div className="lg:col-span-6 flex flex-col justify-between space-y-6 sm:space-y-8">

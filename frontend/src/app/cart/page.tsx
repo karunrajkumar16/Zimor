@@ -78,7 +78,7 @@ export default function CartPage() {
             </div>
             <Link
               href="/shop"
-              className="inline-flex items-center gap-2 bg-brand-700 hover:bg-brand-800 text-white text-xs font-semibold uppercase tracking-luxury py-3.5 px-8 rounded transition-colors shadow-sm"
+              className="inline-flex items-center gap-2 bg-brand-700 hover:bg-brand-800 text-white font-sans text-sm font-medium tracking-normal py-3.5 px-8 rounded transition-colors shadow-sm"
             >
               <span>Explore Collection</span>
               <ArrowRight className="w-4 h-4" />
@@ -330,7 +330,7 @@ export default function CartPage() {
               {/* Checkout CTA */}
               <Link
                 href="/checkout"
-                className="w-full bg-brand-700 hover:bg-brand-800 text-white py-4 px-6 rounded font-semibold text-xs uppercase tracking-luxury flex items-center justify-center gap-2 transition-colors shadow-sm"
+                className="w-full bg-brand-700 hover:bg-brand-800 text-white py-4 px-6 rounded font-sans font-medium text-sm tracking-normal flex items-center justify-center gap-2 transition-colors shadow-sm"
               >
                 <span>Proceed to Checkout</span>
                 <ArrowRight className="w-4 h-4" />

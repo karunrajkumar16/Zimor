@@ -42,7 +42,8 @@ module.exports = {
       },
       fontFamily: {
         serif: ['"Playfair Display"', 'Georgia', 'Cambria', 'serif'],
-        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+        sans: ['Montserrat', 'Inter', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+        montserrat: ['Montserrat', 'sans-serif'],
       },
       letterSpacing: {
         widest: '0.2em',

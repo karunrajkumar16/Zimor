@@ -109,7 +109,7 @@ export const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/profession" className="hover:text-white transition-colors">
+                <Link href="/shop?section=profession#profession" className="hover:text-white transition-colors">
                   Shop by Profession
                 </Link>
               </li>
@@ -189,7 +189,7 @@ export const Footer: React.FC = () => {
                 </div>
                 <button
                   type="submit"
-                  className="w-full bg-brand-500 hover:bg-brand-600 text-white text-xs font-semibold py-2.5 px-4 rounded uppercase tracking-wider transition-colors"
+                  className="w-full bg-brand-500 hover:bg-brand-600 text-white font-sans text-xs sm:text-sm font-medium py-2.5 px-4 rounded tracking-normal transition-colors"
                 >
                   Join Insiders
                 </button>

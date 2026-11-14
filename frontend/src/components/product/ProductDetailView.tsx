@@ -242,7 +242,7 @@ export function ProductDetailView({ product }: { product: Product }) {
                 <button
                   type="button"
                   onClick={handleAddToCart}
-                  className="flex-1 bg-brand-700 hover:bg-brand-800 text-white font-semibold text-xs uppercase tracking-luxury py-4 px-6 rounded flex items-center justify-center gap-2 transition-colors shadow-sm"
+                  className="flex-1 bg-brand-700 hover:bg-brand-800 text-white font-sans font-medium text-sm tracking-normal py-3.5 px-6 rounded flex items-center justify-center gap-2 transition-colors shadow-sm"
                 >
                   <ShoppingBag className="w-4 h-4" />
                   <span>Add to Bag</span>
@@ -265,7 +265,7 @@ export function ProductDetailView({ product }: { product: Product }) {
               <button
                 type="button"
                 onClick={handleBuyNow}
-                className="w-full bg-ink hover:bg-brand-950 text-white font-semibold text-xs uppercase tracking-luxury py-3.5 px-6 rounded flex items-center justify-center transition-colors"
+                className="w-full bg-ink hover:bg-brand-950 text-white font-sans font-medium text-sm tracking-normal py-3.5 px-6 rounded flex items-center justify-center transition-colors"
               >
                 Instant Buy Now
               </button>

@@ -220,7 +220,7 @@ export default function ContactPage() {
 
                 <button
                   type="submit"
-                  className="w-full bg-brand-700 hover:bg-brand-800 text-white font-semibold text-xs uppercase tracking-luxury py-3.5 rounded flex items-center justify-center gap-2 transition-colors shadow-sm"
+                  className="w-full bg-brand-700 hover:bg-brand-800 text-white font-sans font-medium text-sm tracking-normal py-3.5 rounded flex items-center justify-center gap-2 transition-colors shadow-sm"
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>Send Message</span>

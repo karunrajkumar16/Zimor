@@ -19,7 +19,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 lg:hidden">
+    <div data-lenis-prevent-modal className="fixed inset-0 z-50 lg:hidden">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
@@ -27,7 +27,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
       />
 
       {/* Drawer */}
-      <div className="fixed inset-y-0 left-0 w-full max-w-xs bg-canvas shadow-drawer flex flex-col justify-between animate-in slide-in-from-left duration-300">
+      <div data-lenis-prevent-modal className="fixed inset-y-0 left-0 w-full max-w-xs bg-canvas shadow-drawer flex flex-col justify-between animate-in slide-in-from-left duration-300 overflow-y-auto">
         <div>
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-line">
@@ -115,8 +115,25 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
                 Curated Experiences
               </p>
               <Link
-                href="/profession"
-                onClick={onClose}
+                href="/shop?section=profession#profession"
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    sessionStorage.setItem('scroll_to_profession', 'true');
+                  }
+                  onClose();
+                  if (typeof window !== 'undefined' && window.location.pathname === '/shop') {
+                    setTimeout(() => {
+                      const el = document.getElementById('profession');
+                      if (el) {
+                        const header = document.querySelector('header');
+                        const headerHeight = header ? header.offsetHeight : 64;
+                        const rect = el.getBoundingClientRect();
+                        const targetScroll = rect.top + window.scrollY - headerHeight;
+                        window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+                      }
+                    }, 120);
+                  }
+                }}
                 className="flex items-center justify-between px-3 py-2.5 rounded text-sm font-medium text-ink hover:bg-canvas-alt transition-colors"
               >
                 <span className="flex items-center gap-2">

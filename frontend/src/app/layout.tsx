@@ -7,6 +7,7 @@ import { AnnouncementBar } from '@/components/layout/AnnouncementBar';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { CartDrawer } from '@/components/cart/CartDrawer';
+import { SmoothScroll } from '@/components/layout/SmoothScroll';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.zimorindia.com'),
@@ -70,21 +71,23 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,600&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600;700&display=swap"
         />
       </head>
       <body className="font-sans antialiased bg-canvas text-ink flex flex-col min-h-screen">
-        <AuthProvider>
-          <WishlistProvider>
-            <CartProvider>
-              <AnnouncementBar />
-              <Header />
-              <div className="flex-1">{children}</div>
-              <Footer />
-              <CartDrawer />
-            </CartProvider>
-          </WishlistProvider>
-        </AuthProvider>
+        <SmoothScroll>
+          <AuthProvider>
+            <WishlistProvider>
+              <CartProvider>
+                <AnnouncementBar />
+                <Header />
+                <div className="flex-1">{children}</div>
+                <Footer />
+                <CartDrawer />
+              </CartProvider>
+            </WishlistProvider>
+          </AuthProvider>
+        </SmoothScroll>
       </body>
     </html>
   );

@@ -47,7 +47,7 @@ export default function AccountPage() {
 
           <Link
             href="/account/orders"
-            className="inline-flex items-center gap-2 bg-brand-700 hover:bg-brand-800 text-white text-xs font-semibold uppercase tracking-luxury py-3 px-6 rounded transition-colors self-start sm:self-auto"
+            className="inline-flex items-center gap-2 bg-brand-700 hover:bg-brand-800 text-white font-sans text-sm font-medium tracking-normal py-3 px-6 rounded transition-colors self-start sm:self-auto"
           >
             <Package className="w-4 h-4" />
             <span>View All Orders ({orders.length})</span>

@@ -147,7 +147,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
                 <button
                   type="button"
                   onClick={handleAddToCart}
-                  className="flex-1 bg-brand-700 hover:bg-brand-800 text-white py-3 px-4 rounded font-semibold text-xs uppercase tracking-luxury flex items-center justify-center gap-2 transition-colors"
+                  className="flex-1 bg-brand-700 hover:bg-brand-800 text-white py-3 px-4 rounded font-sans font-medium text-sm tracking-normal flex items-center justify-center gap-2 transition-colors"
                 >
                   <ShoppingBag className="w-4 h-4" />
                   <span>Add to Bag</span>
