@@ -62,15 +62,18 @@ const PILLARS: PolenePillar[] = [
 ];
 
 export const LifestyleDiscovery: React.FC = () => {
+  const sectionRef = useRef<HTMLElement>(null);
+  const craftVideoRef = useRef<HTMLVideoElement>(null);
+  const isVisibleRef = useRef(false);
   // Parallax element references for the inner images ONLY (Containers are fixed, locked & borderless)
   const imgRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Smooth, scroll-driven window parallax: only the inner images scroll inside the locked containers
+  // Smooth, scroll-driven window parallax: only active when section is in viewport
   useEffect(() => {
     let isTicking = false;
 
     const updateParallax = () => {
-      if (typeof window === 'undefined') return;
+      if (typeof window === 'undefined' || !isVisibleRef.current) return;
       const windowHeight = window.innerHeight;
       const isDesktop = window.innerWidth >= 768;
 
@@ -82,7 +85,6 @@ export const LifestyleDiscovery: React.FC = () => {
         const rect = parentCard.getBoundingClientRect();
 
         // Calculate card position relative to viewport center
-        // -1.0 = entering from bottom, 0.0 = centered in viewport, +1.0 = exiting to top
         const elementCenter = rect.top + rect.height / 2;
         const viewportCenter = windowHeight / 2;
         const totalSpan = (windowHeight + rect.height) / 2;
@@ -97,6 +99,7 @@ export const LifestyleDiscovery: React.FC = () => {
     };
 
     const handleScroll = () => {
+      if (!isVisibleRef.current) return;
       if (!isTicking) {
         window.requestAnimationFrame(() => {
           updateParallax();
@@ -106,22 +109,35 @@ export const LifestyleDiscovery: React.FC = () => {
       }
     };
 
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisibleRef.current = entry.isIntersecting;
+        if (entry.isIntersecting) {
+          updateParallax();
+          craftVideoRef.current?.play().catch(() => {});
+        } else {
+          craftVideoRef.current?.pause();
+        }
+      },
+      { rootMargin: '150px 0px' }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     window.addEventListener('resize', handleScroll, { passive: true });
 
-    // Initial calculation on mount and after DOM layout settles
-    updateParallax();
-    const timer = setTimeout(updateParallax, 100);
-
     return () => {
-      clearTimeout(timer);
+      observer.disconnect();
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleScroll);
     };
   }, []);
 
   return (
-    <section className="pt-6 sm:pt-10 pb-0 bg-canvas" aria-label="Shop by Profession and Lifestyle">
+    <section ref={sectionRef} className="pt-6 sm:pt-10 pb-0 bg-canvas content-auto" aria-label="Shop by Profession and Lifestyle">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="mb-6 sm:mb-10">
@@ -218,11 +234,12 @@ export const LifestyleDiscovery: React.FC = () => {
           {/* Left 50%: Full Bleed Craftsmanship Video */}
           <div className="relative w-full h-[360px] sm:h-[480px] lg:h-full min-h-[360px] lg:min-h-[640px] bg-canvas-alt overflow-hidden">
             <video
+              ref={craftVideoRef}
               autoPlay
               loop
               muted
               playsInline
-              preload="auto"
+              preload="metadata"
               poster="/craftsmanship-atelier.jpg"
               className="w-full h-full object-cover object-center"
               aria-label="Artisanal leather craftsmanship and luxury handbag creation in India"

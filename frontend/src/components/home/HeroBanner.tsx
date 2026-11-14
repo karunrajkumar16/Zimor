@@ -7,16 +7,10 @@ import { ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface CafuneSlide {
   id: string;
-  name: string;
-  shortName: string;
-  category: string;
   eyebrow: string;
   headline: string;
   description: string;
-  price: number;
-  compareAtPrice: number;
   slug: string;
-  cutoutImage: string;
   editorialImage: string;
   editorialAlt: string;
 }
@@ -24,49 +18,31 @@ interface CafuneSlide {
 const SLIDES: CafuneSlide[] = [
   {
     id: 'delo-tote',
-    name: 'Delo Tote',
-    shortName: 'Delo',
-    category: 'Executive Laptop Tote',
     eyebrow: 'INTRODUCING THE NEW',
     headline: 'ARCHITECTURAL STANCE',
     description:
       'Engineered for modern executive presence. Crafted in 100% superior faux leather with dedicated padded 15.6" laptop protection and an included matching wristlet pouch.',
-    price: 2999,
-    compareAtPrice: 5199,
     slug: '/product/zimor-delo-tote',
-    cutoutImage: '/products/delo-1.jpg',
     editorialImage: '/brandgirl3.webp',
     editorialAlt: 'Zimor Delo Tote executive editorial campaign in warm daylight',
   },
   {
     id: 'classic-shoulder-bag',
-    name: 'Classic Shoulder Bag',
-    shortName: 'Classic',
-    category: 'Crescent Flap Handbag',
     eyebrow: 'SIGNATURE EDITION',
     headline: 'SCULPTURAL CRESCENT',
     description:
       'A refined crescent flap silhouette with custom gold magnetic closure, heavyweight canvas trim, and smooth contours designed to move with you from morning to night.',
-    price: 1699,
-    compareAtPrice: 2999,
     slug: '/product/zimor-classic-shoulder-bag',
-    cutoutImage: '/products/classic-1.jpg',
     editorialImage: '/brandgirl2.webp',
     editorialAlt: 'Zimor Classic Shoulder Bag sculptural crescent editorial',
   },
   {
     id: 'rabota-tote',
-    name: 'Rabota Tote',
-    shortName: 'Rabota',
-    category: 'Dual-Carry Laptop Tote',
     eyebrow: 'TRANSIT & WORKDAY EDIT',
     headline: 'DUAL-CARRY AGILITY',
     description:
       'The definitive laptop tote for active professionals. Seamlessly transitions between reinforced grab handles and an adjustable crossbody sling on busy transit and flights.',
-    price: 2999,
-    compareAtPrice: 5199,
     slug: '/product/zimor-rabota-tote',
-    cutoutImage: '/products/rabota-1.jpg',
     editorialImage: '/image.jpg',
     editorialAlt: 'Zimor Rabota Tote transit commuter editorial',
   },
@@ -171,7 +147,7 @@ export const HeroBanner: React.FC = () => {
 
               {/* Bottom-Left Editorial Headline, Description & Pill CTA */}
               <div
-                className={`absolute bottom-6 left-4 sm:bottom-10 sm:left-8 md:bottom-14 md:left-12 lg:left-16 z-20 max-w-[55%] sm:max-w-md md:max-w-lg lg:max-w-xl text-white transition-all ${
+                className={`absolute bottom-6 left-4 sm:bottom-10 sm:left-8 md:bottom-14 md:left-12 lg:left-16 z-20 max-w-xl sm:max-w-2xl text-white transition-all ${
                   isCurrent
                     ? 'opacity-100 translate-y-0 duration-[1200ms] delay-[250ms] ease-out'
                     : 'opacity-0 -translate-y-2 duration-[500ms] ease-in pointer-events-none'
@@ -207,53 +183,6 @@ export const HeroBanner: React.FC = () => {
                     <ArrowUpRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                   </Link>
                 </div>
-              </div>
-
-              {/* Bottom-Right Framed Inset Product Card */}
-              <div
-                className={`absolute bottom-6 right-4 sm:bottom-10 sm:right-8 md:bottom-14 md:right-12 lg:right-16 z-20 transition-all ${
-                  isCurrent
-                    ? 'opacity-100 translate-y-0 duration-[1200ms] delay-[250ms] ease-out'
-                    : 'opacity-0 -translate-y-2 duration-[500ms] ease-in pointer-events-none'
-                }`}
-                style={{
-                  transitionTimingFunction: isCurrent
-                    ? 'cubic-bezier(0.25, 1, 0.5, 1)'
-                    : 'cubic-bezier(0.4, 0, 1, 1)',
-                }}
-              >
-                <Link
-                  href={slide.slug}
-                  className="group/card block bg-white border border-white/90 p-2 sm:p-3 md:p-4 shadow-[0_20px_50px_rgba(0,0,0,0.35)] hover:shadow-[0_28px_65px_rgba(0,0,0,0.45)] w-32 sm:w-44 md:w-56 lg:w-64 transition-all duration-300 hover:-translate-y-1"
-                  aria-label={`View ${slide.name}`}
-                >
-                  {/* Cutout Bag Image inside White Frame */}
-                  <div className="relative w-full h-24 sm:h-36 md:h-44 lg:h-52 bg-white flex items-center justify-center overflow-hidden">
-                    <Image
-                      src={slide.cutoutImage}
-                      alt={slide.name}
-                      fill
-                      sizes="(max-width: 640px) 128px, (max-width: 768px) 176px, 256px"
-                      className="object-contain object-center scale-95 group-hover/card:scale-100 transition-transform duration-500 ease-out"
-                      priority={index === 0}
-                    />
-                  </div>
-
-                  {/* Product Meta */}
-                  <div className="pt-2 sm:pt-3 border-t border-line/60 flex items-start justify-between gap-1">
-                    <div className="min-w-0 flex-1">
-                      <p className="font-serif text-xs sm:text-sm md:text-base text-ink font-medium tracking-tight truncate">
-                        {slide.name}
-                      </p>
-                      <p className="text-[10px] sm:text-xs text-ink-muted font-sans font-normal mt-0.5">
-                        ₹{slide.price.toLocaleString('en-IN')}
-                      </p>
-                    </div>
-                    <div className="text-ink-muted group-hover/card:text-ink transition-colors pt-0.5 shrink-0">
-                      <ArrowUpRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                    </div>
-                  </div>
-                </Link>
               </div>
             </div>
           );

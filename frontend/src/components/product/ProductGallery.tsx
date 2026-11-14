@@ -68,6 +68,7 @@ export const ProductGallery: React.FC<ProductGalleryProps> = ({ images, productN
               src={img.url}
               alt={img.alt || `${productName} view ${index + 1}`}
               fill
+              sizes="(max-width: 640px) 64px, 80px"
               className="object-cover"
             />
           </button>

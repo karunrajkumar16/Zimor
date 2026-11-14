@@ -2,8 +2,7 @@ import { HeroBanner } from '@/components/home/HeroBanner';
 import { FeaturedProducts } from '@/components/home/FeaturedProducts';
 import { LifestyleDiscovery } from '@/components/home/LifestyleDiscovery';
 import { AboutZimor } from '@/components/home/AboutZimor';
-import { ZimorEdit } from '@/components/home/ZimorEdit';
-import { GiftingBanner } from '@/components/home/GiftingBanner';
+import { ShopByVideo } from '@/components/home/ShopByVideo';
 
 export default function HomePage() {
   return (
@@ -12,8 +11,7 @@ export default function HomePage() {
       <FeaturedProducts />
       <LifestyleDiscovery />
       <AboutZimor />
-      <ZimorEdit />
-      <GiftingBanner />
+      <ShopByVideo />
     </main>
   );
 }

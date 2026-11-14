@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { Order } from '@/types';
 
 export interface UserProfile {
@@ -177,56 +177,61 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [user, orders, isLoaded]);
 
-  const updateProfile = (updates: Partial<UserProfile>) => {
+  const updateProfile = useCallback((updates: Partial<UserProfile>) => {
     setUser((prev) => ({ ...prev, ...updates }));
-  };
+  }, []);
 
-  const createOrder = (
-    orderData: Omit<
-      Order,
-      'id' | 'orderNumber' | 'date' | 'status' | 'trackingNumber' | 'courierName' | 'estimatedDelivery'
-    >
-  ): Order => {
-    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-    const orderNumber = `ZMR-2026-${randomSuffix}`;
-    const trackingNumber = `IND-EXP-${Math.floor(1000000 + Math.random() * 9000000)}`;
+  const createOrder = useCallback(
+    (
+      orderData: Omit<
+        Order,
+        'id' | 'orderNumber' | 'date' | 'status' | 'trackingNumber' | 'courierName' | 'estimatedDelivery'
+      >
+    ): Order => {
+      const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+      const orderNumber = `ZMR-2026-${randomSuffix}`;
+      const trackingNumber = `IND-EXP-${Math.floor(1000000 + Math.random() * 9000000)}`;
 
-    const newOrder: Order = {
-      ...orderData,
-      id: `ord-${Date.now()}`,
-      orderNumber,
-      date: new Date().toLocaleDateString('en-IN', {
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
-      }),
-      status: 'Confirmed',
-      trackingNumber,
-      courierName: 'BlueDart Express',
-      estimatedDelivery: 'In 4–6 business days',
-    };
+      const newOrder: Order = {
+        ...orderData,
+        id: `ord-${Date.now()}`,
+        orderNumber,
+        date: new Date().toLocaleDateString('en-IN', {
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric',
+        }),
+        status: 'Confirmed',
+        trackingNumber,
+        courierName: 'BlueDart Express',
+        estimatedDelivery: 'In 4–6 business days',
+      };
 
-    setOrders((prev) => [newOrder, ...prev]);
-    return newOrder;
-  };
-
-  const getOrderById = (id: string): Order | undefined => {
-    return orders.find((o) => o.id === id || o.orderNumber === id);
-  };
-
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        orders,
-        updateProfile,
-        createOrder,
-        getOrderById,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+      setOrders((prev) => [newOrder, ...prev]);
+      return newOrder;
+    },
+    []
   );
+
+  const getOrderById = useCallback(
+    (id: string): Order | undefined => {
+      return orders.find((o) => o.id === id || o.orderNumber === id);
+    },
+    [orders]
+  );
+
+  const contextValue = useMemo(
+    () => ({
+      user,
+      orders,
+      updateProfile,
+      createOrder,
+      getOrderById,
+    }),
+    [user, orders, updateProfile, createOrder, getOrderById]
+  );
+
+  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {

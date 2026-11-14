@@ -18,7 +18,7 @@ export const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="bg-canvas-dark text-white border-t border-line-dark">
+    <footer className="bg-canvas-dark text-white border-t border-line-dark content-auto">
       {/* Value Badges Banner */}
       <div className="border-b border-line-dark py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center sm:text-left">

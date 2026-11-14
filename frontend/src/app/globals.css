@@ -15,6 +15,7 @@
     font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
     color: var(--ink-primary);
     background-color: var(--canvas-bg);
+    text-rendering: optimizeLegibility;
   }
 
   body {
@@ -25,6 +26,12 @@
     color: var(--ink-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  /* Eliminate 300ms mobile touch delay */
+  a, button, input, select, textarea {
+    touch-action: manipulation;
   }
 
   h1, h2, h3, .font-heading {
@@ -41,9 +48,21 @@
   scrollbar-width: none;
 }
 
-/* Tasteful subtle image loading placeholder */
+/* Subtle image loading placeholder */
 .bg-canvas-alt {
   background-color: #F3EFEA;
+}
+
+/* Modern Content-Visibility optimization for below-the-fold sections */
+.content-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 600px;
+}
+
+/* Hardware-accelerated rendering hints */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 @keyframes growWidth {
@@ -59,3 +78,17 @@
   animation: growWidth 6000ms linear forwards;
 }
 
+/* Accessibility: respect user preferences for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

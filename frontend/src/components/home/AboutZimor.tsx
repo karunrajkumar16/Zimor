@@ -71,15 +71,17 @@ const MASONRY_FRAMES: MasonryFrame[] = [
 ];
 
 export const AboutZimor: React.FC = () => {
+  const sectionRef = useRef<HTMLElement>(null);
+  const isVisibleRef = useRef(false);
   // Parallax element references for the inner images ONLY (Containers are fixed & locked)
   const imgRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Smooth scroll-driven window parallax: only inner images scroll inside the locked masonry frames
+  // Smooth scroll-driven window parallax: only active when section is in viewport
   useEffect(() => {
     let isTicking = false;
 
     const updateParallax = () => {
-      if (typeof window === 'undefined') return;
+      if (typeof window === 'undefined' || !isVisibleRef.current) return;
       const windowHeight = window.innerHeight;
       const isDesktop = window.innerWidth >= 768;
 
@@ -91,7 +93,6 @@ export const AboutZimor: React.FC = () => {
         const rect = parentCard.getBoundingClientRect();
 
         // Calculate card position relative to viewport center
-        // -1.0 = entering from bottom, 0.0 = centered in viewport, +1.0 = exiting to top
         const elementCenter = rect.top + rect.height / 2;
         const viewportCenter = windowHeight / 2;
         const totalSpan = (windowHeight + rect.height) / 2;
@@ -106,6 +107,7 @@ export const AboutZimor: React.FC = () => {
     };
 
     const handleScroll = () => {
+      if (!isVisibleRef.current) return;
       if (!isTicking) {
         window.requestAnimationFrame(() => {
           updateParallax();
@@ -115,15 +117,25 @@ export const AboutZimor: React.FC = () => {
       }
     };
 
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisibleRef.current = entry.isIntersecting;
+        if (entry.isIntersecting) {
+          updateParallax();
+        }
+      },
+      { rootMargin: '150px 0px' }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     window.addEventListener('resize', handleScroll, { passive: true });
 
-    // Initial update on mount and after DOM layout settles
-    updateParallax();
-    const timer = setTimeout(updateParallax, 100);
-
     return () => {
-      clearTimeout(timer);
+      observer.disconnect();
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleScroll);
     };
@@ -131,7 +143,8 @@ export const AboutZimor: React.FC = () => {
 
   return (
     <section
-      className="pt-6 sm:pt-10 lg:pt-14 pb-10 sm:pb-14 lg:pb-18 bg-white select-none overflow-hidden w-full"
+      ref={sectionRef}
+      className="pt-6 sm:pt-10 lg:pt-14 pb-10 sm:pb-14 lg:pb-18 bg-white select-none overflow-hidden w-full content-auto"
       aria-label="About Zimor - Editorial Campaign Collage"
     >
       {/* Seamless Edge-to-Edge Pinterest-Style Asymmetric Editorial Masonry Collage */}

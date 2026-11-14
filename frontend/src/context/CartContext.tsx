@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { CartItem, Product } from '@/types';
 
 interface CartContextType {
@@ -74,7 +74,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [items, appliedPromo, isLoaded]);
 
-  const addItem = (product: Product, quantity = 1, color?: string, size?: string) => {
+  const addItem = useCallback((product: Product, quantity = 1, color?: string, size?: string) => {
     const selectedColor = color || product.defaultColor || product.colors[0]?.name || 'Standard';
     const selectedSize = size || product.sizes[0] || 'Standard';
 
@@ -104,23 +104,23 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ];
     });
     setIsCartDrawerOpen(true);
-  };
+  }, []);
 
-  const removeItem = (itemId: string) => {
+  const removeItem = useCallback((itemId: string) => {
     setItems((prev) => prev.filter((i) => i.id !== itemId));
-  };
+  }, []);
 
-  const updateQuantity = (itemId: string, quantity: number) => {
+  const updateQuantity = useCallback((itemId: string, quantity: number) => {
     if (quantity <= 0) {
-      removeItem(itemId);
+      setItems((prev) => prev.filter((i) => i.id !== itemId));
       return;
     }
     setItems((prev) =>
       prev.map((item) => (item.id === itemId ? { ...item, quantity } : item))
     );
-  };
+  }, []);
 
-  const toggleGiftWrap = (itemId: string, message?: string) => {
+  const toggleGiftWrap = useCallback((itemId: string, message?: string) => {
     setItems((prev) =>
       prev.map((item) =>
         item.id === itemId
@@ -132,14 +132,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           : item
       )
     );
-  };
+  }, []);
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setItems([]);
     setAppliedPromo(null);
-  };
+  }, []);
 
-  const applyPromoCode = (code: string): boolean => {
+  const applyPromoCode = useCallback((code: string): boolean => {
     const clean = code.trim().toUpperCase();
     if (VALID_PROMOS[clean]) {
       setAppliedPromo(clean);
@@ -149,56 +149,81 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setPromoError('Invalid coupon code. Try WELCOME10 for 10% off.');
       return false;
     }
-  };
+  }, []);
 
-  const removePromoCode = () => {
+  const removePromoCode = useCallback(() => {
     setAppliedPromo(null);
     setPromoError(null);
-  };
+  }, []);
 
-  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const openCartDrawer = useCallback(() => setIsCartDrawerOpen(true), []);
+  const closeCartDrawer = useCallback(() => setIsCartDrawerOpen(false), []);
 
-  const subtotal = items.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
-    0
+  const itemCount = useMemo(() => items.reduce((sum, item) => sum + item.quantity, 0), [items]);
+
+  const subtotal = useMemo(
+    () => items.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
+    [items]
   );
 
   const discountPercent = appliedPromo ? VALID_PROMOS[appliedPromo]?.discountPercent || 0 : 0;
-  const discount = Math.round((subtotal * discountPercent) / 100);
+  const discount = useMemo(() => Math.round((subtotal * discountPercent) / 100), [subtotal, discountPercent]);
 
-  const giftWrapCount = items.filter((i) => i.isGiftWrapped).length;
-  const giftWrapFee = giftWrapCount * 149; // Nominal luxury box charge or complimentary depending on promo
+  const giftWrapCount = useMemo(() => items.filter((i) => i.isGiftWrapped).length, [items]);
+  const giftWrapFee = useMemo(() => giftWrapCount * 149, [giftWrapCount]);
 
-  const shippingFee = 0; // Free shipping across India
-  const total = Math.max(0, subtotal - discount + giftWrapFee + shippingFee);
-
-  return (
-    <CartContext.Provider
-      value={{
-        items,
-        addItem,
-        removeItem,
-        updateQuantity,
-        toggleGiftWrap,
-        clearCart,
-        itemCount,
-        subtotal,
-        discount,
-        giftWrapFee,
-        shippingFee,
-        total,
-        appliedPromo,
-        promoError,
-        applyPromoCode,
-        removePromoCode,
-        isCartDrawerOpen,
-        openCartDrawer: () => setIsCartDrawerOpen(true),
-        closeCartDrawer: () => setIsCartDrawerOpen(false),
-      }}
-    >
-      {children}
-    </CartContext.Provider>
+  const shippingFee = 0; // Free express shipping across India
+  const total = useMemo(
+    () => Math.max(0, subtotal - discount + giftWrapFee + shippingFee),
+    [subtotal, discount, giftWrapFee, shippingFee]
   );
+
+  const contextValue = useMemo(
+    () => ({
+      items,
+      addItem,
+      removeItem,
+      updateQuantity,
+      toggleGiftWrap,
+      clearCart,
+      itemCount,
+      subtotal,
+      discount,
+      giftWrapFee,
+      shippingFee,
+      total,
+      appliedPromo,
+      promoError,
+      applyPromoCode,
+      removePromoCode,
+      isCartDrawerOpen,
+      openCartDrawer,
+      closeCartDrawer,
+    }),
+    [
+      items,
+      addItem,
+      removeItem,
+      updateQuantity,
+      toggleGiftWrap,
+      clearCart,
+      itemCount,
+      subtotal,
+      discount,
+      giftWrapFee,
+      shippingFee,
+      total,
+      appliedPromo,
+      promoError,
+      applyPromoCode,
+      removePromoCode,
+      isCartDrawerOpen,
+      openCartDrawer,
+      closeCartDrawer,
+    ]
+  );
+
+  return <CartContext.Provider value={contextValue}>{children}</CartContext.Provider>;
 };
 
 export const useCart = () => {
@@ -208,4 +233,3 @@ export const useCart = () => {
   }
   return context;
 };
-

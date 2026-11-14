@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -41,7 +41,7 @@ export function ProductDetailView({ product }: { product: Product }) {
   const [copiedLink, setCopiedLink] = useState(false);
 
   const inWishlist = isInWishlist(product.id);
-  const relatedProducts = getRelatedProducts(product, 3);
+  const relatedProducts = useMemo(() => getRelatedProducts(product, 3), [product]);
 
   const discountPercent = Math.round(
     ((product.compareAtPrice - product.price) / product.compareAtPrice) * 100

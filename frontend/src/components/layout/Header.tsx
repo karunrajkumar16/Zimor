@@ -25,11 +25,17 @@ export const Header: React.FC = () => {
 
   // Cafuné adaptive scroll behavior: transparent on hero at scroll top, solid white on scroll & subpages
   useEffect(() => {
+    let lastScrolled = window.scrollY > 20;
+    setIsScrolled(lastScrolled);
+
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      const scrolled = window.scrollY > 20;
+      if (scrolled !== lastScrolled) {
+        lastScrolled = scrolled;
+        setIsScrolled(scrolled);
+      }
     };
 
-    handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
