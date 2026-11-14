@@ -1,6 +1,6 @@
-# Zimor India — Premium Handbags E-Commerce Frontend
+# Zimor — Luxury Carry E-Commerce Prototype
 
-A complete, responsive, frontend-only luxury e-commerce website for **Zimor India** built with **Next.js (App Router)**, **TypeScript**, and **Tailwind CSS**, guided by the anti-slop principles of `taste-skill`.
+A premium, responsive full-featured luxury e-commerce prototype for **Zimor India**, structured into clean `frontend` and `backend` modules. Built with **Next.js 15 (App Router)**, **TypeScript**, and **Tailwind CSS**.
 
 Website Reference: [https://www.zimorindia.com/](https://www.zimorindia.com/)
 
@@ -65,18 +65,32 @@ Built entirely around Zimor’s signature registered silhouettes and authentic d
 
 ---
 
-## 🚀 Running the Project
+## 📁 Repository Structure
 
-### Development Server
+```
+Zimor/
+├── frontend/   # Next.js 15 App Router e-commerce application
+├── backend/    # API and server architecture
+├── .gitignore  # Repository root gitignore
+└── README.md   # Project documentation
+```
+
+---
+
+## 🚀 Running the Prototype
+
+### Frontend Development Server
 ```bash
+cd frontend
 npm run dev
 ```
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### Production Build
+### Frontend Production Build
 ```bash
+cd frontend
 npm run build
 npm start
 ```
-All 26 routes are pre-rendered and statically optimized (SSG) with zero warnings or errors.
+All 27 routes are statically optimized (SSG) with zero warnings or errors.
 
