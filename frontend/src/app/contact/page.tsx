@@ -47,7 +47,7 @@ export default function ContactPage() {
           <span className="text-xs uppercase tracking-widest text-brand-700 font-bold">
             We’re Here to Help
           </span>
-          <h1 className="font-serif text-[34px] sm:text-[46px] lg:text-[52px] font-normal text-ink tracking-tight leading-tight">
+          <h1 className="font-primary text-[34px] sm:text-[46px] lg:text-[52px] font-normal text-ink tracking-tight leading-tight">
             Get in Touch with Zimor
           </h1>
           <p className="text-xs sm:text-sm text-ink-secondary leading-relaxed">
@@ -59,7 +59,7 @@ export default function ContactPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Info Column */}
           <div className="lg:col-span-5 bg-canvas-card border border-line rounded-lg p-6 sm:p-8 space-y-6 shadow-xs">
-            <h2 className="text-base font-bold uppercase tracking-wider text-ink border-b border-line pb-3">
+            <h2 className="text-base font-semibold uppercase tracking-wider text-ink border-b border-line pb-3">
               Direct Contact Channels
             </h2>
 
@@ -220,7 +220,7 @@ export default function ContactPage() {
 
                 <button
                   type="submit"
-                  className="w-full bg-brand-700 hover:bg-brand-800 text-white font-sans font-medium text-sm tracking-normal py-3.5 rounded flex items-center justify-center gap-2 transition-colors shadow-sm"
+                  className="w-full bg-ink hover:bg-ink-secondary text-white font-primary font-medium text-sm tracking-normal py-3.5 rounded flex items-center justify-center gap-2 transition-colors shadow-sm"
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>Send Message</span>

@@ -38,6 +38,14 @@ export const PRODUCTS: Product[] = [
         url: '/products/delo-4.jpg',
         alt: 'ZIMOR Delo Tote flatlay with notebook, planner, charger and essentials',
       },
+      {
+        url: '/luxury-handbag-detail.jpg',
+        alt: 'ZIMOR Delo Tote artisan hand-edge finishing and grain texture',
+      },
+      {
+        url: '/craftsmanship-atelier.jpg',
+        alt: 'ZIMOR Delo Tote atelier craftsmanship and precision stitching',
+      },
     ],
     features: [
       'Spacious main compartment with dedicated padded laptop section (fits up to 15.6" laptops)',
@@ -108,6 +116,14 @@ export const PRODUCTS: Product[] = [
         url: '/products/delo-4.jpg',
         alt: 'ZIMOR Delo Tote daily work items organized',
       },
+      {
+        url: '/luxury-black-tote.jpg',
+        alt: 'ZIMOR Delo Tote Noir sleek dark profile in natural light',
+      },
+      {
+        url: '/craftsmanship-workshop.jpg',
+        alt: 'ZIMOR Delo Tote Noir artisan workshop detailing and hardware inspection',
+      },
     ],
     features: [
       'Monochromatic Noir finish with sleek dark-gold custom hardware',
@@ -174,6 +190,14 @@ export const PRODUCTS: Product[] = [
       {
         url: '/products/rabota-4.jpg',
         alt: 'ZIMOR Rabota Tote side angle showing smooth metal zipper closure',
+      },
+      {
+        url: '/luxury-tote-grain.jpg',
+        alt: 'ZIMOR Rabota Tote premium grain texture and reinforcement stitching',
+      },
+      {
+        url: '/craftsmanship-workshop.jpg',
+        alt: 'ZIMOR Rabota Tote artisan bench crafting and hardware assembly',
       },
     ],
     features: [
@@ -243,6 +267,14 @@ export const PRODUCTS: Product[] = [
         url: '/products/rabota-3.jpg',
         alt: 'ZIMOR Rabota sling strap carry detail',
       },
+      {
+        url: '/luxury-tote-grain.jpg',
+        alt: 'ZIMOR Rabota Tote Espresso rich matte grain and antique gold hardware',
+      },
+      {
+        url: '/craftsmanship-atelier.jpg',
+        alt: 'ZIMOR Rabota Tote atelier bench craftsmanship and durability testing',
+      },
     ],
     features: [
       'Rich Espresso faux leather exterior that ages beautifully with use',
@@ -309,6 +341,14 @@ export const PRODUCTS: Product[] = [
       {
         url: '/products/classic-4.jpg',
         alt: 'ZIMOR Classic Shoulder Bag gold metal hardware and stitching detail',
+      },
+      {
+        url: '/luxury-handbag-detail.jpg',
+        alt: 'ZIMOR Classic Shoulder Bag precision edge painting and gold clasp',
+      },
+      {
+        url: '/artisan-heritage-landscape.jpg',
+        alt: 'ZIMOR Classic Shoulder Bag heritage canvas weaving and handcrafting',
       },
     ],
     features: [
@@ -378,6 +418,14 @@ export const PRODUCTS: Product[] = [
       {
         url: '/products/classic-3.jpg',
         alt: 'ZIMOR Classic Shoulder Bag interior compartments',
+      },
+      {
+        url: '/luxury-bag-tan.jpg',
+        alt: 'ZIMOR Classic Shoulder Bag Saddle Tan sculptural silhouette in warm light',
+      },
+      {
+        url: '/artisan-heritage.jpg',
+        alt: 'ZIMOR Classic Shoulder Bag artisan heritage workshop finish',
       },
     ],
     features: [

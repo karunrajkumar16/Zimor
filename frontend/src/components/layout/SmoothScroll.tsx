@@ -25,26 +25,33 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Butter-smooth momentum scroll physics: gently decreased speed + luxury lerp damping
-    const lenis = new Lenis({
-      lerp: 0.075, // Silky exponential damping (eliminates abrupt stops and stutter)
-      smoothWheel: true,
-      wheelMultiplier: 0.82, // Decreases scroll velocity by ~18% for composed, controlled scrolling
-      touchMultiplier: 1.0,
-      syncTouch: false, // Preserves natural high-refresh mobile gesture physics
-      infinite: false,
-      autoResize: true,
-    });
+    let lenis: Lenis | null = null;
+    let rafId: number | null = null;
 
-    lenisRef.current = lenis;
+    try {
+      const LenisConstructor = (typeof Lenis === 'function' ? Lenis : (Lenis as any)?.default) as typeof Lenis;
+      if (typeof LenisConstructor === 'function') {
+        lenis = new LenisConstructor({
+          lerp: 0.075, // Silky exponential damping (eliminates abrupt stops and stutter)
+          smoothWheel: true,
+          wheelMultiplier: 0.82, // Decreases scroll velocity by ~18% for composed, controlled scrolling
+          touchMultiplier: 1.0,
+          syncTouch: false, // Preserves natural high-refresh mobile gesture physics
+          infinite: false,
+          autoResize: true,
+        });
+        lenisRef.current = lenis;
 
-    // Direct 60-120fps RAF loop
-    let rafId: number;
-    function raf(time: number) {
-      lenis.raf(time);
-      rafId = requestAnimationFrame(raf);
+        // Direct 60-120fps RAF loop
+        const raf = (time: number) => {
+          lenis?.raf(time);
+          rafId = requestAnimationFrame(raf);
+        };
+        rafId = requestAnimationFrame(raf);
+      }
+    } catch (e) {
+      console.warn('Lenis smooth scroll failed to initialize:', e);
     }
-    rafId = requestAnimationFrame(raf);
 
     // Intercept in-page hash links for luxurious buttery glide
     const handleAnchorClick = (e: MouseEvent) => {
@@ -60,7 +67,7 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
           e.preventDefault();
           const header = document.querySelector('header');
           const headerOffset = header ? -header.offsetHeight : -80;
-          lenis.scrollTo(el as HTMLElement, { offset: headerOffset, duration: 1.0 });
+          lenis?.scrollTo(el as HTMLElement, { offset: headerOffset, duration: 1.0 });
           window.history.pushState(null, '', href);
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         }
@@ -76,7 +83,7 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
             e.preventDefault();
             const header = document.querySelector('header');
             const headerOffset = header ? -header.offsetHeight : -80;
-            lenis.scrollTo(el as HTMLElement, { offset: headerOffset, duration: 1.0 });
+            lenis?.scrollTo(el as HTMLElement, { offset: headerOffset, duration: 1.0 });
             window.history.pushState(null, '', href);
             window.dispatchEvent(new HashChangeEvent('hashchange'));
           }
@@ -88,8 +95,8 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
 
     return () => {
       document.removeEventListener('click', handleAnchorClick, { capture: true });
-      cancelAnimationFrame(rafId);
-      lenis.destroy();
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      lenis?.destroy();
       lenisRef.current = null;
     };
   }, []);

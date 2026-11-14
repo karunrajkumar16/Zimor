@@ -154,28 +154,28 @@ export const AboutZimor: React.FC = () => {
         <div className="col-span-2 md:col-start-1 md:col-end-6 md:row-start-1 md:row-end-2 min-h-[320px] md:min-h-0 bg-white p-6 sm:p-8 lg:p-9 xl:p-10 flex flex-col justify-between">
           <div className="space-y-4 sm:space-y-4.5">
             <div>
-              <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.28em] text-brand-700 font-semibold mb-2">
+              <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.28em] text-brand-700 font-semibold mb-2 font-primary">
                 About Zimor
               </p>
-              <h2 className="font-serif text-[34px] sm:text-[42px] lg:text-[48px] font-normal text-ink tracking-tight leading-[1.15]">
+              <h2 className="font-primary text-[34px] sm:text-[42px] lg:text-[48px] font-normal text-ink tracking-tight leading-[1.15]">
                 In the Spotlight
               </h2>
             </div>
 
-            <p className="font-sans text-sm sm:text-[15px] text-ink-secondary font-light leading-[1.8] max-w-xl">
+            <p className="font-secondary text-sm sm:text-[15px] text-ink-secondary font-normal leading-[1.8] max-w-xl">
               A curated visual campaign capturing the convergence of Indian craftsmanship, architectural utility, and contemporary executive presence.
             </p>
 
             <div className="space-y-3 pt-0.5">
-              <p className="font-sans text-xs sm:text-[13.5px] text-ink-secondary font-light leading-[1.75]">
+              <p className="font-secondary text-xs sm:text-[13.5px] text-ink-secondary font-normal leading-[1.75]">
                 Sculpted for ambitious professional women across Mumbai, Delhi, and Bengaluru—built to carry modern tech without compromising architectural form.
               </p>
 
-              <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10.5px] sm:text-[11px] font-sans uppercase tracking-[0.2em] text-ink-muted/80 font-normal">
+              <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10.5px] sm:text-[11px] font-secondary uppercase tracking-[0.2em] text-ink-muted/80 font-normal">
                 <span>Cruelty-Free Craft</span>
-                <span className="text-ink-muted/40">•</span>
+                <span className="text-ink-muted/80">•</span>
                 <span>15.6&quot; Tech Protection</span>
-                <span className="text-ink-muted/40">•</span>
+                <span className="text-ink-muted/80">•</span>
                 <span>Crafted in India</span>
               </div>
             </div>
@@ -184,7 +184,7 @@ export const AboutZimor: React.FC = () => {
           <div className="pt-4 sm:pt-5">
             <Link
               href="/about"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-neutral-950 text-white font-sans text-xs sm:text-[13px] font-medium tracking-normal shadow-xs hover:bg-neutral-900 transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-ink text-white font-primary text-xs sm:text-[13px] font-medium tracking-normal shadow-xs hover:bg-ink-secondary transition-colors"
             >
               <span>The Zimor Story</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -196,7 +196,7 @@ export const AboutZimor: React.FC = () => {
         {MASONRY_FRAMES.map((frame, idx) => (
           <div
             key={frame.id}
-            className={`group relative overflow-hidden bg-neutral-900 rounded-none shadow-none ${frame.gridClasses}`}
+            className={`group relative overflow-hidden bg-ink rounded-none shadow-none ${frame.gridClasses}`}
           >
             {/* Inner Oversized Image Canvas: Only this scrolls inside the locked container */}
             <div
@@ -209,6 +209,8 @@ export const AboutZimor: React.FC = () => {
                 src={frame.image}
                 alt={frame.alt}
                 fill
+                loading="lazy"
+                decoding="async"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className={`object-cover ${frame.objectPosition || 'object-center'} transition-transform duration-700 ease-out group-hover:scale-105`}
               />
@@ -219,13 +221,13 @@ export const AboutZimor: React.FC = () => {
 
             {/* Reference-Image Text Overlay: Bottom-left bold white sans title + underlined link */}
             <div className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 z-10 space-y-1 sm:space-y-1.5 drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.85)]">
-              <h3 className="font-sans font-bold text-white text-base sm:text-lg lg:text-xl xl:text-2xl leading-tight tracking-tight whitespace-pre-line">
+              <h3 className="font-primary font-semibold text-white text-base sm:text-lg lg:text-xl xl:text-2xl leading-tight tracking-tight whitespace-pre-line">
                 {frame.title}
               </h3>
               <div>
                 <Link
                   href={frame.linkHref}
-                  className="inline-block font-sans text-xs sm:text-sm font-normal text-white underline underline-offset-4 decoration-white/80 hover:decoration-white transition-opacity"
+                  className="inline-block font-primary text-xs sm:text-sm font-normal text-white underline underline-offset-4 decoration-white/80 hover:decoration-white transition-opacity"
                 >
                   {frame.linkText}
                 </Link>

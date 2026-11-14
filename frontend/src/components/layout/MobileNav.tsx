@@ -153,14 +153,14 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
       >
         <div>
           {/* Header Bar */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-100">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-line/60">
             <Link href="/" onClick={onClose} className="relative w-28 h-7">
               <Image src="/logo.png" alt="Zimor India" fill className="object-contain" priority />
             </Link>
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 text-neutral-400 hover:text-black transition-colors rounded-full hover:bg-neutral-100"
+              className="p-1.5 text-ink-muted hover:text-ink transition-colors rounded-full hover:bg-canvas-card"
               aria-label="Close navigation"
             >
               <X className="w-5 h-5 stroke-[1.5]" />
@@ -168,35 +168,35 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
           </div>
 
           {/* Quick Account / Wishlist / Cart Bar */}
-          <div className="grid grid-cols-3 border-b border-neutral-100 bg-neutral-50/60 text-center py-2.5">
+          <div className="grid grid-cols-3 border-b border-line/60 bg-zimor-cream/10 text-center py-2.5">
             <Link
               href="/account"
               onClick={onClose}
-              className="flex flex-col items-center gap-1 text-neutral-600 hover:text-black transition-colors py-1"
+              className="flex flex-col items-center gap-1 text-ink-secondary hover:text-ink transition-colors py-1"
             >
-              <User className="w-4 h-4 stroke-[1.5] text-neutral-800" />
+              <User className="w-4 h-4 stroke-[1.5] text-ink" />
               <span className="text-[11px] font-medium tracking-tight">Account</span>
             </Link>
             <Link
               href="/wishlist"
               onClick={onClose}
-              className="flex flex-col items-center gap-1 text-neutral-600 hover:text-black transition-colors border-x border-neutral-200/60 py-1"
+              className="flex flex-col items-center gap-1 text-ink-secondary hover:text-ink transition-colors border-x border-line/60 py-1"
             >
-              <Heart className="w-4 h-4 stroke-[1.5] text-neutral-800" />
+              <Heart className="w-4 h-4 stroke-[1.5] text-ink" />
               <span className="text-[11px] font-medium tracking-tight">Wishlist ({wishlistCount})</span>
             </Link>
             <Link
               href="/cart"
               onClick={onClose}
-              className="flex flex-col items-center gap-1 text-neutral-600 hover:text-black transition-colors py-1"
+              className="flex flex-col items-center gap-1 text-ink-secondary hover:text-ink transition-colors py-1"
             >
-              <ShoppingBag className="w-4 h-4 stroke-[1.5] text-neutral-800" />
+              <ShoppingBag className="w-4 h-4 stroke-[1.5] text-ink" />
               <span className="text-[11px] font-medium tracking-tight">Bag ({itemCount})</span>
             </Link>
           </div>
 
           {/* Progressive Disclosure Accordion List */}
-          <div className="divide-y divide-neutral-100">
+          <div className="divide-y divide-line/40">
             {SECTIONS.map((section) => {
               const isExpanded = activeSection === section.id;
 
@@ -206,21 +206,21 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
                   <button
                     type="button"
                     onClick={() => toggleSection(section.id)}
-                    className="w-full px-5 py-3.5 flex items-center justify-between text-left group hover:bg-neutral-50/70 transition-colors"
+                    className="w-full px-5 py-3.5 flex items-center justify-between text-left group hover:bg-zimor-cream/10 transition-colors"
                   >
                     <div className="flex items-center gap-2">
-                      <span className="font-sans text-[14px] font-medium text-neutral-900 tracking-tight">
+                      <span className="font-primary text-[14px] font-medium text-ink tracking-tight">
                         {section.label}
                       </span>
                       {section.badge && (
-                        <span className="text-[9px] font-medium uppercase tracking-wider text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded-sm">
+                        <span className="text-[9px] font-medium uppercase tracking-wider text-ink-muted bg-zimor-cream/25 px-1.5 py-0.5 rounded-sm">
                           {section.badge}
                         </span>
                       )}
                     </div>
                     <ChevronDown
-                      className={`w-4 h-4 text-neutral-400 transition-transform duration-200 ease-out group-hover:text-black ${
-                        isExpanded ? 'rotate-180 text-black' : ''
+                      className={`w-4 h-4 text-ink-muted transition-transform duration-200 ease-out group-hover:text-ink ${
+                        isExpanded ? 'rotate-180 text-ink' : ''
                       }`}
                     />
                   </button>
@@ -228,7 +228,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
                   {/* Sub-Items (Progressive Disclosure upon Interaction) */}
                   {isExpanded && (
                     <div className="px-5 pb-3 pt-1 animate-in slide-in-from-top-1 duration-200">
-                      <div className="pl-3 border-l border-neutral-200 space-y-1.5 my-1">
+                      <div className="pl-3 border-l border-line space-y-1.5 my-1">
                         {section.subItems.map((sub, idx) => (
                           <Link
                             key={sub.label + idx}
@@ -242,12 +242,12 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
                             }}
                             className={`block py-1.5 text-xs transition-colors ${
                               sub.isFeatured
-                                ? 'font-semibold text-neutral-900 hover:text-black flex items-center justify-between'
-                                : 'text-neutral-600 hover:text-neutral-900'
+                                ? 'font-semibold text-ink hover:text-brand-700 flex items-center justify-between'
+                                : 'text-ink-secondary hover:text-ink'
                             }`}
                           >
                             <span>{sub.label}</span>
-                            {sub.isFeatured && <ArrowRight className="w-3.5 h-3.5 text-neutral-400" />}
+                            {sub.isFeatured && <ArrowRight className="w-3.5 h-3.5 text-ink-muted" />}
                           </Link>
                         ))}
                       </div>
@@ -260,18 +260,18 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Footer Brand & Assurance Strip */}
-        <div className="p-4 bg-neutral-50/80 border-t border-neutral-100 space-y-2">
-          <div className="flex items-center gap-2 text-neutral-700">
-            <Truck className="w-3.5 h-3.5 stroke-[1.5] text-neutral-900 shrink-0" />
+        <div className="p-4 bg-zimor-cream/10 border-t border-line/60 space-y-2">
+          <div className="flex items-center gap-2 text-ink-secondary">
+            <Truck className="w-3.5 h-3.5 stroke-[1.5] text-ink shrink-0" />
             <span className="text-[11px] font-medium">Free Express Shipping across India</span>
           </div>
-          <div className="flex items-center gap-2 text-neutral-700">
-            <ShieldCheck className="w-3.5 h-3.5 stroke-[1.5] text-neutral-900 shrink-0" />
+          <div className="flex items-center gap-2 text-ink-secondary">
+            <ShieldCheck className="w-3.5 h-3.5 stroke-[1.5] text-ink shrink-0" />
             <span className="text-[11px] font-medium">7-Day Easy Returns & Exchange</span>
           </div>
-          <div className="pt-2 border-t border-neutral-200/60 flex items-center justify-between text-[10px] text-neutral-400">
+          <div className="pt-2 border-t border-line/60 flex items-center justify-between text-[10px] text-ink-muted">
             <span>© Zimor India</span>
-            <a href="mailto:zimorindia@gmail.com" className="hover:text-black transition-colors">
+            <a href="mailto:zimorindia@gmail.com" className="hover:text-ink transition-colors">
               zimorindia@gmail.com
             </a>
           </div>

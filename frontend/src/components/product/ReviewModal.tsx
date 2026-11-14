@@ -65,10 +65,11 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                   src={mediaItem.url}
                   alt={mediaItem.caption || selectedReview.title}
                   fill
+                  decoding="async"
                   className="object-cover"
                 />
               ) : (
-                <div className="p-8 text-center text-ink-faint">
+                <div className="p-8 text-center text-ink-muted">
                   <Camera className="w-10 h-10 mx-auto mb-2 opacity-50" />
                   <p className="text-xs">Customer Verified Purchase</p>
                 </div>
@@ -83,11 +84,10 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                     {[1, 2, 3, 4, 5].map((s) => (
                       <Star
                         key={s}
-                        className={`w-4 h-4 ${
-                          s <= selectedReview.rating
-                            ? 'fill-amber-500 text-amber-500'
-                            : 'text-neutral-300'
-                        }`}
+                        className={`w-4 h-4 ${s <= selectedReview.rating
+                          ? 'fill-zimor-orange text-zimor-orange'
+                          : 'text-line'
+                          }`}
                       />
                     ))}
                   </div>
@@ -100,7 +100,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                 </p>
 
                 {mediaItem?.caption && (
-                  <p className="text-[11px] text-brand-700 italic mt-2">
+                  <p className="text-[11px] text-brand-700 mt-2 font-normal">
                     Note: {mediaItem.caption}
                   </p>
                 )}
@@ -151,12 +151,12 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
           date: 'Just now',
           media: mediaPreview
             ? [
-                {
-                  type: mediaType,
-                  url: mediaPreview,
-                  caption: 'Customer uploaded review photo',
-                },
-              ]
+              {
+                type: mediaType,
+                url: mediaPreview,
+                caption: 'Customer uploaded review photo',
+              },
+            ]
             : undefined,
         });
       }
@@ -214,11 +214,10 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                       aria-label={`${star} star rating`}
                     >
                       <Star
-                        className={`w-6 h-6 ${
-                          star <= (hoverRating || rating)
-                            ? 'fill-amber-500 text-amber-500'
-                            : 'text-neutral-300'
-                        }`}
+                        className={`w-6 h-6 ${star <= (hoverRating || rating)
+                          ? 'fill-zimor-orange text-zimor-orange'
+                          : 'text-line'
+                          }`}
                       />
                     </button>
                   ))}
@@ -327,7 +326,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
 
               <button
                 type="submit"
-                className="w-full bg-brand-700 hover:bg-brand-800 text-white font-sans font-medium text-sm tracking-normal py-3 rounded transition-colors"
+                className="w-full bg-ink hover:bg-ink-secondary text-white font-primary font-medium text-sm tracking-normal py-3 rounded transition-colors"
               >
                 Submit Verified Review
               </button>
@@ -340,4 +339,6 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
 
   return null;
 };
+
+export default ReviewModal;
 

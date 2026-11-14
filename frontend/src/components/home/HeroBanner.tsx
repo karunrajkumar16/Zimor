@@ -116,13 +116,12 @@ export const HeroBanner: React.FC = () => {
           return (
             <div
               key={slide.id}
-              className={`absolute inset-0 transition-opacity ease-in-out ${
-                isCurrent
-                  ? 'z-20 opacity-100 pointer-events-auto'
-                  : isPrevious
+              className={`absolute inset-0 transition-opacity ease-in-out ${isCurrent
+                ? 'z-20 opacity-100 pointer-events-auto'
+                : isPrevious
                   ? 'z-10 opacity-100 pointer-events-none'
                   : 'z-0 opacity-0 pointer-events-none'
-              }`}
+                }`}
               style={{
                 transitionDuration: '1800ms',
                 transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -135,6 +134,8 @@ export const HeroBanner: React.FC = () => {
                   alt={slide.editorialAlt}
                   fill
                   priority={index === 0}
+                  loading={index === 0 ? undefined : 'lazy'}
+                  decoding="async"
                   sizes="100vw"
                   className="object-cover object-center scale-100 transition-transform duration-[5000ms] ease-out"
                   style={{
@@ -147,11 +148,10 @@ export const HeroBanner: React.FC = () => {
 
               {/* Bottom-Left Editorial Headline, Description & Pill CTA */}
               <div
-                className={`absolute bottom-6 left-4 sm:bottom-10 sm:left-8 md:bottom-14 md:left-12 lg:left-16 z-20 max-w-xl sm:max-w-2xl text-white transition-all ${
-                  isCurrent
-                    ? 'opacity-100 translate-y-0 duration-[1200ms] delay-[250ms] ease-out'
-                    : 'opacity-0 -translate-y-2 duration-[500ms] ease-in pointer-events-none'
-                }`}
+                className={`absolute bottom-6 left-4 sm:bottom-10 sm:left-8 md:bottom-14 md:left-12 lg:left-16 z-20 max-w-xl sm:max-w-2xl text-white transition-all ${isCurrent
+                  ? 'opacity-100 translate-y-0 duration-[1200ms] delay-[250ms] ease-out'
+                  : 'opacity-0 -translate-y-2 duration-[500ms] ease-in pointer-events-none'
+                  }`}
                 style={{
                   transitionTimingFunction: isCurrent
                     ? 'cubic-bezier(0.25, 1, 0.5, 1)'
@@ -159,17 +159,17 @@ export const HeroBanner: React.FC = () => {
                 }}
               >
                 {/* Eyebrow */}
-                <p className="text-[10px] sm:text-xs md:text-sm font-sans uppercase tracking-[0.18em] sm:tracking-[0.2em] text-white/90 font-medium mb-1.5 sm:mb-2 drop-shadow-sm">
+                <p className="text-[10px] sm:text-xs md:text-sm font-primary uppercase tracking-[0.18em] sm:tracking-[0.2em] text-white/90 font-medium mb-1.5 sm:mb-2 drop-shadow-sm">
                   {slide.eyebrow}
                 </p>
 
-                {/* Large Bold Headline */}
-                <h1 className="font-sans text-xl sm:text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight uppercase leading-[1.1] sm:leading-[1.05] mb-2 sm:mb-4 text-white drop-shadow-md">
+                {/* Large Headline */}
+                <h1 className="font-primary text-xl sm:text-3xl md:text-5xl lg:text-6xl font-semibold tracking-tight uppercase leading-[1.1] sm:leading-[1.05] mb-2 sm:mb-4 text-white drop-shadow-md">
                   {slide.headline}
                 </h1>
 
                 {/* Description Paragraph (Visible on tablet & desktop) */}
-                <p className="hidden sm:block text-xs sm:text-sm lg:text-base text-white/90 font-light leading-relaxed max-w-lg mb-4 sm:mb-6 md:mb-8 drop-shadow-sm">
+                <p className="hidden sm:block text-xs sm:text-sm lg:text-base text-white/90 font-normal leading-relaxed max-w-lg mb-4 sm:mb-6 md:mb-8 drop-shadow-sm">
                   {slide.description}
                 </p>
 
@@ -177,7 +177,7 @@ export const HeroBanner: React.FC = () => {
                 <div className="pt-1 sm:pt-0">
                   <Link
                     href={slide.slug}
-                    className="inline-flex items-center gap-1.5 sm:gap-2 px-5 py-2.5 sm:px-7 sm:py-3.5 rounded-full border border-white text-white hover:bg-white hover:text-ink font-sans text-xs sm:text-[13.5px] font-medium tracking-normal transition-all duration-300 shadow-md backdrop-blur-xs whitespace-nowrap"
+                    className="inline-flex items-center gap-1.5 sm:gap-2 px-5 py-2.5 sm:px-7 sm:py-3.5 rounded-full border border-white text-white hover:bg-white hover:text-ink font-primary text-xs sm:text-[13.5px] font-medium tracking-normal transition-all duration-300 shadow-md backdrop-blur-xs whitespace-nowrap"
                   >
                     <span>Discover More</span>
                     <ArrowUpRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
@@ -195,11 +195,10 @@ export const HeroBanner: React.FC = () => {
               key={slide.id}
               onClick={() => goToSlide(idx)}
               aria-label={`Go to slide ${idx + 1}`}
-              className={`h-1 rounded-full transition-all duration-700 cursor-pointer ${
-                idx === currentSlide
-                  ? 'w-7 bg-white shadow-sm'
-                  : 'w-2 bg-white/40 hover:bg-white/70'
-              }`}
+              className={`h-1 rounded-full transition-all duration-700 cursor-pointer ${idx === currentSlide
+                ? 'w-7 bg-white shadow-sm'
+                : 'w-2 bg-white/40 hover:bg-white/70'
+                }`}
             />
           ))}
         </div>

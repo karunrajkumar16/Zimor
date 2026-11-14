@@ -26,7 +26,7 @@ export const AnnouncementBar: React.FC = () => {
   return (
     <aside aria-label="Announcement" className="bg-canvas-dark text-white text-xs py-2 px-4">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <div className="hidden md:flex items-center gap-4 text-ink-faint text-[11px] uppercase tracking-luxury">
+        <div className="hidden md:flex items-center gap-4 text-white/80 text-[11px] uppercase tracking-luxury">
           <span>Official Zimor Store</span>
           <span>•</span>
           <span>Made in India</span>

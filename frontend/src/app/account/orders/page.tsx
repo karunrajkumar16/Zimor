@@ -7,6 +7,7 @@ import { Package, Truck, Download, RotateCcw } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { PRODUCTS, getProductBySlug } from '@/data/products';
+import { Order } from '@/types';
 
 export default function OrdersPage() {
   const { orders } = useAuth();
@@ -21,7 +22,7 @@ export default function OrdersPage() {
     }, 1000);
   };
 
-  const handleReorder = (item: any) => {
+  const handleReorder = (item: Order['items'][number]) => {
     const p = getProductBySlug(item.slug) || PRODUCTS[0];
     addItem(p, item.quantity, item.color, item.size);
   };
@@ -40,7 +41,7 @@ export default function OrdersPage() {
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-line pb-6 mb-8 gap-4">
           <div>
-            <h1 className="font-serif text-[30px] sm:text-[38px] font-normal text-ink tracking-tight">
+            <h1 className="font-primary text-[30px] sm:text-[38px] font-normal text-ink tracking-tight">
               My Orders & Shipments
             </h1>
             <p className="text-xs sm:text-sm text-ink-secondary mt-1">
@@ -62,7 +63,7 @@ export default function OrdersPage() {
             <p className="text-xs text-ink-muted">When you place an order, it will appear here with live tracking.</p>
             <Link
               href="/shop"
-              className="inline-block bg-brand-700 text-white text-xs font-semibold uppercase tracking-wider py-3 px-6 rounded"
+              className="inline-block bg-ink hover:bg-ink-secondary text-white text-xs font-semibold uppercase tracking-wider py-3 px-6 rounded transition-colors"
             >
               Start Shopping
             </Link>
@@ -98,11 +99,10 @@ export default function OrdersPage() {
                     </span>
                     <div>
                       <span
-                        className={`inline-block px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider ${
-                          order.status === 'Delivered'
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : 'bg-brand-100 text-brand-900'
-                        }`}
+                        className={`inline-block px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider ${order.status === 'Delivered'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : 'bg-brand-100 text-brand-900'
+                          }`}
                       >
                         {order.status}
                       </span>
@@ -171,7 +171,7 @@ export default function OrdersPage() {
 
                         <Link
                           href={`/product/${item.slug}#reviews`}
-                          className="px-3 py-1.5 bg-brand-700 hover:bg-brand-800 text-white rounded text-xs font-medium transition-colors"
+                          className="px-3 py-1.5 bg-ink hover:bg-ink-secondary text-white rounded text-xs font-medium transition-colors"
                         >
                           Write Review
                         </Link>

@@ -92,14 +92,14 @@ export const ProductGallery: React.FC<ProductGalleryProps> = ({ images, productN
         <div
           ref={mobileCarouselRef}
           onScroll={handleMobileScroll}
-          className="flex overflow-x-auto snap-x snap-mandatory scrollbar-none bg-[#F7F7F7] w-full"
+          className="flex overflow-x-auto snap-x snap-mandatory scrollbar-none bg-white w-full"
           style={{ scrollSnapType: 'x mandatory' }}
         >
           {images.map((img, idx) => (
             <div
               key={'mobile-' + img.url + idx}
               onClick={() => openLightbox(idx)}
-              className="w-full shrink-0 snap-center relative cursor-pointer bg-[#F7F7F7] min-h-[380px] sm:min-h-[440px]"
+              className="w-full shrink-0 snap-center relative cursor-pointer bg-white min-h-[380px] sm:min-h-[440px]"
               style={{ aspectRatio: '4 / 5' }}
             >
               <Image
@@ -107,6 +107,8 @@ export const ProductGallery: React.FC<ProductGalleryProps> = ({ images, productN
                 alt={img.alt || `${productName} view ${idx + 1}`}
                 fill
                 priority={idx === 0}
+                loading={idx === 0 ? undefined : 'lazy'}
+                decoding="async"
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"
               />
@@ -164,11 +166,10 @@ export const ProductGallery: React.FC<ProductGalleryProps> = ({ images, productN
               key={idx}
               type="button"
               onClick={() => scrollToMobileIndex(idx)}
-              className={`transition-all duration-200 rounded-full ${
-                activeIndex === idx
-                  ? 'w-4 h-1 bg-black'
-                  : 'w-1 h-1 bg-neutral-300 hover:bg-neutral-500'
-              }`}
+              className={`transition-all duration-200 rounded-full ${activeIndex === idx
+                ? 'w-4 h-1 bg-ink'
+                : 'w-1 h-1 bg-line hover:bg-ink-muted'
+                }`}
               aria-label={`Go to slide ${idx + 1}`}
             />
           ))}
@@ -176,16 +177,16 @@ export const ProductGallery: React.FC<ProductGalleryProps> = ({ images, productN
       </div>
 
       {/* ============================================================ */}
-      {/* DESKTOP GALLERY: 2-Column Seamless Image Grid (Benchmark)     */}
+      {/* DESKTOP GALLERY: 2-Column Luxury Grid (2x2x2 Layout)          */}
       {/* ============================================================ */}
-      <div className="hidden lg:grid grid-cols-2 gap-2 w-full">
+      <div className="hidden lg:grid grid-cols-2 gap-2.5 sm:gap-3 w-full">
         {images.map((img, idx) => (
           <div
             key={'desktop-grid-' + img.url + idx}
             onClick={() => openLightbox(idx)}
             onMouseMove={(e) => handleMouseMove(e, idx)}
             onMouseLeave={handleMouseLeave}
-            className="group relative w-full bg-[#F7F7F7] overflow-hidden cursor-zoom-in min-h-[440px] xl:min-h-[500px]"
+            className="group relative w-full bg-white overflow-hidden cursor-zoom-in min-h-[460px] xl:min-h-[520px] 2xl:min-h-[560px]"
             style={{ aspectRatio: '3 / 4' }}
           >
             <Image
@@ -193,8 +194,10 @@ export const ProductGallery: React.FC<ProductGalleryProps> = ({ images, productN
               alt={img.alt || `${productName} view ${idx + 1}`}
               fill
               priority={idx < 2}
+              loading={idx < 2 ? undefined : 'lazy'}
+              decoding="async"
               sizes="(max-width: 1200px) 35vw, 450px"
-              className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+              className="object-contain p-4 sm:p-5 xl:p-6 transition-transform duration-700 ease-out group-hover:scale-105"
             />
 
             {/* Desktop Zoom Loupe on Active Hover */}
@@ -205,32 +208,30 @@ export const ProductGallery: React.FC<ProductGalleryProps> = ({ images, productN
                   backgroundImage: `url(${img.url})`,
                   backgroundPosition: `${zoomPos.x}% ${zoomPos.y}%`,
                   backgroundSize: '220%',
-                  backgroundColor: '#F7F7F7',
+                  backgroundColor: '#ffffff',
                 }}
               />
             )}
 
             {/* Top-Left Bestseller Badge (First Image) */}
             {idx === 0 && (
-              <div className="absolute top-3 left-3 z-10 bg-black text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1">
+              <div className="absolute top-3.5 left-3.5 z-10 bg-black text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1">
                 BESTSELLER
               </div>
             )}
 
-            {/* Bottom-Right Floating Expand Icon (Miraggio Style) */}
-            {idx === 1 && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openLightbox(idx);
-                }}
-                className="absolute bottom-3 right-3 z-10 w-8 h-8 rounded-full bg-white/90 text-black shadow-sm flex items-center justify-center hover:bg-white active:scale-95 transition-all"
-                aria-label="Expand view"
-              >
-                <Maximize2 className="w-3.5 h-3.5" />
-              </button>
-            )}
+            {/* Bottom-Right Floating Expand Icon */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                openLightbox(idx);
+              }}
+              className="absolute bottom-3.5 right-3.5 z-10 w-8 h-8 rounded-full bg-white/90 text-black shadow-sm flex items-center justify-center opacity-0 group-hover:opacity-100 hover:scale-110 active:scale-95 transition-all"
+              aria-label="Expand view"
+            >
+              <Maximize2 className="w-3.5 h-3.5" />
+            </button>
           </div>
         ))}
       </div>
@@ -295,16 +296,17 @@ export const ProductGallery: React.FC<ProductGalleryProps> = ({ images, productN
                 key={'lightbox-thumb-' + idx}
                 type="button"
                 onClick={() => setLightboxIndex(idx)}
-                className={`relative w-12 h-14 sm:w-14 sm:h-16 border overflow-hidden shrink-0 transition-all ${
-                  lightboxIndex === idx
-                    ? 'border-white ring-1 ring-white'
-                    : 'border-white/30 opacity-60 hover:opacity-100'
-                }`}
+                className={`relative w-12 h-14 sm:w-14 sm:h-16 border overflow-hidden shrink-0 transition-all ${lightboxIndex === idx
+                  ? 'border-white ring-1 ring-white'
+                  : 'border-white/30 opacity-60 hover:opacity-100'
+                  }`}
               >
                 <Image
                   src={img.url}
                   alt={`Thumbnail ${idx + 1}`}
                   fill
+                  loading="lazy"
+                  decoding="async"
                   className="object-cover"
                 />
               </button>

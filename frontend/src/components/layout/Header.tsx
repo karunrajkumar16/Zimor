@@ -133,22 +133,21 @@ export const Header: React.FC = () => {
 
   const filteredSearch = searchQuery.trim()
     ? PRODUCTS.filter(
-        (p) =>
-          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.categoryLabel.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.suitableProfessions.some((pr) => pr.toLowerCase().includes(searchQuery.toLowerCase()))
-      )
+      (p) =>
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.categoryLabel.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.suitableProfessions.some((pr) => pr.toLowerCase().includes(searchQuery.toLowerCase()))
+    )
     : [];
 
   return (
     <>
       {/* Cafuné-Style Header — Transparent on Hero (No Borders), Solid White on Scroll */}
       <header
-        className={`sticky top-0 z-40 transition-all duration-300 ease-in-out ${
-          isTransparent
-            ? 'bg-transparent text-white'
-            : 'bg-white/95 backdrop-blur-md text-ink shadow-xs'
-        }`}
+        className={`sticky top-0 z-40 transition-all duration-300 ease-in-out ${isTransparent
+          ? 'bg-transparent text-white'
+          : 'bg-white/95 backdrop-blur-md text-ink shadow-xs'
+          }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-[1fr_auto_1fr] items-center h-16 sm:h-20">
@@ -158,16 +157,15 @@ export const Header: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsMobileNavOpen(true)}
-                className={`lg:hidden p-2 -ml-2 transition-opacity ${
-                  isTransparent ? 'text-white hover:opacity-75' : 'text-ink hover:opacity-60'
-                }`}
+                className={`lg:hidden p-2 -ml-2 transition-opacity ${isTransparent ? 'text-white hover:opacity-75' : 'text-ink hover:opacity-60'
+                  }`}
                 aria-label="Open navigation menu"
               >
                 <Menu className="w-5 h-5 stroke-[1.5]" />
               </button>
 
               {/* Left Nav Links — Miraggio Modern Clean Sans Typography */}
-              <nav className="hidden lg:flex items-center gap-8 xl:gap-10 2xl:gap-12 font-sans text-[13px] xl:text-[13.5px] font-medium tracking-normal text-ink">
+              <nav className="hidden lg:flex items-center gap-8 xl:gap-10 2xl:gap-12 font-primary text-[13px] xl:text-[13.5px] font-medium tracking-normal text-ink">
                 {/* Shop Bags ⌵ */}
                 <div
                   className="relative"
@@ -177,19 +175,17 @@ export const Header: React.FC = () => {
                   <Link
                     href="/shop"
                     onClick={handleShopBagsClick}
-                    className={`header-nav-link relative inline-flex items-center gap-1.5 py-1.5 transition-colors whitespace-nowrap ${
-                      isTransparent
-                        ? 'text-white hover:text-white/80'
-                        : isShopActive
+                    className={`header-nav-link relative inline-flex items-center gap-1.5 py-1.5 transition-colors whitespace-nowrap ${isTransparent
+                      ? 'text-white hover:text-white/80'
+                      : isShopActive
                         ? 'text-ink font-semibold after:content-[\'\'] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-ink'
                         : 'text-ink/80 hover:text-ink'
-                    }`}
+                      }`}
                   >
                     <span>Shop Bags</span>
                     <ChevronDown
-                      className={`w-3.5 h-3.5 stroke-[1.8] transition-transform duration-200 ${
-                        isShopHovered ? 'rotate-180' : ''
-                      } ${isTransparent ? 'text-white/80' : 'text-ink-muted'}`}
+                      className={`w-3.5 h-3.5 stroke-[1.8] transition-transform duration-200 ${isShopHovered ? 'rotate-180' : ''
+                        } ${isTransparent ? 'text-white/80' : 'text-ink-muted'}`}
                     />
                   </Link>
 
@@ -200,35 +196,35 @@ export const Header: React.FC = () => {
                         <div className="grid grid-cols-2 gap-6 text-left normal-case">
                           {/* Column 1: BY TYPES */}
                           <div>
-                            <p className="font-sans font-semibold text-[11px] uppercase tracking-[0.1em] text-ink-muted/80 mb-2.5">
+                            <p className="font-primary font-semibold text-[11px] uppercase tracking-[0.1em] text-ink-muted/80 mb-2.5">
                               BY TYPES
                             </p>
                             <div className="space-y-1">
                               <Link
                                 href="/shop"
                                 onClick={() => setIsShopHovered(false)}
-                                className="header-dropdown-link font-sans text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
+                                className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
                               >
                                 All Handbags
                               </Link>
                               <Link
                                 href="/shop?category=tote-bags"
                                 onClick={() => setIsShopHovered(false)}
-                                className="header-dropdown-link font-sans text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
+                                className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
                               >
                                 Tote Bags
                               </Link>
                               <Link
                                 href="/shop?category=laptop-bags"
                                 onClick={() => setIsShopHovered(false)}
-                                className="header-dropdown-link font-sans text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
+                                className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
                               >
                                 Shoulder Bags
                               </Link>
                               <Link
                                 href="/shop?category=shoulder-bags"
                                 onClick={() => setIsShopHovered(false)}
-                                className="header-dropdown-link font-sans text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
+                                className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
                               >
                                 Crossbody &amp; Slings
                               </Link>
@@ -237,35 +233,35 @@ export const Header: React.FC = () => {
 
                           {/* Column 2: BY OCCASIONS */}
                           <div>
-                            <p className="font-sans font-semibold text-[11px] uppercase tracking-[0.1em] text-ink-muted/80 mb-2.5">
+                            <p className="font-primary font-semibold text-[11px] uppercase tracking-[0.1em] text-ink-muted/80 mb-2.5">
                               BY OCCASIONS
                             </p>
                             <div className="space-y-1">
                               <Link
                                 href="/shop?section=profession#corporate-executive"
                                 onClick={() => setIsShopHovered(false)}
-                                className="header-dropdown-link font-sans text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
+                                className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
                               >
                                 Work
                               </Link>
                               <Link
                                 href="/shop?section=profession#tech-transit"
                                 onClick={() => setIsShopHovered(false)}
-                                className="header-dropdown-link font-sans text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
+                                className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
                               >
                                 Travel
                               </Link>
                               <Link
                                 href="/shop?section=profession#creative-studio"
                                 onClick={() => setIsShopHovered(false)}
-                                className="header-dropdown-link font-sans text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
+                                className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
                               >
                                 Essentials
                               </Link>
                               <Link
                                 href="/gifting"
                                 onClick={() => setIsShopHovered(false)}
-                                className="header-dropdown-link font-sans text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
+                                className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
                               >
                                 Gift
                               </Link>
@@ -281,13 +277,12 @@ export const Header: React.FC = () => {
                 <Link
                   href="/shop?section=profession#profession"
                   onClick={handleProfessionClick}
-                  className={`header-nav-link relative inline-flex items-center py-1.5 transition-colors whitespace-nowrap ${
-                    isTransparent
-                      ? 'text-white hover:text-white/80'
-                      : isProfessionActive
+                  className={`header-nav-link relative inline-flex items-center py-1.5 transition-colors whitespace-nowrap ${isTransparent
+                    ? 'text-white hover:text-white/80'
+                    : isProfessionActive
                       ? 'text-ink font-semibold after:content-[\'\'] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-ink'
                       : 'text-ink/80 hover:text-ink'
-                  }`}
+                    }`}
                 >
                   Shop by Profession
                 </Link>
@@ -307,9 +302,8 @@ export const Header: React.FC = () => {
                   width={392}
                   height={169}
                   priority
-                  className={`h-8 sm:h-9 md:h-10 lg:h-11 w-auto object-contain transition-all duration-300 ${
-                    isTransparent ? 'brightness-0 invert' : ''
-                  }`}
+                  className={`h-8 sm:h-9 md:h-10 lg:h-11 w-auto object-contain transition-all duration-300 ${isTransparent ? 'brightness-0 invert' : ''
+                    }`}
                 />
               </Link>
             </div>
@@ -317,7 +311,7 @@ export const Header: React.FC = () => {
             {/* COLUMN 3: RIGHT NAVIGATION & RIGHT-ALIGNED ACTION ICONS */}
             <div className="flex items-center justify-end w-full">
               {/* Right Nav Links — Miraggio Modern Clean Sans Typography */}
-              <nav className="hidden lg:flex items-center gap-8 xl:gap-10 2xl:gap-12 font-sans text-[13px] xl:text-[13.5px] font-medium tracking-normal text-ink">
+              <nav className="hidden lg:flex items-center gap-8 xl:gap-10 2xl:gap-12 font-primary text-[13px] xl:text-[13.5px] font-medium tracking-normal text-ink">
                 {/* About Us ⌵ */}
                 <div
                   className="relative"
@@ -326,44 +320,42 @@ export const Header: React.FC = () => {
                 >
                   <Link
                     href="/about"
-                    className={`header-nav-link relative inline-flex items-center gap-1.5 py-1.5 transition-colors whitespace-nowrap ${
-                      isTransparent
-                        ? 'text-white hover:text-white/80'
-                        : pathname === '/about'
+                    className={`header-nav-link relative inline-flex items-center gap-1.5 py-1.5 transition-colors whitespace-nowrap ${isTransparent
+                      ? 'text-white hover:text-white/80'
+                      : pathname === '/about'
                         ? 'text-ink font-semibold after:content-[\'\'] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-ink'
                         : 'text-ink/80 hover:text-ink'
-                    }`}
+                      }`}
                   >
                     <span>About Us</span>
                     <ChevronDown
-                      className={`w-3.5 h-3.5 stroke-[1.8] transition-transform duration-200 ${
-                        isAboutHovered ? 'rotate-180' : ''
-                      } ${isTransparent ? 'text-white/80' : 'text-ink-muted'}`}
+                      className={`w-3.5 h-3.5 stroke-[1.8] transition-transform duration-200 ${isAboutHovered ? 'rotate-180' : ''
+                        } ${isTransparent ? 'text-white/80' : 'text-ink-muted'}`}
                     />
                   </Link>
 
                   {isAboutHovered && (
                     <div className="absolute top-full left-0 w-56 pt-2 z-50">
                       <div className="bg-white border border-line shadow-lift p-5 rounded-xs text-ink animate-in fade-in-50 duration-150">
-                        <p className="font-sans font-semibold text-[11px] uppercase tracking-[0.1em] text-ink-muted/80 mb-2.5">
+                        <p className="font-primary font-semibold text-[11px] uppercase tracking-[0.1em] text-ink-muted/80 mb-2.5">
                           OUR ATELIER
                         </p>
                         <div className="space-y-1 text-left normal-case">
                           <Link
                             href="/about"
-                            className="header-dropdown-link font-sans text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
+                            className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
                           >
                             Our Story &amp; Heritage
                           </Link>
                           <Link
                             href="/about#craft"
-                            className="header-dropdown-link font-sans text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
+                            className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
                           >
                             Cruelty-Free Craft
                           </Link>
                           <Link
                             href="/about#reviews"
-                            className="header-dropdown-link font-sans text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
+                            className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
                           >
                             Verified Client Reviews
                           </Link>
@@ -376,13 +368,12 @@ export const Header: React.FC = () => {
                 {/* Contact Us */}
                 <Link
                   href="/contact"
-                  className={`header-nav-link relative inline-flex items-center py-1.5 transition-colors whitespace-nowrap ${
-                    isTransparent
-                      ? 'text-white hover:text-white/80'
-                      : pathname === '/contact'
+                  className={`header-nav-link relative inline-flex items-center py-1.5 transition-colors whitespace-nowrap ${isTransparent
+                    ? 'text-white hover:text-white/80'
+                    : pathname === '/contact'
                       ? 'text-ink font-semibold after:content-[\'\'] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-ink'
                       : 'text-ink/80 hover:text-ink'
-                  }`}
+                    }`}
                 >
                   Contact Us
                 </Link>
@@ -393,9 +384,8 @@ export const Header: React.FC = () => {
                 {/* 1. User / Account (Hidden on phone view, accessible via drawer) */}
                 <Link
                   href="/account"
-                  className={`hidden sm:inline-flex p-1.5 sm:p-2 transition-opacity ${
-                    isTransparent ? 'text-white hover:opacity-75' : 'text-ink hover:opacity-60'
-                  }`}
+                  className={`hidden sm:inline-flex p-1.5 sm:p-2 transition-opacity ${isTransparent ? 'text-white hover:opacity-75' : 'text-ink hover:opacity-60'
+                    }`}
                   aria-label="Customer Account"
                 >
                   <User className="w-[19px] h-[19px] sm:w-5 sm:h-5 stroke-[1.35]" />
@@ -405,9 +395,8 @@ export const Header: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsSearchOpen(!isSearchOpen)}
-                  className={`p-1.5 sm:p-2 transition-opacity ${
-                    isTransparent ? 'text-white hover:opacity-75' : 'text-ink hover:opacity-60'
-                  }`}
+                  className={`p-1.5 sm:p-2 transition-opacity ${isTransparent ? 'text-white hover:opacity-75' : 'text-ink hover:opacity-60'
+                    }`}
                   aria-label="Search products"
                 >
                   <Search className="w-[19px] h-[19px] sm:w-5 sm:h-5 stroke-[1.35]" />
@@ -416,17 +405,15 @@ export const Header: React.FC = () => {
                 {/* 3. Wishlist (Heart) */}
                 <Link
                   href="/wishlist"
-                  className={`relative p-1.5 sm:p-2 transition-opacity ${
-                    isTransparent ? 'text-white hover:opacity-75' : 'text-ink hover:opacity-60'
-                  }`}
+                  className={`relative p-1.5 sm:p-2 transition-opacity ${isTransparent ? 'text-white hover:opacity-75' : 'text-ink hover:opacity-60'
+                    }`}
                   aria-label={`Wishlist (${wishlistCount} items)`}
                 >
                   <Heart className="w-[19px] h-[19px] sm:w-5 sm:h-5 stroke-[1.35]" />
                   {wishlistCount > 0 && (
                     <span
-                      className={`absolute -top-1 -right-1 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center shadow-xs ${
-                        isTransparent ? 'bg-white text-ink' : 'bg-brand-700 text-white'
-                      }`}
+                      className={`absolute -top-1 -right-1 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center shadow-xs ${isTransparent ? 'bg-white text-ink' : 'bg-brand-700 text-white'
+                        }`}
                     >
                       {wishlistCount}
                     </span>
@@ -437,16 +424,14 @@ export const Header: React.FC = () => {
                 <button
                   type="button"
                   onClick={openCartDrawer}
-                  className={`relative p-1.5 sm:p-2 transition-opacity ${
-                    isTransparent ? 'text-white hover:opacity-75' : 'text-ink hover:opacity-60'
-                  }`}
+                  className={`relative p-1.5 sm:p-2 transition-opacity ${isTransparent ? 'text-white hover:opacity-75' : 'text-ink hover:opacity-60'
+                    }`}
                   aria-label={`Shopping bag (${itemCount} items)`}
                 >
                   <ShoppingBag className="w-[19px] h-[19px] sm:w-5 sm:h-5 stroke-[1.35]" />
                   <span
-                    className={`absolute -top-1 -right-1.5 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center shadow-xs ${
-                      isTransparent ? 'bg-white text-ink' : 'bg-ink text-white'
-                    }`}
+                    className={`absolute -top-1 -right-1.5 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center shadow-xs ${isTransparent ? 'bg-white text-ink' : 'bg-ink text-white'
+                      }`}
                   >
                     {itemCount}
                   </span>
@@ -468,7 +453,7 @@ export const Header: React.FC = () => {
                   placeholder="Search silhouettes, laptop sizes, professions (Delo, Rabota, Crescent)..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-10 py-3 bg-canvas text-sm border border-line rounded-none focus:outline-none focus:border-ink transition-colors font-sans"
+                  className="w-full pl-10 pr-10 py-3 bg-canvas text-sm border border-line rounded-none focus:outline-none focus:border-ink transition-colors font-secondary"
                 />
                 <button
                   type="button"
@@ -502,6 +487,8 @@ export const Header: React.FC = () => {
                               src={p.images[0].url}
                               alt={p.name}
                               fill
+                              loading="lazy"
+                              decoding="async"
                               className="object-cover"
                             />
                           </div>
@@ -511,7 +498,7 @@ export const Header: React.FC = () => {
                             </p>
                             <p className="text-[11px] text-ink-muted">
                               ₹{p.price.toLocaleString('en-IN')}{' '}
-                              <span className="line-through text-ink-faint">
+                              <span className="line-through text-ink-muted">
                                 ₹{p.compareAtPrice.toLocaleString('en-IN')}
                               </span>
                             </p>

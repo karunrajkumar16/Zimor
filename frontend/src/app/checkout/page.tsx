@@ -74,10 +74,10 @@ export default function CheckoutPage() {
       paymentMethod === 'upi'
         ? 'UPI (Google Pay / PhonePe)'
         : paymentMethod === 'card'
-        ? 'Credit / Debit Card'
-        : paymentMethod === 'netbanking'
-        ? 'Net Banking'
-        : 'Cash on Delivery';
+          ? 'Credit / Debit Card'
+          : paymentMethod === 'netbanking'
+            ? 'Net Banking'
+            : 'Cash on Delivery';
 
     const orderPayload = {
       items: items.map((i) => ({
@@ -123,7 +123,7 @@ export default function CheckoutPage() {
           <p className="text-xs text-ink-muted">Please add a handbag before proceeding to checkout.</p>
           <Link
             href="/shop"
-            className="inline-block bg-brand-700 text-white text-xs font-semibold uppercase tracking-wider py-3 px-6 rounded"
+            className="inline-block bg-ink hover:bg-ink-secondary text-white text-xs font-semibold uppercase tracking-wider py-3 px-6 rounded transition-colors"
           >
             Explore Bags
           </Link>
@@ -143,9 +143,8 @@ export default function CheckoutPage() {
               onClick={() => setStep(1)}
               className={`flex items-center gap-2 ${step >= 1 ? 'text-brand-700' : 'text-ink-muted'}`}
             >
-              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${
-                step >= 1 ? 'bg-brand-700 text-white' : 'bg-canvas-alt text-ink-muted'
-              }`}>
+              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step >= 1 ? 'bg-brand-700 text-white' : 'bg-canvas-alt text-ink-muted'
+                }`}>
                 1
               </span>
               <span>Shipping Address</span>
@@ -158,9 +157,8 @@ export default function CheckoutPage() {
               onClick={() => setStep(2)}
               className={`flex items-center gap-2 ${step >= 2 ? 'text-brand-700' : 'text-ink-muted'}`}
             >
-              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${
-                step >= 2 ? 'bg-brand-700 text-white' : 'bg-canvas-alt text-ink-muted'
-              }`}>
+              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step >= 2 ? 'bg-brand-700 text-white' : 'bg-canvas-alt text-ink-muted'
+                }`}>
                 2
               </span>
               <span>Delivery Method</span>
@@ -173,9 +171,8 @@ export default function CheckoutPage() {
               onClick={() => setStep(3)}
               className={`flex items-center gap-2 ${step === 3 ? 'text-brand-700' : 'text-ink-muted'}`}
             >
-              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${
-                step === 3 ? 'bg-brand-700 text-white' : 'bg-canvas-alt text-ink-muted'
-              }`}>
+              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step === 3 ? 'bg-brand-700 text-white' : 'bg-canvas-alt text-ink-muted'
+                }`}>
                 3
               </span>
               <span>Payment & Review</span>
@@ -189,7 +186,7 @@ export default function CheckoutPage() {
             {step === 1 && (
               <div className="space-y-4">
                 <div className="border-b border-line pb-3">
-                  <h2 className="text-base font-serif font-bold text-ink">
+                  <h2 className="text-base font-primary font-semibold text-ink">
                     1. Contact & Delivery Address
                   </h2>
                   <p className="text-xs text-ink-muted">
@@ -300,7 +297,7 @@ export default function CheckoutPage() {
                   <button
                     type="button"
                     onClick={() => setStep(2)}
-                    className="bg-brand-700 hover:bg-brand-800 text-white font-sans font-medium text-sm tracking-normal py-3 px-8 rounded flex items-center gap-2 transition-colors"
+                    className="bg-ink hover:bg-ink-secondary text-white font-primary font-medium text-sm tracking-normal py-3 px-8 rounded flex items-center gap-2 transition-colors"
                   >
                     <span>Continue to Shipping Method</span>
                     <ArrowRight className="w-4 h-4" />
@@ -312,7 +309,7 @@ export default function CheckoutPage() {
             {step === 2 && (
               <div className="space-y-4">
                 <div className="border-b border-line pb-3">
-                  <h2 className="text-base font-serif font-bold text-ink">
+                  <h2 className="text-base font-primary font-semibold text-ink">
                     2. Choose Delivery Method
                   </h2>
                   <p className="text-xs text-ink-muted">
@@ -322,11 +319,10 @@ export default function CheckoutPage() {
 
                 <div className="space-y-3">
                   <label
-                    className={`block p-4 border rounded cursor-pointer transition-all ${
-                      shippingMethod === 'standard'
-                        ? 'border-brand-700 bg-brand-50/50 ring-1 ring-brand-700'
-                        : 'border-line hover:border-ink/30'
-                    }`}
+                    className={`block p-4 border rounded cursor-pointer transition-all ${shippingMethod === 'standard'
+                      ? 'border-brand-700 bg-brand-50/50 ring-1 ring-brand-700'
+                      : 'border-line hover:border-ink/30'
+                      }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -347,11 +343,10 @@ export default function CheckoutPage() {
                   </label>
 
                   <label
-                    className={`block p-4 border rounded cursor-pointer transition-all ${
-                      shippingMethod === 'priority'
-                        ? 'border-brand-700 bg-brand-50/50 ring-1 ring-brand-700'
-                        : 'border-line hover:border-ink/30'
-                    }`}
+                    className={`block p-4 border rounded cursor-pointer transition-all ${shippingMethod === 'priority'
+                      ? 'border-brand-700 bg-brand-50/50 ring-1 ring-brand-700'
+                      : 'border-line hover:border-ink/30'
+                      }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -383,7 +378,7 @@ export default function CheckoutPage() {
                   <button
                     type="button"
                     onClick={() => setStep(3)}
-                    className="bg-brand-700 hover:bg-brand-800 text-white font-sans font-medium text-sm tracking-normal py-3 px-8 rounded flex items-center gap-2 transition-colors"
+                    className="bg-ink hover:bg-ink-secondary text-white font-primary font-medium text-sm tracking-normal py-3 px-8 rounded flex items-center gap-2 transition-colors"
                   >
                     <span>Continue to Payment</span>
                     <ArrowRight className="w-4 h-4" />
@@ -395,7 +390,7 @@ export default function CheckoutPage() {
             {step === 3 && (
               <form onSubmit={handlePlaceOrder} className="space-y-5">
                 <div className="border-b border-line pb-3">
-                  <h2 className="text-base font-serif font-bold text-ink">
+                  <h2 className="text-base font-primary font-semibold text-ink">
                     3. Payment Selection & Review
                   </h2>
                   <p className="text-xs text-ink-muted">
@@ -407,11 +402,10 @@ export default function CheckoutPage() {
                 <div className="space-y-3">
                   {/* UPI */}
                   <label
-                    className={`block p-4 border rounded cursor-pointer transition-all ${
-                      paymentMethod === 'upi'
-                        ? 'border-brand-700 bg-brand-50/50 ring-1 ring-brand-700'
-                        : 'border-line hover:border-ink/30'
-                    }`}
+                    className={`block p-4 border rounded cursor-pointer transition-all ${paymentMethod === 'upi'
+                      ? 'border-brand-700 bg-brand-50/50 ring-1 ring-brand-700'
+                      : 'border-line hover:border-ink/30'
+                      }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -440,11 +434,10 @@ export default function CheckoutPage() {
 
                   {/* Cards */}
                   <label
-                    className={`block p-4 border rounded cursor-pointer transition-all ${
-                      paymentMethod === 'card'
-                        ? 'border-brand-700 bg-brand-50/50 ring-1 ring-brand-700'
-                        : 'border-line hover:border-ink/30'
-                    }`}
+                    className={`block p-4 border rounded cursor-pointer transition-all ${paymentMethod === 'card'
+                      ? 'border-brand-700 bg-brand-50/50 ring-1 ring-brand-700'
+                      : 'border-line hover:border-ink/30'
+                      }`}
                   >
                     <div className="flex items-center gap-3">
                       <input
@@ -468,11 +461,10 @@ export default function CheckoutPage() {
 
                   {/* Net Banking */}
                   <label
-                    className={`block p-4 border rounded cursor-pointer transition-all ${
-                      paymentMethod === 'netbanking'
-                        ? 'border-brand-700 bg-brand-50/50 ring-1 ring-brand-700'
-                        : 'border-line hover:border-ink/30'
-                    }`}
+                    className={`block p-4 border rounded cursor-pointer transition-all ${paymentMethod === 'netbanking'
+                      ? 'border-brand-700 bg-brand-50/50 ring-1 ring-brand-700'
+                      : 'border-line hover:border-ink/30'
+                      }`}
                   >
                     <div className="flex items-center gap-3">
                       <input
@@ -496,11 +488,10 @@ export default function CheckoutPage() {
 
                   {/* Cash on Delivery */}
                   <label
-                    className={`block p-4 border rounded cursor-pointer transition-all ${
-                      paymentMethod === 'cod'
-                        ? 'border-brand-700 bg-brand-50/50 ring-1 ring-brand-700'
-                        : 'border-line hover:border-ink/30'
-                    }`}
+                    className={`block p-4 border rounded cursor-pointer transition-all ${paymentMethod === 'cod'
+                      ? 'border-brand-700 bg-brand-50/50 ring-1 ring-brand-700'
+                      : 'border-line hover:border-ink/30'
+                      }`}
                   >
                     <div className="flex items-center gap-3">
                       <input
@@ -535,7 +526,7 @@ export default function CheckoutPage() {
                   <button
                     type="submit"
                     disabled={isPlacingOrder}
-                    className="bg-brand-700 hover:bg-brand-800 text-white font-sans font-medium text-sm tracking-normal py-4 px-8 rounded flex items-center gap-2 transition-colors shadow-sm disabled:opacity-50"
+                    className="bg-ink hover:bg-ink-secondary text-white font-primary font-medium text-sm tracking-normal py-4 px-8 rounded flex items-center gap-2 transition-colors shadow-sm disabled:opacity-50"
                   >
                     {isPlacingOrder ? (
                       <span>Placing Your Order...</span>
@@ -553,7 +544,7 @@ export default function CheckoutPage() {
 
           {/* Right Summary Sidebar */}
           <div className="lg:col-span-5 bg-canvas-card border border-line rounded-lg p-5 sm:p-6 space-y-4 shadow-xs sticky top-28">
-            <h3 className="text-sm font-serif font-bold text-ink border-b border-line pb-3">
+            <h3 className="text-sm font-primary font-semibold text-ink border-b border-line pb-3">
               Items in Your Order ({items.length})
             </h3>
 
@@ -565,6 +556,8 @@ export default function CheckoutPage() {
                       src={item.product.images[0]?.url || '/products/delo-1.jpg'}
                       alt={item.product.name}
                       fill
+                      loading="lazy"
+                      decoding="async"
                       className="object-cover"
                     />
                   </div>

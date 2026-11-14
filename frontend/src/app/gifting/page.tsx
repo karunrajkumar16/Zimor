@@ -32,7 +32,7 @@ export default function GiftingPage() {
             <Gift className="w-3.5 h-3.5" />
             <span>Zimor Signature Gifting Concierge</span>
           </span>
-          <h1 className="font-serif text-[34px] sm:text-[46px] lg:text-[52px] font-normal text-ink tracking-tight leading-tight">
+          <h1 className="font-primary text-[34px] sm:text-[46px] lg:text-[52px] font-normal text-ink tracking-tight leading-tight">
             Gifts of Enduring Elegance
           </h1>
           <p className="text-xs sm:text-base text-ink-secondary leading-relaxed">
@@ -67,7 +67,7 @@ export default function GiftingPage() {
             <p className="text-xs uppercase tracking-widest text-brand-700 font-bold">
               Find the Perfect Match
             </p>
-            <h2 className="font-serif text-[28px] sm:text-[36px] font-normal text-ink tracking-tight">
+            <h2 className="font-primary text-[28px] sm:text-[36px] font-normal text-ink tracking-tight">
               Shop Gifts by Occasion
             </h2>
           </div>
@@ -78,11 +78,10 @@ export default function GiftingPage() {
                 key={occ.id}
                 type="button"
                 onClick={() => setSelectedOccasionId(occ.id)}
-                className={`px-4 py-2.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                  selectedOccasionId === occ.id
-                    ? 'bg-brand-700 text-white shadow-sm'
-                    : 'bg-canvas-card border border-line text-ink-secondary hover:text-ink hover:border-ink/40'
-                }`}
+                className={`px-4 py-2.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${selectedOccasionId === occ.id
+                  ? 'bg-ink text-white shadow-sm'
+                  : 'bg-canvas-card border border-line text-ink-secondary hover:text-ink hover:border-ink/40'
+                  }`}
               >
                 {occ.title.split('&')[0].trim()}
               </button>
@@ -95,7 +94,7 @@ export default function GiftingPage() {
               <span className="inline-block text-[11px] font-bold text-brand-700 uppercase tracking-widest">
                 Ideal For: {activeOccasion.idealFor}
               </span>
-              <h3 className="font-serif text-[26px] sm:text-[32px] font-normal text-ink tracking-tight">
+              <h3 className="font-primary text-[26px] sm:text-[32px] font-normal text-ink tracking-tight">
                 {activeOccasion.title}
               </h3>
               <p className="text-sm font-semibold text-brand-800">
@@ -107,15 +106,15 @@ export default function GiftingPage() {
 
               <div className="pt-2 border-t border-line space-y-2 text-xs text-ink-secondary">
                 <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <Check className="w-4 h-4 text-ink shrink-0" />
                   <span>Complimentary signature gift box with grosgrain ribbon included</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <Check className="w-4 h-4 text-ink shrink-0" />
                   <span>Free handwritten note card included with your personalized message</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <Check className="w-4 h-4 text-ink shrink-0" />
                   <span>Price tags concealed; digital receipt emailed to you</span>
                 </div>
               </div>
@@ -126,6 +125,8 @@ export default function GiftingPage() {
                 src={activeOccasion.image}
                 alt={activeOccasion.title}
                 fill
+                loading="lazy"
+                decoding="async"
                 className="object-cover"
               />
             </div>
@@ -133,7 +134,7 @@ export default function GiftingPage() {
 
           {/* Recommended Handbags for this Occasion */}
           <div className="space-y-6">
-            <h3 className="text-xl font-serif font-bold text-ink">
+            <h3 className="text-xl font-primary font-semibold text-ink">
               Recommended Gifts for {activeOccasion.title}
             </h3>
 

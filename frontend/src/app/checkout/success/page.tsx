@@ -27,7 +27,7 @@ function SuccessContent() {
             <span className="text-xs uppercase tracking-widest text-brand-700 font-bold">
               Order Confirmed
             </span>
-            <h1 className="font-serif text-[28px] sm:text-[36px] font-normal text-ink tracking-tight">
+            <h1 className="font-primary text-[28px] sm:text-[36px] font-normal text-ink tracking-tight">
               Thank You for Your Order!
             </h1>
             <p className="text-xs sm:text-sm text-ink-secondary max-w-md mx-auto">
@@ -167,7 +167,7 @@ function SuccessContent() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
           <Link
             href="/account/orders"
-            className="w-full sm:w-auto bg-brand-700 hover:bg-brand-800 text-white text-xs font-semibold uppercase tracking-luxury py-3.5 px-8 rounded flex items-center justify-center gap-2 transition-colors"
+            className="w-full sm:w-auto bg-ink hover:bg-ink-secondary text-white text-xs font-semibold uppercase tracking-luxury py-3.5 px-8 rounded flex items-center justify-center gap-2 transition-colors"
           >
             <span>View All My Orders</span>
             <ArrowRight className="w-4 h-4" />

@@ -162,21 +162,21 @@ export const LifestyleDiscovery: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="mb-6 sm:mb-10">
-          <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-brand-700 font-bold mb-1.5 font-sans">
+          <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-brand-700 font-bold mb-1.5 font-primary">
             Find Your Everyday Match
           </p>
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
             <div>
-              <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-normal text-ink tracking-tight leading-tight">
+              <h2 className="font-primary text-2xl sm:text-3xl lg:text-4xl font-normal text-ink tracking-tight leading-tight">
                 Shop by Profession & Lifestyle
               </h2>
-              <p className="text-xs sm:text-sm text-ink-secondary mt-1 font-light max-w-xl leading-relaxed">
+              <p className="text-xs sm:text-sm text-ink-secondary mt-1 font-normal max-w-xl leading-relaxed">
                 Select your daily routine to explore the silhouette engineered for your workday carry, tech protection, and transit agility.
               </p>
             </div>
             <Link
               href="/shop"
-              className="inline-flex items-center gap-1.5 font-sans text-xs sm:text-sm font-medium tracking-normal text-ink hover:text-brand-700 transition-colors shrink-0"
+              className="inline-flex items-center gap-1.5 font-primary text-xs sm:text-sm font-medium tracking-normal text-ink hover:text-brand-700 transition-colors shrink-0"
             >
               <span>Explore All Silhouettes</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -229,29 +229,29 @@ export const LifestyleDiscovery: React.FC = () => {
 
                 {/* Top Title: 1-2 Word Representative Category Title */}
                 <div className="absolute top-4 sm:top-5 left-4 sm:left-5 z-10 pointer-events-none drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.85)]">
-                  <h4 className="font-sans font-bold text-white text-base sm:text-lg lg:text-xl tracking-tight leading-tight">
+                  <h4 className="font-primary font-semibold text-white text-base sm:text-lg lg:text-xl tracking-tight leading-tight">
                     {pillar.topTitle}
                   </h4>
                 </div>
 
                 {/* Bottom Overlay Content */}
                 <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 text-white z-10 space-y-1.5 sm:space-y-2 pointer-events-none drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.85)]">
-                  <p className="font-sans text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-white/80 font-medium">
+                  <p className="font-primary text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-white/80 font-medium">
                     {pillar.eyebrow}
                   </p>
-                  <h3 className="font-sans font-bold text-white text-lg sm:text-xl lg:text-2xl leading-tight tracking-tight">
+                  <h3 className="font-primary font-semibold text-white text-lg sm:text-xl lg:text-2xl leading-tight tracking-tight">
                     {pillar.name}
                   </h3>
-                  <p className="font-sans text-[11px] sm:text-xs text-white/90 font-normal leading-relaxed line-clamp-1 sm:line-clamp-none">
+                  <p className="font-secondary text-[11px] sm:text-xs text-white/90 font-normal leading-relaxed line-clamp-1 sm:line-clamp-none">
                     {pillar.subtitle}
                   </p>
 
                   {/* Bottom Action Line: Unified design for all 3 cards */}
                   <div className="pt-2 sm:pt-2.5 border-t border-white/20 flex items-center justify-between text-xs pointer-events-auto">
-                    <span className="font-sans font-medium text-white/90 flex items-center gap-1 group-hover:text-white text-[11px] sm:text-xs">
+                    <span className="font-primary font-medium text-white/90 flex items-center gap-1 group-hover:text-white text-[11px] sm:text-xs">
                       <span>{pillar.silhouette}</span>
                     </span>
-                    <span className="inline-flex items-center gap-1 font-sans text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold text-white/90 group-hover:text-white group-hover:translate-x-1 transition-all">
+                    <span className="inline-flex items-center gap-1 font-primary text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold text-white/90 group-hover:text-white group-hover:translate-x-1 transition-all">
                       <span>Explore</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </span>
@@ -303,7 +303,7 @@ export const LifestyleDiscovery: React.FC = () => {
           {/* Right 50%: Seamless Continuous Clean Editorial Panel */}
           <div className="p-8 sm:p-14 lg:p-20 xl:p-24 flex flex-col items-center justify-center text-center bg-white">
             {/* Title: Crafted in India */}
-            <h3 className="font-serif text-[38px] sm:text-[46px] md:text-[52px] font-normal text-ink tracking-tight mb-7 sm:mb-9 leading-none">
+            <h3 className="font-primary text-[38px] sm:text-[46px] md:text-[52px] font-normal text-ink tracking-tight mb-7 sm:mb-9 leading-none">
               Crafted in India
             </h3>
 
@@ -320,14 +320,14 @@ export const LifestyleDiscovery: React.FC = () => {
             </div>
 
             {/* Editorial Body Paragraph */}
-            <p className="font-sans text-[13px] sm:text-[14px] text-ink-secondary font-light leading-[1.8] max-w-[440px] mx-auto text-center mb-6 sm:mb-8">
+            <p className="font-secondary text-[13px] sm:text-[14px] text-ink-secondary font-normal leading-[1.8] max-w-[440px] mx-auto text-center mb-6 sm:mb-8">
               Rooted in centuries of master leatherworking traditions, every Zimor silhouette is meticulously crafted in the renowned artisan clusters of India. Combining generational hand-stitching with refined architectural precision, our craftsmen transform premium materials into enduring modern heirlooms.
             </p>
 
             {/* Underlined Call to Action */}
             <Link
               href="/about"
-              className="font-sans text-xs sm:text-sm font-medium tracking-normal text-ink hover:text-brand-700 underline underline-offset-8 transition-colors"
+              className="font-primary text-xs sm:text-sm font-medium tracking-normal text-ink hover:text-brand-700 underline underline-offset-8 transition-colors"
             >
               Discover More
             </Link>

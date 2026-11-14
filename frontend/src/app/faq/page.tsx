@@ -34,7 +34,7 @@ export default function FAQPage() {
           <span className="text-xs uppercase tracking-widest text-brand-700 font-bold">
             Frequently Asked Questions
           </span>
-          <h1 className="font-serif text-[34px] sm:text-[46px] lg:text-[52px] font-normal text-ink tracking-tight leading-tight">
+          <h1 className="font-primary text-[34px] sm:text-[46px] lg:text-[52px] font-normal text-ink tracking-tight leading-tight">
             How Can We Assist You?
           </h1>
           <p className="text-xs sm:text-sm text-ink-secondary max-w-lg mx-auto">
@@ -61,11 +61,10 @@ export default function FAQPage() {
               key={cat}
               type="button"
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
-                selectedCategory === cat
-                  ? 'bg-ink text-white'
-                  : 'bg-canvas-card border border-line text-ink-secondary hover:text-ink'
-              }`}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${selectedCategory === cat
+                ? 'bg-ink text-white'
+                : 'bg-canvas-card border border-line text-ink-secondary hover:text-ink'
+                }`}
             >
               {cat === 'all' ? 'All Questions' : cat}
             </button>
@@ -89,9 +88,8 @@ export default function FAQPage() {
                   >
                     <span className="pr-4">{faq.question}</span>
                     <ChevronDown
-                      className={`w-4 h-4 text-ink-muted shrink-0 transition-transform duration-200 ${
-                        isOpen ? 'rotate-180 text-brand-700' : ''
-                      }`}
+                      className={`w-4 h-4 text-ink-muted shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180 text-brand-700' : ''
+                        }`}
                     />
                   </button>
                   {isOpen && (
@@ -132,7 +130,7 @@ export default function FAQPage() {
           </div>
           <Link
             href="/contact"
-            className="inline-flex items-center gap-1.5 bg-brand-700 hover:bg-brand-800 text-white text-xs font-semibold uppercase tracking-wider py-2.5 px-5 rounded transition-colors shrink-0"
+            className="inline-flex items-center gap-1.5 bg-ink hover:bg-ink-secondary text-white text-xs font-semibold uppercase tracking-wider py-2.5 px-5 rounded transition-colors shrink-0"
           >
             <span>Contact Support</span>
             <ArrowRight className="w-3.5 h-3.5" />

@@ -64,18 +64,6 @@ export interface Product {
   laptopCompatibility: string;
 }
 
-export interface Profession {
-  id: string;
-  name: string;
-  title: string;
-  tagline: string;
-  description: string;
-  recommendedBagSlugs: string[];
-  essentialsCarried: string[];
-  image: string;
-  badge: string;
-}
-
 export interface GiftingOccasion {
   id: string;
   title: string;

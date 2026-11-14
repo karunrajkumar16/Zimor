@@ -7,6 +7,7 @@ import { Heart, ShoppingBag, Trash2, ArrowRight } from 'lucide-react';
 import { useWishlist } from '@/context/WishlistContext';
 import { useCart } from '@/context/CartContext';
 import { PRODUCTS } from '@/data/products';
+import { Product } from '@/types';
 
 export default function WishlistPage() {
   const { wishlistIds, removeFromWishlist, clearWishlist } = useWishlist();
@@ -14,7 +15,7 @@ export default function WishlistPage() {
 
   const savedProducts = PRODUCTS.filter((p) => wishlistIds.includes(p.id));
 
-  const handleMoveToCart = (product: any) => {
+  const handleMoveToCart = (product: Product) => {
     addItem(product, 1);
     removeFromWishlist(product.id);
   };
@@ -31,7 +32,7 @@ export default function WishlistPage() {
 
         <div className="flex flex-col sm:flex-row sm:items-end justify-between border-b border-line pb-6 mb-8 gap-4">
           <div>
-            <h1 className="font-serif text-[32px] sm:text-[42px] font-normal text-ink tracking-tight">
+            <h1 className="font-primary text-[32px] sm:text-[42px] font-normal text-ink tracking-tight">
               Your Wishlist
             </h1>
             <p className="text-xs sm:text-sm text-ink-secondary mt-1">
@@ -63,7 +64,7 @@ export default function WishlistPage() {
             </div>
             <Link
               href="/shop"
-              className="inline-flex items-center gap-2 bg-brand-700 hover:bg-brand-800 text-white font-sans text-sm font-medium tracking-normal py-3.5 px-8 rounded transition-colors shadow-sm"
+              className="inline-flex items-center gap-2 bg-ink hover:bg-ink-secondary text-white font-primary text-sm font-medium tracking-normal py-3.5 px-8 rounded transition-colors shadow-sm"
             >
               <span>Explore Collection</span>
               <ArrowRight className="w-4 h-4" />
@@ -82,6 +83,8 @@ export default function WishlistPage() {
                       src={product.images[0].url}
                       alt={product.name}
                       fill
+                      loading="lazy"
+                      decoding="async"
                       className="object-cover group-hover:scale-102 transition-transform duration-500"
                     />
                   </Link>
@@ -115,7 +118,7 @@ export default function WishlistPage() {
                     <span className="text-base font-bold text-ink">
                       ₹{product.price.toLocaleString('en-IN')}
                     </span>
-                    <span className="text-xs text-ink-faint line-through">
+                    <span className="text-xs text-ink-muted line-through">
                       ₹{product.compareAtPrice.toLocaleString('en-IN')}
                     </span>
                   </div>
@@ -123,7 +126,7 @@ export default function WishlistPage() {
                   <button
                     type="button"
                     onClick={() => handleMoveToCart(product)}
-                    className="w-full bg-brand-700 hover:bg-brand-800 text-white font-sans font-medium text-sm tracking-normal py-3 rounded flex items-center justify-center gap-2 transition-colors shadow-sm"
+                    className="w-full bg-ink hover:bg-ink-secondary text-white font-primary font-medium text-sm tracking-normal py-3 rounded flex items-center justify-center gap-2 transition-colors shadow-sm"
                   >
                     <ShoppingBag className="w-3.5 h-3.5" />
                     <span>Move to Bag</span>

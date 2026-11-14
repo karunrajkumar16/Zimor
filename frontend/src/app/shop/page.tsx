@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useRef, Suspense } from 'react';
+import React, { useState, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -8,18 +8,23 @@ import {
   X,
   Grid,
   LayoutGrid,
-  ArrowRight,
   Briefcase,
   Laptop,
   Sparkles,
   SlidersHorizontal,
   Check,
   RotateCcw,
+  ChevronDown,
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { PRODUCTS } from '@/data/products';
 import { ProductCard } from '@/components/product/ProductCard';
-import { QuickViewModal } from '@/components/product/QuickViewModal';
 import { Product } from '@/types';
+
+const QuickViewModal = dynamic(
+  () => import('@/components/product/QuickViewModal'),
+  { ssr: false }
+);
 
 // Category name mapping for active filter display
 const CATEGORY_NAMES: Record<string, string> = {
@@ -264,106 +269,105 @@ function ShopContent() {
       <section className="pt-3 sm:pt-4 pb-14 sm:pb-20 bg-white" aria-label="All Products Collection">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Breadcrumb Navigation */}
-          <nav className="text-[11px] uppercase tracking-[0.2em] text-ink-muted flex items-center gap-2 mb-1.5 font-sans">
+          <nav className="text-[11px] uppercase tracking-[0.2em] text-ink-muted flex items-center gap-2 mb-1.5 font-secondary">
             <Link href="/" className="hover:text-ink transition-colors">
               Home
             </Link>
-            <span className="text-line-dark">/</span>
+            <span className="text-ink-muted">/</span>
             <span className="text-ink font-semibold">Collection</span>
           </nav>
 
-          {/* Section Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 sm:gap-4 mb-4 sm:mb-5">
+          {/* Section Header — Compact on Mobile */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-1 sm:gap-4 mb-3 sm:mb-5">
             <div>
-              <h1 className="font-serif text-[32px] sm:text-[40px] lg:text-[46px] font-normal text-ink tracking-tight leading-none">
+              <h1 className="font-primary text-2xl sm:text-[40px] lg:text-[46px] font-normal text-ink tracking-tight leading-tight">
                 All Products Collection
               </h1>
-              <p className="text-xs sm:text-[13px] text-ink-muted mt-1.5 max-w-2xl font-light leading-relaxed">
+              <p className="hidden sm:block text-xs sm:text-[13px] text-ink-muted mt-1 max-w-2xl font-normal leading-relaxed">
                 Explore our full line-up of six handcrafted silhouettes. Built with shock-absorbing laptop compartments, upright base studs, and certified cruelty-free materials.
               </p>
             </div>
-            <p className="text-xs text-ink-muted font-sans shrink-0">
+            <p className="text-[11px] sm:text-xs text-ink-muted font-secondary shrink-0">
               Showing <strong>{filteredProducts.length}</strong> of {PRODUCTS.length} silhouettes
             </p>
           </div>
 
-          {/* Useful Filters & Sorting Bar */}
-          <div className="bg-[#FAF8F5] border border-line rounded-lg p-3 sm:p-4 mb-6 sm:mb-8 flex flex-wrap items-center justify-between gap-3 sm:gap-4 shadow-xs">
-            {/* Left Controls: Category Pills & Dropdown Refinements */}
-            <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 text-xs">
-              <div className="flex items-center gap-1.5 text-ink-muted font-medium pr-1">
+          {/* Useful Filters & Sorting Bar — Borderless, Ultra-Clean & Perfectly Spaced */}
+          <div className="mb-6 sm:mb-8 space-y-2.5 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-4 sm:bg-canvas sm:border sm:border-line sm:rounded-lg sm:p-4 sm:shadow-xs relative z-20">
+            {/* Top Row / Scrollable Categories: Horizontal single line on mobile with zero scrollbar */}
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-none no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 py-1">
+              <div className="hidden sm:flex items-center gap-1.5 text-ink-muted font-medium pr-1 text-xs shrink-0">
                 <SlidersHorizontal className="w-3.5 h-3.5 text-brand-700" />
-                <span className="hidden sm:inline">Filter:</span>
+                <span>Filter:</span>
               </div>
 
               {/* Quick Category Buttons */}
               <button
                 type="button"
                 onClick={() => setSelectedCategory('all')}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                  selectedCategory === 'all'
-                    ? 'bg-ink text-white shadow-xs'
-                    : 'bg-white border border-line text-ink-secondary hover:text-ink'
-                }`}
+                className={`px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0 transition-all ${selectedCategory === 'all'
+                  ? 'bg-ink text-white shadow-xs'
+                  : 'bg-white border border-line text-ink-secondary hover:text-ink hover:border-ink/40'
+                  }`}
               >
                 All ({PRODUCTS.length})
               </button>
               <button
                 type="button"
                 onClick={() => setSelectedCategory('tote-bags')}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                  selectedCategory === 'tote-bags'
-                    ? 'bg-ink text-white shadow-xs'
-                    : 'bg-white border border-line text-ink-secondary hover:text-ink'
-                }`}
+                className={`px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0 transition-all ${selectedCategory === 'tote-bags'
+                  ? 'bg-ink text-white shadow-xs'
+                  : 'bg-white border border-line text-ink-secondary hover:text-ink hover:border-ink/40'
+                  }`}
               >
                 Totes (4)
               </button>
               <button
                 type="button"
                 onClick={() => setSelectedCategory('laptop-bags')}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                  selectedCategory === 'laptop-bags'
-                    ? 'bg-ink text-white shadow-xs'
-                    : 'bg-white border border-line text-ink-secondary hover:text-ink'
-                }`}
+                className={`px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0 transition-all ${selectedCategory === 'laptop-bags'
+                  ? 'bg-ink text-white shadow-xs'
+                  : 'bg-white border border-line text-ink-secondary hover:text-ink hover:border-ink/40'
+                  }`}
               >
                 Laptop Bags (2)
               </button>
               <button
                 type="button"
                 onClick={() => setSelectedCategory('shoulder-bags')}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                  selectedCategory === 'shoulder-bags'
-                    ? 'bg-ink text-white shadow-xs'
-                    : 'bg-white border border-line text-ink-secondary hover:text-ink'
-                }`}
+                className={`px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0 transition-all ${selectedCategory === 'shoulder-bags'
+                  ? 'bg-ink text-white shadow-xs'
+                  : 'bg-white border border-line text-ink-secondary hover:text-ink hover:border-ink/40'
+                  }`}
               >
                 Shoulder Bags (2)
               </button>
 
-              {/* Color Dropdown */}
-              <select
-                value={selectedColor}
-                onChange={(e) => setSelectedColor(e.target.value)}
-                className="bg-white border border-line px-3 py-1.5 rounded-full text-ink text-xs focus:outline-none focus:border-ink transition-colors cursor-pointer"
-                aria-label="Filter by color variation"
-              >
-                <option value="all">All Colors</option>
-                <option value="Rust">Rust Caramel</option>
-                <option value="Noir">Noir Black</option>
-                <option value="Cognac">Cognac Brown</option>
-                <option value="Espresso">Espresso Roast</option>
-                <option value="Cream">Cream Canvas</option>
-                <option value="Saddle">Saddle Tan</option>
-              </select>
+              {/* Color Dropdown on Desktop */}
+              <div className="hidden sm:inline-flex relative items-center">
+                <select
+                  value={selectedColor}
+                  onChange={(e) => setSelectedColor(e.target.value)}
+                  className="appearance-none bg-white border border-line px-3.5 pr-8 py-1.5 rounded-full text-ink text-xs font-medium focus:outline-none focus:border-ink transition-colors cursor-pointer shadow-2xs"
+                  aria-label="Filter by color variation"
+                >
+                  <option value="all">All Colors</option>
+                  <option value="Rust">Rust Caramel</option>
+                  <option value="Noir">Noir Black</option>
+                  <option value="Cognac">Cognac Brown</option>
+                  <option value="Espresso">Espresso Roast</option>
+                  <option value="Cream">Cream Canvas</option>
+                  <option value="Saddle">Saddle Tan</option>
+                </select>
+                <ChevronDown className="w-3.5 h-3.5 text-ink-muted absolute right-2.5 pointer-events-none" />
+              </div>
 
-              {/* Reset active filters */}
+              {/* Reset active filters on Desktop */}
               {hasActiveFilters && (
                 <button
                   type="button"
                   onClick={clearAllFilters}
-                  className="inline-flex items-center gap-1 text-xs text-[#BA3C3C] hover:underline font-medium ml-1"
+                  className="hidden sm:inline-flex items-center gap-1 text-xs text-zimor-orange hover:underline font-medium ml-1 whitespace-nowrap shrink-0"
                 >
                   <RotateCcw className="w-3 h-3" />
                   <span>Reset</span>
@@ -371,56 +375,91 @@ function ShopContent() {
               )}
             </div>
 
-            {/* Right Controls: Sort Dropdown & Column Toggle */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 text-xs">
-                <label htmlFor="shop-sort" className="text-ink-muted hidden sm:inline">
-                  Sort:
-                </label>
-                <select
-                  id="shop-sort"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
-                  className="bg-white border border-line text-xs py-1.5 px-3 rounded-full text-ink focus:outline-none focus:border-ink transition-colors cursor-pointer"
-                >
-                  <option value="featured">Featured First</option>
-                  <option value="price-asc">Price: Low to High</option>
-                  <option value="price-desc">Price: High to Low</option>
-                  <option value="rating">Top Rated (4.8+)</option>
-                </select>
+            {/* Mobile Secondary Row: Color + Sort combined in a single clean hairline strip */}
+            <div className="flex items-center justify-between gap-3 pt-2.5 sm:pt-0 border-t border-line/60 sm:border-0 text-xs">
+              {/* Left Controls on Mobile: Color Selector + Inline Reset */}
+              <div className="flex items-center gap-2">
+                <div className="sm:hidden relative inline-flex items-center">
+                  <select
+                    value={selectedColor}
+                    onChange={(e) => setSelectedColor(e.target.value)}
+                    className="appearance-none bg-white border border-line text-xs py-1.5 pl-3 pr-7 rounded-full text-ink font-medium focus:outline-none focus:border-ink transition-colors cursor-pointer shadow-2xs"
+                    aria-label="Filter by color variation"
+                  >
+                    <option value="all">All Colors</option>
+                    <option value="Rust">Rust Caramel</option>
+                    <option value="Noir">Noir Black</option>
+                    <option value="Cognac">Cognac Brown</option>
+                    <option value="Espresso">Espresso Roast</option>
+                    <option value="Cream">Cream Canvas</option>
+                    <option value="Saddle">Saddle Tan</option>
+                  </select>
+                  <ChevronDown className="w-3 h-3 text-ink-muted absolute right-2 pointer-events-none" />
+                </div>
+
+                {/* Inline Reset Button on Mobile when filters active */}
+                {hasActiveFilters && (
+                  <button
+                    type="button"
+                    onClick={clearAllFilters}
+                    className="sm:hidden inline-flex items-center gap-1 text-[11px] font-medium text-zimor-orange bg-zimor-cream/20 border border-zimor-ashGrey px-2.5 py-1 rounded-full whitespace-nowrap shrink-0 transition-colors"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    <span>Reset</span>
+                  </button>
+                )}
               </div>
 
-              {/* 2 or 3 Column Grid Toggle */}
-              <div className="hidden sm:flex items-center border border-line rounded-full bg-white p-0.5">
-                <button
-                  type="button"
-                  onClick={() => setColumns(2)}
-                  className={`p-1.5 rounded-full transition-colors ${
-                    columns === 2 ? 'bg-ink text-white shadow-xs' : 'text-ink-muted hover:text-ink'
-                  }`}
-                  title="2 Columns (Editorial)"
-                  aria-label="2 Columns"
-                >
-                  <Grid className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setColumns(3)}
-                  className={`p-1.5 rounded-full transition-colors ${
-                    columns === 3 ? 'bg-ink text-white shadow-xs' : 'text-ink-muted hover:text-ink'
-                  }`}
-                  title="3 Columns (Grid)"
-                  aria-label="3 Columns"
-                >
-                  <LayoutGrid className="w-3.5 h-3.5" />
-                </button>
+              {/* Right Controls: Sort Order (+ Desktop Grid Toggle) */}
+              <div className="flex items-center gap-2 ml-auto sm:ml-0">
+                <div className="relative inline-flex items-center">
+                  <label htmlFor="shop-sort" className="text-ink-muted hidden sm:inline text-xs mr-1.5">
+                    Sort:
+                  </label>
+                  <select
+                    id="shop-sort"
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as any)}
+                    className="appearance-none bg-white border border-line text-xs py-1.5 pl-3 pr-7 rounded-full text-ink font-medium focus:outline-none focus:border-ink transition-colors cursor-pointer shadow-2xs"
+                  >
+                    <option value="featured">Featured First</option>
+                    <option value="price-asc">Price: Low to High</option>
+                    <option value="price-desc">Price: High to Low</option>
+                    <option value="rating">Top Rated (4.8+)</option>
+                  </select>
+                  <ChevronDown className="w-3 h-3 text-ink-muted absolute right-2 pointer-events-none" />
+                </div>
+
+                {/* 2 or 3 Column Grid Toggle (Desktop Only) */}
+                <div className="hidden sm:flex items-center border border-line rounded-full bg-white p-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setColumns(2)}
+                    className={`p-1.5 rounded-full transition-colors ${columns === 2 ? 'bg-ink text-white shadow-xs' : 'text-ink-muted hover:text-ink'
+                      }`}
+                    title="2 Columns (Editorial)"
+                    aria-label="2 Columns"
+                  >
+                    <Grid className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setColumns(3)}
+                    className={`p-1.5 rounded-full transition-colors ${columns === 3 ? 'bg-ink text-white shadow-xs' : 'text-ink-muted hover:text-ink'
+                      }`}
+                    title="3 Columns (Grid)"
+                    aria-label="3 Columns"
+                  >
+                    <LayoutGrid className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Active Filter Banner when filters are applied */}
+          {/* Active Filter Banner when filters are applied (Desktop Only to prevent mobile clutter) */}
           {hasActiveFilters && (
-            <div className="flex items-center justify-between p-3 sm:p-3.5 mb-6 rounded-md bg-[#FAF8F5] border border-line/80">
+            <div className="hidden sm:flex items-center justify-between p-3 sm:p-3.5 mb-6 rounded-md bg-canvas border border-line/80">
               <div className="flex items-center gap-2 flex-wrap text-xs">
                 <span className="text-ink-muted">Filtered by:</span>
                 <span className="inline-flex items-center gap-1 font-semibold text-ink bg-white px-2.5 py-0.5 rounded-full border border-line">
@@ -444,9 +483,8 @@ function ShopContent() {
           {/* Clean Product Grid: All 6 Unique Products */}
           {filteredProducts.length > 0 ? (
             <div
-              className={`grid gap-5 sm:gap-7 lg:gap-8 ${
-                columns === 2 ? 'grid-cols-2 md:grid-cols-2' : 'grid-cols-2 md:grid-cols-3'
-              }`}
+              className={`grid gap-x-3.5 gap-y-8 sm:gap-x-6 sm:gap-y-12 lg:gap-x-8 lg:gap-y-14 relative z-10 ${columns === 2 ? 'grid-cols-2 md:grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
+                }`}
             >
               {filteredProducts.map((product) => (
                 <ProductCard
@@ -457,11 +495,11 @@ function ShopContent() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-16 sm:py-20 bg-[#FAF8F5] rounded-lg border border-line space-y-4">
-              <h2 className="text-lg font-serif font-normal text-ink">
+            <div className="text-center py-16 sm:py-20 bg-canvas rounded-lg border border-line space-y-4">
+              <h2 className="text-lg font-primary font-normal text-ink">
                 No silhouettes match your selected filters
               </h2>
-              <p className="text-xs text-ink-muted max-w-md mx-auto font-light">
+              <p className="text-xs text-ink-muted max-w-md mx-auto font-normal">
                 Reset your filter criteria to display the full permanent collection of six bags.
               </p>
               <button
@@ -481,20 +519,20 @@ function ShopContent() {
           ========================================================================= */}
       <section
         id="profession"
-        className="pt-8 sm:pt-12 pb-16 sm:pb-24 bg-[#FAF8F5] border-t border-line scroll-mt-0"
+        className="pt-8 sm:pt-12 pb-16 sm:pb-24 bg-canvas border-t border-line scroll-mt-0"
         aria-label="Shop by Profession and Lifestyle"
       >
         <span id="shop-by-profession" className="sr-only" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Main Section Header */}
           <div className="mb-12 sm:mb-16">
-            <p className="text-[11px] sm:text-xs uppercase tracking-[0.25em] text-brand-700 font-bold mb-1.5 font-sans">
+            <p className="text-[11px] sm:text-xs uppercase tracking-[0.25em] text-brand-700 font-bold mb-1.5 font-secondary">
               Curated For Your Workday
             </p>
-            <h2 className="font-serif text-[34px] sm:text-[42px] lg:text-[48px] font-normal text-ink tracking-tight leading-none">
+            <h2 className="font-primary text-[34px] sm:text-[42px] lg:text-[48px] font-normal text-ink tracking-tight leading-none">
               Shop by Profession &amp; Lifestyle
             </h2>
-            <p className="text-xs sm:text-sm text-ink-muted mt-2 max-w-2xl font-light leading-relaxed">
+            <p className="text-xs sm:text-sm text-ink-muted mt-2 max-w-2xl font-normal leading-relaxed">
               Three distinct carry archetypes engineered with specific tech dimensions, internal partitions, and ergonomic drops. Explore the curated silhouettes for each lifestyle below.
             </p>
           </div>
@@ -519,7 +557,8 @@ function ShopContent() {
                           src={subsection.horizontalImage}
                           alt={`${subsection.title} Workspace`}
                           fill
-                          priority={subsection.id === "corporate-executive"}
+                          loading="lazy"
+                          decoding="async"
                           sizes="(max-width: 1024px) 100vw, 50vw"
                           className="object-cover object-center transition-transform duration-1000 ease-out group-hover:scale-102"
                         />
@@ -530,20 +569,20 @@ function ShopContent() {
                         {/* Overlaid Cinematic Content */}
                         <div className="absolute inset-0 p-5 sm:p-7 lg:p-8 flex flex-col justify-end text-white z-10">
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-white text-[10px] uppercase tracking-[0.22em] font-sans font-semibold">
-                              <IconComp className="w-3.5 h-3.5 text-[#E8D8C8]" />
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-white text-[10px] uppercase tracking-[0.22em] font-primary font-semibold">
+                              <IconComp className="w-3.5 h-3.5 text-zimor-cream" />
                               <span>{subsection.title}</span>
                             </span>
-                            <span className="text-white/60 text-[11px] font-serif italic hidden sm:inline">
+                            <span className="text-white/80 text-[11px] font-primary hidden sm:inline">
                               Archetype {subsection.number}
                             </span>
                           </div>
 
-                          <h3 className="font-serif text-[24px] sm:text-[30px] lg:text-[34px] font-normal text-white tracking-tight leading-[1.1] mb-1.5 sm:mb-2">
+                          <h3 className="font-primary text-[24px] sm:text-[30px] lg:text-[34px] font-normal text-white tracking-tight leading-[1.1] mb-1.5 sm:mb-2">
                             {subsection.archetype}
                           </h3>
 
-                          <p className="text-xs sm:text-[13px] text-white/85 leading-relaxed font-light max-w-lg mb-3">
+                          <p className="text-xs sm:text-[13px] text-white/85 leading-relaxed font-normal max-w-lg mb-3">
                             {subsection.description}
                           </p>
 
@@ -551,9 +590,9 @@ function ShopContent() {
                             {subsection.specs.map((spec, specIdx) => (
                               <span
                                 key={specIdx}
-                                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-white/95 text-[10px] sm:text-[11px] font-sans"
+                                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-white/95 text-[10px] sm:text-[11px] font-secondary"
                               >
-                                <Check className="w-3.5 h-3.5 text-[#E8D8C8]" />
+                                <Check className="w-3.5 h-3.5 text-zimor-cream" />
                                 <span>{spec}</span>
                               </span>
                             ))}
@@ -564,10 +603,10 @@ function ShopContent() {
                       {/* BOTTOM LEFT: DISPLAY THE TWO MATCHING PRODUCT CARDS (EXISTING CARD DESIGN) */}
                       <div className="space-y-3">
                         <div className="flex items-center justify-between border-b border-line pb-2">
-                          <p className="text-[11px] uppercase tracking-[0.18em] text-brand-700 font-bold font-sans">
+                          <p className="text-[11px] uppercase tracking-[0.18em] text-brand-700 font-bold font-secondary">
                             Matching Silhouettes
                           </p>
-                          <p className="text-[11px] text-ink-muted font-sans">
+                          <p className="text-[11px] text-ink-muted font-secondary">
                             Showing {subsection.products.length} models · {subsection.subtitleFilterText}
                           </p>
                         </div>
@@ -589,7 +628,8 @@ function ShopContent() {
                         src={subsection.editorialImage}
                         alt={`${subsection.title} - ${subsection.archetype}`}
                         fill
-                        priority={subsection.id === "corporate-executive"}
+                        loading="lazy"
+                        decoding="async"
                         sizes="(max-width: 1024px) 100vw, 50vw"
                         className="object-cover object-[center_24%] transition-transform duration-1000 ease-out group-hover:scale-102"
                       />
@@ -597,8 +637,8 @@ function ShopContent() {
 
                       {/* Floating Base Badge */}
                       <div className="absolute bottom-5 left-5 right-5 z-10 text-white">
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-white/95 text-[10px] uppercase tracking-[0.2em] font-sans font-semibold border border-white/20">
-                          <IconComp className="w-3.5 h-3.5 text-[#E8D8C8]" />
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-white/95 text-[10px] uppercase tracking-[0.2em] font-primary font-semibold border border-white/20">
+                          <IconComp className="w-3.5 h-3.5 text-zimor-cream" />
                           <span>{subsection.archetype} · Full Height Editorial</span>
                         </span>
                       </div>

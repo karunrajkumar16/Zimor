@@ -57,7 +57,6 @@ export const SHOPPABLE_VIDEOS: ShoppableVideoItem[] = [
 
 interface ShoppableVideoCardProps {
   item: ShoppableVideoItem;
-  idx: number;
   onAddToCart: (product: Product, e: React.MouseEvent) => void;
   isAdded: boolean;
 }
@@ -70,7 +69,6 @@ interface ShoppableVideoCardProps {
  */
 const ShoppableVideoCard = memo<ShoppableVideoCardProps>(({
   item,
-  idx,
   onAddToCart,
   isAdded,
 }) => {
@@ -87,7 +85,7 @@ const ShoppableVideoCard = memo<ShoppableVideoCardProps>(({
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && entry.intersectionRatio >= 0.25) {
-          videoEl.play().then(() => setIsPlaying(true)).catch(() => {});
+          videoEl.play().then(() => setIsPlaying(true)).catch(() => { });
         } else {
           videoEl.pause();
           setIsPlaying(false);
@@ -106,7 +104,7 @@ const ShoppableVideoCard = memo<ShoppableVideoCardProps>(({
   return (
     <div
       ref={cardRef}
-      className="group relative flex-none w-[160px] sm:w-[190px] md:w-[220px] lg:w-[240px] shrink-0 snap-start aspect-[9/16] rounded-xl overflow-hidden bg-neutral-900 shadow-xs hover:shadow-md transition-shadow duration-300"
+      className="group relative flex-none w-[160px] sm:w-[190px] md:w-[220px] lg:w-[240px] shrink-0 snap-start aspect-[9/16] rounded-xl overflow-hidden bg-ink shadow-xs hover:shadow-md transition-shadow duration-300"
       style={{
         transform: 'translateZ(0)',
         backfaceVisibility: 'hidden',
@@ -127,19 +125,19 @@ const ShoppableVideoCard = memo<ShoppableVideoCardProps>(({
         src={item.posterUrl}
         alt={item.title}
         fill
+        loading="lazy"
+        decoding="async"
         sizes="(max-width: 640px) 160px, (max-width: 1024px) 220px, 240px"
-        priority={idx < 2}
-        className={`object-cover object-center pointer-events-none transition-opacity duration-300 ${
-          isPlaying ? 'opacity-0' : 'opacity-100'
-        }`}
+        className={`object-cover object-center pointer-events-none transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'
+          }`}
       />
 
-      {/* Ultra-efficient GIF-Style Silent Video Stream */}
+      {/* Ultra-efficient GIF-Style Silent Video Stream — Lazy Loaded with preload="none" */}
       <video
         ref={videoRef}
         src={item.videoUrl}
         poster={item.posterUrl}
-        preload="metadata"
+        preload="none"
         muted
         playsInline
         loop
@@ -163,12 +161,14 @@ const ShoppableVideoCard = memo<ShoppableVideoCardProps>(({
             {/* Thumbnail */}
             <Link
               href={`/product/${item.product.slug}`}
-              className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-md bg-[#FAF8F5] shrink-0 overflow-hidden block"
+              className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-md bg-canvas shrink-0 overflow-hidden block"
             >
               <Image
                 src={item.product.images[0]?.url || item.posterUrl}
                 alt={item.product.name}
                 fill
+                loading="lazy"
+                decoding="async"
                 sizes="40px"
                 className="object-contain p-0.5"
               />
@@ -179,10 +179,10 @@ const ShoppableVideoCard = memo<ShoppableVideoCardProps>(({
               href={`/product/${item.product.slug}`}
               className="min-w-0 flex-1 block group/link"
             >
-              <p className="font-sans text-[11px] sm:text-xs font-medium text-ink truncate leading-tight group-hover/link:text-brand-700 transition-colors">
+              <p className="font-primary text-[11px] sm:text-xs font-normal text-ink truncate leading-tight group-hover/link:text-brand-700 transition-colors">
                 {item.product.name}
               </p>
-              <p className="font-sans text-[11px] sm:text-xs font-semibold text-ink mt-0.5">
+              <p className="font-secondary text-[11px] sm:text-xs font-bold text-ink mt-0.5">
                 ₹{item.product.price.toLocaleString('en-IN')}
               </p>
             </Link>
@@ -191,11 +191,10 @@ const ShoppableVideoCard = memo<ShoppableVideoCardProps>(({
             <button
               type="button"
               onClick={(e) => onAddToCart(item.product, e)}
-              className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-90 shadow-2xs ${
-                isAdded
-                  ? 'bg-emerald-600 text-white'
-                  : 'bg-ink hover:bg-brand-700 text-white'
-              }`}
+              className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-90 shadow-2xs ${isAdded
+                ? 'bg-emerald-600 text-white'
+                : 'bg-ink hover:bg-ink-secondary text-white'
+                }`}
               aria-label={`Add ${item.product.name} to bag`}
               title="Add to Bag"
             >
@@ -244,7 +243,7 @@ export const ShopByVideo: React.FC = () => {
         {/* Clean, Clutter-Free Miraggio-Inspired Header */}
         <div className="flex items-end justify-between gap-4 mb-5 sm:mb-7">
           <div>
-            <h2 className="font-sans text-xl sm:text-2xl md:text-3xl font-medium text-ink tracking-tight leading-tight">
+            <h2 className="font-primary text-xl sm:text-2xl md:text-3xl font-medium text-ink tracking-tight leading-tight">
               Shop by Video
             </h2>
             <p className="text-xs sm:text-[13px] text-ink-muted mt-1 font-normal max-w-lg leading-relaxed">
@@ -257,7 +256,7 @@ export const ShopByVideo: React.FC = () => {
             <button
               type="button"
               onClick={() => scrollTrack('left')}
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-line hover:border-ink hover:bg-neutral-50 text-ink flex items-center justify-center transition-all shadow-2xs active:scale-95"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-line hover:border-ink hover:bg-canvas-card text-ink flex items-center justify-center transition-all shadow-2xs active:scale-95"
               aria-label="Previous video"
             >
               <ChevronLeft className="w-4 h-4 stroke-[1.8]" />
@@ -265,7 +264,7 @@ export const ShopByVideo: React.FC = () => {
             <button
               type="button"
               onClick={() => scrollTrack('right')}
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-line hover:border-ink hover:bg-neutral-50 text-ink flex items-center justify-center transition-all shadow-2xs active:scale-95"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-line hover:border-ink hover:bg-canvas-card text-ink flex items-center justify-center transition-all shadow-2xs active:scale-95"
               aria-label="Next video"
             >
               <ChevronRight className="w-4 h-4 stroke-[1.8]" />
@@ -286,11 +285,10 @@ export const ShopByVideo: React.FC = () => {
             overscrollBehaviorY: 'auto',
           }}
         >
-          {SHOPPABLE_VIDEOS.map((item, idx) => (
+          {SHOPPABLE_VIDEOS.map((item) => (
             <ShoppableVideoCard
               key={item.id}
               item={item}
-              idx={idx}
               onAddToCart={handleAddToCartFromVideo}
               isAdded={addedProductId === item.product.id}
             />

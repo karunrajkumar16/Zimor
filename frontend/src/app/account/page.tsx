@@ -37,7 +37,7 @@ export default function AccountPage() {
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-line pb-6 mb-8 gap-4">
           <div>
-            <h1 className="font-serif text-[32px] sm:text-[42px] font-normal text-ink tracking-tight">
+            <h1 className="font-primary text-[32px] sm:text-[42px] font-normal text-ink tracking-tight">
               My Profile & Dashboard
             </h1>
             <p className="text-xs sm:text-sm text-ink-secondary mt-1">
@@ -47,7 +47,7 @@ export default function AccountPage() {
 
           <Link
             href="/account/orders"
-            className="inline-flex items-center gap-2 bg-brand-700 hover:bg-brand-800 text-white font-sans text-sm font-medium tracking-normal py-3 px-6 rounded transition-colors self-start sm:self-auto"
+            className="inline-flex items-center gap-2 bg-ink hover:bg-ink-secondary text-white font-primary text-sm font-medium tracking-normal py-3 px-6 rounded transition-colors self-start sm:self-auto"
           >
             <Package className="w-4 h-4" />
             <span>View All Orders ({orders.length})</span>
@@ -67,7 +67,7 @@ export default function AccountPage() {
           <div className="lg:col-span-5 bg-canvas-card border border-line rounded-lg p-6 sm:p-8 space-y-6 shadow-xs">
             <div className="flex items-center gap-4">
               <div className="relative w-16 h-16 rounded-full overflow-hidden border border-line shrink-0 bg-canvas-alt">
-                <Image src={user.avatar} alt={user.name} fill className="object-cover" />
+                <Image src={user.avatar} alt={user.name} fill loading="lazy" decoding="async" className="object-cover" />
               </div>
               <div>
                 <h2 className="text-base font-bold text-ink">{user.name}</h2>
@@ -115,7 +115,7 @@ export default function AccountPage() {
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-1.5 bg-brand-700 text-white rounded font-medium"
+                    className="px-4 py-1.5 bg-ink hover:bg-ink-secondary text-white rounded font-medium transition-colors"
                   >
                     Save Changes
                   </button>
@@ -181,11 +181,10 @@ export default function AccountPage() {
                 {user.addresses.map((addr) => (
                   <div
                     key={addr.id}
-                    className={`p-4 rounded border text-xs space-y-1 relative ${
-                      addr.isDefault
-                        ? 'border-brand-700 bg-brand-50/40 ring-1 ring-brand-700'
-                        : 'border-line bg-canvas'
-                    }`}
+                    className={`p-4 rounded border text-xs space-y-1 relative ${addr.isDefault
+                      ? 'border-brand-700 bg-brand-50/40 ring-1 ring-brand-700'
+                      : 'border-line bg-canvas'
+                      }`}
                   >
                     <div className="flex items-center justify-between mb-1">
                       <span className="font-bold text-ink">{addr.label}</span>
@@ -239,6 +238,8 @@ export default function AccountPage() {
                       src={orders[0].items[0]?.image || '/products/delo-1.jpg'}
                       alt={orders[0].items[0]?.name || 'Bag'}
                       fill
+                      loading="lazy"
+                      decoding="async"
                       className="object-cover"
                     />
                   </div>

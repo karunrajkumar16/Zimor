@@ -61,7 +61,7 @@ export default function CartPage() {
           <span className="text-ink font-semibold">Shopping Bag</span>
         </nav>
 
-        <h1 className="font-serif text-[32px] sm:text-[42px] font-normal text-ink tracking-tight mb-8">
+        <h1 className="font-primary text-[32px] sm:text-[42px] font-normal text-ink tracking-tight mb-8">
           Shopping Bag ({items.reduce((sum, i) => sum + i.quantity, 0)})
         </h1>
 
@@ -78,7 +78,7 @@ export default function CartPage() {
             </div>
             <Link
               href="/shop"
-              className="inline-flex items-center gap-2 bg-brand-700 hover:bg-brand-800 text-white font-sans text-sm font-medium tracking-normal py-3.5 px-8 rounded transition-colors shadow-sm"
+              className="inline-flex items-center gap-2 bg-ink hover:bg-ink-secondary text-white font-primary text-sm font-medium tracking-normal py-3.5 px-8 rounded transition-colors shadow-sm"
             >
               <span>Explore Collection</span>
               <ArrowRight className="w-4 h-4" />
@@ -104,6 +104,8 @@ export default function CartPage() {
                           src={item.product.images[0]?.url || '/products/delo-1.jpg'}
                           alt={item.product.name}
                           fill
+                          loading="lazy"
+                          decoding="async"
                           className="object-cover"
                         />
                       </div>
@@ -192,9 +194,8 @@ export default function CartPage() {
                               setGiftNoteInput(item.giftMessage || '');
                             }
                           }}
-                          className={`inline-flex items-center gap-1.5 font-medium ${
-                            item.isGiftWrapped ? 'text-brand-800' : 'text-brand-700 hover:text-brand-900'
-                          }`}
+                          className={`inline-flex items-center gap-1.5 font-medium ${item.isGiftWrapped ? 'text-brand-800' : 'text-brand-700 hover:text-brand-900'
+                            }`}
                         >
                           <Gift className="w-4 h-4 text-brand-600" />
                           <span>{item.isGiftWrapped ? '✓ Luxury Gift Box Added (₹149)' : '+ Add Signature Gift Packaging'}</span>
@@ -239,7 +240,7 @@ export default function CartPage() {
                           <button
                             type="button"
                             onClick={() => handleSaveGiftMessage(item.id)}
-                            className="text-xs bg-brand-700 text-white font-medium px-3.5 py-1.5 rounded"
+                            className="text-xs bg-ink hover:bg-ink-secondary text-white font-medium px-3.5 py-1.5 rounded transition-colors"
                           >
                             Save Gift Packaging
                           </button>
@@ -253,7 +254,7 @@ export default function CartPage() {
 
             {/* Right Summary Column */}
             <div className="lg:col-span-4 bg-canvas-card border border-line rounded-lg p-5 sm:p-6 space-y-5 shadow-xs sticky top-28">
-              <h2 className="text-base font-serif font-bold text-ink border-b border-line pb-3">
+              <h2 className="text-base font-primary font-semibold text-ink border-b border-line pb-3">
                 Order Summary
               </h2>
 
@@ -284,7 +285,7 @@ export default function CartPage() {
                     />
                     <button
                       type="submit"
-                      className="bg-ink hover:bg-brand-900 text-white text-xs font-semibold px-4 py-2 rounded uppercase tracking-wider transition-colors"
+                      className="bg-ink hover:bg-ink-secondary text-white text-xs font-semibold px-4 py-2 rounded uppercase tracking-wider transition-colors"
                     >
                       Apply
                     </button>
@@ -330,7 +331,7 @@ export default function CartPage() {
               {/* Checkout CTA */}
               <Link
                 href="/checkout"
-                className="w-full bg-brand-700 hover:bg-brand-800 text-white py-4 px-6 rounded font-sans font-medium text-sm tracking-normal flex items-center justify-center gap-2 transition-colors shadow-sm"
+                className="w-full bg-ink hover:bg-ink-secondary text-white py-4 px-6 rounded font-primary font-medium text-sm tracking-normal flex items-center justify-center gap-2 transition-colors shadow-sm"
               >
                 <span>Proceed to Checkout</span>
                 <ArrowRight className="w-4 h-4" />

@@ -1,22 +1,78 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* =========================================================================
+   ZIMOR BRAND GUIDELINES (Page 12) - TYPOGRAPHY SPECIFICATION
+   Primary Typeface: Akzidenz Grotesk (Regular 400, Medium 500, Semibold 600)
+   Secondary Typeface: DM Sans (Regular 400, Bold 700)
+   ========================================================================= */
+
+/* Akzidenz Grotesk local font definitions (loaded from /fonts/ when files are added) */
+@font-face {
+  font-family: 'Akzidenz Grotesk';
+  src: url('/fonts/AkzidenzGrotesk-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Akzidenz Grotesk';
+  src: url('/fonts/AkzidenzGrotesk-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Akzidenz Grotesk';
+  src: url('/fonts/AkzidenzGrotesk-Semibold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer base {
   :root {
-    --canvas-bg: #FAF8F5;
-    --canvas-card: #FFFFFF;
-    --ink-primary: #161413;
-    --line-border: #E8E3DA;
+    /* =========================================================================
+       ZIMOR BRAND GUIDELINES (Page 11) - 6 OFFICIAL COLOUR DESIGN TOKENS
+       ========================================================================= */
+    --zimor-orange: #b44220;   /* Orange Blossom (Accents, CTAs, Active States) */
+    --zimor-black: #000000;    /* Black (Text, Dark Surfaces) */
+    --zimor-brown: #3f2211;    /* Brown (Secondary Text, Dark Surfaces) */
+    --zimor-cream: #caab8e;    /* Cream (Soft Backgrounds, Cards) */
+    --zimor-ash-grey: #b4b4b4; /* Ash Grey (Borders, Dividers, Disabled States only) */
+    --zimor-white: #ffffff;    /* White (Page Background, Text on Dark/Orange) */
+
+    /* Typography Design Tokens */
+    --font-primary: "Akzidenz Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --font-secondary: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+    /* Semantic Roles */
+    --canvas-bg: #ffffff;
+    --canvas-card: #ffffff;
+    --canvas-soft: #caab8e;
+    --canvas-dark: #000000;
+    --canvas-dark-surface: #3f2211;
+    --ink-primary: #000000;
+    --ink-secondary: #3f2211;
+    --line-border: #b4b4b4;
+    --accent-orange: #b44220;
+  }
+
+  *,
+  *::before,
+  *::after {
+    font-synthesis: none;
   }
 
   html {
-    font-family: 'Montserrat', 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: var(--font-secondary);
     color: var(--ink-primary);
     background-color: var(--canvas-bg);
     text-rendering: optimizeLegibility;
+    font-synthesis: none;
   }
 
   body {
@@ -28,7 +84,18 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: clip;
-    font-family: 'Montserrat', 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: var(--font-secondary);
+    font-synthesis: none;
+  }
+
+  /* Ensure no synthetic italics on semantic inline/block elements */
+  em,
+  i,
+  cite,
+  dfn,
+  var,
+  address {
+    font-style: normal;
   }
 
   /* Eliminate 300ms mobile touch delay */
@@ -40,27 +107,62 @@
     touch-action: manipulation;
   }
 
-  /* Button Typography — Clean modern sans-serif (Miraggio lifestyle standard) */
+  /* Primary Typeface: Akzidenz Grotesk (Buttons & CTAs) */
   button,
   .btn,
   [role="button"],
   a.btn {
-    font-family: 'Montserrat', system-ui, -apple-system, sans-serif !important;
+    font-family: var(--font-primary) !important;
     letter-spacing: 0em !important;
     text-transform: none !important;
   }
 
+  /* Secondary Typeface: DM Sans (Form Inputs, Textareas, Selects & Placeholders) */
+  input,
+  textarea,
+  select {
+    font-family: var(--font-secondary) !important;
+  }
+
+  input::-moz-placeholder,
+  textarea::-moz-placeholder {
+    font-family: var(--font-secondary) !important;
+    color: var(--zimor-brown);
+    opacity: 0.85;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    font-family: var(--font-secondary) !important;
+    color: var(--zimor-brown);
+    opacity: 0.85; /* Ensures >= 4.5:1 contrast ratio on all light backgrounds */
+  }
+
+  /* Dark surface placeholder contrast safeguard */
+  .bg-canvas-darkSurface input::placeholder,
+  .bg-canvas-dark input::placeholder,
+  [data-theme="dark"] input::placeholder {
+    color: var(--zimor-white);
+    opacity: 0.85;
+  }
+
+  /* Headings: Primary Typeface (Akzidenz Grotesk) */
   h1,
   h2,
   h3,
-  .font-heading {
+  h4,
+  h5,
+  h6,
+  .font-heading,
+  .font-primary {
+    font-family: var(--font-primary);
     letter-spacing: -0.015em;
   }
 }
 
-/* Miraggio-Style Modern Clean Header Typography */
+/* Header Navigation Typography (Akzidenz Grotesk Medium) */
 .header-nav-link {
-  font-family: 'Montserrat', system-ui, -apple-system, sans-serif !important;
+  font-family: var(--font-primary) !important;
   font-size: 13.5px !important;
   font-weight: 500 !important;
   text-transform: none !important;
@@ -68,7 +170,7 @@
 }
 
 .header-dropdown-link {
-  font-family: 'Montserrat', system-ui, -apple-system, sans-serif !important;
+  font-family: var(--font-primary) !important;
   font-size: 13px !important;
   font-weight: 500 !important;
   text-transform: none !important;
@@ -102,18 +204,30 @@ html.lenis body {
 }
 
 /* Custom scrollbar utility */
-.scrollbar-none::-webkit-scrollbar {
+.scrollbar-none::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
   display: none;
 }
 
-.scrollbar-none {
+.scrollbar-none,
+.no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
 /* Subtle image loading placeholder */
 .bg-canvas-alt {
-  background-color: #F3EFEA;
+  background-color: #caab8e;
+}
+
+/* Contrast Accessibility Rule: Never put white text on Cream or Ash Grey */
+.bg-cream,
+.bg-ash-grey,
+.bg-zimor-cream,
+.bg-zimor-ashGrey,
+[data-bg="cream"],
+[data-bg="ash-grey"] {
+  color: var(--zimor-black);
 }
 
 /* Section stability — prevents scroll-height recalculations and micro-stutters during momentum scrolling */

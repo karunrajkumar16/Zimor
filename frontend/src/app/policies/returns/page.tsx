@@ -16,7 +16,7 @@ export default function ReturnsPolicyPage() {
           <span className="text-xs uppercase tracking-widest text-brand-700 font-bold">
             Customer Guarantee
           </span>
-          <h1 className="font-serif text-[30px] sm:text-[42px] font-normal text-ink tracking-tight">
+          <h1 className="font-primary text-[30px] sm:text-[42px] font-normal text-ink tracking-tight">
             7-Day Easy Return Policy
           </h1>
           <p className="text-xs sm:text-sm text-ink-secondary">

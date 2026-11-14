@@ -6,17 +6,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   Heart,
-  ShoppingBag,
   Star,
   CheckCircle,
-  Truck,
-  RefreshCw,
-  ShieldCheck,
   ChevronDown,
-  Gift,
   Share2,
   Plus,
-  Minus,
   Check,
 } from 'lucide-react';
 import { Product, CustomerReview } from '@/types';
@@ -24,9 +18,14 @@ import { getRelatedProducts } from '@/data/products';
 import { getReviewsForProduct } from '@/data/reviews';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
+import dynamic from 'next/dynamic';
 import { ProductGallery } from '@/components/product/ProductGallery';
 import { ProductCard } from '@/components/product/ProductCard';
-import { ReviewModal } from '@/components/product/ReviewModal';
+
+const ReviewModal = dynamic(
+  () => import('@/components/product/ReviewModal'),
+  { ssr: false }
+);
 
 export function ProductDetailView({ product }: { product: Product }) {
   const router = useRouter();
@@ -35,7 +34,7 @@ export function ProductDetailView({ product }: { product: Product }) {
 
   const [selectedColor, setSelectedColor] = useState<string>(product.defaultColor);
   const selectedSize = product.sizes[0];
-  const [quantity, setQuantity] = useState(1);
+  const quantity = 1;
   const [activeAccordion, setActiveAccordion] = useState<string | null>('love');
   const [reviewsList, setReviewsList] = useState<CustomerReview[]>(getReviewsForProduct(product.slug));
   const [selectedReview, setSelectedReview] = useState<CustomerReview | null>(null);
@@ -134,16 +133,16 @@ export function ProductDetailView({ product }: { product: Product }) {
         {/* ============================================================ */}
         {/* Breadcrumb Navigation                                       */}
         {/* ============================================================ */}
-        <nav className="text-[11px] text-neutral-400 uppercase tracking-wider flex items-center gap-2 mb-4 sm:mb-6 overflow-x-auto scrollbar-none whitespace-nowrap">
-          <Link href="/" className="hover:text-black transition-colors">Home</Link>
+        <nav className="text-[11px] text-ink-muted uppercase tracking-wider flex items-center gap-2 mb-4 sm:mb-6 overflow-x-auto scrollbar-none whitespace-nowrap">
+          <Link href="/" className="hover:text-ink transition-colors">Home</Link>
           <span>/</span>
-          <Link href="/shop" className="hover:text-black transition-colors">Shop Bags</Link>
+          <Link href="/shop" className="hover:text-ink transition-colors">Shop Bags</Link>
           <span>/</span>
-          <Link href={`/shop?category=${product.category}`} className="hover:text-black transition-colors">
+          <Link href={`/shop?category=${product.category}`} className="hover:text-ink transition-colors">
             {product.categoryLabel}
           </Link>
           <span>/</span>
-          <span className="text-neutral-900 font-medium truncate">{product.name}</span>
+          <span className="text-ink font-medium truncate">{product.name}</span>
         </nav>
 
         {/* ============================================================ */}
@@ -157,63 +156,63 @@ export function ProductDetailView({ product }: { product: Product }) {
             <ProductGallery images={product.images} productName={product.name} />
           </div>
 
-          {/* Right Column: Sticky Product Information & Actions */}
-          <div className="lg:col-span-5 lg:sticky lg:top-24 space-y-5">
+          {/* Right Column: Sticky Product Information & Actions (Pinned at Header) */}
+          <div className="lg:col-span-5 lg:sticky lg:top-20 space-y-4 lg:max-h-[calc(100vh-5.5rem)] lg:overflow-y-auto scrollbar-none no-scrollbar pr-1">
             {/* Header: Title, Rating & Pricing */}
             <div className="space-y-1.5 pb-2">
-              <div className="flex items-center justify-between text-xs text-neutral-500">
-                <span className="text-[11px] uppercase tracking-widest text-neutral-800 font-semibold font-sans">
+              <div className="flex items-center justify-between text-xs text-ink-muted">
+                <span className="text-[11px] uppercase tracking-widest text-ink font-semibold font-primary">
                   {product.categoryLabel}
                 </span>
                 <div className="flex items-center gap-1.5 text-xs">
-                  <div className="flex items-center gap-0.5 text-neutral-900">
+                  <div className="flex items-center gap-0.5 text-ink">
                     <Star className="w-3.5 h-3.5 fill-black text-black" />
-                    <span className="font-semibold text-neutral-900">{product.averageRating.toFixed(1)}</span>
+                    <span className="font-semibold text-ink">{product.averageRating.toFixed(1)}</span>
                   </div>
-                  <a href="#reviews" className="text-neutral-500 hover:text-black transition-colors">
+                  <a href="#reviews" className="text-ink-muted hover:text-ink transition-colors">
                     ({reviewsList.length} reviews)
                   </a>
                 </div>
               </div>
 
               {/* Product Title */}
-              <h1 className="font-serif text-2xl sm:text-3xl lg:text-[34px] font-normal text-neutral-900 tracking-tight leading-tight">
+              <h1 className="font-primary text-2xl sm:text-3xl lg:text-[34px] font-normal text-ink tracking-tight leading-tight">
                 {product.name}
               </h1>
 
               {/* Tagline / Subtitle */}
-              <p className="text-xs sm:text-[13px] text-neutral-600 leading-relaxed">
+              <p className="text-xs sm:text-[13px] text-ink-secondary leading-relaxed">
                 {product.tagline}
               </p>
 
               {/* Price & Savings */}
               <div className="flex items-baseline gap-2.5 pt-1.5">
-                <span className="text-xl sm:text-2xl font-bold text-neutral-900">
+                <span className="text-xl sm:text-2xl font-bold text-ink">
                   ₹{product.price.toLocaleString('en-IN')}
                 </span>
-                <span className="text-sm text-neutral-400 line-through">
+                <span className="text-sm text-ink-muted line-through">
                   ₹{product.compareAtPrice.toLocaleString('en-IN')}
                 </span>
-                <span className="text-xs font-semibold text-[#BA3C3C]">
+                <span className="text-xs font-semibold text-zimor-orange">
                   ({discountPercent}% OFF)
                 </span>
               </div>
-              <p className="text-[11px] text-neutral-500">
+              <p className="text-[11px] text-ink-muted">
                 Inclusive of all taxes. Free express shipping across India.
               </p>
             </div>
 
             {/* Laptop Compatibility Callout (Clean borderless line) */}
-            <div className="py-2.5 border-y border-neutral-100 flex items-center gap-2 text-xs text-neutral-800 font-medium">
+            <div className="py-2.5 border-y border-line flex items-center gap-2 text-xs text-ink font-medium">
               <CheckCircle className="w-3.5 h-3.5 text-black shrink-0" />
               <span>{product.laptopCompatibility}</span>
             </div>
 
             {/* Color Swatch Selector (Benchmark Screenshot 1 Style: Image Tiles) */}
             <div className="space-y-2 pt-1">
-              <div className="text-xs sm:text-[13px] text-neutral-800">
-                <span className="text-neutral-500">Color: </span>
-                <span className="font-semibold text-neutral-900">{selectedColor}</span>
+              <div className="text-xs sm:text-[13px] text-ink">
+                <span className="text-ink-muted">Color: </span>
+                <span className="font-semibold text-ink">{selectedColor}</span>
               </div>
 
               {/* Mini Photo Thumbnail Swatches */}
@@ -223,11 +222,10 @@ export function ProductDetailView({ product }: { product: Product }) {
                     key={color.name}
                     type="button"
                     onClick={() => setSelectedColor(color.name)}
-                    className={`relative w-12 h-14 sm:w-14 sm:h-16 overflow-hidden bg-[#F5F5F5] transition-all ${
-                      selectedColor === color.name
-                        ? 'border-2 border-black ring-offset-1'
-                        : 'border border-transparent hover:border-neutral-300'
-                    }`}
+                    className={`relative w-12 h-14 sm:w-14 sm:h-16 overflow-hidden bg-white transition-all ${selectedColor === color.name
+                      ? 'border-2 border-black ring-offset-1'
+                      : 'border border-transparent hover:border-line'
+                      }`}
                     title={color.name}
                     aria-label={`Select color ${color.name}`}
                   >
@@ -235,6 +233,8 @@ export function ProductDetailView({ product }: { product: Product }) {
                       src={getColorSwatchImage(idx)}
                       alt={color.name}
                       fill
+                      loading="lazy"
+                      decoding="async"
                       sizes="56px"
                       className="object-cover"
                     />
@@ -250,21 +250,20 @@ export function ProductDetailView({ product }: { product: Product }) {
                 <button
                   type="button"
                   onClick={() => toggleWishlist(product.id)}
-                  className={`w-12 h-12 shrink-0 border flex items-center justify-center transition-colors ${
-                    inWishlist
-                      ? 'border-black text-[#BA3C3C]'
-                      : 'border-neutral-300 text-neutral-800 hover:border-black'
-                  }`}
+                  className={`w-12 h-12 shrink-0 border flex items-center justify-center transition-colors ${inWishlist
+                    ? 'border-black text-zimor-orange'
+                    : 'border-line text-ink hover:border-black'
+                    }`}
                   aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
                 >
-                  <Heart className={`w-5 h-5 ${inWishlist ? 'fill-[#BA3C3C]' : ''}`} />
+                  <Heart className={`w-5 h-5 ${inWishlist ? 'fill-zimor-orange' : ''}`} />
                 </button>
 
                 {/* Primary ADD TO CART Button: Full-width Solid Black */}
                 <button
                   type="button"
                   onClick={handleAddToCart}
-                  className="flex-1 h-12 bg-black hover:bg-neutral-800 text-white font-medium text-xs sm:text-sm tracking-wider uppercase flex items-center justify-center transition-colors active:scale-[0.99]"
+                  className="flex-1 h-12 bg-black hover:bg-ink-secondary text-white font-medium text-xs sm:text-sm tracking-wider uppercase flex items-center justify-center transition-colors active:scale-[0.99]"
                 >
                   ADD TO CART
                 </button>
@@ -274,20 +273,20 @@ export function ProductDetailView({ product }: { product: Product }) {
               <button
                 type="button"
                 onClick={handleBuyNow}
-                className="w-full h-11 bg-neutral-100 hover:bg-neutral-200 text-neutral-900 font-medium text-xs sm:text-sm tracking-wider uppercase flex items-center justify-center transition-colors"
+                className="w-full h-11 bg-canvas-card border border-line hover:bg-zimor-cream/20 text-ink font-medium text-xs sm:text-sm tracking-wider uppercase flex items-center justify-center transition-colors"
               >
                 Instant Buy Now
               </button>
 
-              <div className="flex items-center justify-between text-xs text-neutral-500 pt-1">
+              <div className="flex items-center justify-between text-xs text-ink-muted pt-1">
                 <span>Quantity: {quantity}</span>
-                <span className="text-[#BA3C3C] font-medium">• Only {product.stock} pieces left in stock</span>
+                <span className="text-zimor-orange font-medium">• Only {product.stock} pieces left in stock</span>
               </div>
             </div>
 
             {/* Delivery Details with Pincode Check (Benchmark Screenshot 1) */}
-            <div className="pt-3 border-t border-neutral-100">
-              <h3 className="text-xs sm:text-sm font-semibold text-neutral-900 mb-2 font-sans">
+            <div className="pt-3 border-t border-line">
+              <h3 className="text-xs sm:text-sm font-semibold text-ink mb-2 font-primary">
                 Delivery Details
               </h3>
               <form onSubmit={handleCheckPincode} className="flex">
@@ -300,11 +299,11 @@ export function ProductDetailView({ product }: { product: Product }) {
                     setPincode(e.target.value);
                     if (pincodeStatus !== 'idle') setPincodeStatus('idle');
                   }}
-                  className="flex-1 border border-neutral-300 px-3.5 py-2.5 text-xs sm:text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-black transition-colors"
+                  className="flex-1 border border-line px-3.5 py-2.5 text-xs sm:text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:border-black transition-colors"
                 />
                 <button
                   type="submit"
-                  className="bg-black text-white text-xs font-bold tracking-wider px-5 sm:px-6 py-2.5 hover:bg-neutral-800 uppercase transition-colors"
+                  className="bg-black text-white text-xs font-bold tracking-wider px-5 sm:px-6 py-2.5 hover:bg-ink-secondary uppercase transition-colors"
                 >
                   CHECK
                 </button>
@@ -317,21 +316,21 @@ export function ProductDetailView({ product }: { product: Product }) {
                 </p>
               )}
               {pincodeStatus === 'invalid' && (
-                <p className="mt-2 text-xs text-[#BA3C3C]">
+                <p className="mt-2 text-xs text-red-600">
                   Please enter a valid 6-digit Indian pincode.
                 </p>
               )}
             </div>
 
             {/* Key Features (Benchmark Screenshot 1: Clean 2-Column Bullets) */}
-            <div className="pt-3 border-t border-neutral-100">
-              <h3 className="text-xs sm:text-sm font-semibold text-neutral-900 mb-2.5 font-sans">
+            <div className="pt-3 border-t border-line">
+              <h3 className="text-xs sm:text-sm font-semibold text-ink mb-2.5 font-primary">
                 Key Features
               </h3>
-              <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs sm:text-[13px] text-neutral-700">
+              <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs sm:text-[13px] text-ink-secondary">
                 {product.features.map((feat, idx) => (
                   <li key={idx} className="flex items-start gap-2">
-                    <span className="text-neutral-900 mt-1.5 w-1 h-1 rounded-full bg-neutral-900 shrink-0" />
+                    <span className="text-ink mt-1.5 w-1 h-1 rounded-full bg-ink shrink-0" />
                     <span className="leading-snug">{feat}</span>
                   </li>
                 ))}
@@ -339,25 +338,24 @@ export function ProductDetailView({ product }: { product: Product }) {
             </div>
 
             {/* Accordions (Benchmark Screenshot 1: Hairline Dividers, Zero Container Box) */}
-            <div className="pt-2 border-t border-neutral-200">
+            <div className="pt-2 border-t border-line">
               {/* Accordion 1: Why You'll Love It? */}
-              <div className="border-b border-neutral-200">
+              <div className="border-b border-line">
                 <button
                   type="button"
                   onClick={() => toggleAccordion('love')}
-                  className="w-full py-4 flex items-center justify-between text-left text-xs sm:text-sm font-normal text-neutral-900 hover:text-neutral-600 transition-colors"
+                  className="w-full py-4 flex items-center justify-between text-left text-xs sm:text-sm font-normal text-ink hover:text-ink-secondary transition-colors"
                 >
                   <span className="font-medium">Why You'll Love It?</span>
                   <ChevronDown
-                    className={`w-4 h-4 text-neutral-500 transition-transform duration-200 ${
-                      activeAccordion === 'love' ? 'rotate-180' : ''
-                    }`}
+                    className={`w-4 h-4 text-ink-muted transition-transform duration-200 ${activeAccordion === 'love' ? 'rotate-180' : ''
+                      }`}
                   />
                 </button>
                 {activeAccordion === 'love' && (
-                  <div className="pb-4 text-xs sm:text-[13px] text-neutral-600 leading-relaxed space-y-2">
+                  <div className="pb-4 text-xs sm:text-[13px] text-ink-secondary leading-relaxed space-y-2">
                     <p>{product.description}</p>
-                    <p className="font-medium text-neutral-800 pt-1">
+                    <p className="font-medium text-ink pt-1">
                       Ideal for: {product.suitableProfessions.join(', ').replace(/-/g, ' ')}.
                     </p>
                   </div>
@@ -365,44 +363,43 @@ export function ProductDetailView({ product }: { product: Product }) {
               </div>
 
               {/* Accordion 2: Details & Dimensions */}
-              <div className="border-b border-neutral-200">
+              <div className="border-b border-line">
                 <button
                   type="button"
                   onClick={() => toggleAccordion('dimensions')}
-                  className="w-full py-4 flex items-center justify-between text-left text-xs sm:text-sm font-normal text-neutral-900 hover:text-neutral-600 transition-colors"
+                  className="w-full py-4 flex items-center justify-between text-left text-xs sm:text-sm font-normal text-ink hover:text-ink-secondary transition-colors"
                 >
                   <span className="font-medium">Details & Dimensions</span>
                   <ChevronDown
-                    className={`w-4 h-4 text-neutral-500 transition-transform duration-200 ${
-                      activeAccordion === 'dimensions' ? 'rotate-180' : ''
-                    }`}
+                    className={`w-4 h-4 text-ink-muted transition-transform duration-200 ${activeAccordion === 'dimensions' ? 'rotate-180' : ''
+                      }`}
                   />
                 </button>
                 {activeAccordion === 'dimensions' && (
-                  <div className="pb-4 text-xs sm:text-[13px] text-neutral-600 leading-relaxed space-y-3">
+                  <div className="pb-4 text-xs sm:text-[13px] text-ink-secondary leading-relaxed space-y-3">
                     <div className="grid grid-cols-2 gap-y-2 gap-x-4">
                       <div>
-                        <span className="text-neutral-400">Length: </span>
-                        <span className="font-medium text-neutral-800">{product.dimensions.length}</span>
+                        <span className="text-ink-muted">Length: </span>
+                        <span className="font-medium text-ink">{product.dimensions.length}</span>
                       </div>
                       <div>
-                        <span className="text-neutral-400">Height: </span>
-                        <span className="font-medium text-neutral-800">{product.dimensions.height}</span>
+                        <span className="text-ink-muted">Height: </span>
+                        <span className="font-medium text-ink">{product.dimensions.height}</span>
                       </div>
                       <div>
-                        <span className="text-neutral-400">Base Width: </span>
-                        <span className="font-medium text-neutral-800">{product.dimensions.width}</span>
+                        <span className="text-ink-muted">Base Width: </span>
+                        <span className="font-medium text-ink">{product.dimensions.width}</span>
                       </div>
                       <div>
-                        <span className="text-neutral-400">Empty Weight: </span>
-                        <span className="font-medium text-neutral-800">{product.dimensions.weight}</span>
+                        <span className="text-ink-muted">Empty Weight: </span>
+                        <span className="font-medium text-ink">{product.dimensions.weight}</span>
                       </div>
                     </div>
-                    <p className="text-neutral-600 text-xs">
+                    <p className="text-ink-secondary text-xs">
                       Strap Drop: {product.dimensions.strapDrop} (Engineered for fatigue-free shoulder carry).
                     </p>
-                    <div className="pt-2 border-t border-neutral-100">
-                      <p className="font-medium text-neutral-800 mb-1">Materials & Hardware:</p>
+                    <div className="pt-2 border-t border-line">
+                      <p className="font-medium text-ink mb-1">Materials & Hardware:</p>
                       <ul className="list-disc pl-4 space-y-1 text-xs">
                         {product.material.map((mat, idx) => (
                           <li key={idx}>{mat}</li>
@@ -414,21 +411,20 @@ export function ProductDetailView({ product }: { product: Product }) {
               </div>
 
               {/* Accordion 3: Shipping & Returns */}
-              <div className="border-b border-neutral-200">
+              <div className="border-b border-line">
                 <button
                   type="button"
                   onClick={() => toggleAccordion('shipping')}
-                  className="w-full py-4 flex items-center justify-between text-left text-xs sm:text-sm font-normal text-neutral-900 hover:text-neutral-600 transition-colors"
+                  className="w-full py-4 flex items-center justify-between text-left text-xs sm:text-sm font-normal text-ink hover:text-ink-secondary transition-colors"
                 >
                   <span className="font-medium">Shipping & Returns</span>
                   <ChevronDown
-                    className={`w-4 h-4 text-neutral-500 transition-transform duration-200 ${
-                      activeAccordion === 'shipping' ? 'rotate-180' : ''
-                    }`}
+                    className={`w-4 h-4 text-ink-muted transition-transform duration-200 ${activeAccordion === 'shipping' ? 'rotate-180' : ''
+                      }`}
                   />
                 </button>
                 {activeAccordion === 'shipping' && (
-                  <div className="pb-4 text-xs sm:text-[13px] text-neutral-600 leading-relaxed space-y-2">
+                  <div className="pb-4 text-xs sm:text-[13px] text-ink-secondary leading-relaxed space-y-2">
                     <p>• <strong>Free Express Shipping:</strong> Dispatched within 24 hours. Delivered in 2–4 business days across India.</p>
                     <p>• <strong>7-Day Easy Returns:</strong> Hassle-free exchanges and returns if unworn and in original condition.</p>
                     <p>• <strong>Cash on Delivery (COD):</strong> Available across 19,000+ Indian pincodes.</p>
@@ -438,22 +434,21 @@ export function ProductDetailView({ product }: { product: Product }) {
               </div>
 
               {/* Accordion 4: More Information & Care */}
-              <div className="border-b border-neutral-200">
+              <div className="border-b border-line">
                 <button
                   type="button"
                   onClick={() => toggleAccordion('more')}
-                  className="w-full py-4 flex items-center justify-between text-left text-xs sm:text-sm font-normal text-neutral-900 hover:text-neutral-600 transition-colors"
+                  className="w-full py-4 flex items-center justify-between text-left text-xs sm:text-sm font-normal text-ink hover:text-ink-secondary transition-colors"
                 >
                   <span className="font-medium">More Information & Care</span>
                   <ChevronDown
-                    className={`w-4 h-4 text-neutral-500 transition-transform duration-200 ${
-                      activeAccordion === 'more' ? 'rotate-180' : ''
-                    }`}
+                    className={`w-4 h-4 text-ink-muted transition-transform duration-200 ${activeAccordion === 'more' ? 'rotate-180' : ''
+                      }`}
                   />
                 </button>
                 {activeAccordion === 'more' && (
-                  <div className="pb-4 text-xs sm:text-[13px] text-neutral-600 leading-relaxed space-y-2">
-                    <p className="font-medium text-neutral-800">Care Instructions:</p>
+                  <div className="pb-4 text-xs sm:text-[13px] text-ink-secondary leading-relaxed space-y-2">
+                    <p className="font-medium text-ink">Care Instructions:</p>
                     <ul className="list-disc pl-4 space-y-1 text-xs">
                       {product.careInstructions.map((inst, idx) => (
                         <li key={idx}>{inst}</li>
@@ -469,7 +464,7 @@ export function ProductDetailView({ product }: { product: Product }) {
               <button
                 type="button"
                 onClick={handleShare}
-                className="inline-flex items-center gap-1.5 text-xs text-neutral-500 hover:text-black transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs text-ink-muted hover:text-ink transition-colors"
               >
                 <Share2 className="w-3.5 h-3.5" />
                 <span>{copiedLink ? 'Link Copied to Clipboard!' : 'Share Product'}</span>
@@ -481,13 +476,13 @@ export function ProductDetailView({ product }: { product: Product }) {
         {/* ============================================================ */}
         {/* Customer Reviews Section (#reviews) — Clean White Aesthetic */}
         {/* ============================================================ */}
-        <section id="reviews" className="mt-16 pt-10 border-t border-neutral-200 scroll-mt-20">
+        <section id="reviews" className="mt-16 pt-10 border-t border-line scroll-mt-20">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
             <div>
-              <p className="text-xs uppercase tracking-widest text-neutral-500 font-semibold mb-1">
+              <p className="text-xs uppercase tracking-widest text-ink-muted font-semibold mb-1">
                 Verified Customer Feedback
               </p>
-              <h2 className="font-serif text-2xl sm:text-3xl font-normal text-neutral-900 tracking-tight">
+              <h2 className="font-primary text-2xl sm:text-3xl font-normal text-ink tracking-tight">
                 Reviews for {product.name}
               </h2>
             </div>
@@ -495,7 +490,7 @@ export function ProductDetailView({ product }: { product: Product }) {
             <button
               type="button"
               onClick={() => setIsWriteReviewOpen(true)}
-              className="inline-flex items-center gap-2 bg-black hover:bg-neutral-800 text-white px-4 py-2.5 text-xs font-semibold uppercase tracking-wider transition-colors self-start sm:self-auto"
+              className="inline-flex items-center gap-2 bg-black hover:bg-ink-secondary text-white px-4 py-2.5 text-xs font-semibold uppercase tracking-wider transition-colors self-start sm:self-auto"
             >
               <Plus className="w-4 h-4" />
               <span>Write a Review</span>
@@ -503,49 +498,48 @@ export function ProductDetailView({ product }: { product: Product }) {
           </div>
 
           {/* Rating Summary Bar */}
-          <div className="border-y border-neutral-200 py-6 mb-8 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-            <div className="md:col-span-4 text-center md:text-left border-b md:border-b-0 md:border-r border-neutral-200 pb-4 md:pb-0 md:pr-6">
-              <p className="text-4xl sm:text-5xl font-serif font-bold text-neutral-900">
+          <div className="border-y border-line py-6 mb-8 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+            <div className="md:col-span-4 text-center md:text-left border-b md:border-b-0 md:border-r border-line pb-4 md:pb-0 md:pr-6">
+              <p className="text-4xl sm:text-5xl font-primary font-semibold text-ink">
                 {product.averageRating.toFixed(1)}
               </p>
               <div className="flex items-center justify-center md:justify-start gap-1 text-black my-1.5">
                 {[1, 2, 3, 4, 5].map((s) => (
                   <Star
                     key={s}
-                    className={`w-4 h-4 ${
-                      s <= Math.round(product.averageRating)
-                        ? 'fill-black text-black'
-                        : 'text-neutral-300'
-                    }`}
+                    className={`w-4 h-4 ${s <= Math.round(product.averageRating)
+                      ? 'fill-black text-black'
+                      : 'text-line'
+                      }`}
                   />
                 ))}
               </div>
-              <p className="text-xs text-neutral-500">
+              <p className="text-xs text-ink-muted">
                 Based on {reviewsList.length} verified customer reviews
               </p>
             </div>
 
             <div className="md:col-span-8 space-y-2 text-xs">
               <div className="flex items-center gap-3">
-                <span className="w-12 text-neutral-600">5 Stars</span>
-                <div className="flex-1 bg-neutral-100 h-1.5 rounded-full overflow-hidden">
+                <span className="w-12 text-ink-secondary">5 Stars</span>
+                <div className="flex-1 bg-line/25 h-1.5 rounded-full overflow-hidden">
                   <div className="bg-black h-full w-[85%]" />
                 </div>
-                <span className="w-8 text-right text-neutral-400">85%</span>
+                <span className="w-8 text-right text-ink-muted">85%</span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="w-12 text-neutral-600">4 Stars</span>
-                <div className="flex-1 bg-neutral-100 h-1.5 rounded-full overflow-hidden">
+                <span className="w-12 text-ink-secondary">4 Stars</span>
+                <div className="flex-1 bg-line/25 h-1.5 rounded-full overflow-hidden">
                   <div className="bg-black h-full w-[15%]" />
                 </div>
-                <span className="w-8 text-right text-neutral-400">15%</span>
+                <span className="w-8 text-right text-ink-muted">15%</span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="w-12 text-neutral-600">3 Stars</span>
-                <div className="flex-1 bg-neutral-100 h-1.5 rounded-full overflow-hidden">
+                <span className="w-12 text-ink-secondary">3 Stars</span>
+                <div className="flex-1 bg-line/25 h-1.5 rounded-full overflow-hidden">
                   <div className="bg-black h-full w-0" />
                 </div>
-                <span className="w-8 text-right text-neutral-400">0%</span>
+                <span className="w-8 text-right text-ink-muted">0%</span>
               </div>
             </div>
           </div>
@@ -555,7 +549,7 @@ export function ProductDetailView({ product }: { product: Product }) {
             {reviewsList.map((rev) => (
               <div
                 key={rev.id}
-                className="border-b border-neutral-100 pb-5 space-y-2"
+                className="border-b border-line/60 pb-5 space-y-2"
               >
                 <div className="flex items-start justify-between">
                   <div>
@@ -563,24 +557,23 @@ export function ProductDetailView({ product }: { product: Product }) {
                       {[1, 2, 3, 4, 5].map((s) => (
                         <Star
                           key={s}
-                          className={`w-3.5 h-3.5 ${
-                            s <= rev.rating ? 'fill-black text-black' : 'text-neutral-300'
-                          }`}
+                          className={`w-3.5 h-3.5 ${s <= rev.rating ? 'fill-black text-black' : 'text-line'
+                            }`}
                         />
                       ))}
                     </div>
-                    <h4 className="text-sm font-semibold text-neutral-900">{rev.title}</h4>
+                    <h4 className="text-sm font-semibold text-ink">{rev.title}</h4>
                   </div>
-                  <span className="text-[11px] text-neutral-400">{rev.date}</span>
+                  <span className="text-[11px] text-ink-muted">{rev.date}</span>
                 </div>
 
-                <p className="text-xs sm:text-[13px] text-neutral-600 leading-relaxed">
+                <p className="text-xs sm:text-[13px] text-ink-secondary leading-relaxed">
                   "{rev.comment}"
                 </p>
 
-                <div className="pt-1 flex items-center justify-between text-xs text-neutral-500">
+                <div className="pt-1 flex items-center justify-between text-xs text-ink-muted">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-neutral-900">{rev.userName}</span>
+                    <span className="font-medium text-ink">{rev.userName}</span>
                     {rev.userCity && <span>• {rev.userCity}</span>}
                     {rev.verifiedPurchase && (
                       <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700">
@@ -598,19 +591,19 @@ export function ProductDetailView({ product }: { product: Product }) {
         {/* ============================================================ */}
         {/* Curated Recommendations ("Complete Your Workday Look")      */}
         {/* ============================================================ */}
-        <section className="mt-16 pt-10 border-t border-neutral-200">
+        <section className="mt-16 pt-10 border-t border-line">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <p className="text-xs uppercase tracking-widest text-neutral-500 font-semibold mb-1">
+              <p className="text-xs uppercase tracking-widest text-ink-muted font-semibold mb-1">
                 Curated Recommendations
               </p>
-              <h2 className="font-serif text-2xl sm:text-3xl font-normal text-neutral-900 tracking-tight">
+              <h2 className="font-primary text-2xl sm:text-3xl font-normal text-ink tracking-tight">
                 Complete Your Workday Look
               </h2>
             </div>
             <Link
               href="/shop"
-              className="text-xs font-semibold uppercase tracking-wider text-neutral-900 hover:text-black underline underline-offset-4"
+              className="text-xs font-semibold uppercase tracking-wider text-ink hover:text-brand-700 underline underline-offset-4"
             >
               View All Bags →
             </Link>
@@ -628,30 +621,31 @@ export function ProductDetailView({ product }: { product: Product }) {
       {/* Mobile Sticky Bottom "ADD TO CART" Bar (Proportionate)       */}
       {/* ============================================================ */}
       <div
-        className={`fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-neutral-200 px-4 py-2.5 lg:hidden transition-transform duration-300 shadow-md ${
-          showStickyBottomBar ? 'translate-y-0' : 'translate-y-full pointer-events-none'
-        }`}
+        className={`fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-line px-4 py-2.5 lg:hidden transition-transform duration-300 shadow-md ${showStickyBottomBar ? 'translate-y-0' : 'translate-y-full pointer-events-none'
+          }`}
       >
         <div className="flex items-center justify-between gap-3 max-w-md mx-auto">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="relative w-10 h-10 overflow-hidden bg-[#F5F5F5] shrink-0 border border-neutral-200">
+            <div className="relative w-10 h-10 overflow-hidden bg-white shrink-0 border border-line">
               <Image
                 src={product.images[0]?.url || '/products/delo-1.jpg'}
                 alt={product.name}
                 fill
+                loading="lazy"
+                decoding="async"
                 sizes="40px"
                 className="object-cover"
               />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-medium text-neutral-900 truncate">{product.name}</p>
-              <p className="text-xs font-bold text-neutral-900">₹{product.price.toLocaleString('en-IN')}</p>
+              <p className="text-xs font-medium text-ink truncate">{product.name}</p>
+              <p className="text-xs font-bold text-ink">₹{product.price.toLocaleString('en-IN')}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={handleAddToCart}
-            className="bg-black hover:bg-neutral-800 text-white font-medium text-xs tracking-wider uppercase py-2.5 px-4 flex items-center gap-1.5 shrink-0 transition-colors"
+            className="bg-black hover:bg-ink-secondary text-white font-medium text-xs tracking-wider uppercase py-2.5 px-4 flex items-center gap-1.5 shrink-0 transition-colors"
           >
             ADD TO CART
           </button>

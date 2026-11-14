@@ -94,7 +94,7 @@ export const CartDrawer: React.FC = () => {
                 <Link
                   href="/shop"
                   onClick={closeCartDrawer}
-                  className="inline-block bg-ink hover:bg-brand-800 text-white font-sans text-sm font-medium tracking-normal py-3 px-6 rounded transition-colors"
+                  className="inline-block bg-ink hover:bg-ink-secondary text-white font-primary text-sm font-medium tracking-normal py-3 px-6 rounded transition-colors"
                 >
                   Explore Workbags
                 </Link>
@@ -232,7 +232,7 @@ export const CartDrawer: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleSaveGiftMessage(item.id)}
-                          className="text-[10px] bg-brand-600 text-white font-medium px-3 py-1 rounded"
+                          className="text-[10px] bg-ink hover:bg-ink-secondary text-white font-medium px-3 py-1 rounded transition-colors"
                         >
                           Save Gift Box
                         </button>
@@ -316,7 +316,7 @@ export const CartDrawer: React.FC = () => {
                 <Link
                   href="/checkout"
                   onClick={closeCartDrawer}
-                  className="w-full bg-brand-700 hover:bg-brand-800 text-white py-3.5 px-4 rounded font-sans font-medium text-sm tracking-normal flex items-center justify-center gap-2 transition-colors shadow-sm"
+                  className="w-full bg-ink hover:bg-ink-secondary text-white py-3.5 px-4 rounded font-primary font-medium text-sm tracking-normal flex items-center justify-center gap-2 transition-colors shadow-sm"
                 >
                   <span>Proceed to Checkout</span>
                   <ArrowRight className="w-4 h-4" />

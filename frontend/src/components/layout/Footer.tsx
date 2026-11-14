@@ -28,7 +28,7 @@ export const Footer: React.FC = () => {
             </div>
             <div>
               <h4 className="text-xs font-semibold uppercase tracking-wider text-white">Free Express Shipping</h4>
-              <p className="text-[11px] text-ink-faint">Across all states in India</p>
+              <p className="text-[11px] text-white/80">Across all states in India</p>
             </div>
           </div>
 
@@ -38,7 +38,7 @@ export const Footer: React.FC = () => {
             </div>
             <div>
               <h4 className="text-xs font-semibold uppercase tracking-wider text-white">7-Day Easy Returns</h4>
-              <p className="text-[11px] text-ink-faint">Hassle-free doorstep pickup</p>
+              <p className="text-[11px] text-white/80">Hassle-free doorstep pickup</p>
             </div>
           </div>
 
@@ -48,7 +48,7 @@ export const Footer: React.FC = () => {
             </div>
             <div>
               <h4 className="text-xs font-semibold uppercase tracking-wider text-white">Cash on Delivery</h4>
-              <p className="text-[11px] text-ink-faint">Pay securely upon delivery</p>
+              <p className="text-[11px] text-white/80">Pay securely upon delivery</p>
             </div>
           </div>
 
@@ -58,7 +58,7 @@ export const Footer: React.FC = () => {
             </div>
             <div>
               <h4 className="text-xs font-semibold uppercase tracking-wider text-white">100% Superior Faux Leather</h4>
-              <p className="text-[11px] text-ink-faint">Scratch & water-resistant</p>
+              <p className="text-[11px] text-white/80">Scratch & water-resistant</p>
             </div>
           </div>
         </div>
@@ -72,7 +72,7 @@ export const Footer: React.FC = () => {
             <div className="relative w-36 h-9">
               <Image src="/logo.png" alt="Zimor India" fill className="object-contain brightness-200 invert" />
             </div>
-            <p className="text-xs text-ink-faint leading-relaxed max-w-sm">
+            <p className="text-xs text-white/80 leading-relaxed max-w-sm">
               Structured, elegant leather bags and accessories thoughtfully designed for the modern working professional. Designed and crafted with love in India.
             </p>
             <div className="pt-2">
@@ -80,14 +80,14 @@ export const Footer: React.FC = () => {
                 Client Concierge
               </p>
               <p className="text-xs text-white">Email: zimorindia@gmail.com</p>
-              <p className="text-xs text-ink-faint">Mon–Sat: 10:00 AM – 7:00 PM IST</p>
+              <p className="text-xs text-white/80">Mon–Sat: 10:00 AM – 7:00 PM IST</p>
             </div>
           </div>
 
           {/* Shop */}
           <div className="space-y-3">
             <h3 className="text-xs font-bold uppercase tracking-widest text-brand-200">Shop Collections</h3>
-            <ul className="space-y-2 text-xs text-ink-faint">
+            <ul className="space-y-2 text-xs text-white/80">
               <li>
                 <Link href="/shop" className="hover:text-white transition-colors">
                   All Workbags (6)
@@ -124,7 +124,7 @@ export const Footer: React.FC = () => {
           {/* Contact Us */}
           <div className="space-y-3">
             <h3 className="text-xs font-bold uppercase tracking-widest text-brand-200">Contact Us</h3>
-            <ul className="space-y-2 text-xs text-ink-faint">
+            <ul className="space-y-2 text-xs text-white/80">
               <li>
                 <Link href="/contact" className="hover:text-white transition-colors">
                   Contact Us
@@ -166,7 +166,7 @@ export const Footer: React.FC = () => {
           {/* Newsletter Subscription */}
           <div className="space-y-3">
             <h3 className="text-xs font-bold uppercase tracking-widest text-brand-200">Zimor Insiders</h3>
-            <p className="text-xs text-ink-faint leading-relaxed">
+            <p className="text-xs text-white/80 leading-relaxed">
               Subscribe to receive 10% off your first order and exclusive access to limited-edition drops.
             </p>
 
@@ -184,12 +184,12 @@ export const Footer: React.FC = () => {
                     placeholder="Enter your email address"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-canvas-darkSurface text-xs text-white border border-line-dark px-3 py-2.5 rounded focus:outline-none focus:border-brand-400 placeholder:text-ink-faint transition-colors"
+                    className="w-full bg-canvas-darkSurface text-xs text-white border border-line-dark px-3 py-2.5 rounded focus:outline-none focus:border-brand-400 placeholder:text-white/80 transition-colors"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="w-full bg-brand-500 hover:bg-brand-600 text-white font-sans text-xs sm:text-sm font-medium py-2.5 px-4 rounded tracking-normal transition-colors"
+                  className="w-full bg-black hover:bg-ink-secondary text-white border border-line-dark font-primary text-xs sm:text-sm font-medium py-2.5 px-4 rounded tracking-normal transition-colors"
                 >
                   Join Insiders
                 </button>
@@ -199,7 +199,7 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-12 pt-8 border-t border-line-dark flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-ink-faint">
+        <div className="mt-12 pt-8 border-t border-line-dark flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/80">
           <p>© 2026 Zimor India. All rights reserved. Thoughtfully Designed & Crafted in India.</p>
           <div className="flex items-center gap-4 text-[11px]">
             <span>100% Encrypted Payments</span>
