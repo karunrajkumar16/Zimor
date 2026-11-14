@@ -1,17 +1,22 @@
 # Dependencies
-/node_modules
-/.pnp
+node_modules
+*/node_modules
+.pnp
 .pnp.js
 
 # Testing
-/coverage
+coverage
+*/coverage
 
-# Next.js
-/.next/
-/out/
-
-# Production
-/build
+# Next.js & Builds
+.next/
+*/.next/
+out/
+*/out/
+build/
+*/build/
+dist/
+*/dist/
 
 # Misc
 .DS_Store
@@ -20,6 +25,7 @@
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+*/next-env.d.ts
 
 # Vercel
 .vercel
@@ -27,8 +33,10 @@ next-env.d.ts
 # Environment variables
 .env*.local
 .env
+*/.env*.local
+*/.env
 
 # Agent artifacts
-/.agents
-/.taste-skill
-/shots
+.agents
+.taste-skill
+shots
