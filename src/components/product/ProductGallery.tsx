@@ -14,6 +14,7 @@ export const ProductGallery: React.FC<ProductGalleryProps> = ({ images, productN
   const [activeIndex, setActiveIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [zoomStyle, setZoomStyle] = useState({ display: 'none', backgroundPosition: '0% 0%' });
+  const rectRef = React.useRef<DOMRect | null>(null);
 
   const activeImage = images[activeIndex] || images[0];
 
@@ -25,8 +26,15 @@ export const ProductGallery: React.FC<ProductGalleryProps> = ({ images, productN
     setActiveIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
+  const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    rectRef.current = e.currentTarget.getBoundingClientRect();
+  };
+
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    if (!rectRef.current) {
+      rectRef.current = e.currentTarget.getBoundingClientRect();
+    }
+    const { left, top, width, height } = rectRef.current;
     const x = ((e.clientX - left) / width) * 100;
     const y = ((e.clientY - top) / height) * 100;
     setZoomStyle({
@@ -36,6 +44,7 @@ export const ProductGallery: React.FC<ProductGalleryProps> = ({ images, productN
   };
 
   const handleMouseLeave = () => {
+    rectRef.current = null;
     setZoomStyle({ display: 'none', backgroundPosition: '0% 0%' });
   };
 
@@ -70,6 +79,7 @@ export const ProductGallery: React.FC<ProductGalleryProps> = ({ images, productN
         {/* Main image with zoom effect */}
         <div
           className="relative w-full h-full cursor-zoom-in"
+          onMouseEnter={handleMouseEnter}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
           onClick={() => setIsLightboxOpen(true)}

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Heart } from 'lucide-react';
+import { Heart, Eye } from 'lucide-react';
 import { Product } from '@/types';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
@@ -15,7 +15,7 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({
   product,
-  onQuickView: _onQuickView,
+  onQuickView,
 }) => {
   const { addItem } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
@@ -111,34 +111,53 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           />
         </button>
 
-        {/* Bottom Right: White Floating Circular Quick-Add Button with Bag+ Icon */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            addItem(product, 1);
-          }}
-          className="absolute bottom-3 right-3 sm:bottom-3.5 sm:right-3.5 z-10 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.1)] flex items-center justify-center text-ink hover:scale-110 active:scale-95 transition-all group/btn"
-          aria-label={`Add ${product.name} to bag`}
-          title="Quick add to bag"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-ink group-hover/btn:text-[#BA3C3C] transition-colors"
+        {/* Bottom Right: Quick Actions */}
+        <div className="absolute bottom-3 right-3 sm:bottom-3.5 sm:right-3.5 z-10 flex items-center gap-1.5">
+          {onQuickView && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onQuickView(product);
+              }}
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.1)] hidden sm:flex items-center justify-center text-ink hover:scale-110 active:scale-95 transition-all opacity-0 group-hover:opacity-100"
+              aria-label={`Quick view ${product.name}`}
+              title="Quick view"
+            >
+              <Eye className="w-4 h-4 text-ink" />
+            </button>
+          )}
+
+          {/* White Floating Circular Quick-Add Button with Bag+ Icon */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              addItem(product, 1);
+            }}
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.1)] flex items-center justify-center text-ink hover:scale-110 active:scale-95 transition-all group/btn"
+            aria-label={`Add ${product.name} to bag`}
+            title="Quick add to bag"
           >
-            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h7" />
-            <path d="M3 6h18" />
-            <path d="M16 10a4 4 0 0 1-8 0" />
-            <line x1="19" y1="13" x2="19" y2="21" />
-            <line x1="15" y1="17" x2="23" y2="17" />
-          </svg>
-        </button>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-ink group-hover/btn:text-[#BA3C3C] transition-colors"
+            >
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h7" />
+              <path d="M3 6h18" />
+              <path d="M16 10a4 4 0 0 1-8 0" />
+              <line x1="19" y1="13" x2="19" y2="21" />
+              <line x1="15" y1="17" x2="23" y2="17" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* Details Container below Image Container */}

@@ -77,31 +77,32 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const addItem = (product: Product, quantity = 1, color?: string, size?: string) => {
     const selectedColor = color || product.defaultColor || product.colors[0]?.name || 'Standard';
     const selectedSize = size || product.sizes[0] || 'Standard';
-    const existingIndex = items.findIndex(
-      (item) =>
-        item.productId === product.id &&
-        item.selectedColor === selectedColor &&
-        item.selectedSize === selectedSize
-    );
 
-    if (existingIndex > -1) {
-      setItems((prev) => {
-        const next = [...prev];
-        next[existingIndex].quantity += quantity;
-        return next;
-      });
-    } else {
-      const newItem: CartItem = {
-        id: `${product.id}-${selectedColor}-${Date.now()}`,
-        productId: product.id,
-        product,
-        quantity,
-        selectedColor,
-        selectedSize,
-        isGiftWrapped: false,
-      };
-      setItems((prev) => [...prev, newItem]);
-    }
+    setItems((prev) => {
+      const idx = prev.findIndex(
+        (item) =>
+          item.productId === product.id &&
+          item.selectedColor === selectedColor &&
+          item.selectedSize === selectedSize
+      );
+      if (idx > -1) {
+        return prev.map((item, i) =>
+          i === idx ? { ...item, quantity: item.quantity + quantity } : item
+        );
+      }
+      return [
+        ...prev,
+        {
+          id: `${product.id}-${selectedColor}-${Date.now()}`,
+          productId: product.id,
+          product,
+          quantity,
+          selectedColor,
+          selectedSize,
+          isGiftWrapped: false,
+        },
+      ];
+    });
     setIsCartDrawerOpen(true);
   };
 
