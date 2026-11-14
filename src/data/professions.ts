@@ -1,0 +1,111 @@
+import { Profession } from '@/types';
+
+export const PROFESSIONS: Profession[] = [
+  {
+    id: 'corporate-executive',
+    name: 'Corporate & Executive',
+    title: 'The Executive Suite',
+    tagline: 'Command the Boardroom with Quiet Authority',
+    description: 'Engineered for women leading enterprises and steering major client engagements. Structured silhouettes that stand upright beside conference desks, safeguarding 15.6" laptops, quarterly decks, and contracts in bespoke compartments.',
+    recommendedBagSlugs: ['zimor-delo-tote', 'zimor-delo-tote-noir'],
+    essentialsCarried: [
+      '15.6" ThinkPad or MacBook Pro',
+      'Leather Presentation Folder & Decks',
+      'Matching Zimor Wristlet for Lunches',
+      'Dual Smartphone & Charging Hub',
+      'Montblanc Pen & Business Cards',
+    ],
+    image: '/brandgirl3.webp',
+    badge: 'Executive Presence',
+  },
+  {
+    id: 'tech-founder',
+    name: 'Tech & Product',
+    title: 'The Tech Innovator',
+    tagline: 'Dual-Carry Agility from Standups to Investor Pitches',
+    description: 'Designed for product architects, founders, and engineers carrying high-performance laptops and multi-cable setups. The dual-carry system allows instant transition from bicycle commutes to tech conferences.',
+    recommendedBagSlugs: ['zimor-rabota-tote', 'zimor-rabota-tote-espresso'],
+    essentialsCarried: [
+      '15" Work Laptop & MagSafe Cable',
+      'Wireless Mouse & USB-C Multi-Hub',
+      'Noise-Cancelling Headphones',
+      'Insulated Steel Water Bottle',
+      'Tech Accessories Zip Pouch',
+    ],
+    image: '/products/rabota-1.jpg',
+    badge: 'Agile & Functional',
+  },
+  {
+    id: 'consultant',
+    name: 'Consulting & Strategy',
+    title: 'The Strategy Partner',
+    tagline: 'Airport-to-Client Agility for Big 4 & Boutique Strategists',
+    description: 'Built for frequent flyers and management consultants living out of client offices. Endures rigorous weekly flights, cab transfers, and boardroom marathons without losing its pristine structural integrity.',
+    recommendedBagSlugs: ['zimor-rabota-tote', 'zimor-delo-tote'],
+    essentialsCarried: [
+      'Laptop & Universal Travel Adapter',
+      'Boarding Pass & Passport Pocket',
+      'Noise-Canceling Earbuds',
+      'Notebook, Pen Slots & Highlighter',
+      'Emergency Cosmetic Touch-up Pouch',
+    ],
+    image: '/products/delo-4.jpg',
+    badge: 'Commute-Ready',
+  },
+  {
+    id: 'legal-finance',
+    name: 'Legal & Private Equity',
+    title: 'The Counsel & Banker',
+    tagline: 'Uncompromising Rigor for Courtrooms & Capital Markets',
+    description: 'Crafted for corporate attorneys, partners, and investment bankers who require discreet luxury, structured legal dossier storage, and superior faux leather that withstands daily heavy loads.',
+    recommendedBagSlugs: ['zimor-delo-tote-noir', 'zimor-delo-tote'],
+    essentialsCarried: [
+      'Heavy Legal Case Briefs & Red-lines',
+      'Encrypted Firm Laptop (up to 15.6")',
+      'Financial Calculator & Tablet',
+      'Key Tether & Card Wallet',
+      'Firm Security Token & Fob',
+    ],
+    image: '/products/delo-2.jpg',
+    badge: 'Discreet Luxury',
+  },
+  {
+    id: 'creative-director',
+    name: 'Creative & Design',
+    title: 'The Visual Architect',
+    tagline: 'Sculptural Lines for Creative Directors & Curators',
+    description: 'For art directors, architects, and studio founders whose personal style is an extension of their aesthetic judgment. Elegant crescent silhouettes and warm leather tones that transition seamlessly to gallery vernissages.',
+    recommendedBagSlugs: ['zimor-classic-shoulder-bag', 'zimor-classic-shoulder-bag-tan'],
+    essentialsCarried: [
+      'iPad Pro + Apple Pencil',
+      'Moleskine Grid Sketchbook',
+      'Pantone Swatch Cards',
+      'Compact Sunglasses & Cardholder',
+      'Lip Balm & Pocket Perfume',
+    ],
+    image: '/brandgirl2.webp',
+    badge: 'Editorial Chic',
+  },
+  {
+    id: 'academic-doctor',
+    name: 'Healthcare & Academia',
+    title: 'The Clinician & Scholar',
+    tagline: 'Reliable Everyday Luxury for Clinical Rounds & Seminars',
+    description: 'Tailored for doctors, professors, and medical researchers needing lightweight durability, easy-clean wipeable surfaces, and dependable compartments between hospital rounds and faculty symposiums.',
+    recommendedBagSlugs: ['zimor-classic-shoulder-bag-tan', 'zimor-rabota-tote-espresso'],
+    essentialsCarried: [
+      'Digital Tablet / Kindle Reader',
+      'Stethoscope Pouch & Daily Journal',
+      'Hospital ID Badge & Sanitizer',
+      'Prescription Pad & Rollerball Pen',
+      'Reading Glasses & Case',
+    ],
+    image: '/brandgitl.jpeg',
+    badge: 'Durable & Easy-Care',
+  },
+];
+
+export function getProfessionById(id: string): Profession | undefined {
+  return PROFESSIONS.find((p) => p.id === id);
+}
+
