@@ -34,7 +34,7 @@ const INDIAN_STATES = [
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, subtotal, discount, giftWrapFee, total, clearCart, appliedPromo } = useCart();
+  const { items, subtotal, discount, total, clearCart, appliedPromo } = useCart();
   const { user, createOrder } = useAuth();
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -104,7 +104,6 @@ export default function CheckoutPage() {
       subtotal,
       discount,
       shippingFee: shippingCharge,
-      giftWrapFee,
       total: finalTotal,
     };
 
@@ -584,12 +583,6 @@ export default function CheckoutPage() {
                 <div className="flex justify-between text-emerald-700 font-medium">
                   <span>Promo Discount ({appliedPromo})</span>
                   <span>-₹{discount.toLocaleString('en-IN')}</span>
-                </div>
-              )}
-              {giftWrapFee > 0 && (
-                <div className="flex justify-between text-brand-800">
-                  <span>Gift Box & Card</span>
-                  <span>₹{giftWrapFee.toLocaleString('en-IN')}</span>
                 </div>
               )}
               <div className="flex justify-between">

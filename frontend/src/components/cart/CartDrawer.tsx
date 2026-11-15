@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { X, Trash2, Plus, Minus, ShoppingBag, Gift, ArrowRight, Check } from 'lucide-react';
+import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight, Check } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 
 export const CartDrawer: React.FC = () => {
@@ -13,10 +13,8 @@ export const CartDrawer: React.FC = () => {
     closeCartDrawer,
     removeItem,
     updateQuantity,
-    toggleGiftWrap,
     subtotal,
     discount,
-    giftWrapFee,
     total,
     appliedPromo,
     promoError,
@@ -25,8 +23,6 @@ export const CartDrawer: React.FC = () => {
   } = useCart();
 
   const [promoInput, setPromoInput] = useState('');
-  const [editingGiftId, setEditingGiftId] = useState<string | null>(null);
-  const [giftNoteInput, setGiftNoteInput] = useState('');
 
   if (!isCartDrawerOpen) return null;
 
@@ -36,12 +32,6 @@ export const CartDrawer: React.FC = () => {
       applyPromoCode(promoInput);
       setPromoInput('');
     }
-  };
-
-  const handleSaveGiftMessage = (itemId: string) => {
-    toggleGiftWrap(itemId, giftNoteInput);
-    setEditingGiftId(null);
-    setGiftNoteInput('');
   };
 
   return (
@@ -175,70 +165,6 @@ export const CartDrawer: React.FC = () => {
                       </div>
                     </div>
                   </div>
-
-                  {/* Gift Wrap Option */}
-                  <div className="pt-2 border-t border-line/60 flex items-center justify-between text-[11px]">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (item.isGiftWrapped) {
-                          toggleGiftWrap(item.id);
-                        } else {
-                          setEditingGiftId(item.id);
-                          setGiftNoteInput(item.giftMessage || '');
-                        }
-                      }}
-                      className="inline-flex items-center gap-1.5 text-brand-700 hover:text-brand-900 font-medium"
-                    >
-                      <Gift className="w-3.5 h-3.5" />
-                      <span>{item.isGiftWrapped ? '✓ Gift Box Added (₹149)' : '+ Add Signature Gift Box'}</span>
-                    </button>
-
-                    {item.isGiftWrapped && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditingGiftId(item.id);
-                          setGiftNoteInput(item.giftMessage || '');
-                        }}
-                        className="text-[10px] text-ink-muted underline"
-                      >
-                        {item.giftMessage ? 'Edit Note' : '+ Add Note'}
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Gift Message Input modal/form */}
-                  {editingGiftId === item.id && (
-                    <div className="mt-2 p-2 bg-canvas-card border border-brand-200 rounded space-y-2">
-                      <p className="text-[11px] font-medium text-brand-900">
-                        Include a handwritten gift card message:
-                      </p>
-                      <textarea
-                        rows={2}
-                        value={giftNoteInput}
-                        onChange={(e) => setGiftNoteInput(e.target.value)}
-                        placeholder="e.g. Happy Promotion Ananya! Proud of you, love Rohan."
-                        className="w-full text-xs p-2 border border-line bg-canvas rounded focus:outline-none focus:border-brand-500"
-                      />
-                      <div className="flex justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setEditingGiftId(null)}
-                          className="text-[10px] text-ink-muted px-2 py-1"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleSaveGiftMessage(item.id)}
-                          className="text-[10px] bg-ink hover:bg-ink-secondary text-white font-medium px-3 py-1 rounded transition-colors"
-                        >
-                          Save Gift Box
-                        </button>
-                      </div>
-                    </div>
-                  )}
                 </div>
               ))
             )}
@@ -293,12 +219,6 @@ export const CartDrawer: React.FC = () => {
                   <div className="flex justify-between text-emerald-700 font-medium">
                     <span>Discount ({appliedPromo})</span>
                     <span>-₹{discount.toLocaleString('en-IN')}</span>
-                  </div>
-                )}
-                {giftWrapFee > 0 && (
-                  <div className="flex justify-between text-brand-800">
-                    <span>Luxury Gift Packaging</span>
-                    <span>₹{giftWrapFee.toLocaleString('en-IN')}</span>
                   </div>
                 )}
                 <div className="flex justify-between">

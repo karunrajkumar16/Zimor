@@ -8,10 +8,10 @@
    Secondary Typeface: DM Sans (Regular 400, Bold 700)
    ========================================================================= */
 
-/* Akzidenz Grotesk local font definitions (loaded from /fonts/ when files are added) */
+/* Akzidenz Grotesk system & local font declaration (uses locally installed or system neo-grotesque fallbacks until licensed .woff2 files are supplied) */
 @font-face {
   font-family: 'Akzidenz Grotesk';
-  src: url('/fonts/AkzidenzGrotesk-Regular.woff2') format('woff2');
+  src: local('Akzidenz Grotesk'), local('Akzidenz-Grotesk'), local('AkzidenzGrotesk');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -19,7 +19,7 @@
 
 @font-face {
   font-family: 'Akzidenz Grotesk';
-  src: url('/fonts/AkzidenzGrotesk-Medium.woff2') format('woff2');
+  src: local('Akzidenz Grotesk Medium'), local('Akzidenz-Grotesk-Medium'), local('AkzidenzGrotesk-Medium');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -27,7 +27,7 @@
 
 @font-face {
   font-family: 'Akzidenz Grotesk';
-  src: url('/fonts/AkzidenzGrotesk-Semibold.woff2') format('woff2');
+  src: local('Akzidenz Grotesk Semibold'), local('Akzidenz-Grotesk-Semibold'), local('AkzidenzGrotesk-Semibold');
   font-weight: 600;
   font-style: normal;
   font-display: swap;

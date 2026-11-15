@@ -39,4 +39,5 @@ next-env.d.ts
 # Agent artifacts
 .agents
 .taste-skill
+skills-lock.json
 shots

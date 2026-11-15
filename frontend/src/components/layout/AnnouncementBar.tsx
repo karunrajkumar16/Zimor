@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Truck, ShieldCheck, RefreshCw, Gift } from 'lucide-react';
+import { Truck, ShieldCheck, RefreshCw } from 'lucide-react';
 
 const MESSAGES = [
   { text: 'Free Express Shipping Across India — No Minimum Order', icon: Truck },
   { text: 'Cash on Delivery Available Across 19,000+ Pin Codes', icon: ShieldCheck },
   { text: '7-Day Easy Returns — Shop with Complete Confidence', icon: RefreshCw },
-  { text: 'Complimentary Luxury Gift Box with Every Order', icon: Gift },
+  { text: '6-Month Warranty on All Handcrafted Products', icon: ShieldCheck },
 ];
 
 export const AnnouncementBar: React.FC = () => {
@@ -40,8 +40,8 @@ export const AnnouncementBar: React.FC = () => {
         </div>
 
         <div className="hidden md:flex items-center gap-4 text-[11px] text-brand-200">
-          <Link href="/gifting" className="hover:text-white transition-colors">
-            Gift Concierge
+          <Link href="/contact" className="hover:text-white transition-colors">
+            Contact Us
           </Link>
           <span>•</span>
           <Link href="/faq" className="hover:text-white transition-colors">

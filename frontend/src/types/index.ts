@@ -46,6 +46,7 @@ export interface Product {
   sizes: string[];
   stock: number;
   isFeatured: boolean;
+  isComingSoon?: boolean;
   averageRating: number;
   numReviews: number;
   images: ProductImage[];
@@ -57,22 +58,20 @@ export interface Product {
     height: string;
     width: string;
     strapDrop: string;
-    weight: string;
+    weight?: string;
   };
   suitableProfessions: string[];
-  giftingOccasions: string[];
   laptopCompatibility: string;
-}
-
-export interface GiftingOccasion {
-  id: string;
-  title: string;
-  subtitle: string;
-  description: string;
-  recommendedSlugs: string[];
-  image: string;
-  giftBoxIncluded: boolean;
-  idealFor: string;
+  whyYoullLoveIt?: string;
+  strap?: string;
+  netQuantity?: string;
+  shippingPolicy?: string[];
+  returnPolicy?: string[];
+  moreInformation?: {
+    importedAndMarketedBy?: string;
+    customerCare?: string;
+    countryOfOrigin?: string;
+  };
 }
 
 export interface CartItem {
@@ -82,8 +81,6 @@ export interface CartItem {
   quantity: number;
   selectedColor: string;
   selectedSize: string;
-  isGiftWrapped?: boolean;
-  giftMessage?: string;
 }
 
 export interface Order {
@@ -114,7 +111,6 @@ export interface Order {
   subtotal: number;
   discount: number;
   shippingFee: number;
-  giftWrapFee: number;
   total: number;
   status: 'Processing' | 'Confirmed' | 'Dispatched' | 'Out for Delivery' | 'Delivered';
   trackingNumber: string;

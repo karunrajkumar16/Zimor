@@ -129,6 +129,22 @@ export const Header: React.FC = () => {
     }
   };
 
+  const handleAboutSectionClick = (sectionId: string, e?: React.MouseEvent) => {
+    setIsAboutHovered(false);
+    if (pathname === '/about') {
+      if (e) e.preventDefault();
+      const el = document.getElementById(sectionId);
+      if (el) {
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.offsetHeight : 70;
+        const targetScroll = el.getBoundingClientRect().top + window.scrollY - headerHeight - 16;
+        window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+        window.history.pushState(null, '', `/about#${sectionId}`);
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
+      }
+    }
+  };
+
   const isTransparent = isHome && !isScrolled;
 
   const filteredSearch = searchQuery.trim()
@@ -258,13 +274,6 @@ export const Header: React.FC = () => {
                               >
                                 Essentials
                               </Link>
-                              <Link
-                                href="/gifting"
-                                onClick={() => setIsShopHovered(false)}
-                                className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
-                              >
-                                Gift
-                              </Link>
                             </div>
                           </div>
                         </div>
@@ -335,29 +344,46 @@ export const Header: React.FC = () => {
                   </Link>
 
                   {isAboutHovered && (
-                    <div className="absolute top-full left-0 w-56 pt-2 z-50">
+                    <div className="absolute top-full left-0 w-64 pt-2 z-50">
                       <div className="bg-white border border-line shadow-lift p-5 rounded-xs text-ink animate-in fade-in-50 duration-150">
                         <p className="font-primary font-semibold text-[11px] uppercase tracking-[0.1em] text-ink-muted/80 mb-2.5">
                           OUR ATELIER
                         </p>
                         <div className="space-y-1 text-left normal-case">
                           <Link
-                            href="/about"
+                            href="/about#brand-overview"
+                            onClick={(e) => handleAboutSectionClick('brand-overview', e)}
                             className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
                           >
-                            Our Story &amp; Heritage
+                            Brand Overview
                           </Link>
                           <Link
-                            href="/about#craft"
+                            href="/about#brand-philosophy"
+                            onClick={(e) => handleAboutSectionClick('brand-philosophy', e)}
                             className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
                           >
-                            Cruelty-Free Craft
+                            Brand Philosophy
                           </Link>
                           <Link
-                            href="/about#reviews"
+                            href="/about#brand-story"
+                            onClick={(e) => handleAboutSectionClick('brand-story', e)}
                             className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
                           >
-                            Verified Client Reviews
+                            Brand Story
+                          </Link>
+                          <Link
+                            href="/about#brand-vision-mission"
+                            onClick={(e) => handleAboutSectionClick('brand-vision-mission', e)}
+                            className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
+                          >
+                            Brand Vision and Mission
+                          </Link>
+                          <Link
+                            href="/about#brand-values"
+                            onClick={(e) => handleAboutSectionClick('brand-values', e)}
+                            className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
+                          >
+                            Brand Values
                           </Link>
                         </div>
                       </div>

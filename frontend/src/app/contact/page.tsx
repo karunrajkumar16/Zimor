@@ -51,7 +51,7 @@ export default function ContactPage() {
             Get in Touch with Zimor
           </h1>
           <p className="text-xs sm:text-sm text-ink-secondary leading-relaxed">
-            Have questions about laptop compatibility, leather care, order status, or corporate gifting? Our support team is at your service.
+            Have questions about laptop compatibility, leather care, order status, or bulk orders? Our support team is at your service.
           </p>
         </div>
 
@@ -200,7 +200,7 @@ export default function ContactPage() {
                       <option value="Order & Shipping Inquiry">Order & Shipping Status</option>
                       <option value="Product Sizing & Laptop Fit">Product Sizing & Laptop Compatibility</option>
                       <option value="Returns & Exchange Request">7-Day Return / Exchange Request</option>
-                      <option value="Corporate Gifting & Bulk Orders">Corporate & Executive Gifting</option>
+                      <option value="Corporate & Bulk Orders">Corporate & Bulk Orders</option>
                       <option value="Other Inquiries">Other Feedback / Questions</option>
                     </select>
                   </div>

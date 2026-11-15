@@ -106,24 +106,14 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
       ],
     },
     {
-      id: 'gifting',
-      label: 'Gifts & Occasions',
-      badge: 'Gift Box',
-      subItems: [
-        { label: 'Explore Curated Gifting Guide', href: '/gifting', isFeatured: true },
-        { label: 'Promotion & Milestone Carry', href: '/gifting' },
-        { label: 'Corporate Appreciation Sets', href: '/gifting' },
-        { label: 'Festive & Personal Celebrations', href: '/gifting' },
-      ],
-    },
-    {
       id: 'about',
       label: 'About Zimor',
       subItems: [
-        { label: 'Our Story & Brand Philosophy', href: '/about', isFeatured: true },
-        { label: 'Materials & Craftsmanship Standards', href: '/about' },
-        { label: 'Frequently Asked Questions (FAQ)', href: '/faq' },
-        { label: 'Get in Touch with Concierge', href: '/contact' },
+        { label: 'Brand Overview', href: '/about#brand-overview', isFeatured: true },
+        { label: 'Brand Philosophy', href: '/about#brand-philosophy' },
+        { label: 'Brand Story', href: '/about#brand-story' },
+        { label: 'Brand Vision and Mission', href: '/about#brand-vision-mission' },
+        { label: 'Brand Values', href: '/about#brand-values' },
       ],
     },
     {
@@ -131,9 +121,9 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
       label: 'Customer Care',
       subItems: [
         { label: 'Track Your Order', href: '/account/orders', isFeatured: true },
-        { label: 'Shipping & Delivery Timelines', href: '/policies/shipping' },
-        { label: '7-Day Easy Returns & Exchange', href: '/policies/returns' },
-        { label: 'Privacy Policy & Terms', href: '/policies/privacy' },
+        { label: 'Policy & Customer Guidelines', href: '/policy' },
+        { label: 'Frequently Asked Questions (FAQ)', href: '/faq' },
+        { label: 'Client Concierge & Support', href: '/contact' },
       ],
     },
   ];

@@ -135,12 +135,6 @@ function SuccessContent() {
                   <span>-₹{currentOrder.discount.toLocaleString('en-IN')}</span>
                 </div>
               )}
-              {currentOrder.giftWrapFee > 0 && (
-                <div className="flex justify-between text-brand-800">
-                  <span>Gift Box & Card</span>
-                  <span>₹{currentOrder.giftWrapFee.toLocaleString('en-IN')}</span>
-                </div>
-              )}
               <div className="flex justify-between">
                 <span>Shipping</span>
                 <span className="text-emerald-700 font-semibold">FREE</span>

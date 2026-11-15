@@ -14,13 +14,14 @@ import {
   Check,
 } from 'lucide-react';
 import { Product, CustomerReview } from '@/types';
-import { getRelatedProducts } from '@/data/products';
+import { PRODUCTS } from '@/data/products';
 import { getReviewsForProduct } from '@/data/reviews';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import dynamic from 'next/dynamic';
 import { ProductGallery } from '@/components/product/ProductGallery';
 import { ProductCard } from '@/components/product/ProductCard';
+import { FAQAccordion } from '@/components/faq/FAQAccordion';
 
 const ReviewModal = dynamic(
   () => import('@/components/product/ReviewModal'),
@@ -35,7 +36,13 @@ export function ProductDetailView({ product }: { product: Product }) {
   const [selectedColor, setSelectedColor] = useState<string>(product.defaultColor);
   const selectedSize = product.sizes[0];
   const quantity = 1;
-  const [activeAccordion, setActiveAccordion] = useState<string | null>('love');
+  const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({
+    love: true,
+    dimensions: false,
+    shipping: false,
+    more: false,
+    faq: false,
+  });
   const [reviewsList, setReviewsList] = useState<CustomerReview[]>(getReviewsForProduct(product.slug));
   const [selectedReview, setSelectedReview] = useState<CustomerReview | null>(null);
   const [isWriteReviewOpen, setIsWriteReviewOpen] = useState(false);
@@ -49,7 +56,14 @@ export function ProductDetailView({ product }: { product: Product }) {
   const buyBoxRef = useRef<HTMLDivElement | null>(null);
 
   const inWishlist = isInWishlist(product.id);
-  const relatedProducts = useMemo(() => getRelatedProducts(product, 3), [product]);
+  const youMayAlsoLike = useMemo(
+    () => PRODUCTS.filter((p) => p.slug !== product.slug).slice(0, 3),
+    [product]
+  );
+  const recentlyViewed = useMemo(
+    () => PRODUCTS.filter((p) => p.slug !== product.slug).slice(3, 6),
+    [product]
+  );
 
   const discountPercent = Math.round(
     ((product.compareAtPrice - product.price) / product.compareAtPrice) * 100
@@ -89,7 +103,7 @@ export function ProductDetailView({ product }: { product: Product }) {
   };
 
   const toggleAccordion = (id: string) => {
-    setActiveAccordion(activeAccordion === id ? null : id);
+    setOpenAccordions((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   const handleCheckPincode = (e: React.FormEvent) => {
@@ -128,7 +142,7 @@ export function ProductDetailView({ product }: { product: Product }) {
   };
 
   return (
-    <div className="bg-white min-h-screen py-4 sm:py-8">
+    <div className="bg-white min-h-screen py-4 sm:py-8 pb-24 lg:pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* ============================================================ */}
         {/* Breadcrumb Navigation                                       */}
@@ -150,14 +164,14 @@ export function ProductDetailView({ product }: { product: Product }) {
         {/* Left: 2-Column Multi-Image Grid                              */}
         {/* Right: Sticky Buy Box, Features & Line Accordions            */}
         {/* ============================================================ */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-start relative z-0">
           {/* Left Column: Seamless 2-Column Product Gallery */}
           <div className="lg:col-span-7">
-            <ProductGallery images={product.images} productName={product.name} />
+            <ProductGallery images={product.images} productName={product.name} isComingSoon={product.isComingSoon} />
           </div>
 
-          {/* Right Column: Sticky Product Information & Actions (Pinned at Header) */}
-          <div className="lg:col-span-5 lg:sticky lg:top-20 space-y-4 lg:max-h-[calc(100vh-5.5rem)] lg:overflow-y-auto scrollbar-none no-scrollbar pr-1">
+          {/* Right Column: Product Information & Accordions (Natural Crawl — Zero Clipping) */}
+          <div className="lg:col-span-5 space-y-4">
             {/* Header: Title, Rating & Pricing */}
             <div className="space-y-1.5 pb-2">
               <div className="flex items-center justify-between text-xs text-ink-muted">
@@ -193,9 +207,15 @@ export function ProductDetailView({ product }: { product: Product }) {
                 <span className="text-sm text-ink-muted line-through">
                   ₹{product.compareAtPrice.toLocaleString('en-IN')}
                 </span>
-                <span className="text-xs font-semibold text-zimor-orange">
-                  ({discountPercent}% OFF)
-                </span>
+                {product.isComingSoon ? (
+                  <span className="text-xs font-semibold text-zimor-orange uppercase tracking-wider">
+                    (COMING SOON)
+                  </span>
+                ) : (
+                  <span className="text-xs font-semibold text-zimor-orange">
+                    ({discountPercent}% OFF)
+                  </span>
+                )}
               </div>
               <p className="text-[11px] text-ink-muted">
                 Inclusive of all taxes. Free express shipping across India.
@@ -243,45 +263,89 @@ export function ProductDetailView({ product }: { product: Product }) {
               </div>
             </div>
 
-            {/* Primary Action Row: Wishlist Heart + ADD TO CART Button (Benchmark Screenshot 1) */}
+            {/* Primary Action Row: Wishlist Heart + ADD TO CART / COMING SOON Button */}
             <div ref={buyBoxRef} className="pt-2 space-y-2.5">
-              <div className="flex items-center gap-2.5">
-                {/* Wishlist Button: Clean square border with heart */}
-                <button
-                  type="button"
-                  onClick={() => toggleWishlist(product.id)}
-                  className={`w-12 h-12 shrink-0 border flex items-center justify-center transition-colors ${inWishlist
-                    ? 'border-black text-zimor-orange'
-                    : 'border-line text-ink hover:border-black'
-                    }`}
-                  aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
-                >
-                  <Heart className={`w-5 h-5 ${inWishlist ? 'fill-zimor-orange' : ''}`} />
-                </button>
+              {product.isComingSoon ? (
+                <>
+                  <div className="flex items-center gap-2.5">
+                    {/* Wishlist Button: Clean square border with heart */}
+                    <button
+                      type="button"
+                      onClick={() => toggleWishlist(product.id)}
+                      className={`w-12 h-12 shrink-0 border flex items-center justify-center transition-colors ${inWishlist
+                        ? 'border-black text-zimor-orange'
+                        : 'border-line text-ink hover:border-black'
+                        }`}
+                      aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+                    >
+                      <Heart className={`w-5 h-5 ${inWishlist ? 'fill-zimor-orange' : ''}`} />
+                    </button>
 
-                {/* Primary ADD TO CART Button: Full-width Solid Black */}
-                <button
-                  type="button"
-                  onClick={handleAddToCart}
-                  className="flex-1 h-12 bg-black hover:bg-ink-secondary text-white font-medium text-xs sm:text-sm tracking-wider uppercase flex items-center justify-center transition-colors active:scale-[0.99]"
-                >
-                  ADD TO CART
-                </button>
-              </div>
+                    <button
+                      type="button"
+                      disabled
+                      className="flex-1 h-12 bg-zimor-ash/20 text-ink-muted font-medium text-xs sm:text-sm tracking-wider uppercase flex items-center justify-center cursor-not-allowed border border-line"
+                    >
+                      COMING SOON
+                    </button>
+                  </div>
 
-              {/* Instant Buy Now Direct Button */}
-              <button
-                type="button"
-                onClick={handleBuyNow}
-                className="w-full h-11 bg-canvas-card border border-line hover:bg-zimor-cream/20 text-ink font-medium text-xs sm:text-sm tracking-wider uppercase flex items-center justify-center transition-colors"
-              >
-                Instant Buy Now
-              </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      toggleWishlist(product.id);
+                    }}
+                    className="w-full h-11 bg-black text-white hover:bg-ink-secondary font-medium text-xs sm:text-sm tracking-wider uppercase flex items-center justify-center transition-colors"
+                  >
+                    {inWishlist ? 'Saved to Wishlist' : 'Notify Me When Available'}
+                  </button>
 
-              <div className="flex items-center justify-between text-xs text-ink-muted pt-1">
-                <span>Quantity: {quantity}</span>
-                <span className="text-zimor-orange font-medium">• Only {product.stock} pieces left in stock</span>
-              </div>
+                  <div className="flex items-center justify-between text-xs text-ink-muted pt-1">
+                    <span>Exclusive Silhouette</span>
+                    <span className="text-zimor-orange font-medium">• Dropping Soon</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center gap-2.5">
+                    {/* Wishlist Button: Clean square border with heart */}
+                    <button
+                      type="button"
+                      onClick={() => toggleWishlist(product.id)}
+                      className={`w-12 h-12 shrink-0 border flex items-center justify-center transition-colors ${inWishlist
+                        ? 'border-black text-zimor-orange'
+                        : 'border-line text-ink hover:border-black'
+                        }`}
+                      aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+                    >
+                      <Heart className={`w-5 h-5 ${inWishlist ? 'fill-zimor-orange' : ''}`} />
+                    </button>
+
+                    {/* Primary ADD TO CART Button: Full-width Solid Black */}
+                    <button
+                      type="button"
+                      onClick={handleAddToCart}
+                      className="flex-1 h-12 bg-black hover:bg-ink-secondary text-white font-medium text-xs sm:text-sm tracking-wider uppercase flex items-center justify-center transition-colors active:scale-[0.99]"
+                    >
+                      ADD TO CART
+                    </button>
+                  </div>
+
+                  {/* Instant Buy Now Direct Button */}
+                  <button
+                    type="button"
+                    onClick={handleBuyNow}
+                    className="w-full h-11 bg-canvas-card border border-line hover:bg-zimor-cream/20 text-ink font-medium text-xs sm:text-sm tracking-wider uppercase flex items-center justify-center transition-colors"
+                  >
+                    Instant Buy Now
+                  </button>
+
+                  <div className="flex items-center justify-between text-xs text-ink-muted pt-1">
+                    <span>Quantity: {quantity}</span>
+                    <span className="text-zimor-orange font-medium">• Only {product.stock} pieces left in stock</span>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Delivery Details with Pincode Check (Benchmark Screenshot 1) */}
@@ -348,16 +412,18 @@ export function ProductDetailView({ product }: { product: Product }) {
                 >
                   <span className="font-medium">Why You'll Love It?</span>
                   <ChevronDown
-                    className={`w-4 h-4 text-ink-muted transition-transform duration-200 ${activeAccordion === 'love' ? 'rotate-180' : ''
+                    className={`w-4 h-4 text-ink-muted transition-transform duration-200 ${openAccordions.love ? 'rotate-180' : ''
                       }`}
                   />
                 </button>
-                {activeAccordion === 'love' && (
+                {openAccordions.love && (
                   <div className="pb-4 text-xs sm:text-[13px] text-ink-secondary leading-relaxed space-y-2">
-                    <p>{product.description}</p>
-                    <p className="font-medium text-ink pt-1">
-                      Ideal for: {product.suitableProfessions.join(', ').replace(/-/g, ' ')}.
-                    </p>
+                    <p>{product.whyYoullLoveIt || product.description}</p>
+                    {product.suitableProfessions && product.suitableProfessions.length > 0 && (
+                      <p className="font-medium text-ink pt-1">
+                        Ideal for: {product.suitableProfessions.join(', ').replace(/-/g, ' ')}.
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
@@ -371,40 +437,63 @@ export function ProductDetailView({ product }: { product: Product }) {
                 >
                   <span className="font-medium">Details & Dimensions</span>
                   <ChevronDown
-                    className={`w-4 h-4 text-ink-muted transition-transform duration-200 ${activeAccordion === 'dimensions' ? 'rotate-180' : ''
+                    className={`w-4 h-4 text-ink-muted transition-transform duration-200 ${openAccordions.dimensions ? 'rotate-180' : ''
                       }`}
                   />
                 </button>
-                {activeAccordion === 'dimensions' && (
+                {openAccordions.dimensions && (
                   <div className="pb-4 text-xs sm:text-[13px] text-ink-secondary leading-relaxed space-y-3">
-                    <div className="grid grid-cols-2 gap-y-2 gap-x-4">
-                      <div>
-                        <span className="text-ink-muted">Length: </span>
-                        <span className="font-medium text-ink">{product.dimensions.length}</span>
-                      </div>
-                      <div>
-                        <span className="text-ink-muted">Height: </span>
-                        <span className="font-medium text-ink">{product.dimensions.height}</span>
-                      </div>
-                      <div>
-                        <span className="text-ink-muted">Base Width: </span>
-                        <span className="font-medium text-ink">{product.dimensions.width}</span>
-                      </div>
-                      <div>
-                        <span className="text-ink-muted">Empty Weight: </span>
-                        <span className="font-medium text-ink">{product.dimensions.weight}</span>
+                    <div>
+                      <p className="font-medium text-ink mb-1.5 uppercase tracking-wider text-[11px]">
+                        Measurements
+                      </p>
+                      <div className="space-y-1 text-xs sm:text-[13px]">
+                        <div>
+                          <span className="text-ink-muted">Length: </span>
+                          <span className="font-medium text-ink">{product.dimensions.length}</span>
+                        </div>
+                        <div>
+                          <span className="text-ink-muted">Height: </span>
+                          <span className="font-medium text-ink">{product.dimensions.height}</span>
+                        </div>
+                        <div>
+                          <span className="text-ink-muted">Width: </span>
+                          <span className="font-medium text-ink">{product.dimensions.width}</span>
+                        </div>
+                        <div>
+                          <span className="text-ink-muted">Shoulder Strap Drop Length: </span>
+                          <span className="font-medium text-ink">{product.dimensions.strapDrop}</span>
+                        </div>
                       </div>
                     </div>
-                    <p className="text-ink-secondary text-xs">
-                      Strap Drop: {product.dimensions.strapDrop} (Engineered for fatigue-free shoulder carry).
-                    </p>
-                    <div className="pt-2 border-t border-line">
-                      <p className="font-medium text-ink mb-1">Materials & Hardware:</p>
-                      <ul className="list-disc pl-4 space-y-1 text-xs">
-                        {product.material.map((mat, idx) => (
-                          <li key={idx}>{mat}</li>
-                        ))}
-                      </ul>
+
+                    <div className="pt-2 border-t border-line space-y-2">
+                      <div>
+                        <p className="font-medium text-ink uppercase tracking-wider text-[11px] mb-0.5">
+                          Materials
+                        </p>
+                        <p className="text-xs sm:text-[13px] text-ink-secondary">
+                          {Array.isArray(product.material) ? product.material.join(', ') : product.material}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="font-medium text-ink uppercase tracking-wider text-[11px] mb-0.5">
+                          Strap
+                        </p>
+                        <p className="text-xs sm:text-[13px] text-ink-secondary">
+                          {product.strap || 'Shoulder Strap'}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="font-medium text-ink uppercase tracking-wider text-[11px] mb-0.5">
+                          Net Quantity
+                        </p>
+                        <p className="text-xs sm:text-[13px] text-ink-secondary">
+                          {product.netQuantity || '1N Bag'}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -419,41 +508,127 @@ export function ProductDetailView({ product }: { product: Product }) {
                 >
                   <span className="font-medium">Shipping & Returns</span>
                   <ChevronDown
-                    className={`w-4 h-4 text-ink-muted transition-transform duration-200 ${activeAccordion === 'shipping' ? 'rotate-180' : ''
+                    className={`w-4 h-4 text-ink-muted transition-transform duration-200 ${openAccordions.shipping ? 'rotate-180' : ''
                       }`}
                   />
                 </button>
-                {activeAccordion === 'shipping' && (
-                  <div className="pb-4 text-xs sm:text-[13px] text-ink-secondary leading-relaxed space-y-2">
-                    <p>• <strong>Free Express Shipping:</strong> Dispatched within 24 hours. Delivered in 2–4 business days across India.</p>
-                    <p>• <strong>7-Day Easy Returns:</strong> Hassle-free exchanges and returns if unworn and in original condition.</p>
-                    <p>• <strong>Cash on Delivery (COD):</strong> Available across 19,000+ Indian pincodes.</p>
-                    <p>• <strong>Complimentary Packaging:</strong> Ships in a signature dust bag with protective gift box.</p>
+                {openAccordions.shipping && (
+                  <div className="pb-4 text-xs sm:text-[13px] text-ink-secondary leading-relaxed space-y-3">
+                    <div>
+                      <p className="font-medium text-ink uppercase tracking-wider text-[11px] mb-1">
+                        Shipping Policy
+                      </p>
+                      <ul className="list-disc pl-4 space-y-1 text-xs">
+                        {(product.shippingPolicy || [
+                          'Orders are dispatched within 24–48 hours of confirmation.',
+                          'Delivery takes 2–7 business days from the order date.',
+                        ]).map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="pt-2 border-t border-line">
+                      <p className="font-medium text-ink uppercase tracking-wider text-[11px] mb-1">
+                        Return Policy
+                      </p>
+                      <ul className="list-disc pl-4 space-y-1 text-xs">
+                        {(product.returnPolicy || [
+                          'Returns, exchanges, or replacements are accepted for unused items within 7 days of delivery. (Items must have original tags, dust bags, and packaging intact.)',
+                          'Customised or promotional items are not eligible for return/exchange.',
+                          'In case of any damage, defective item, missing item, empty parcel, or any other issue, please contact us within 24 hours of delivery. Kindly share a proper unboxing video along with a few clear pictures of the bag and box from all sides.',
+                          'For any assistance, write to us at Zimorindia@gmail.com or call us at +91 89536 96928 from Monday to Saturday 10:00 am to 7:00 pm',
+                          'Pick-up and delivery will be handled by Zimor.',
+                          'For returns on Cash on Delivery orders, the refund will be credited to your bank account within 5–7 working days, as per standard banking timelines.',
+                        ]).map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 )}
               </div>
 
-              {/* Accordion 4: More Information & Care */}
+              {/* Accordion 4: More Information */}
               <div className="border-b border-line">
                 <button
                   type="button"
                   onClick={() => toggleAccordion('more')}
                   className="w-full py-4 flex items-center justify-between text-left text-xs sm:text-sm font-normal text-ink hover:text-ink-secondary transition-colors"
                 >
-                  <span className="font-medium">More Information & Care</span>
+                  <span className="font-medium">More Information</span>
                   <ChevronDown
-                    className={`w-4 h-4 text-ink-muted transition-transform duration-200 ${activeAccordion === 'more' ? 'rotate-180' : ''
+                    className={`w-4 h-4 text-ink-muted transition-transform duration-200 ${openAccordions.more ? 'rotate-180' : ''
                       }`}
                   />
                 </button>
-                {activeAccordion === 'more' && (
-                  <div className="pb-4 text-xs sm:text-[13px] text-ink-secondary leading-relaxed space-y-2">
-                    <p className="font-medium text-ink">Care Instructions:</p>
-                    <ul className="list-disc pl-4 space-y-1 text-xs">
-                      {product.careInstructions.map((inst, idx) => (
-                        <li key={idx}>{inst}</li>
-                      ))}
-                    </ul>
+                {openAccordions.more && (
+                  <div className="pb-4 text-xs sm:text-[13px] text-ink-secondary leading-relaxed space-y-3">
+                    <div>
+                      <p className="font-medium text-ink uppercase tracking-wider text-[11px] mb-0.5">
+                        Imported and Marketed by | Customer Care Address
+                      </p>
+                      <p className="text-xs text-ink-muted">
+                        {product.moreInformation?.importedAndMarketedBy ||
+                          'Miraggio Lifestyles Pvt. Ltd. Plot D6, Sushant Lok 2, Golf Course Road, Sector 56, Gurgaon, Haryana, 122001, India'}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="font-medium text-ink uppercase tracking-wider text-[11px] mb-0.5">
+                        Customer Care
+                      </p>
+                      <p className="text-xs text-ink-muted">
+                        {product.moreInformation?.customerCare ||
+                          'Reach out to us at support@miraggiolife.com or call us at +918377991911'}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="font-medium text-ink uppercase tracking-wider text-[11px] mb-0.5">
+                        Country of Origin
+                      </p>
+                      <p className="text-xs text-ink-muted">
+                        {product.moreInformation?.countryOfOrigin || 'China'}
+                      </p>
+                    </div>
+
+                    {product.careInstructions && product.careInstructions.length > 0 && (
+                      <div className="pt-2 border-t border-line">
+                        <p className="font-medium text-ink uppercase tracking-wider text-[11px] mb-1">
+                          Care Instructions
+                        </p>
+                        <ul className="list-disc pl-4 space-y-1 text-xs">
+                          {product.careInstructions.map((inst, idx) => (
+                            <li key={idx}>{inst}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Accordion 5: Frequently Asked Questions */}
+              <div className="border-b border-line">
+                <button
+                  type="button"
+                  onClick={() => toggleAccordion('faq')}
+                  className="w-full py-4 flex items-center justify-between text-left text-xs sm:text-sm font-normal text-ink hover:text-ink-secondary transition-colors"
+                >
+                  <span className="font-medium">Frequently Asked Questions</span>
+                  <ChevronDown
+                    className={`w-4 h-4 text-ink-muted transition-transform duration-200 ${
+                      openAccordions.faq ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
+                {openAccordions.faq && (
+                  <div className="pb-4 space-y-2">
+                    <FAQAccordion
+                      showHeading={false}
+                      className="border-none"
+                    />
                   </div>
                 )}
               </div>
@@ -589,30 +764,72 @@ export function ProductDetailView({ product }: { product: Product }) {
         </section>
 
         {/* ============================================================ */}
-        {/* Curated Recommendations ("Complete Your Workday Look")      */}
+        {/* YOU MAY ALSO LIKE Section                                   */}
         {/* ============================================================ */}
         <section className="mt-16 pt-10 border-t border-line">
           <div className="flex items-center justify-between mb-8">
             <div>
               <p className="text-xs uppercase tracking-widest text-ink-muted font-semibold mb-1">
-                Curated Recommendations
+                Tote Bags & Work Essentials
               </p>
-              <h2 className="font-primary text-2xl sm:text-3xl font-normal text-ink tracking-tight">
-                Complete Your Workday Look
+              <h2 className="font-primary text-2xl sm:text-3xl font-normal text-ink tracking-tight uppercase">
+                YOU MAY ALSO LIKE
               </h2>
             </div>
             <Link
               href="/shop"
-              className="text-xs font-semibold uppercase tracking-wider text-ink hover:text-brand-700 underline underline-offset-4"
+              className="text-xs font-semibold uppercase tracking-wider text-ink hover:text-zimor-orange underline underline-offset-4"
             >
               View All Bags →
             </Link>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 lg:gap-8">
-            {relatedProducts.map((rel) => (
+            {youMayAlsoLike.map((rel) => (
               <ProductCard key={rel.id} product={rel} />
             ))}
+          </div>
+        </section>
+
+        {/* ============================================================ */}
+        {/* RECENTLY VIEWED PRODUCTS / NEW ARRIVALS                     */}
+        {/* ============================================================ */}
+        {recentlyViewed.length > 0 && (
+          <section className="mt-16 pt-10 border-t border-line">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <p className="text-xs uppercase tracking-widest text-ink-muted font-semibold mb-1">
+                  Recently Viewed & New Arrivals
+                </p>
+                <h2 className="font-primary text-2xl sm:text-3xl font-normal text-ink tracking-tight uppercase">
+                  RECENTLY VIEWED PRODUCTS
+                </h2>
+              </div>
+              <Link
+                href="/shop"
+                className="text-xs font-semibold uppercase tracking-wider text-ink hover:text-zimor-orange underline underline-offset-4"
+              >
+                Explore Shop →
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 lg:gap-8">
+              {recentlyViewed.map((rel) => (
+                <ProductCard key={rel.id} product={rel} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ============================================================ */}
+        {/* ZIMOR – FREQUENTLY ASKED QUESTIONS (LAST SECTION ABOVE FOOTER) */}
+        {/* ============================================================ */}
+        <section id="faq" className="mt-16 sm:mt-24 pt-10 sm:pt-16 border-t border-line scroll-mt-20">
+          <div className="max-w-4xl mx-auto">
+            <FAQAccordion
+              title="ZIMOR – Frequently Asked Questions"
+              subtitle="Everything you need to know about delivery timelines, returns, refunds, warranty, and product care."
+            />
           </div>
         </section>
       </div>
@@ -621,7 +838,7 @@ export function ProductDetailView({ product }: { product: Product }) {
       {/* Mobile Sticky Bottom "ADD TO CART" Bar (Proportionate)       */}
       {/* ============================================================ */}
       <div
-        className={`fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-line px-4 py-2.5 lg:hidden transition-transform duration-300 shadow-md ${showStickyBottomBar ? 'translate-y-0' : 'translate-y-full pointer-events-none'
+        className={`fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-line px-4 py-2.5 lg:hidden transition-transform duration-300 shadow-md ${showStickyBottomBar ? 'translate-y-0' : 'translate-y-full pointer-events-none'
           }`}
       >
         <div className="flex items-center justify-between gap-3 max-w-md mx-auto">
@@ -642,13 +859,23 @@ export function ProductDetailView({ product }: { product: Product }) {
               <p className="text-xs font-bold text-ink">₹{product.price.toLocaleString('en-IN')}</p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={handleAddToCart}
-            className="bg-black hover:bg-ink-secondary text-white font-medium text-xs tracking-wider uppercase py-2.5 px-4 flex items-center gap-1.5 shrink-0 transition-colors"
-          >
-            ADD TO CART
-          </button>
+          {product.isComingSoon ? (
+            <button
+              type="button"
+              onClick={() => toggleWishlist(product.id)}
+              className="bg-black hover:bg-ink-secondary text-white font-medium text-xs tracking-wider uppercase py-2.5 px-4 flex items-center gap-1.5 shrink-0 transition-colors"
+            >
+              {inWishlist ? 'WISHLISTED' : 'NOTIFY ME'}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              className="bg-black hover:bg-ink-secondary text-white font-medium text-xs tracking-wider uppercase py-2.5 px-4 flex items-center gap-1.5 shrink-0 transition-colors"
+            >
+              ADD TO CART
+            </button>
+          )}
         </div>
       </div>
 

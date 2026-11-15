@@ -3,7 +3,8 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
-  allowedDevOrigins: ['192.168.0.103', 'localhost:3000'],
+  devIndicators: false,
+  allowedDevOrigins: ['192.168.0.103', '192.168.0.104', 'localhost:3000'],
   async redirects() {
     return [
       {

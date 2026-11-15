@@ -177,7 +177,11 @@ function ShopContent() {
         break;
       case 'featured':
       default:
-        result.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
+        result.sort((a, b) => {
+          if (!a.isComingSoon && b.isComingSoon) return -1;
+          if (a.isComingSoon && !b.isComingSoon) return 1;
+          return (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0);
+        });
         break;
     }
 
@@ -560,7 +564,7 @@ function ShopContent() {
                           loading="lazy"
                           decoding="async"
                           sizes="(max-width: 1024px) 100vw, 50vw"
-                          className="object-cover object-center transition-transform duration-1000 ease-out group-hover:scale-102"
+                          className="object-cover object-center"
                         />
                         {/* Cinematic Lighting Scrims */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/55 to-black/25 pointer-events-none" />
@@ -631,7 +635,7 @@ function ShopContent() {
                         loading="lazy"
                         decoding="async"
                         sizes="(max-width: 1024px) 100vw, 50vw"
-                        className="object-cover object-[center_24%] transition-transform duration-1000 ease-out group-hover:scale-102"
+                        className="object-cover object-[center_24%]"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
 

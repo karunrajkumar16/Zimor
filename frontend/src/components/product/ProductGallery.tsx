@@ -8,14 +8,13 @@ import { ProductImage } from '@/types';
 interface ProductGalleryProps {
   images: ProductImage[];
   productName: string;
+  isComingSoon?: boolean;
 }
 
-export const ProductGallery: React.FC<ProductGalleryProps> = ({ images, productName }) => {
+export const ProductGallery: React.FC<ProductGalleryProps> = ({ images, productName, isComingSoon = false }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
 
   const mobileCarouselRef = useRef<HTMLDivElement | null>(null);
 
@@ -66,19 +65,6 @@ export const ProductGallery: React.FC<ProductGalleryProps> = ({ images, productN
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isLightboxOpen, handleNextLightbox, handlePrevLightbox]);
 
-  // Desktop hover zoom handler
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>, index: number) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
-    const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
-    setZoomPos({ x, y });
-    setHoveredIndex(index);
-  };
-
-  const handleMouseLeave = () => {
-    setHoveredIndex(null);
-  };
-
   if (!images || images.length === 0) {
     return null;
   }
@@ -110,13 +96,13 @@ export const ProductGallery: React.FC<ProductGalleryProps> = ({ images, productN
                 loading={idx === 0 ? undefined : 'lazy'}
                 decoding="async"
                 sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover"
+                className={`object-cover ${isComingSoon ? 'filter blur-[7px] scale-105' : ''}`}
               />
 
-              {/* Bestseller Badge on First Slide */}
+              {/* Status Badge on First Slide */}
               {idx === 0 && (
                 <div className="absolute top-3 left-3 bg-black text-white text-[9px] font-bold uppercase tracking-wider px-2 py-1">
-                  BESTSELLER
+                  {isComingSoon ? 'COMING SOON' : 'BESTSELLER'}
                 </div>
               )}
             </div>
@@ -177,16 +163,16 @@ export const ProductGallery: React.FC<ProductGalleryProps> = ({ images, productN
       </div>
 
       {/* ============================================================ */}
-      {/* DESKTOP GALLERY: 2-Column Luxury Grid (2x2x2 Layout)          */}
+      {/* DESKTOP GALLERY: 2-Column Luxury Grid                        */}
       {/* ============================================================ */}
       <div className="hidden lg:grid grid-cols-2 gap-2.5 sm:gap-3 w-full">
         {images.map((img, idx) => (
           <div
             key={'desktop-grid-' + img.url + idx}
             onClick={() => openLightbox(idx)}
-            onMouseMove={(e) => handleMouseMove(e, idx)}
-            onMouseLeave={handleMouseLeave}
-            className="group relative w-full bg-white overflow-hidden cursor-zoom-in min-h-[460px] xl:min-h-[520px] 2xl:min-h-[560px]"
+            className={`group relative w-full bg-white overflow-hidden cursor-pointer min-h-[460px] xl:min-h-[520px] 2xl:min-h-[560px] ${
+              images.length === 1 ? 'col-span-2' : ''
+            }`}
             style={{ aspectRatio: '3 / 4' }}
           >
             <Image
@@ -196,27 +182,16 @@ export const ProductGallery: React.FC<ProductGalleryProps> = ({ images, productN
               priority={idx < 2}
               loading={idx < 2 ? undefined : 'lazy'}
               decoding="async"
-              sizes="(max-width: 1200px) 35vw, 450px"
-              className="object-contain p-4 sm:p-5 xl:p-6 transition-transform duration-700 ease-out group-hover:scale-105"
+              sizes="(max-width: 1200px) 50vw, 600px"
+              className={`object-contain p-4 sm:p-5 xl:p-6 ${
+                isComingSoon ? 'filter blur-[7px] scale-105' : ''
+              }`}
             />
 
-            {/* Desktop Zoom Loupe on Active Hover */}
-            {hoveredIndex === idx && (
-              <div
-                className="absolute inset-0 pointer-events-none transition-opacity duration-150"
-                style={{
-                  backgroundImage: `url(${img.url})`,
-                  backgroundPosition: `${zoomPos.x}% ${zoomPos.y}%`,
-                  backgroundSize: '220%',
-                  backgroundColor: '#ffffff',
-                }}
-              />
-            )}
-
-            {/* Top-Left Bestseller Badge (First Image) */}
+            {/* Top-Left Badge (First Image) */}
             {idx === 0 && (
               <div className="absolute top-3.5 left-3.5 z-10 bg-black text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1">
-                BESTSELLER
+                {isComingSoon ? 'COMING SOON' : 'BESTSELLER'}
               </div>
             )}
 

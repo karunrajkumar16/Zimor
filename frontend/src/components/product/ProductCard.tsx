@@ -41,7 +41,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const title = getProductDisplayTitle();
 
   return (
-    <div className="group flex flex-col relative bg-transparent transition-all duration-300">
+    <div className="group flex flex-col relative bg-transparent">
       {/* Frameless Studio Image Canvas — Louis Vuitton Reference Style */}
       <div className="relative w-full aspect-square sm:aspect-[4/5] bg-white overflow-hidden flex items-center justify-center">
         <Link href={`/product/${product.slug}`} className="block w-full h-full relative" aria-label={`View ${product.name}`}>
@@ -52,20 +52,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             loading="lazy"
             decoding="async"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-contain p-3.5 sm:p-5 lg:p-6 transition-transform duration-700 ease-out group-hover:scale-105"
+            className={`object-contain p-3.5 sm:p-5 lg:p-6 ${product.isComingSoon ? 'filter blur-[7px] scale-105' : ''
+              }`}
           />
-          {product.images.length > 1 && (
-            <Image
-              src={product.images[1]?.url}
-              alt={`${product.name} alternate view`}
-              fill
-              loading="lazy"
-              decoding="async"
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-contain p-3.5 sm:p-5 lg:p-6 absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out"
-            />
-          )}
         </Link>
+
+        {/* Top Left: Coming Soon Badge */}
+        {product.isComingSoon && (
+          <div className="absolute top-2.5 left-2.5 sm:top-3.5 sm:left-3.5 z-10 bg-black/90 backdrop-blur-xs text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-widest px-2.5 py-1">
+            COMING SOON
+          </div>
+        )}
 
         {/* Top Right: Delicate Minimalist Outline Heart Icon */}
         <button
@@ -87,12 +84,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
       {/* Details Container Below Image — Clean LV Reference Hierarchy */}
       <div className="pt-2 sm:pt-3 space-y-0.5">
-        {/* Line 1: Discount Badge / Status Tag (LV Reference Style) */}
-        {discountPercent > 0 && (
+        {/* Line 1: Discount Badge or Coming Soon Tag */}
+        {product.isComingSoon ? (
+          <p className="text-[10px] sm:text-[11px] font-primary font-medium uppercase tracking-wider text-zimor-orange leading-none">
+            COMING SOON
+          </p>
+        ) : discountPercent > 0 ? (
           <p className="text-[10px] sm:text-[11px] font-primary font-medium uppercase tracking-wider text-zimor-orange leading-none">
             {discountPercent}% OFF
           </p>
-        )}
+        ) : null}
 
         {/* Line 2: Product Name */}
         <Link

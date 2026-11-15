@@ -1,49 +1,68 @@
 export interface FAQItem {
+  id: string;
   question: string;
   answer: string;
-  category: 'Products & Sizing' | 'Materials & Care' | 'Shipping & Delivery' | 'Returns & Refunds';
+  actionText: string;
+  actionHref: string;
 }
+
+export const FAQ_TITLE = 'ZIMOR – Frequently Asked Questions';
 
 export const FAQS: FAQItem[] = [
   {
-    category: 'Products & Sizing',
-    question: 'Which laptops fit inside the ZIMOR Delo and Rabota totes?',
-    answer: 'Both the ZIMOR Delo Tote and Rabota Tote are specifically engineered for laptops up to 15.6 inches. This includes the 16" Apple MacBook Pro (slim bezel), 15" MacBook Air, Dell XPS 15, Lenovo ThinkPad, and HP Spectre. The dedicated laptop sleeve is cushioned on all sides to protect your device during travel and daily transit.',
+    id: 'shipping',
+    question: 'When can I expect my ZIMOR order to arrive?',
+    answer:
+      'Orders are typically processed and dispatched within 24–48 hours, and generally take 3–7 working days to reach you across India. A live courier tracking link will be shared via email or WhatsApp as soon as your shipment is on its way.',
+    actionText: 'View Shipping & Delivery Policy',
+    actionHref: '/policy#shipping',
   },
   {
-    category: 'Products & Sizing',
-    question: 'Does the Classic Shoulder Bag fit a tablet or Kindle?',
-    answer: 'Yes! The ZIMOR Classic Shoulder Bag comfortably fits an iPad mini, Amazon Kindle, sunglasses case, large smartphone (iPhone 16 Pro Max / Galaxy Ultra), wallet, keys, and cosmetic essentials while retaining its sleek crescent silhouette.',
+    id: 'returns',
+    question: 'What is your return and exchange policy?',
+    answer:
+      'If you receive a damaged, defective, or incorrect item, or wish to request an exchange, please notify us within 24 hours of delivery. Products must remain unused, unwashed, and in their original packaging with tags intact.',
+    actionText: 'View Return & Exchange Policy',
+    actionHref: '/policy#returns',
   },
   {
-    category: 'Materials & Care',
-    question: 'What material does Zimor India use, and is it waterproof?',
-    answer: 'We craft our bags from 100% Superior Faux Leather and high-density treated canvas. Our material is water-resistant, scratch-resistant, and significantly more durable than conventional synthetic leathers. While it repels light rain and spills, we recommend wiping moisture dry promptly and avoiding full immersion.',
+    id: 'refunds',
+    question: 'How and when are refunds processed?',
+    answer:
+      'Refunds are initiated within 48–72 hours after your returned product passes quality inspection. Prepaid orders are credited back in 5–7 working days, while COD orders receive a secure payout link via WhatsApp or email.',
+    actionText: 'View Refund Policy',
+    actionHref: '/policy#refund',
   },
   {
-    category: 'Materials & Care',
-    question: 'How do I clean and maintain my Zimor bag?',
-    answer: 'Routine maintenance is simple: wipe gently with a soft, slightly damp microfiber cloth and allow it to air-dry at room temperature. Avoid machine washing, bleach, or harsh chemical cleaners. To preserve its structured form over years, store in the complimentary breathable Zimor dust bag with tissue paper stuffing when not in use.',
+    id: 'cancellation',
+    question: 'Can I cancel my order after placing it?',
+    answer:
+      'Orders can be cancelled upon request within 24 hours of placing the order, provided they have not yet been packed for dispatch. Once dispatched, you may refuse delivery at your doorstep for an eligible refund.',
+    actionText: 'View Cancellation Policy',
+    actionHref: '/policy#cancellation',
   },
   {
-    category: 'Shipping & Delivery',
-    question: 'Do you offer free shipping across India?',
-    answer: 'Yes! We provide 100% Free Express Shipping on all prepaid orders across India. There are zero hidden shipping or handling fees at checkout.',
+    id: 'warranty',
+    question: 'Is my ZIMOR bag covered under warranty?',
+    answer:
+      'Yes, we offer a 6-month warranty on hardware components—such as zippers, clasps, buckles, locks, hooks, and rings—against manufacturing defects starting from the date of purchase.',
+    actionText: 'View Warranty Policy',
+    actionHref: '/policy#warranty',
   },
   {
-    category: 'Shipping & Delivery',
-    question: 'How long does delivery take, and do you offer Cash on Delivery (COD)?',
-    answer: 'Orders are processed within 24 to 48 hours and typically arrive within 5 to 7 business days across metro cities (Delhi NCR, Mumbai, Bengaluru, Hyderabad, Chennai, Kolkata, Pune) and 6 to 8 days for other pin codes. Yes, Cash on Delivery is available across most serviceable pin codes in India.',
+    id: 'care',
+    question: 'How can I keep my ZIMOR bag looking its best?',
+    answer:
+      'Gently clean faux leather with a soft damp cloth, wipe metal hardware with a dry cloth, and avoid direct heat or harsh chemicals. Clean spills immediately, use small pouches, and store inside your complimentary dust bag.',
+    actionText: 'View Bag Care Guide',
+    actionHref: '/policy#care',
   },
   {
-    category: 'Returns & Refunds',
-    question: 'What is Zimor’s return policy?',
-    answer: 'We provide a 7-day easy return window from the date of delivery. If you are not completely delighted with your purchase, simply initiate a return from your Account or email us at zimorindia@gmail.com with your Order Number. The item must be unused, with original tags intact and dust bag included.',
-  },
-  {
-    category: 'Returns & Refunds',
-    question: 'How quickly are refunds credited?',
-    answer: 'Once our quality team receives and verifies the returned product at our facility, refunds are initiated within 48 hours and credited to your original payment method within 5 to 7 business days.',
+    id: 'materials',
+    question: 'What materials and craftsmanship go into ZIMOR pieces?',
+    answer:
+      'Every piece is thoughtfully designed with premium, water-resistant faux leather, custom golden hardware, and architectural precision inspired by meticulous automotive craftsmanship.',
+    actionText: 'The Story Behind Zimor',
+    actionHref: '/about',
   },
 ];
-

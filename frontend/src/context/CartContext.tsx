@@ -8,12 +8,10 @@ interface CartContextType {
   addItem: (product: Product, quantity?: number, color?: string, size?: string) => void;
   removeItem: (itemId: string) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
-  toggleGiftWrap: (itemId: string, message?: string) => void;
   clearCart: () => void;
   itemCount: number;
   subtotal: number;
   discount: number;
-  giftWrapFee: number;
   shippingFee: number;
   total: number;
   appliedPromo: string | null;
@@ -99,7 +97,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           quantity,
           selectedColor,
           selectedSize,
-          isGiftWrapped: false,
         },
       ];
     });
@@ -117,20 +114,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     setItems((prev) =>
       prev.map((item) => (item.id === itemId ? { ...item, quantity } : item))
-    );
-  }, []);
-
-  const toggleGiftWrap = useCallback((itemId: string, message?: string) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === itemId
-          ? {
-              ...item,
-              isGiftWrapped: !item.isGiftWrapped,
-              giftMessage: message || item.giftMessage,
-            }
-          : item
-      )
     );
   }, []);
 
@@ -169,13 +152,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const discountPercent = appliedPromo ? VALID_PROMOS[appliedPromo]?.discountPercent || 0 : 0;
   const discount = useMemo(() => Math.round((subtotal * discountPercent) / 100), [subtotal, discountPercent]);
 
-  const giftWrapCount = useMemo(() => items.filter((i) => i.isGiftWrapped).length, [items]);
-  const giftWrapFee = useMemo(() => giftWrapCount * 149, [giftWrapCount]);
-
   const shippingFee = 0; // Free express shipping across India
   const total = useMemo(
-    () => Math.max(0, subtotal - discount + giftWrapFee + shippingFee),
-    [subtotal, discount, giftWrapFee, shippingFee]
+    () => Math.max(0, subtotal - discount + shippingFee),
+    [subtotal, discount, shippingFee]
   );
 
   const contextValue = useMemo(
@@ -184,12 +164,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       addItem,
       removeItem,
       updateQuantity,
-      toggleGiftWrap,
       clearCart,
       itemCount,
       subtotal,
       discount,
-      giftWrapFee,
       shippingFee,
       total,
       appliedPromo,
@@ -205,12 +183,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       addItem,
       removeItem,
       updateQuantity,
-      toggleGiftWrap,
       clearCart,
       itemCount,
       subtotal,
       discount,
-      giftWrapFee,
       shippingFee,
       total,
       appliedPromo,

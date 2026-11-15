@@ -9,7 +9,6 @@ import {
   Plus,
   Minus,
   ArrowRight,
-  Gift,
   Truck,
   ShieldCheck,
   RefreshCw,
@@ -22,10 +21,8 @@ export default function CartPage() {
     items,
     removeItem,
     updateQuantity,
-    toggleGiftWrap,
     subtotal,
     discount,
-    giftWrapFee,
     total,
     appliedPromo,
     promoError,
@@ -34,8 +31,6 @@ export default function CartPage() {
   } = useCart();
 
   const [promoCodeInput, setPromoCodeInput] = useState('');
-  const [activeGiftModalId, setActiveGiftModalId] = useState<string | null>(null);
-  const [giftNoteInput, setGiftNoteInput] = useState('');
 
   const handleApplyPromo = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,12 +38,6 @@ export default function CartPage() {
       applyPromoCode(promoCodeInput);
       setPromoCodeInput('');
     }
-  };
-
-  const handleSaveGiftMessage = (itemId: string) => {
-    toggleGiftWrap(itemId, giftNoteInput);
-    setActiveGiftModalId(null);
-    setGiftNoteInput('');
   };
 
   return (
@@ -180,73 +169,6 @@ export default function CartPage() {
                         </div>
                       </div>
                     </div>
-
-                    {/* Gift Option per item */}
-                    <div className="pt-3 border-t border-line/60 flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (item.isGiftWrapped) {
-                              toggleGiftWrap(item.id);
-                            } else {
-                              setActiveGiftModalId(item.id);
-                              setGiftNoteInput(item.giftMessage || '');
-                            }
-                          }}
-                          className={`inline-flex items-center gap-1.5 font-medium ${item.isGiftWrapped ? 'text-brand-800' : 'text-brand-700 hover:text-brand-900'
-                            }`}
-                        >
-                          <Gift className="w-4 h-4 text-brand-600" />
-                          <span>{item.isGiftWrapped ? '✓ Luxury Gift Box Added (₹149)' : '+ Add Signature Gift Packaging'}</span>
-                        </button>
-                      </div>
-
-                      {item.isGiftWrapped && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setActiveGiftModalId(item.id);
-                            setGiftNoteInput(item.giftMessage || '');
-                          }}
-                          className="text-[11px] text-brand-700 hover:underline"
-                        >
-                          {item.giftMessage ? 'Edit Gift Message' : '+ Add Gift Note'}
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Inline Gift Note Editor */}
-                    {activeGiftModalId === item.id && (
-                      <div className="p-3 bg-canvas border border-brand-200 rounded space-y-2">
-                        <p className="text-xs font-semibold text-brand-900">
-                          Handwritten gift note message:
-                        </p>
-                        <textarea
-                          rows={2}
-                          value={giftNoteInput}
-                          onChange={(e) => setGiftNoteInput(e.target.value)}
-                          placeholder="e.g. Congratulations on the big milestone, proud of you!"
-                          className="w-full text-xs p-2.5 bg-canvas-card border border-line rounded focus:outline-none focus:border-brand-600"
-                        />
-                        <div className="flex justify-end gap-2">
-                          <button
-                            type="button"
-                            onClick={() => setActiveGiftModalId(null)}
-                            className="text-xs text-ink-muted px-2.5 py-1"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleSaveGiftMessage(item.id)}
-                            className="text-xs bg-ink hover:bg-ink-secondary text-white font-medium px-3.5 py-1.5 rounded transition-colors"
-                          >
-                            Save Gift Packaging
-                          </button>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
@@ -307,12 +229,6 @@ export default function CartPage() {
                   <div className="flex justify-between text-emerald-700 font-medium">
                     <span>Discount ({appliedPromo})</span>
                     <span>-₹{discount.toLocaleString('en-IN')}</span>
-                  </div>
-                )}
-                {giftWrapFee > 0 && (
-                  <div className="flex justify-between text-brand-800">
-                    <span>Gift Packaging</span>
-                    <span>₹{giftWrapFee.toLocaleString('en-IN')}</span>
                   </div>
                 )}
                 <div className="flex justify-between">

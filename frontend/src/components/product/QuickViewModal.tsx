@@ -56,8 +56,13 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
                 fill
                 loading="lazy"
                 decoding="async"
-                className="object-cover"
+                className={`object-cover ${product.isComingSoon ? 'filter blur-[7px] scale-105' : ''}`}
               />
+              {product.isComingSoon && (
+                <div className="absolute top-2.5 left-2.5 bg-black/90 backdrop-blur-xs text-white text-[9px] font-bold uppercase tracking-widest px-2.5 py-1">
+                  COMING SOON
+                </div>
+              )}
             </div>
 
             {/* Thumbnail Row */}
@@ -144,14 +149,24 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
             {/* CTAs */}
             <div className="space-y-3 pt-3 border-t border-line">
               <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={handleAddToCart}
-                  className="flex-1 bg-ink hover:bg-ink-secondary text-white py-3 px-4 rounded font-primary font-medium text-sm tracking-normal flex items-center justify-center gap-2 transition-colors"
-                >
-                  <ShoppingBag className="w-4 h-4" />
-                  <span>Add to Bag</span>
-                </button>
+                {product.isComingSoon ? (
+                  <button
+                    type="button"
+                    disabled
+                    className="flex-1 bg-zimor-ashGrey/20 text-ink-muted py-3 px-4 rounded font-primary font-medium text-sm tracking-normal flex items-center justify-center gap-2 cursor-not-allowed border border-line"
+                  >
+                    <span>Coming Soon</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleAddToCart}
+                    className="flex-1 bg-ink hover:bg-ink-secondary text-white py-3 px-4 rounded font-primary font-medium text-sm tracking-normal flex items-center justify-center gap-2 transition-colors"
+                  >
+                    <ShoppingBag className="w-4 h-4" />
+                    <span>Add to Bag</span>
+                  </button>
+                )}
 
                 <button
                   type="button"
