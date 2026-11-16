@@ -208,11 +208,11 @@ export function ProductDetailView({ product }: { product: Product }) {
                   ₹{product.compareAtPrice.toLocaleString('en-IN')}
                 </span>
                 {product.isComingSoon ? (
-                  <span className="text-xs font-semibold text-zimor-orange uppercase tracking-wider">
+                  <span className="text-xs font-semibold text-black uppercase tracking-wider">
                     (COMING SOON)
                   </span>
                 ) : (
-                  <span className="text-xs font-semibold text-zimor-orange">
+                  <span className="text-xs font-semibold text-black">
                     ({discountPercent}% OFF)
                   </span>
                 )}
@@ -273,18 +273,18 @@ export function ProductDetailView({ product }: { product: Product }) {
                       type="button"
                       onClick={() => toggleWishlist(product.id)}
                       className={`w-12 h-12 shrink-0 border flex items-center justify-center transition-colors ${inWishlist
-                        ? 'border-black text-zimor-orange'
+                        ? 'border-black text-black'
                         : 'border-line text-ink hover:border-black'
                         }`}
                       aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
                     >
-                      <Heart className={`w-5 h-5 ${inWishlist ? 'fill-zimor-orange' : ''}`} />
+                      <Heart className={`w-5 h-5 ${inWishlist ? 'fill-black' : ''}`} />
                     </button>
 
                     <button
                       type="button"
                       disabled
-                      className="flex-1 h-12 bg-zimor-ash/20 text-ink-muted font-medium text-xs sm:text-sm tracking-wider uppercase flex items-center justify-center cursor-not-allowed border border-line"
+                      className="flex-1 h-12 bg-[#b4b4b4]/20 text-ink-muted font-medium text-xs sm:text-sm tracking-wider uppercase flex items-center justify-center cursor-not-allowed border border-line"
                     >
                       COMING SOON
                     </button>
@@ -295,14 +295,14 @@ export function ProductDetailView({ product }: { product: Product }) {
                     onClick={() => {
                       toggleWishlist(product.id);
                     }}
-                    className="w-full h-11 bg-black text-white hover:bg-ink-secondary font-medium text-xs sm:text-sm tracking-wider uppercase flex items-center justify-center transition-colors"
+                    className="w-full h-11 bg-black text-white hover:bg-neutral-800 font-medium text-xs sm:text-sm tracking-wider uppercase flex items-center justify-center transition-colors"
                   >
                     {inWishlist ? 'Saved to Wishlist' : 'Notify Me When Available'}
                   </button>
 
                   <div className="flex items-center justify-between text-xs text-ink-muted pt-1">
                     <span>Exclusive Silhouette</span>
-                    <span className="text-zimor-orange font-medium">• Dropping Soon</span>
+                    <span className="text-black font-semibold">• Dropping Soon</span>
                   </div>
                 </>
               ) : (
@@ -313,19 +313,19 @@ export function ProductDetailView({ product }: { product: Product }) {
                       type="button"
                       onClick={() => toggleWishlist(product.id)}
                       className={`w-12 h-12 shrink-0 border flex items-center justify-center transition-colors ${inWishlist
-                        ? 'border-black text-zimor-orange'
+                        ? 'border-black text-black'
                         : 'border-line text-ink hover:border-black'
                         }`}
                       aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
                     >
-                      <Heart className={`w-5 h-5 ${inWishlist ? 'fill-zimor-orange' : ''}`} />
+                      <Heart className={`w-5 h-5 ${inWishlist ? 'fill-black' : ''}`} />
                     </button>
 
                     {/* Primary ADD TO CART Button: Full-width Solid Black */}
                     <button
                       type="button"
                       onClick={handleAddToCart}
-                      className="flex-1 h-12 bg-black hover:bg-ink-secondary text-white font-medium text-xs sm:text-sm tracking-wider uppercase flex items-center justify-center transition-colors active:scale-[0.99]"
+                      className="flex-1 h-12 bg-black hover:bg-neutral-800 text-white font-medium text-xs sm:text-sm tracking-wider uppercase flex items-center justify-center transition-colors active:scale-[0.99]"
                     >
                       ADD TO CART
                     </button>
@@ -335,14 +335,14 @@ export function ProductDetailView({ product }: { product: Product }) {
                   <button
                     type="button"
                     onClick={handleBuyNow}
-                    className="w-full h-11 bg-canvas-card border border-line hover:bg-zimor-cream/20 text-ink font-medium text-xs sm:text-sm tracking-wider uppercase flex items-center justify-center transition-colors"
+                    className="w-full h-11 bg-white border border-black hover:bg-neutral-100 text-black font-medium text-xs sm:text-sm tracking-wider uppercase flex items-center justify-center transition-colors"
                   >
                     Instant Buy Now
                   </button>
 
                   <div className="flex items-center justify-between text-xs text-ink-muted pt-1">
                     <span>Quantity: {quantity}</span>
-                    <span className="text-zimor-orange font-medium">• Only {product.stock} pieces left in stock</span>
+                    <span className="text-black font-semibold">• Only {product.stock} pieces left in stock</span>
                   </div>
                 </>
               )}
@@ -618,9 +618,8 @@ export function ProductDetailView({ product }: { product: Product }) {
                 >
                   <span className="font-medium">Frequently Asked Questions</span>
                   <ChevronDown
-                    className={`w-4 h-4 text-ink-muted transition-transform duration-200 ${
-                      openAccordions.faq ? 'rotate-180' : ''
-                    }`}
+                    className={`w-4 h-4 text-ink-muted transition-transform duration-200 ${openAccordions.faq ? 'rotate-180' : ''
+                      }`}
                   />
                 </button>
                 {openAccordions.faq && (
@@ -778,7 +777,7 @@ export function ProductDetailView({ product }: { product: Product }) {
             </div>
             <Link
               href="/shop"
-              className="text-xs font-semibold uppercase tracking-wider text-ink hover:text-zimor-orange underline underline-offset-4"
+              className="text-xs font-semibold uppercase tracking-wider text-ink hover:text-[#b4b4b4] underline underline-offset-4"
             >
               View All Bags →
             </Link>
@@ -807,7 +806,7 @@ export function ProductDetailView({ product }: { product: Product }) {
               </div>
               <Link
                 href="/shop"
-                className="text-xs font-semibold uppercase tracking-wider text-ink hover:text-zimor-orange underline underline-offset-4"
+                className="text-xs font-semibold uppercase tracking-wider text-ink hover:text-[#b4b4b4] underline underline-offset-4"
               >
                 Explore Shop →
               </Link>

@@ -35,16 +35,16 @@ const CATEGORY_NAMES: Record<string, string> = {
   'crossbody-bags': 'Crossbody Bags',
 };
 
-// Three Distinct Lifestyle & Profession Subsections with authentic editorial photography
+// Three Distinct Lifestyle Subsections with authentic editorial photography
 const LIFESTYLE_SUBSECTIONS = [
   {
-    id: "corporate-executive",
-    number: "01",
-    eyebrow: "Corporate • Legal • Executive",
-    title: "Corporate & Executive",
-    archetype: "The Boardroom Silhouette",
-    tagline: "Structured Authority & Padded 15.6\" Laptop Protection",
-    description: "Architectural structure, upright base studs, and dedicated 15.6\" laptop protection engineered for corporate leadership.",
+    id: "everyday",
+    number: "",
+    eyebrow: "EVERYDAY",
+    title: "Everyday",
+    archetype: "EVERYDAY",
+    tagline: "For the everyday.",
+    description: "Architectural structure, upright base studs, and dedicated 15.6\" laptop protection engineered for daily rhythm and effortless day-to-day carrying.",
     specs: [
       "Padded cradle for up to 15.6\" laptops",
       "5 solid brass protective bottom studs",
@@ -52,7 +52,7 @@ const LIFESTYLE_SUBSECTIONS = [
     ],
     horizontalImage: "/corporate-workspace-horizontal.jpg",
     editorialImage: "/corporate-executive-editorial.jpg",
-    subtitleFilterText: "15.6\" Laptop Fit",
+    subtitleFilterText: "Everyday Carry · 15.6\" Laptop Fit",
     icon: Briefcase,
     products: [
       PRODUCTS.find((p) => p.id === "zimor-delo-tote-rust") || PRODUCTS[0],
@@ -60,13 +60,13 @@ const LIFESTYLE_SUBSECTIONS = [
     ],
   },
   {
-    id: "tech-transit",
-    number: "02",
-    eyebrow: "Tech • Founders • Commute",
-    title: "Tech & Modern Commute",
-    archetype: "The Dynamic Commute",
-    tagline: "Dual-Carry Versatility with Detachable Crossbody Sling",
-    description: "Dual-carry versatility with detachable 110cm crossbody sling, padded 15\" laptop sleeve, and 6 internal organizer pockets.",
+    id: "work",
+    number: "",
+    eyebrow: "WORK",
+    title: "Work",
+    archetype: "WORK",
+    tagline: "For what lies ahead.",
+    description: "Dual-carry versatility with detachable 110cm crossbody sling, padded 15\" laptop sleeve, and 6 internal organizer pockets designed for focus and productivity.",
     specs: [
       "Dedicated 15\" cushioned laptop cradle",
       "Dual grab handles + 110cm detachable sling",
@@ -74,7 +74,7 @@ const LIFESTYLE_SUBSECTIONS = [
     ],
     horizontalImage: "/tech-commute-workspace-horizontal.jpg",
     editorialImage: "/tech-commute-editorial.jpg",
-    subtitleFilterText: "15\" Dual-Carry Transit",
+    subtitleFilterText: "Work & Focus · 15\" Dual-Carry",
     icon: Laptop,
     products: [
       PRODUCTS.find((p) => p.id === "zimor-rabota-tote-cognac") || PRODUCTS[2],
@@ -82,13 +82,13 @@ const LIFESTYLE_SUBSECTIONS = [
     ],
   },
   {
-    id: "creative-studio",
-    number: "03",
-    eyebrow: "Design • Studio • Evenings",
-    title: "Creative & Studio",
-    archetype: "The Sculptural Silhouette",
-    tagline: "Sculptural French Curves & Contoured Shoulder Fit",
-    description: "Sculptural curves, heavyweight French canvas, and luminous gold clasps designed for gallery afternoons and evening dinners.",
+    id: "travel",
+    number: "",
+    eyebrow: "TRAVEL",
+    title: "Travel",
+    archetype: "TRAVEL",
+    tagline: "For places beyond.",
+    description: "Sculptural curves, heavyweight French canvas, and luminous gold clasps designed for journeys near and far, weekend escapes, and evening destinations.",
     specs: [
       "Fits iPad mini, Kindle & daily essentials",
       "Heavyweight French canvas with vegan leather trim",
@@ -96,7 +96,7 @@ const LIFESTYLE_SUBSECTIONS = [
     ],
     horizontalImage: "/artisan-heritage-landscape.jpg",
     editorialImage: "/brandgirl2.webp",
-    subtitleFilterText: "Underarm Crescent Fit",
+    subtitleFilterText: "Travel & Escapes · Underarm Fit",
     icon: Sparkles,
     products: [
       PRODUCTS.find((p) => p.id === "zimor-classic-shoulder-bag-cream") || PRODUCTS[4],
@@ -144,13 +144,13 @@ function ShopContent() {
       }
     }
 
-    // Profession filter logic
+    // Profession / Lifestyle filter logic
     if (selectedProfession !== 'all') {
-      if (selectedProfession === 'corporate-executive') {
+      if (selectedProfession === 'everyday' || selectedProfession === 'corporate-executive') {
         result = result.filter((p) => p.id.startsWith('zimor-delo'));
-      } else if (selectedProfession === 'tech-transit' || selectedProfession === 'tech-founder') {
+      } else if (selectedProfession === 'work' || selectedProfession === 'tech-transit' || selectedProfession === 'tech-founder') {
         result = result.filter((p) => p.id.startsWith('zimor-rabota'));
-      } else if (selectedProfession === 'creative-studio' || selectedProfession === 'creative-director') {
+      } else if (selectedProfession === 'travel' || selectedProfession === 'creative-studio' || selectedProfession === 'creative-director') {
         result = result.filter((p) => p.id.startsWith('zimor-classic'));
       } else {
         result = result.filter((p) => p.suitableProfessions.includes(selectedProfession));
@@ -198,7 +198,7 @@ function ShopContent() {
     }
     if (selectedProfession !== 'all') {
       const match = LIFESTYLE_SUBSECTIONS.find((p) => p.id === selectedProfession);
-      return match ? match.title : selectedProfession;
+      return match ? match.archetype : selectedProfession;
     }
     if (selectedColor !== 'all') {
       return `Color: ${selectedColor}`;
@@ -206,63 +206,54 @@ function ShopContent() {
     return '';
   }, [selectedCategory, selectedProfession, selectedColor]);
 
-  // Smooth scroll to targeted section (#profession or ?section=profession) on mount
+  // Smooth scroll to targeted lifestyle section (#everyday, #work, #travel, #lifestyle) on mount and hashchange
   React.useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const isProfession =
-      window.location.hash.includes('profession') ||
-      window.location.hash.includes('corporate') ||
-      window.location.hash.includes('tech-transit') ||
-      window.location.hash.includes('creative') ||
-      searchParams.get('section') === 'profession' ||
-      sessionStorage.getItem('scroll_to_profession') === 'true';
+    const scrollToTarget = () => {
+      const hash = window.location.hash ? window.location.hash.slice(1) : '';
+      const sectionParam = searchParams.get('section') || '';
 
-    if (isProfession) {
-      sessionStorage.removeItem('scroll_to_profession');
-      const targetHash = window.location.hash ? window.location.hash.slice(1) : 'profession';
+      let targetId = hash;
+      if (!targetId && sectionParam) {
+        if (sectionParam === 'everyday' || sectionParam === 'corporate-executive') targetId = 'everyday';
+        else if (sectionParam === 'work' || sectionParam === 'tech-transit') targetId = 'work';
+        else if (sectionParam === 'travel' || sectionParam === 'creative-studio') targetId = 'travel';
+        else if (sectionParam === 'lifestyle' || sectionParam === 'profession') targetId = 'lifestyle';
+        else targetId = sectionParam;
+      }
+
+      if (!targetId) return;
+
       let attempts = 0;
       const pollAndScroll = () => {
-        const el = document.getElementById(targetHash) || document.getElementById('profession');
+        const el =
+          document.getElementById(targetId) ||
+          (targetId === 'profession' ? document.getElementById('lifestyle') : null);
+
         if (el) {
           const header = document.querySelector('header');
           const headerHeight = header ? header.offsetHeight : 80;
           const rect = el.getBoundingClientRect();
-          if (Math.abs(rect.top - headerHeight) > 5) {
+          if (Math.abs(rect.top - headerHeight) > 4) {
             const targetScroll = rect.top + window.scrollY - headerHeight;
             window.scrollTo({ top: targetScroll, behavior: 'smooth' });
           }
-        } else if (attempts < 20) {
+        } else if (attempts < 25) {
           attempts++;
-          setTimeout(pollAndScroll, 60);
+          setTimeout(pollAndScroll, 50);
         }
       };
-      // Progressive ticks to align perfectly once DOM and images are ready
+
+      // Multiple ticks to ensure layout, images, and Lenis are stable
       setTimeout(pollAndScroll, 60);
       setTimeout(pollAndScroll, 250);
-      return;
-    }
+      setTimeout(pollAndScroll, 650);
+    };
 
-    if (window.location.hash) {
-      const hash = window.location.hash.slice(1);
-      let attempts = 0;
-      const pollAndScroll = () => {
-        const el = document.getElementById(hash);
-        if (el) {
-          const header = document.querySelector('header');
-          const headerHeight = header ? header.offsetHeight : 80;
-          const rect = el.getBoundingClientRect();
-          if (Math.abs(rect.top - headerHeight) > 5) {
-            const targetScroll = rect.top + window.scrollY - headerHeight;
-            window.scrollTo({ top: targetScroll, behavior: 'smooth' });
-          }
-        } else if (attempts < 20) {
-          attempts++;
-          setTimeout(pollAndScroll, 60);
-        }
-      };
-      setTimeout(pollAndScroll, 60);
-    }
+    scrollToTarget();
+    window.addEventListener('hashchange', scrollToTarget);
+    return () => window.removeEventListener('hashchange', scrollToTarget);
   }, [searchParams]);
 
   return (
@@ -301,7 +292,7 @@ function ShopContent() {
             {/* Top Row / Scrollable Categories: Horizontal single line on mobile with zero scrollbar */}
             <div className="flex items-center gap-2 overflow-x-auto scrollbar-none no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 py-1">
               <div className="hidden sm:flex items-center gap-1.5 text-ink-muted font-medium pr-1 text-xs shrink-0">
-                <SlidersHorizontal className="w-3.5 h-3.5 text-brand-700" />
+                <SlidersHorizontal className="w-3.5 h-3.5 text-black" />
                 <span>Filter:</span>
               </div>
 
@@ -371,7 +362,7 @@ function ShopContent() {
                 <button
                   type="button"
                   onClick={clearAllFilters}
-                  className="hidden sm:inline-flex items-center gap-1 text-xs text-zimor-orange hover:underline font-medium ml-1 whitespace-nowrap shrink-0"
+                  className="hidden sm:inline-flex items-center gap-1 text-xs text-black hover:text-[#b4b4b4] hover:underline font-medium ml-1 whitespace-nowrap shrink-0"
                 >
                   <RotateCcw className="w-3 h-3" />
                   <span>Reset</span>
@@ -406,7 +397,7 @@ function ShopContent() {
                   <button
                     type="button"
                     onClick={clearAllFilters}
-                    className="sm:hidden inline-flex items-center gap-1 text-[11px] font-medium text-zimor-orange bg-zimor-cream/20 border border-zimor-ashGrey px-2.5 py-1 rounded-full whitespace-nowrap shrink-0 transition-colors"
+                    className="sm:hidden inline-flex items-center gap-1 text-[11px] font-medium text-black bg-neutral-100 border border-[#b4b4b4] px-2.5 py-1 rounded-full whitespace-nowrap shrink-0 transition-colors"
                   >
                     <RotateCcw className="w-3 h-3" />
                     <span>Reset</span>
@@ -477,7 +468,7 @@ function ShopContent() {
               <button
                 type="button"
                 onClick={clearAllFilters}
-                className="text-xs font-semibold text-brand-700 hover:underline"
+                className="text-xs font-semibold text-black hover:text-[#b4b4b4] hover:underline"
               >
                 View All 6 Silhouettes →
               </button>
@@ -519,22 +510,23 @@ function ShopContent() {
       </section>
 
       {/* =========================================================================
-          SECTION 2: SHOP BY PROFESSION & LIFESTYLE
+          SECTION 2: SHOP BY LIFESTYLE
           ========================================================================= */}
       <section
-        id="profession"
-        className="pt-8 sm:pt-12 pb-16 sm:pb-24 bg-canvas border-t border-line scroll-mt-0"
-        aria-label="Shop by Profession and Lifestyle"
+        id="lifestyle"
+        className="pt-8 sm:pt-12 pb-16 sm:pb-24 bg-canvas border-t border-line scroll-mt-0 relative"
+        aria-label="Shop by Lifestyle"
       >
+        <span id="profession" className="sr-only" />
         <span id="shop-by-profession" className="sr-only" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Main Section Header */}
           <div className="mb-12 sm:mb-16">
-            <p className="text-[11px] sm:text-xs uppercase tracking-[0.25em] text-brand-700 font-bold mb-1.5 font-secondary">
-              Curated For Your Workday
+            <p className="text-[11px] sm:text-xs uppercase tracking-[0.25em] text-black font-bold mb-1.5 font-secondary">
+              Curated For Your Routine &amp; Beyond
             </p>
             <h2 className="font-primary text-[34px] sm:text-[42px] lg:text-[48px] font-normal text-ink tracking-tight leading-none">
-              Shop by Profession &amp; Lifestyle
+              Shop by Lifestyle
             </h2>
             <p className="text-xs sm:text-sm text-ink-muted mt-2 max-w-2xl font-normal leading-relaxed">
               Three distinct carry archetypes engineered with specific tech dimensions, internal partitions, and ergonomic drops. Explore the curated silhouettes for each lifestyle below.
@@ -550,8 +542,28 @@ function ShopContent() {
                 <div
                   key={subsection.id}
                   id={subsection.id}
-                  className="pt-8 sm:pt-10 border-t border-line/70 scroll-mt-20 sm:scroll-mt-24"
+                  className="pt-8 sm:pt-10 border-t border-line/70 scroll-mt-20 sm:scroll-mt-24 relative"
                 >
+                  {/* Backward compatibility anchors */}
+                  {subsection.id === 'everyday' && (
+                    <>
+                      <span id="corporate-executive" className="sr-only" />
+                      <span id="01-everyday" className="sr-only" />
+                    </>
+                  )}
+                  {subsection.id === 'work' && (
+                    <>
+                      <span id="tech-transit" className="sr-only" />
+                      <span id="02-work" className="sr-only" />
+                    </>
+                  )}
+                  {subsection.id === 'travel' && (
+                    <>
+                      <span id="creative-studio" className="sr-only" />
+                      <span id="03-travel" className="sr-only" />
+                    </>
+                  )}
+
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10 items-stretch">
                     {/* LEFT HALF (lg:col-span-6): TOP LEFT HORIZONTAL FRAMELESS IMAGE + BOTTOM LEFT PRODUCT CARDS */}
                     <div className="lg:col-span-6 flex flex-col justify-between space-y-6 sm:space-y-8">
@@ -559,7 +571,7 @@ function ShopContent() {
                       <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] lg:aspect-[16/9] min-h-[220px] sm:min-h-[250px] overflow-hidden border-0 bg-ink group rounded-none">
                         <Image
                           src={subsection.horizontalImage}
-                          alt={`${subsection.title} Workspace`}
+                          alt={`${subsection.archetype}`}
                           fill
                           loading="lazy"
                           decoding="async"
@@ -574,17 +586,18 @@ function ShopContent() {
                         <div className="absolute inset-0 p-5 sm:p-7 lg:p-8 flex flex-col justify-end text-white z-10">
                           <div className="flex items-center gap-2 mb-2">
                             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-white text-[10px] uppercase tracking-[0.22em] font-primary font-semibold">
-                              <IconComp className="w-3.5 h-3.5 text-zimor-cream" />
-                              <span>{subsection.title}</span>
-                            </span>
-                            <span className="text-white/80 text-[11px] font-primary hidden sm:inline">
-                              Archetype {subsection.number}
+                              <IconComp className="w-3.5 h-3.5 text-[#b4b4b4]" />
+                              <span>{subsection.archetype}</span>
                             </span>
                           </div>
 
-                          <h3 className="font-primary text-[24px] sm:text-[30px] lg:text-[34px] font-normal text-white tracking-tight leading-[1.1] mb-1.5 sm:mb-2">
+                          <h3 className="font-primary text-[24px] sm:text-[30px] lg:text-[34px] font-normal text-white tracking-tight leading-[1.1] mb-1 sm:mb-1.5">
                             {subsection.archetype}
                           </h3>
+
+                          <p className="text-xs sm:text-sm text-white/90 italic font-primary mb-2 sm:mb-2.5">
+                            “{subsection.tagline}”
+                          </p>
 
                           <p className="text-xs sm:text-[13px] text-white/85 leading-relaxed font-normal max-w-lg mb-3">
                             {subsection.description}
@@ -596,7 +609,7 @@ function ShopContent() {
                                 key={specIdx}
                                 className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-white/95 text-[10px] sm:text-[11px] font-secondary"
                               >
-                                <Check className="w-3.5 h-3.5 text-zimor-cream" />
+                                <Check className="w-3.5 h-3.5 text-[#b4b4b4]" />
                                 <span>{spec}</span>
                               </span>
                             ))}
@@ -607,7 +620,7 @@ function ShopContent() {
                       {/* BOTTOM LEFT: DISPLAY THE TWO MATCHING PRODUCT CARDS (EXISTING CARD DESIGN) */}
                       <div className="space-y-3">
                         <div className="flex items-center justify-between border-b border-line pb-2">
-                          <p className="text-[11px] uppercase tracking-[0.18em] text-brand-700 font-bold font-secondary">
+                          <p className="text-[11px] uppercase tracking-[0.18em] text-black font-bold font-secondary">
                             Matching Silhouettes
                           </p>
                           <p className="text-[11px] text-ink-muted font-secondary">
@@ -630,7 +643,7 @@ function ShopContent() {
                     <div className="lg:col-span-6 relative w-full h-full min-h-[480px] sm:min-h-[560px] lg:min-h-[660px] overflow-hidden border-0 bg-ink group rounded-none">
                       <Image
                         src={subsection.editorialImage}
-                        alt={`${subsection.title} - ${subsection.archetype}`}
+                        alt={`${subsection.archetype} - ${subsection.tagline}`}
                         fill
                         loading="lazy"
                         decoding="async"
@@ -642,8 +655,8 @@ function ShopContent() {
                       {/* Floating Base Badge */}
                       <div className="absolute bottom-5 left-5 right-5 z-10 text-white">
                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-white/95 text-[10px] uppercase tracking-[0.2em] font-primary font-semibold border border-white/20">
-                          <IconComp className="w-3.5 h-3.5 text-zimor-cream" />
-                          <span>{subsection.archetype} · Full Height Editorial</span>
+                          <IconComp className="w-3.5 h-3.5 text-[#b4b4b4]" />
+                          <span>{subsection.archetype} · {subsection.tagline}</span>
                         </span>
                       </div>
                     </div>

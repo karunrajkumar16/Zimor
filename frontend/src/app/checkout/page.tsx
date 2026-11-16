@@ -140,9 +140,9 @@ export default function CheckoutPage() {
             <button
               type="button"
               onClick={() => setStep(1)}
-              className={`flex items-center gap-2 ${step >= 1 ? 'text-brand-700' : 'text-ink-muted'}`}
+              className={`flex items-center gap-2 ${step >= 1 ? 'text-black' : 'text-ink-muted'}`}
             >
-              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step >= 1 ? 'bg-brand-700 text-white' : 'bg-canvas-alt text-ink-muted'
+              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step >= 1 ? 'bg-black text-white' : 'bg-canvas-alt text-ink-muted'
                 }`}>
                 1
               </span>
@@ -154,9 +154,9 @@ export default function CheckoutPage() {
             <button
               type="button"
               onClick={() => setStep(2)}
-              className={`flex items-center gap-2 ${step >= 2 ? 'text-brand-700' : 'text-ink-muted'}`}
+              className={`flex items-center gap-2 ${step >= 2 ? 'text-black' : 'text-ink-muted'}`}
             >
-              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step >= 2 ? 'bg-brand-700 text-white' : 'bg-canvas-alt text-ink-muted'
+              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step >= 2 ? 'bg-black text-white' : 'bg-canvas-alt text-ink-muted'
                 }`}>
                 2
               </span>
@@ -168,9 +168,9 @@ export default function CheckoutPage() {
             <button
               type="button"
               onClick={() => setStep(3)}
-              className={`flex items-center gap-2 ${step === 3 ? 'text-brand-700' : 'text-ink-muted'}`}
+              className={`flex items-center gap-2 ${step === 3 ? 'text-black' : 'text-ink-muted'}`}
             >
-              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step === 3 ? 'bg-brand-700 text-white' : 'bg-canvas-alt text-ink-muted'
+              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step === 3 ? 'bg-black text-white' : 'bg-canvas-alt text-ink-muted'
                 }`}>
                 3
               </span>
@@ -202,7 +202,7 @@ export default function CheckoutPage() {
                       required
                       value={formData.fullName}
                       onChange={handleInputChange}
-                      className="w-full p-2.5 bg-canvas border border-line rounded focus:outline-none focus:border-brand-600"
+                      className="w-full p-2.5 bg-canvas border border-line rounded focus:outline-none focus:border-black"
                     />
                   </div>
 
@@ -214,7 +214,7 @@ export default function CheckoutPage() {
                       required
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="w-full p-2.5 bg-canvas border border-line rounded focus:outline-none focus:border-brand-600"
+                      className="w-full p-2.5 bg-canvas border border-line rounded focus:outline-none focus:border-black"
                     />
                   </div>
 
@@ -226,7 +226,7 @@ export default function CheckoutPage() {
                       required
                       value={formData.phone}
                       onChange={handleInputChange}
-                      className="w-full p-2.5 bg-canvas border border-line rounded focus:outline-none focus:border-brand-600"
+                      className="w-full p-2.5 bg-canvas border border-line rounded focus:outline-none focus:border-black"
                     />
                   </div>
 
@@ -238,7 +238,7 @@ export default function CheckoutPage() {
                       required
                       value={formData.addressLine1}
                       onChange={handleInputChange}
-                      className="w-full p-2.5 bg-canvas border border-line rounded focus:outline-none focus:border-brand-600"
+                      className="w-full p-2.5 bg-canvas border border-line rounded focus:outline-none focus:border-black"
                     />
                   </div>
 
@@ -249,7 +249,7 @@ export default function CheckoutPage() {
                       name="addressLine2"
                       value={formData.addressLine2}
                       onChange={handleInputChange}
-                      className="w-full p-2.5 bg-canvas border border-line rounded focus:outline-none focus:border-brand-600"
+                      className="w-full p-2.5 bg-canvas border border-line rounded focus:outline-none focus:border-black"
                     />
                   </div>
 
@@ -261,7 +261,7 @@ export default function CheckoutPage() {
                       required
                       value={formData.city}
                       onChange={handleInputChange}
-                      className="w-full p-2.5 bg-canvas border border-line rounded focus:outline-none focus:border-brand-600"
+                      className="w-full p-2.5 bg-canvas border border-line rounded focus:outline-none focus:border-black"
                     />
                   </div>
 
@@ -271,7 +271,7 @@ export default function CheckoutPage() {
                       name="state"
                       value={formData.state}
                       onChange={handleInputChange}
-                      className="w-full p-2.5 bg-canvas border border-line rounded focus:outline-none focus:border-brand-600"
+                      className="w-full p-2.5 bg-canvas border border-line rounded focus:outline-none focus:border-black"
                     >
                       {INDIAN_STATES.map((s) => (
                         <option key={s} value={s}>{s}</option>
@@ -287,7 +287,7 @@ export default function CheckoutPage() {
                       required
                       value={formData.pincode}
                       onChange={handleInputChange}
-                      className="w-full p-2.5 bg-canvas border border-line rounded focus:outline-none focus:border-brand-600"
+                      className="w-full p-2.5 bg-canvas border border-line rounded focus:outline-none focus:border-black"
                     />
                   </div>
                 </div>
@@ -319,7 +319,7 @@ export default function CheckoutPage() {
                 <div className="space-y-3">
                   <label
                     className={`block p-4 border rounded cursor-pointer transition-all ${shippingMethod === 'standard'
-                      ? 'border-brand-700 bg-brand-50/50 ring-1 ring-brand-700'
+                      ? 'border-black bg-neutral-50 ring-1 ring-black'
                       : 'border-line hover:border-ink/30'
                       }`}
                   >
@@ -330,7 +330,7 @@ export default function CheckoutPage() {
                           name="shippingMethod"
                           checked={shippingMethod === 'standard'}
                           onChange={() => setShippingMethod('standard')}
-                          className="accent-brand-700"
+                          className="accent-black"
                         />
                         <div>
                           <p className="text-xs font-bold text-ink">Standard Express Air Delivery</p>
@@ -343,7 +343,7 @@ export default function CheckoutPage() {
 
                   <label
                     className={`block p-4 border rounded cursor-pointer transition-all ${shippingMethod === 'priority'
-                      ? 'border-brand-700 bg-brand-50/50 ring-1 ring-brand-700'
+                      ? 'border-black bg-neutral-50 ring-1 ring-black'
                       : 'border-line hover:border-ink/30'
                       }`}
                   >
@@ -354,7 +354,7 @@ export default function CheckoutPage() {
                           name="shippingMethod"
                           checked={shippingMethod === 'priority'}
                           onChange={() => setShippingMethod('priority')}
-                          className="accent-brand-700"
+                          className="accent-black"
                         />
                         <div>
                           <p className="text-xs font-bold text-ink">Priority Expedited Transit</p>
@@ -402,7 +402,7 @@ export default function CheckoutPage() {
                   {/* UPI */}
                   <label
                     className={`block p-4 border rounded cursor-pointer transition-all ${paymentMethod === 'upi'
-                      ? 'border-brand-700 bg-brand-50/50 ring-1 ring-brand-700'
+                      ? 'border-black bg-neutral-50 ring-1 ring-black'
                       : 'border-line hover:border-ink/30'
                       }`}
                   >
@@ -413,10 +413,10 @@ export default function CheckoutPage() {
                           name="paymentMethod"
                           checked={paymentMethod === 'upi'}
                           onChange={() => setPaymentMethod('upi')}
-                          className="accent-brand-700"
+                          className="accent-black"
                         />
                         <div className="flex items-center gap-2">
-                          <QrCode className="w-4 h-4 text-brand-700" />
+                          <QrCode className="w-4 h-4 text-black" />
                           <span className="text-xs font-bold text-ink">UPI / QR Code</span>
                         </div>
                       </div>
@@ -434,7 +434,7 @@ export default function CheckoutPage() {
                   {/* Cards */}
                   <label
                     className={`block p-4 border rounded cursor-pointer transition-all ${paymentMethod === 'card'
-                      ? 'border-brand-700 bg-brand-50/50 ring-1 ring-brand-700'
+                      ? 'border-black bg-neutral-50 ring-1 ring-black'
                       : 'border-line hover:border-ink/30'
                       }`}
                   >
@@ -444,10 +444,10 @@ export default function CheckoutPage() {
                         name="paymentMethod"
                         checked={paymentMethod === 'card'}
                         onChange={() => setPaymentMethod('card')}
-                        className="accent-brand-700"
+                        className="accent-black"
                       />
                       <div className="flex items-center gap-2">
-                        <CreditCard className="w-4 h-4 text-brand-700" />
+                        <CreditCard className="w-4 h-4 text-black" />
                         <span className="text-xs font-bold text-ink">Credit & Debit Cards</span>
                       </div>
                     </div>
@@ -461,7 +461,7 @@ export default function CheckoutPage() {
                   {/* Net Banking */}
                   <label
                     className={`block p-4 border rounded cursor-pointer transition-all ${paymentMethod === 'netbanking'
-                      ? 'border-brand-700 bg-brand-50/50 ring-1 ring-brand-700'
+                      ? 'border-black bg-neutral-50 ring-1 ring-black'
                       : 'border-line hover:border-ink/30'
                       }`}
                   >
@@ -471,10 +471,10 @@ export default function CheckoutPage() {
                         name="paymentMethod"
                         checked={paymentMethod === 'netbanking'}
                         onChange={() => setPaymentMethod('netbanking')}
-                        className="accent-brand-700"
+                        className="accent-black"
                       />
                       <div className="flex items-center gap-2">
-                        <Building2 className="w-4 h-4 text-brand-700" />
+                        <Building2 className="w-4 h-4 text-black" />
                         <span className="text-xs font-bold text-ink">Net Banking</span>
                       </div>
                     </div>
@@ -488,7 +488,7 @@ export default function CheckoutPage() {
                   {/* Cash on Delivery */}
                   <label
                     className={`block p-4 border rounded cursor-pointer transition-all ${paymentMethod === 'cod'
-                      ? 'border-brand-700 bg-brand-50/50 ring-1 ring-brand-700'
+                      ? 'border-black bg-neutral-50 ring-1 ring-black'
                       : 'border-line hover:border-ink/30'
                       }`}
                   >
@@ -498,10 +498,10 @@ export default function CheckoutPage() {
                         name="paymentMethod"
                         checked={paymentMethod === 'cod'}
                         onChange={() => setPaymentMethod('cod')}
-                        className="accent-brand-700"
+                        className="accent-black"
                       />
                       <div className="flex items-center gap-2">
-                        <Banknote className="w-4 h-4 text-brand-700" />
+                        <Banknote className="w-4 h-4 text-black" />
                         <span className="text-xs font-bold text-ink">Cash on Delivery (COD)</span>
                       </div>
                     </div>
@@ -596,8 +596,8 @@ export default function CheckoutPage() {
             </div>
 
             <div className="p-3 bg-canvas rounded border border-line text-[11px] text-ink-muted space-y-1">
-              <p className="flex items-center gap-1.5 text-brand-900 font-semibold">
-                <ShieldCheck className="w-3.5 h-3.5 text-brand-700" />
+              <p className="flex items-center gap-1.5 text-black font-semibold">
+                <ShieldCheck className="w-3.5 h-3.5 text-black" />
                 7-Day Easy Return Guarantee
               </p>
               <p>Doorstep pickup available if you wish to return your bag.</p>

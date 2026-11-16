@@ -76,7 +76,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
         >
           <Heart
-            className={`w-4 h-4 stroke-[1.2] transition-all ${inWishlist ? 'fill-zimor-orange text-zimor-orange' : 'text-ink/80 hover:text-ink'
+            className={`w-4 h-4 stroke-[1.2] transition-all ${inWishlist ? 'fill-black text-black' : 'text-ink/80 hover:text-ink'
               }`}
           />
         </button>
@@ -86,11 +86,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       <div className="pt-2 sm:pt-3 space-y-0.5">
         {/* Line 1: Discount Badge or Coming Soon Tag */}
         {product.isComingSoon ? (
-          <p className="text-[10px] sm:text-[11px] font-primary font-medium uppercase tracking-wider text-zimor-orange leading-none">
+          <p className="text-[10px] sm:text-[11px] font-primary font-medium uppercase tracking-wider text-[#000000] leading-none">
             COMING SOON
           </p>
         ) : discountPercent > 0 ? (
-          <p className="text-[10px] sm:text-[11px] font-primary font-medium uppercase tracking-wider text-zimor-orange leading-none">
+          <p className="text-[10px] sm:text-[11px] font-primary font-medium uppercase tracking-wider text-[#000000] leading-none">
             {discountPercent}% OFF
           </p>
         ) : null}
@@ -98,7 +98,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {/* Line 2: Product Name */}
         <Link
           href={`/product/${product.slug}`}
-          className="block text-xs sm:text-[13.5px] font-primary font-normal text-ink hover:text-brand-700 transition-colors truncate leading-tight"
+          className="block text-xs sm:text-[13.5px] font-primary font-normal text-ink hover:text-[#b4b4b4] transition-colors truncate leading-tight"
         >
           {title}
         </Link>

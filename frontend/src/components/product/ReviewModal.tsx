@@ -85,7 +85,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                       <Star
                         key={s}
                         className={`w-4 h-4 ${s <= selectedReview.rating
-                          ? 'fill-zimor-orange text-zimor-orange'
+                          ? 'fill-black text-black'
                           : 'text-line'
                           }`}
                       />
@@ -100,7 +100,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                 </p>
 
                 {mediaItem?.caption && (
-                  <p className="text-[11px] text-brand-700 mt-2 font-normal">
+                  <p className="text-[11px] text-ink-muted mt-2 font-normal">
                     Note: {mediaItem.caption}
                   </p>
                 )}
@@ -215,7 +215,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                     >
                       <Star
                         className={`w-6 h-6 ${star <= (hoverRating || rating)
-                          ? 'fill-zimor-orange text-zimor-orange'
+                          ? 'fill-black text-black'
                           : 'text-line'
                           }`}
                       />
@@ -239,7 +239,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                     placeholder="e.g. Superior craftsmanship & perfect laptop protection"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    className="w-full text-xs p-2.5 border border-line bg-canvas rounded focus:outline-none focus:border-brand-600"
+                    className="w-full text-xs p-2.5 border border-line bg-canvas rounded focus:outline-none focus:border-black"
                   />
                 </div>
 
@@ -253,7 +253,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                     placeholder="How does it fit your daily commute? How is the leather feel, stitching, and laptop capacity?"
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
-                    className="w-full text-xs p-2.5 border border-line bg-canvas rounded focus:outline-none focus:border-brand-600"
+                    className="w-full text-xs p-2.5 border border-line bg-canvas rounded focus:outline-none focus:border-black"
                   />
                 </div>
               </div>
@@ -272,7 +272,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                     }}
                     className="flex items-center gap-2 px-3 py-2 border border-line bg-canvas hover:bg-canvas-alt text-xs rounded text-ink-secondary"
                   >
-                    <Camera className="w-4 h-4 text-brand-600" />
+                    <Camera className="w-4 h-4 text-black" />
                     <span>Upload Bag Photo</span>
                   </button>
                   <button
@@ -283,7 +283,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                     }}
                     className="flex items-center gap-2 px-3 py-2 border border-line bg-canvas hover:bg-canvas-alt text-xs rounded text-ink-secondary"
                   >
-                    <Video className="w-4 h-4 text-brand-600" />
+                    <Video className="w-4 h-4 text-black" />
                     <span>Upload Video Clip</span>
                   </button>
                 </div>
@@ -306,7 +306,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                     placeholder="e.g. Radhika Sen"
                     value={authorName}
                     onChange={(e) => setAuthorName(e.target.value)}
-                    className="w-full text-xs p-2.5 border border-line bg-canvas rounded focus:outline-none focus:border-brand-600"
+                    className="w-full text-xs p-2.5 border border-line bg-canvas rounded focus:outline-none focus:border-black"
                   />
                 </div>
                 <div>
@@ -319,7 +319,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                     placeholder="e.g. Mumbai"
                     value={authorCity}
                     onChange={(e) => setAuthorCity(e.target.value)}
-                    className="w-full text-xs p-2.5 border border-line bg-canvas rounded focus:outline-none focus:border-brand-600"
+                    className="w-full text-xs p-2.5 border border-line bg-canvas rounded focus:outline-none focus:border-black"
                   />
                 </div>
               </div>

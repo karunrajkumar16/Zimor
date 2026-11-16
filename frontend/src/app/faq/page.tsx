@@ -43,73 +43,73 @@ export default function FAQPage() {
           aria-labelledby="product-care-heading"
         >
           <div className="mb-6">
-            <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-zimor-orange font-medium font-primary mb-1.5">
+            <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-black font-medium font-primary mb-1.5">
               CARE INSTRUCTIONS
             </p>
             <h2
               id="product-care-heading"
-              className="font-primary text-xl sm:text-2xl lg:text-3xl font-normal text-zimor-black tracking-tight"
+              className="font-primary text-xl sm:text-2xl lg:text-3xl font-normal text-black tracking-tight"
             >
               How to Care for Your ZIMOR Piece
             </h2>
-            <p className="font-secondary text-xs sm:text-sm text-zimor-brown mt-1.5 leading-relaxed">
+            <p className="font-secondary text-xs sm:text-sm text-[#333333] mt-1.5 leading-relaxed">
               Crafted to accompany you through daily commutes and elevated moments, our bags require minimal yet intentional maintenance to preserve their silhouette and finish over years.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
             <div className="p-5 border border-line/60 bg-white space-y-2">
-              <div className="w-8 h-8 rounded-full bg-canvas-soft/30 flex items-center justify-center text-zimor-orange mb-3">
+              <div className="w-8 h-8 rounded-full bg-[#f8f8f8] flex items-center justify-center text-black mb-3">
                 <Sparkles className="w-4 h-4" />
               </div>
-              <h3 className="font-primary text-sm sm:text-base font-medium text-zimor-black">
+              <h3 className="font-primary text-sm sm:text-base font-medium text-black">
                 Routine Cleaning
               </h3>
-              <p className="font-secondary text-xs text-zimor-brown leading-relaxed">
+              <p className="font-secondary text-xs text-[#333333] leading-relaxed">
                 Wipe gently with a clean, soft, slightly damp microfiber cloth. Allow the piece to air-dry naturally at room temperature. Avoid machine washing or harsh chemical solvents.
               </p>
             </div>
 
             <div className="p-5 border border-line/60 bg-white space-y-2">
-              <div className="w-8 h-8 rounded-full bg-canvas-soft/30 flex items-center justify-center text-zimor-orange mb-3">
+              <div className="w-8 h-8 rounded-full bg-[#f8f8f8] flex items-center justify-center text-black mb-3">
                 <Package className="w-4 h-4" />
               </div>
-              <h3 className="font-primary text-sm sm:text-base font-medium text-zimor-black">
+              <h3 className="font-primary text-sm sm:text-base font-medium text-black">
                 Storage &amp; Structure
               </h3>
-              <p className="font-secondary text-xs text-zimor-brown leading-relaxed">
+              <p className="font-secondary text-xs text-[#333333] leading-relaxed">
                 When not in use, lightly stuff the bag with acid-free tissue paper to retain its architectural structure. Store inside the complimentary breathable Zimor dust bag.
               </p>
             </div>
 
             <div className="p-5 border border-line/60 bg-white space-y-2">
-              <div className="w-8 h-8 rounded-full bg-canvas-soft/30 flex items-center justify-center text-zimor-orange mb-3">
+              <div className="w-8 h-8 rounded-full bg-[#f8f8f8] flex items-center justify-center text-black mb-3">
                 <ShieldCheck className="w-4 h-4" />
               </div>
-              <h3 className="font-primary text-sm sm:text-base font-medium text-zimor-black">
+              <h3 className="font-primary text-sm sm:text-base font-medium text-black">
                 Heat &amp; Moisture
               </h3>
-              <p className="font-secondary text-xs text-zimor-brown leading-relaxed">
+              <p className="font-secondary text-xs text-[#333333] leading-relaxed">
                 While our superior faux leather is water-resistant, promptly wipe away standing droplets. Keep your bag away from direct heat sources, radiators, or prolonged direct midday sun.
               </p>
             </div>
           </div>
         </section>
 
-        {/* Concierge Assistance Card */}
+        {/* Client Support Assistance Card */}
         <section
           className="p-6 sm:p-8 border border-line/60 bg-[#faf9f6] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6"
-          aria-label="Contact Concierge"
+          aria-label="Contact Client Support"
         >
           <div className="space-y-1.5 max-w-lg">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-zimor-orange font-primary font-medium">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-black font-primary font-medium">
               CLIENT SERVICES
             </p>
-            <h3 className="font-primary text-lg sm:text-xl font-medium text-zimor-black">
+            <h3 className="font-primary text-lg sm:text-xl font-medium text-black">
               Still Have Questions?
             </h3>
-            <p className="font-secondary text-xs sm:text-sm text-zimor-brown leading-relaxed">
-              Our customer concierge is available Monday to Saturday, 9:30 AM to 6:00 PM IST, to assist you with order inquiries, product sizing, or personal styling advice.
+            <p className="font-secondary text-xs sm:text-sm text-[#333333] leading-relaxed">
+              Our customer support team is available 24×7 to assist you with order inquiries, product sizing, or personal styling advice.
             </p>
           </div>
 
@@ -123,7 +123,7 @@ export default function FAQPage() {
             </Link>
             <a
               href="mailto:care@zimorindia.com"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full border border-line text-zimor-black hover:border-black transition-colors font-primary text-xs font-medium uppercase tracking-[0.14em]"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full border border-line text-black hover:border-black transition-colors font-primary text-xs font-medium uppercase tracking-[0.14em]"
             >
               <Mail className="w-3.5 h-3.5" />
               <span>Email Support</span>

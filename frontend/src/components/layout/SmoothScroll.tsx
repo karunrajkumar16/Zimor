@@ -106,20 +106,44 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
     if (!lenisRef.current) return;
     if (typeof window === 'undefined') return;
 
-    const isProfession =
+    const storedSection = sessionStorage.getItem('scroll_to_section') || sessionStorage.getItem('scroll_to_profession');
+    const isTargeted =
+      window.location.hash.includes('everyday') ||
+      window.location.hash.includes('work') ||
+      window.location.hash.includes('travel') ||
+      window.location.hash.includes('lifestyle') ||
       window.location.hash.includes('profession') ||
       window.location.hash.includes('corporate') ||
       window.location.hash.includes('tech-transit') ||
       window.location.hash.includes('creative') ||
-      window.location.search.includes('section=profession') ||
-      sessionStorage.getItem('scroll_to_profession') === 'true';
+      window.location.search.includes('section=') ||
+      storedSection !== null;
 
-    if (isProfession) {
+    if (isTargeted) {
+      sessionStorage.removeItem('scroll_to_section');
       sessionStorage.removeItem('scroll_to_profession');
       let attempts = 0;
-      const targetHash = window.location.hash ? window.location.hash.slice(1) : 'profession';
+      let targetId = window.location.hash ? window.location.hash.slice(1) : '';
+      if (!targetId && storedSection) {
+        targetId = storedSection;
+      }
+      if (!targetId && window.location.search.includes('section=')) {
+        const match = window.location.search.match(/section=([a-zA-Z0-9_-]+)/);
+        if (match) targetId = match[1];
+      }
+      if (!targetId) targetId = 'lifestyle';
+
+      // Map legacy IDs
+      if (targetId === 'corporate-executive') targetId = 'everyday';
+      if (targetId === 'tech-transit') targetId = 'work';
+      if (targetId === 'creative-studio') targetId = 'travel';
+      if (targetId === 'profession') targetId = 'lifestyle';
+
       const pollAndScroll = () => {
-        const el = document.getElementById(targetHash) || document.getElementById('profession');
+        const el =
+          document.getElementById(targetId) ||
+          document.getElementById('lifestyle') ||
+          document.getElementById('profession');
         if (el && lenisRef.current) {
           const header = document.querySelector('header');
           const headerOffset = header ? -header.offsetHeight : -80;
@@ -130,6 +154,7 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
         }
       };
       setTimeout(pollAndScroll, 60);
+      setTimeout(pollAndScroll, 250);
       return;
     }
 
@@ -153,6 +178,35 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
 
     lenisRef.current.scrollTo(0, { immediate: true });
   }, [pathname]);
+
+  // Handle in-page hashchange events with Lenis
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleHashChange = () => {
+      if (!lenisRef.current) return;
+      const hash = window.location.hash ? window.location.hash.slice(1) : '';
+      if (!hash) return;
+      let targetId = hash;
+      if (targetId === 'corporate-executive') targetId = 'everyday';
+      if (targetId === 'tech-transit') targetId = 'work';
+      if (targetId === 'creative-studio') targetId = 'travel';
+      if (targetId === 'profession') targetId = 'lifestyle';
+
+      const el =
+        document.getElementById(targetId) ||
+        document.getElementById('lifestyle') ||
+        document.getElementById('profession');
+      if (el) {
+        const header = document.querySelector('header');
+        const headerOffset = header ? -header.offsetHeight : -80;
+        lenisRef.current.scrollTo(el, { offset: headerOffset, duration: 1.0 });
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   const scrollTo = (
     target: string | number | HTMLElement,

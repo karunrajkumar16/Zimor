@@ -99,12 +99,12 @@ export default function WishlistPage() {
 
                 <div className="p-4 space-y-3">
                   <div>
-                    <span className="text-[10px] uppercase tracking-widest text-brand-700 font-bold">
+                    <span className="text-[10px] uppercase tracking-widest text-black font-bold">
                       {product.categoryLabel}
                     </span>
                     <Link
                       href={`/product/${product.slug}`}
-                      className="block text-sm font-bold text-ink hover:text-brand-700 transition-colors line-clamp-1 mt-0.5"
+                      className="block text-sm font-bold text-ink hover:text-[#b4b4b4] transition-colors line-clamp-1 mt-0.5"
                     >
                       {product.name}
                     </Link>

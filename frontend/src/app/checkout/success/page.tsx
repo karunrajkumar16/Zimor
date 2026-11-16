@@ -24,7 +24,7 @@ function SuccessContent() {
           </div>
 
           <div className="space-y-1">
-            <span className="text-xs uppercase tracking-widest text-brand-700 font-bold">
+            <span className="text-xs uppercase tracking-widest text-black font-bold">
               Order Confirmed
             </span>
             <h1 className="font-primary text-[28px] sm:text-[36px] font-normal text-ink tracking-tight">
@@ -42,7 +42,7 @@ function SuccessContent() {
             </p>
             <div className="grid grid-cols-4 gap-2 text-center text-xs">
               <div className="space-y-1">
-                <div className="w-6 h-6 mx-auto rounded-full bg-brand-700 text-white flex items-center justify-center text-[10px] font-bold">
+                <div className="w-6 h-6 mx-auto rounded-full bg-black text-white flex items-center justify-center text-[10px] font-bold">
                   ✓
                 </div>
                 <p className="font-semibold text-ink text-[11px]">Confirmed</p>
@@ -50,7 +50,7 @@ function SuccessContent() {
               </div>
 
               <div className="space-y-1">
-                <div className="w-6 h-6 mx-auto rounded-full bg-brand-50 border border-brand-300 text-brand-800 flex items-center justify-center text-[10px] font-bold">
+                <div className="w-6 h-6 mx-auto rounded-full bg-neutral-100 border border-[#b4b4b4] text-black flex items-center justify-center text-[10px] font-bold">
                   2
                 </div>
                 <p className="font-medium text-ink text-[11px]">Handcraft Check</p>
@@ -86,7 +86,7 @@ function SuccessContent() {
               </div>
               <div>
                 <p className="text-xs text-ink-muted">Courier Tracking</p>
-                <p className="text-sm font-bold text-brand-800">
+                <p className="text-sm font-bold text-black">
                   {currentOrder.courierName}: {currentOrder.trackingNumber}
                 </p>
               </div>

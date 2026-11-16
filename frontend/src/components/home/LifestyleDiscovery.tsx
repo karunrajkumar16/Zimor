@@ -21,40 +21,40 @@ interface PolenePillar {
 
 const PILLARS: PolenePillar[] = [
   {
-    id: 'corporate-executive',
-    topTitle: 'Executive Carry',
-    number: '01',
-    eyebrow: 'Corporate • Legal • Executive',
-    name: 'The Executive Suite',
-    subtitle: '15.6" Executive Laptop Tote',
+    id: 'everyday',
+    topTitle: '',
+    number: '',
+    eyebrow: '',
+    name: 'EVERYDAY',
+    subtitle: 'For the everyday.',
     silhouette: 'The Delo Collection',
-    href: '/product/zimor-delo-tote',
+    href: '/shop?section=everyday#everyday',
     editorialImage: '/brandgirl3.webp',
     macroImage: '/products/classic-4.jpg',
     icon: Briefcase,
   },
   {
-    id: 'tech-transit',
-    topTitle: 'Daily Commute',
-    number: '02',
-    eyebrow: 'Tech • Founders • Commute',
-    name: 'The Dynamic Commute',
-    subtitle: '15" Dual-Carry Laptop Tote',
+    id: 'work',
+    topTitle: '',
+    number: '',
+    eyebrow: '',
+    name: 'WORK',
+    subtitle: 'For what lies ahead.',
     silhouette: 'The Rabota Collection',
-    href: '/product/zimor-rabota-tote',
+    href: '/shop?section=work#work',
     editorialImage: '/image.jpg',
     macroImage: '/products/rabota-4.jpg',
     icon: Laptop,
   },
   {
-    id: 'creative-studio',
-    topTitle: 'Creative Studio',
-    number: '03',
-    eyebrow: 'Design • Curators • Evening',
-    name: 'The Creative Studio',
-    subtitle: 'Sculptural Crescent Handbag',
+    id: 'travel',
+    topTitle: '',
+    number: '',
+    eyebrow: '',
+    name: 'TRAVEL',
+    subtitle: 'For places beyond.',
     silhouette: 'The Classic Collection',
-    href: '/product/zimor-classic-shoulder-bag',
+    href: '/shop?section=travel#travel',
     editorialImage: '/brandgirl2.webp',
     macroImage: '/products/classic-4.jpg',
     icon: Sparkles,
@@ -158,25 +158,25 @@ export const LifestyleDiscovery: React.FC = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} className="pt-10 sm:pt-16 pb-0 bg-canvas content-auto" aria-label="Shop by Profession and Lifestyle">
+    <section ref={sectionRef} className="pt-10 sm:pt-16 pb-0 bg-canvas content-auto" aria-label="Shop by Lifestyle">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="mb-6 sm:mb-10">
-          <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-brand-700 font-bold mb-1.5 font-primary">
+          <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-[#000000] font-bold mb-1.5 font-primary">
             Find Your Everyday Match
           </p>
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
             <div>
               <h2 className="font-primary text-2xl sm:text-3xl lg:text-4xl font-normal text-ink tracking-tight leading-tight">
-                Shop by Profession & Lifestyle
+                Shop by Lifestyle
               </h2>
               <p className="text-xs sm:text-sm text-ink-secondary mt-1 font-normal max-w-xl leading-relaxed">
-                Select your daily routine to explore the silhouette engineered for your workday carry, tech protection, and transit agility.
+                Select your lifestyle to explore the silhouette engineered for your everyday rhythm, work focus, and travel escapes.
               </p>
             </div>
             <Link
               href="/shop"
-              className="inline-flex items-center gap-1.5 font-primary text-xs sm:text-sm font-medium tracking-normal text-ink hover:text-brand-700 transition-colors shrink-0"
+              className="inline-flex items-center gap-1.5 font-primary text-xs sm:text-sm font-medium tracking-normal text-ink hover:text-[#b4b4b4] transition-colors shrink-0"
             >
               <span>Explore All Silhouettes</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -220,19 +220,21 @@ export const LifestyleDiscovery: React.FC = () => {
                     fill
                     sizes="(max-width: 768px) 70vw, 33vw"
                     className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
-                    priority={pillar.id === 'corporate-executive'}
+                    priority={pillar.id === 'everyday'}
                   />
                 </div>
 
                 {/* Balanced Vignette Gradient for Top Title & Bottom Content */}
                 <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-transparent to-black/85 group-hover:from-black/60 group-hover:to-black/90 transition-opacity duration-300 pointer-events-none" />
 
-                {/* Top Title: 1-2 Word Representative Category Title */}
-                <div className="absolute top-4 sm:top-5 left-4 sm:left-5 z-10 pointer-events-none drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.85)]">
-                  <h4 className="font-primary font-semibold text-white text-base sm:text-lg lg:text-xl tracking-tight leading-tight">
-                    {pillar.topTitle}
-                  </h4>
-                </div>
+                {/* Top Title: 1-2 Word Representative Category Title (if present) */}
+                {pillar.topTitle && (
+                  <div className="absolute top-4 sm:top-5 left-4 sm:left-5 z-10 pointer-events-none drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.85)]">
+                    <h4 className="font-primary font-semibold text-white text-base sm:text-lg lg:text-xl tracking-tight leading-tight">
+                      {pillar.topTitle}
+                    </h4>
+                  </div>
+                )}
 
                 {/* Bottom Overlay Content */}
                 <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 text-white z-10 space-y-1.5 sm:space-y-2 pointer-events-none drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.85)]">
@@ -272,7 +274,7 @@ export const LifestyleDiscovery: React.FC = () => {
               className={`h-1.5 transition-all duration-300 rounded-full ${
                 activeMobileIndex === idx ? 'w-8 bg-ink' : 'w-2 bg-line hover:bg-ink-muted'
               }`}
-              aria-label={`Go to slide ${pillar.number} - ${pillar.topTitle}`}
+              aria-label={`Go to slide - ${pillar.name}`}
             />
           ))}
         </div>
@@ -327,7 +329,7 @@ export const LifestyleDiscovery: React.FC = () => {
             {/* Underlined Call to Action */}
             <Link
               href="/about"
-              className="font-primary text-xs sm:text-sm font-medium tracking-normal text-ink hover:text-brand-700 underline underline-offset-8 transition-colors"
+              className="font-primary text-xs sm:text-sm font-medium tracking-normal text-ink hover:text-[#b4b4b4] underline underline-offset-8 transition-colors"
             >
               Discover More
             </Link>

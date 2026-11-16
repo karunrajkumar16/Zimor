@@ -50,7 +50,7 @@ export default function OrdersPage() {
           </div>
           <Link
             href="/shop"
-            className="text-xs font-semibold text-brand-700 hover:text-brand-900 underline self-start sm:self-auto"
+            className="text-xs font-semibold text-black hover:text-[#b4b4b4] underline self-start sm:self-auto"
           >
             Explore More Handbags →
           </Link>
@@ -101,7 +101,7 @@ export default function OrdersPage() {
                       <span
                         className={`inline-block px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider ${order.status === 'Delivered'
                           ? 'bg-emerald-100 text-emerald-800'
-                          : 'bg-brand-100 text-brand-900'
+                          : 'bg-neutral-100 text-black'
                           }`}
                       >
                         {order.status}
@@ -122,15 +122,15 @@ export default function OrdersPage() {
                 </div>
 
                 {/* Tracking Ribbon */}
-                <div className="p-4 bg-brand-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-brand-950">
+                <div className="p-4 bg-[#f8f8f8] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-black">
                   <div className="flex items-center gap-2">
-                    <Truck className="w-4 h-4 text-brand-700 shrink-0" />
+                    <Truck className="w-4 h-4 text-black shrink-0" />
                     <span>
                       Carrier: <strong>{order.courierName}</strong> • AWB Tracking Number:{' '}
                       <strong className="underline">{order.trackingNumber}</strong>
                     </span>
                   </div>
-                  <span className="text-[11px] text-brand-800 font-semibold">
+                  <span className="text-[11px] text-[#555555] font-semibold">
                     Delivery: {order.estimatedDelivery}
                   </span>
                 </div>
@@ -146,7 +146,7 @@ export default function OrdersPage() {
                         <div className="space-y-1">
                           <Link
                             href={`/product/${item.slug}`}
-                            className="text-xs sm:text-sm font-bold text-ink hover:text-brand-700 transition-colors"
+                            className="text-xs sm:text-sm font-bold text-ink hover:text-black transition-colors"
                           >
                             {item.name}
                           </Link>
@@ -165,7 +165,7 @@ export default function OrdersPage() {
                           onClick={() => handleReorder(item)}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-canvas border border-line hover:bg-canvas-alt rounded text-xs font-medium text-ink transition-colors"
                         >
-                          <RotateCcw className="w-3.5 h-3.5 text-brand-700" />
+                          <RotateCcw className="w-3.5 h-3.5 text-black" />
                           <span>Buy Again</span>
                         </button>
 

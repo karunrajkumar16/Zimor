@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight, ShoppingBag, Check } from 'lucide-react';
 import { PRODUCTS } from '@/data/products';
 import { Product } from '@/types';
 import { useCart } from '@/context/CartContext';
+import { SOCIAL_LINKS } from '@/data/social';
 
 export interface ShoppableVideoItem {
   id: string;
@@ -179,7 +180,7 @@ const ShoppableVideoCard = memo<ShoppableVideoCardProps>(({
               href={`/product/${item.product.slug}`}
               className="min-w-0 flex-1 block group/link"
             >
-              <p className="font-primary text-[11px] sm:text-xs font-normal text-ink truncate leading-tight group-hover/link:text-brand-700 transition-colors">
+              <p className="font-primary text-[11px] sm:text-xs font-normal text-ink truncate leading-tight group-hover/link:text-[#b4b4b4] transition-colors">
                 {item.product.name}
               </p>
               <p className="font-secondary text-[11px] sm:text-xs font-bold text-ink mt-0.5">
@@ -247,7 +248,15 @@ export const ShopByVideo: React.FC = () => {
               Shop by Video
             </h2>
             <p className="text-xs sm:text-[13px] text-ink-muted mt-1 font-normal max-w-lg leading-relaxed">
-              Experience how each handbag fits, moves, and styles in real workday motion.
+              Experience how each handbag fits, moves, and styles in real workday motion.{' '}
+              <a
+                href={SOCIAL_LINKS.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center text-ink hover:underline font-medium"
+              >
+                Follow @zimorindia ↗
+              </a>
             </p>
           </div>
 

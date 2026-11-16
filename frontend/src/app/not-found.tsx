@@ -4,13 +4,13 @@ import { ArrowRight } from 'lucide-react';
 export default function NotFound() {
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center px-4 py-16 text-center bg-white">
-      <p className="text-[11px] uppercase tracking-[0.25em] text-zimor-orange font-medium font-primary mb-3">
+      <p className="text-[11px] uppercase tracking-[0.25em] text-black font-medium font-primary mb-3">
         404 · PAGE NOT FOUND
       </p>
-      <h1 className="font-primary text-3xl sm:text-5xl font-normal text-zimor-black tracking-tight mb-4">
+      <h1 className="font-primary text-3xl sm:text-5xl font-normal text-black tracking-tight mb-4">
         Piece Not Found
       </h1>
-      <p className="font-secondary text-sm sm:text-base text-zimor-brown max-w-md mb-8 leading-relaxed">
+      <p className="font-secondary text-sm sm:text-base text-[#333333] max-w-md mb-8 leading-relaxed">
         The page or silhouette you are looking for may have been moved, renamed, or is temporarily unavailable.
       </p>
       <Link

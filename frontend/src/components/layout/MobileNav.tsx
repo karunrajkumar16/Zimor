@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import { useWishlist } from '@/context/WishlistContext';
 import { useCart } from '@/context/CartContext';
+import { SOCIAL_LINKS } from '@/data/social';
+import { InstagramIcon, FacebookIcon, PinterestIcon, YoutubeIcon } from './Footer';
 
 interface MobileNavProps {
   isOpen: boolean;
@@ -46,14 +48,17 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
     setActiveSection((prev) => (prev === id ? null : id));
   };
 
-  const handleProfessionScroll = () => {
+  const handleLifestyleScroll = (targetId: string = 'lifestyle') => {
     if (typeof window !== 'undefined') {
-      sessionStorage.setItem('scroll_to_profession', 'true');
+      sessionStorage.setItem('scroll_to_section', targetId);
     }
     onClose();
     if (typeof window !== 'undefined' && window.location.pathname === '/shop') {
       setTimeout(() => {
-        const el = document.getElementById('profession');
+        const el =
+          document.getElementById(targetId) ||
+          document.getElementById('lifestyle') ||
+          document.getElementById('profession');
         if (el) {
           const header = document.querySelector('header');
           const headerHeight = header ? header.offsetHeight : 64;
@@ -79,29 +84,29 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
     },
     {
       id: 'profession',
-      label: 'Shop by Profession',
+      label: 'Shop by Lifestyle',
       badge: 'Curated',
       subItems: [
         {
-          label: 'Explore All Work Archetypes',
-          href: '/shop?section=profession#profession',
+          label: 'Explore All Lifestyles',
+          href: '/shop?section=lifestyle#lifestyle',
           isFeatured: true,
-          onClick: handleProfessionScroll,
+          onClick: () => handleLifestyleScroll('lifestyle'),
         },
         {
-          label: 'Corporate & Executive Carry',
-          href: '/shop?section=profession#profession',
-          onClick: handleProfessionScroll,
+          label: 'Everyday Carry',
+          href: '/shop?section=everyday#everyday',
+          onClick: () => handleLifestyleScroll('everyday'),
         },
         {
-          label: 'Dynamic Commuter & Tech Founders',
-          href: '/shop?section=profession#profession',
-          onClick: handleProfessionScroll,
+          label: 'Work Silhouettes',
+          href: '/shop?section=work#work',
+          onClick: () => handleLifestyleScroll('work'),
         },
         {
-          label: 'Creative Studio & Evening Carry',
-          href: '/shop?section=profession#profession',
-          onClick: handleProfessionScroll,
+          label: 'Travel & Beyond',
+          href: '/shop?section=travel#travel',
+          onClick: () => handleLifestyleScroll('travel'),
         },
       ],
     },
@@ -117,13 +122,16 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
       ],
     },
     {
-      id: 'care',
-      label: 'Customer Care',
+      id: 'contact',
+      label: 'Contact Us',
       subItems: [
-        { label: 'Track Your Order', href: '/account/orders', isFeatured: true },
+        { label: 'Contact Page & Inquiries', href: '/contact', isFeatured: true },
+        { label: 'WhatsApp (+91 86046 47888)', href: 'https://wa.me/918604647888' },
+        { label: 'Call (+91 86046 47888)', href: 'tel:+918604647888' },
+        { label: 'Send Email', href: 'mailto:zimorindia@gmail.com' },
+        { label: 'Track Your Order', href: '/account/orders' },
         { label: 'Policy & Customer Guidelines', href: '/policy' },
         { label: 'Frequently Asked Questions (FAQ)', href: '/faq' },
-        { label: 'Client Concierge & Support', href: '/contact' },
       ],
     },
   ];
@@ -136,21 +144,21 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
         onClick={onClose}
       />
 
-      {/* Drawer Canvas — Clean Pure White Architecture */}
+      {/* Drawer Canvas — Clean Pure White Architecture with Monochromatic Minimalist Finish */}
       <div
         data-lenis-prevent-modal
-        className="fixed inset-y-0 left-0 w-full max-w-[310px] bg-white shadow-2xl flex flex-col justify-between animate-in slide-in-from-left duration-300 overflow-y-auto"
+        className="fixed inset-y-0 left-0 w-full max-w-[320px] bg-[#ffffff] text-[#000000] shadow-2xl flex flex-col justify-between animate-in slide-in-from-left duration-300 overflow-y-auto"
       >
         <div>
           {/* Header Bar */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-line/60">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-[#b4b4b4]/30">
             <Link href="/" onClick={onClose} className="relative w-28 h-7">
               <Image src="/logo.png" alt="Zimor India" fill className="object-contain" priority />
             </Link>
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 text-ink-muted hover:text-ink transition-colors rounded-full hover:bg-canvas-card"
+              className="p-1.5 text-[#000000] hover:text-[#b4b4b4] transition-colors rounded-full hover:bg-neutral-100"
               aria-label="Close navigation"
             >
               <X className="w-5 h-5 stroke-[1.5]" />
@@ -158,35 +166,35 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
           </div>
 
           {/* Quick Account / Wishlist / Cart Bar */}
-          <div className="grid grid-cols-3 border-b border-line/60 bg-zimor-cream/10 text-center py-2.5">
+          <div className="grid grid-cols-3 border-b border-[#b4b4b4]/30 bg-[#f8f8f8] text-center py-2.5">
             <Link
               href="/account"
               onClick={onClose}
-              className="flex flex-col items-center gap-1 text-ink-secondary hover:text-ink transition-colors py-1"
+              className="flex flex-col items-center gap-1 text-[#000000] hover:text-[#b4b4b4] transition-colors py-1"
             >
-              <User className="w-4 h-4 stroke-[1.5] text-ink" />
+              <User className="w-4 h-4 stroke-[1.5]" />
               <span className="text-[11px] font-medium tracking-tight">Account</span>
             </Link>
             <Link
               href="/wishlist"
               onClick={onClose}
-              className="flex flex-col items-center gap-1 text-ink-secondary hover:text-ink transition-colors border-x border-line/60 py-1"
+              className="flex flex-col items-center gap-1 text-[#000000] hover:text-[#b4b4b4] transition-colors border-x border-[#b4b4b4]/30 py-1"
             >
-              <Heart className="w-4 h-4 stroke-[1.5] text-ink" />
+              <Heart className="w-4 h-4 stroke-[1.5]" />
               <span className="text-[11px] font-medium tracking-tight">Wishlist ({wishlistCount})</span>
             </Link>
             <Link
               href="/cart"
               onClick={onClose}
-              className="flex flex-col items-center gap-1 text-ink-secondary hover:text-ink transition-colors py-1"
+              className="flex flex-col items-center gap-1 text-[#000000] hover:text-[#b4b4b4] transition-colors py-1"
             >
-              <ShoppingBag className="w-4 h-4 stroke-[1.5] text-ink" />
+              <ShoppingBag className="w-4 h-4 stroke-[1.5]" />
               <span className="text-[11px] font-medium tracking-tight">Bag ({itemCount})</span>
             </Link>
           </div>
 
           {/* Progressive Disclosure Accordion List */}
-          <div className="divide-y divide-line/40">
+          <div className="divide-y divide-[#b4b4b4]/25">
             {SECTIONS.map((section) => {
               const isExpanded = activeSection === section.id;
 
@@ -196,21 +204,21 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
                   <button
                     type="button"
                     onClick={() => toggleSection(section.id)}
-                    className="w-full px-5 py-3.5 flex items-center justify-between text-left group hover:bg-zimor-cream/10 transition-colors"
+                    className="w-full px-5 py-3.5 flex items-center justify-between text-left group hover:bg-[#f8f8f8] transition-colors"
                   >
                     <div className="flex items-center gap-2">
-                      <span className="font-primary text-[14px] font-medium text-ink tracking-tight">
+                      <span className="font-primary text-[14px] font-medium text-[#000000] tracking-tight">
                         {section.label}
                       </span>
                       {section.badge && (
-                        <span className="text-[9px] font-medium uppercase tracking-wider text-ink-muted bg-zimor-cream/25 px-1.5 py-0.5 rounded-sm">
+                        <span className="text-[9px] font-medium uppercase tracking-wider text-[#000000] bg-[#b4b4b4]/20 px-1.5 py-0.5 rounded-sm">
                           {section.badge}
                         </span>
                       )}
                     </div>
                     <ChevronDown
-                      className={`w-4 h-4 text-ink-muted transition-transform duration-200 ease-out group-hover:text-ink ${
-                        isExpanded ? 'rotate-180 text-ink' : ''
+                      className={`w-4 h-4 text-[#b4b4b4] transition-transform duration-200 ease-out group-hover:text-[#000000] ${
+                        isExpanded ? 'rotate-180 text-[#000000]' : ''
                       }`}
                     />
                   </button>
@@ -218,7 +226,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
                   {/* Sub-Items (Progressive Disclosure upon Interaction) */}
                   {isExpanded && (
                     <div className="px-5 pb-3 pt-1 animate-in slide-in-from-top-1 duration-200">
-                      <div className="pl-3 border-l border-line space-y-1.5 my-1">
+                      <div className="pl-3 border-l-2 border-[#000000] space-y-1.5 my-1">
                         {section.subItems.map((sub, idx) => (
                           <Link
                             key={sub.label + idx}
@@ -232,12 +240,12 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
                             }}
                             className={`block py-1.5 text-xs transition-colors ${
                               sub.isFeatured
-                                ? 'font-semibold text-ink hover:text-brand-700 flex items-center justify-between'
-                                : 'text-ink-secondary hover:text-ink'
+                                ? 'font-semibold text-[#000000] hover:text-[#b4b4b4] flex items-center justify-between'
+                                : 'text-[#333333] hover:text-[#000000]'
                             }`}
                           >
                             <span>{sub.label}</span>
-                            {sub.isFeatured && <ArrowRight className="w-3.5 h-3.5 text-ink-muted" />}
+                            {sub.isFeatured && <ArrowRight className="w-3.5 h-3.5 text-[#000000]" />}
                           </Link>
                         ))}
                       </div>
@@ -250,18 +258,58 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Footer Brand & Assurance Strip */}
-        <div className="p-4 bg-zimor-cream/10 border-t border-line/60 space-y-2">
-          <div className="flex items-center gap-2 text-ink-secondary">
-            <Truck className="w-3.5 h-3.5 stroke-[1.5] text-ink shrink-0" />
+        <div className="p-4 bg-[#f8f8f8] border-t border-[#b4b4b4]/30 space-y-2">
+          <div className="flex items-center gap-2 text-[#333333]">
+            <Truck className="w-3.5 h-3.5 stroke-[1.5] text-[#000000] shrink-0" />
             <span className="text-[11px] font-medium">Free Express Shipping across India</span>
           </div>
-          <div className="flex items-center gap-2 text-ink-secondary">
-            <ShieldCheck className="w-3.5 h-3.5 stroke-[1.5] text-ink shrink-0" />
+          <div className="flex items-center gap-2 text-[#333333]">
+            <ShieldCheck className="w-3.5 h-3.5 stroke-[1.5] text-[#000000] shrink-0" />
             <span className="text-[11px] font-medium">7-Day Easy Returns & Exchange</span>
           </div>
-          <div className="pt-2 border-t border-line/60 flex items-center justify-between text-[10px] text-ink-muted">
+
+          {/* Social Media Links with Brand Hover Colors */}
+          <div className="pt-2 flex items-center justify-center gap-3">
+            <a
+              href={SOCIAL_LINKS.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-8 h-8 rounded-full bg-black/5 border border-[#b4b4b4]/30 text-[#000000] flex items-center justify-center transition-all duration-300 hover:scale-110 hover:bg-gradient-to-tr hover:from-[#f09433] hover:via-[#dc2743] hover:to-[#bc1888] hover:border-transparent hover:text-white hover:shadow-sm"
+              aria-label="Instagram"
+            >
+              <InstagramIcon className="w-3.5 h-3.5" />
+            </a>
+            <a
+              href={SOCIAL_LINKS.pinterest}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-8 h-8 rounded-full bg-black/5 border border-[#b4b4b4]/30 text-[#000000] flex items-center justify-center transition-all duration-300 hover:scale-110 hover:bg-[#E60023] hover:border-[#E60023] hover:text-white hover:shadow-sm"
+              aria-label="Pinterest"
+            >
+              <PinterestIcon className="w-3.5 h-3.5" />
+            </a>
+            <a
+              href={SOCIAL_LINKS.youtube}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-8 h-8 rounded-full bg-black/5 border border-[#b4b4b4]/30 text-[#000000] flex items-center justify-center transition-all duration-300 hover:scale-110 hover:bg-[#FF0000] hover:border-[#FF0000] hover:text-white hover:shadow-sm"
+              aria-label="YouTube"
+            >
+              <YoutubeIcon className="w-3.5 h-3.5" />
+            </a>
+            <a
+              href={SOCIAL_LINKS.facebook}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-8 h-8 rounded-full bg-black/5 border border-[#b4b4b4]/30 text-[#000000] flex items-center justify-center transition-all duration-300 hover:scale-110 hover:bg-[#1877F2] hover:border-[#1877F2] hover:text-white hover:shadow-sm"
+              aria-label="Facebook"
+            >
+              <FacebookIcon className="w-3.5 h-3.5" />
+            </a>
+          </div>
+          <div className="pt-2 border-t border-[#b4b4b4]/25 flex items-center justify-between text-[10px] text-[#555555]">
             <span>© Zimor India</span>
-            <a href="mailto:zimorindia@gmail.com" className="hover:text-ink transition-colors">
+            <a href="mailto:zimorindia@gmail.com" className="hover:text-[#000000] transition-colors">
               zimorindia@gmail.com
             </a>
           </div>
@@ -270,3 +318,5 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
     </div>
   );
 };
+
+export default MobileNav;

@@ -71,7 +71,7 @@ export default function AccountPage() {
               </div>
               <div>
                 <h2 className="text-base font-bold text-ink">{user.name}</h2>
-                <p className="text-xs text-brand-700 font-medium">{user.designation}</p>
+                <p className="text-xs text-[#555555] font-medium">{user.designation}</p>
                 <p className="text-xs text-ink-muted">{user.city}, India</p>
               </div>
             </div>
@@ -84,7 +84,7 @@ export default function AccountPage() {
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full p-2 bg-canvas border border-line rounded focus:outline-none focus:border-brand-600"
+                    className="w-full p-2 bg-canvas border border-line rounded focus:outline-none focus:border-black"
                   />
                 </div>
                 <div>
@@ -93,7 +93,7 @@ export default function AccountPage() {
                     type="text"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full p-2 bg-canvas border border-line rounded focus:outline-none focus:border-brand-600"
+                    className="w-full p-2 bg-canvas border border-line rounded focus:outline-none focus:border-black"
                   />
                 </div>
                 <div>
@@ -102,7 +102,7 @@ export default function AccountPage() {
                     type="text"
                     value={designation}
                     onChange={(e) => setDesignation(e.target.value)}
-                    className="w-full p-2 bg-canvas border border-line rounded focus:outline-none focus:border-brand-600"
+                    className="w-full p-2 bg-canvas border border-line rounded focus:outline-none focus:border-black"
                   />
                 </div>
                 <div className="flex gap-2 pt-2">
@@ -138,7 +138,7 @@ export default function AccountPage() {
                 <button
                   type="button"
                   onClick={() => setIsEditing(true)}
-                  className="inline-flex items-center gap-1.5 text-xs text-brand-700 hover:text-brand-900 font-semibold pt-1"
+                  className="inline-flex items-center gap-1.5 text-xs text-black hover:text-[#b4b4b4] font-semibold pt-1"
                 >
                   <Edit3 className="w-3.5 h-3.5" />
                   <span>Edit Personal Details</span>
@@ -150,14 +150,14 @@ export default function AccountPage() {
             <div className="grid grid-cols-2 gap-3 pt-3 border-t border-line text-center">
               <Link
                 href="/account/orders"
-                className="p-3 bg-canvas rounded border border-line hover:border-brand-600 transition-colors"
+                className="p-3 bg-canvas rounded border border-line hover:border-black transition-colors"
               >
                 <p className="text-xl font-bold text-ink">{orders.length}</p>
                 <p className="text-[11px] text-ink-muted">Past Orders</p>
               </Link>
               <Link
                 href="/wishlist"
-                className="p-3 bg-canvas rounded border border-line hover:border-brand-600 transition-colors"
+                className="p-3 bg-canvas rounded border border-line hover:border-black transition-colors"
               >
                 <p className="text-xl font-bold text-ink">{wishlistCount}</p>
                 <p className="text-[11px] text-ink-muted">Wishlist Items</p>
@@ -171,7 +171,7 @@ export default function AccountPage() {
             <div className="bg-canvas-card border border-line rounded-lg p-6 sm:p-8 space-y-4 shadow-xs">
               <div className="flex items-center justify-between border-b border-line pb-3">
                 <h3 className="text-sm font-bold uppercase tracking-wider text-ink flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-brand-700" />
+                  <MapPin className="w-4 h-4 text-black" />
                   Saved Delivery Addresses
                 </h3>
                 <span className="text-xs text-ink-muted">{user.addresses.length} saved</span>
@@ -182,14 +182,14 @@ export default function AccountPage() {
                   <div
                     key={addr.id}
                     className={`p-4 rounded border text-xs space-y-1 relative ${addr.isDefault
-                      ? 'border-brand-700 bg-brand-50/40 ring-1 ring-brand-700'
+                      ? 'border-black bg-neutral-50 ring-1 ring-black'
                       : 'border-line bg-canvas'
                       }`}
                   >
                     <div className="flex items-center justify-between mb-1">
                       <span className="font-bold text-ink">{addr.label}</span>
                       {addr.isDefault && (
-                        <span className="text-[10px] bg-brand-700 text-white font-semibold px-2 py-0.5 rounded">
+                        <span className="text-[10px] bg-black text-white font-semibold px-2 py-0.5 rounded">
                           Default
                         </span>
                       )}
@@ -211,12 +211,12 @@ export default function AccountPage() {
               <div className="bg-canvas-card border border-line rounded-lg p-6 sm:p-8 space-y-4 shadow-xs">
                 <div className="flex items-center justify-between border-b border-line pb-3">
                   <h3 className="text-sm font-bold uppercase tracking-wider text-ink flex items-center gap-2">
-                    <Package className="w-4 h-4 text-brand-700" />
+                    <Package className="w-4 h-4 text-black" />
                     Latest Active Order
                   </h3>
                   <Link
                     href="/account/orders"
-                    className="text-xs font-semibold text-brand-700 hover:underline"
+                    className="text-xs font-semibold text-black hover:underline"
                   >
                     View All →
                   </Link>
@@ -227,7 +227,7 @@ export default function AccountPage() {
                     <p className="font-bold text-ink">Order #{orders[0].orderNumber}</p>
                     <p className="text-ink-muted">Placed on {orders[0].date}</p>
                   </div>
-                  <span className="px-2.5 py-1 bg-brand-100 text-brand-900 font-semibold rounded text-xs">
+                  <span className="px-2.5 py-1 bg-neutral-100 text-black font-semibold rounded text-xs">
                     {orders[0].status}
                   </span>
                 </div>

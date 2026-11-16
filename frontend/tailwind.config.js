@@ -9,44 +9,45 @@ module.exports = {
     extend: {
       colors: {
         zimor: {
-          orange: '#b44220',   // Orange Blossom (Accents, CTAs, Active States)
-          black: '#000000',    // Black (Text, Dark Surfaces)
-          brown: '#3f2211',    // Brown (Secondary Text, Dark Surfaces)
-          cream: '#caab8e',    // Cream (Soft Backgrounds, Cards)
-          ashGrey: '#b4b4b4',  // Ash Grey (Borders, Dividers, Disabled States only)
-          white: '#ffffff',    // White (Page Background, Text on Dark/Orange)
+          black: '#000000',    // Black (Text, Dark Surfaces, CTAs)
+          ashGrey: '#b4b4b4',  // Ash Grey (Borders, Dividers, Subdued Accents)
+          white: '#ffffff',    // White (Page Canvas, Surfaces, Text on Dark)
+          // Legacy mappings redirected strictly to client 3-color palette:
+          orange: '#000000',
+          brown: '#000000',
+          cream: '#ffffff',
         },
         brand: {
-          50: '#caab8e',
-          100: '#caab8e',
-          200: '#caab8e',
-          300: '#caab8e',
-          400: '#caab8e',
-          500: '#b44220',
-          600: '#b44220',
-          700: '#b44220',
-          800: '#b44220',
+          50: '#f8f8f8',
+          100: '#f0f0f0',
+          200: '#e5e5e5',
+          300: '#b4b4b4',
+          400: '#b4b4b4',
+          500: '#000000',
+          600: '#000000',
+          700: '#000000',
+          800: '#000000',
           900: '#000000',
           950: '#000000',
         },
         canvas: {
-          DEFAULT: '#ffffff',  // White for page background
-          card: '#ffffff',     // White
-          soft: '#caab8e',     // Cream for soft backgrounds
-          alt: '#caab8e',      // Cream
-          dark: '#000000',     // Black for dark surfaces
-          darkSurface: '#3f2211', // Brown for secondary dark surfaces
+          DEFAULT: '#ffffff',     // White for page background
+          card: '#ffffff',        // White
+          soft: '#f8f8f8',        // Clean light surface
+          alt: '#f8f8f8',         // Clean light surface
+          dark: '#000000',        // Pure Black
+          darkSurface: '#000000', // Pure Black
         },
         ink: {
           DEFAULT: '#000000',   // Black for primary text
-          secondary: '#3f2211', // Brown for secondary text
-          muted: '#3f2211',     // Brown (Rule 4: never use Ash Grey for body text)
-          faint: '#3f2211',     // Brown
+          secondary: '#333333', // Deep high-contrast neutral
+          muted: '#555555',     // Medium neutral
+          faint: '#777777',     // Light neutral
         },
         line: {
-          DEFAULT: '#b4b4b4',   // Ash Grey for borders & dividers only
-          subtle: '#b4b4b4',    // Ash Grey
-          dark: '#3f2211',      // Brown
+          DEFAULT: '#b4b4b4',   // Ash Grey for borders & dividers
+          subtle: '#e5e5e5',    // Subtle hairline
+          dark: '#000000',      // Black divider
         },
       },
       fontFamily: {

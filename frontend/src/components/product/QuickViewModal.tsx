@@ -72,7 +72,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
                   key={img.url}
                   type="button"
                   onClick={() => setSelectedImage(idx)}
-                  className={`relative w-14 h-14 rounded border shrink-0 overflow-hidden transition-all ${selectedImage === idx ? 'ring-2 ring-brand-700 border-transparent' : 'border-line opacity-75 hover:opacity-100'
+                  className={`relative w-14 h-14 rounded border shrink-0 overflow-hidden transition-all ${selectedImage === idx ? 'ring-2 ring-black border-transparent' : 'border-line opacity-75 hover:opacity-100'
                     }`}
                 >
                   <Image src={img.url} alt={img.alt} fill loading="lazy" decoding="async" className="object-cover" />
@@ -85,11 +85,11 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
           <div className="p-6 sm:p-8 flex flex-col justify-between space-y-4">
             <div>
               <div className="flex items-center justify-between text-xs text-ink-muted mb-1">
-                <span className="uppercase tracking-widest font-semibold text-brand-700">
+                <span className="uppercase tracking-widest font-semibold text-black">
                   {product.categoryLabel}
                 </span>
-                <div className="flex items-center gap-1 text-zimor-orange">
-                  <Star className="w-3.5 h-3.5 fill-zimor-orange text-zimor-orange" />
+                <div className="flex items-center gap-1 text-black">
+                  <Star className="w-3.5 h-3.5 fill-black text-black" />
                   <span className="font-semibold text-ink">{product.averageRating.toFixed(1)}</span>
                   <span>({product.numReviews} reviews)</span>
                 </div>
@@ -108,7 +108,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
                 <span className="text-sm text-ink-muted line-through">
                   ₹{product.compareAtPrice.toLocaleString('en-IN')}
                 </span>
-                <span className="text-xs font-semibold text-zimor-orange bg-zimor-cream/25 px-2 py-0.5 rounded">
+                <span className="text-xs font-semibold text-black bg-neutral-100 px-2 py-0.5 rounded">
                   Save ₹{(product.compareAtPrice - product.price).toLocaleString('en-IN')}
                 </span>
               </div>
@@ -131,7 +131,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
                       type="button"
                       onClick={() => setSelectedColor(color.name)}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border transition-all ${currentColor === color.name
-                        ? 'border-brand-700 bg-brand-50 text-brand-900 font-semibold'
+                        ? 'border-black bg-black text-white font-semibold'
                         : 'border-line text-ink hover:border-ink/40'
                         }`}
                     >
@@ -153,7 +153,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
                   <button
                     type="button"
                     disabled
-                    className="flex-1 bg-zimor-ashGrey/20 text-ink-muted py-3 px-4 rounded font-primary font-medium text-sm tracking-normal flex items-center justify-center gap-2 cursor-not-allowed border border-line"
+                    className="flex-1 bg-[#b4b4b4]/20 text-ink-muted py-3 px-4 rounded font-primary font-medium text-sm tracking-normal flex items-center justify-center gap-2 cursor-not-allowed border border-line"
                   >
                     <span>Coming Soon</span>
                   </button>
@@ -161,7 +161,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
                   <button
                     type="button"
                     onClick={handleAddToCart}
-                    className="flex-1 bg-ink hover:bg-ink-secondary text-white py-3 px-4 rounded font-primary font-medium text-sm tracking-normal flex items-center justify-center gap-2 transition-colors"
+                    className="flex-1 bg-ink hover:bg-neutral-800 text-white py-3 px-4 rounded font-primary font-medium text-sm tracking-normal flex items-center justify-center gap-2 transition-colors"
                   >
                     <ShoppingBag className="w-4 h-4" />
                     <span>Add to Bag</span>
@@ -171,7 +171,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
                 <button
                   type="button"
                   onClick={() => toggleWishlist(product.id)}
-                  className={`p-3 rounded border transition-colors ${inWishlist ? 'border-brand-700 text-brand-700 bg-brand-50' : 'border-line text-ink hover:border-ink'
+                  className={`p-3 rounded border transition-colors ${inWishlist ? 'border-black text-black bg-black/5' : 'border-line text-ink hover:border-ink'
                     }`}
                   aria-label="Wishlist toggle"
                 >
@@ -183,7 +183,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
                 <Link
                   href={`/product/${product.slug}`}
                   onClick={onClose}
-                  className="text-brand-700 hover:text-brand-900 font-medium underline"
+                  className="text-black hover:text-[#b4b4b4] font-medium underline"
                 >
                   View Full Specifications & Reviews →
                 </Link>

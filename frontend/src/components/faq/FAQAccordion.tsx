@@ -40,14 +40,14 @@ export const FAQAccordion: React.FC<FAQAccordionProps> = ({
     <div className={`w-full ${className}`}>
       {showHeading && (
         <div className="mb-8 sm:mb-12 text-center max-w-2xl mx-auto">
-          <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-zimor-orange font-medium font-primary mb-2">
+          <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-black font-medium font-primary mb-2">
             HELP &amp; ASSISTANCE
           </p>
-          <h2 className="font-primary text-2xl sm:text-3xl lg:text-4xl font-normal text-zimor-black tracking-tight leading-tight">
+          <h2 className="font-primary text-2xl sm:text-3xl lg:text-4xl font-normal text-black tracking-tight leading-tight">
             {title}
           </h2>
           {subtitle && (
-            <p className="font-secondary text-xs sm:text-sm text-zimor-brown mt-2 leading-relaxed">
+            <p className="font-secondary text-xs sm:text-sm text-[#333333] mt-2 leading-relaxed">
               {subtitle}
             </p>
           )}
@@ -69,19 +69,19 @@ export const FAQAccordion: React.FC<FAQAccordionProps> = ({
                 onClick={() => toggleItem(item.id)}
                 aria-expanded={isOpen}
                 aria-controls={`faq-answer-${item.id}`}
-                className="w-full py-4 sm:py-5 flex items-center justify-between text-left gap-4 focus:outline-none focus-visible:ring-1 focus-visible:ring-zimor-orange"
+                className="w-full py-4 sm:py-5 flex items-center justify-between text-left gap-4 focus:outline-none focus-visible:ring-1 focus-visible:ring-black"
               >
                 <div className="flex items-baseline gap-3 sm:gap-4">
-                  <span className="font-primary text-[11px] sm:text-xs text-zimor-orange font-medium tracking-[0.16em] shrink-0">
+                  <span className="font-primary text-[11px] sm:text-xs text-black font-medium tracking-[0.16em] shrink-0">
                     {numStr}
                   </span>
-                  <span className="font-primary text-[15px] sm:text-[17px] lg:text-[18px] font-medium text-zimor-black tracking-tight group-hover:text-zimor-orange transition-colors">
+                  <span className="font-primary text-[15px] sm:text-[17px] lg:text-[18px] font-medium text-black tracking-tight group-hover:text-black transition-colors">
                     {item.question}
                   </span>
                 </div>
                 <ChevronDown
-                  className={`w-4 h-4 text-zimor-brown/60 shrink-0 transition-transform duration-300 ${
-                    isOpen ? 'rotate-180 text-zimor-orange' : ''
+                  className={`w-4 h-4 text-[#333333]/60 shrink-0 transition-transform duration-300 ${
+                    isOpen ? 'rotate-180 text-black' : ''
                   }`}
                   aria-hidden="true"
                 />
@@ -92,13 +92,13 @@ export const FAQAccordion: React.FC<FAQAccordionProps> = ({
                   id={`faq-answer-${item.id}`}
                   className="pb-5 pl-7 sm:pl-9 pr-4 sm:pr-8 space-y-3.5 animate-in fade-in duration-200"
                 >
-                  <p className="font-secondary text-[13px] sm:text-[14px] text-zimor-brown leading-[1.7]">
+                  <p className="font-secondary text-[13px] sm:text-[14px] text-[#333333] leading-[1.7]">
                     {item.answer}
                   </p>
                   <div>
                     <Link
                       href={item.actionHref}
-                      className="group/link inline-flex items-center gap-1.5 text-xs font-primary font-medium uppercase tracking-[0.15em] text-zimor-orange hover:text-zimor-black underline underline-offset-4 transition-colors"
+                      className="group/link inline-flex items-center gap-1.5 text-xs font-primary font-medium uppercase tracking-[0.15em] text-black hover:text-black underline underline-offset-4 transition-colors"
                     >
                       <span>{item.actionText}</span>
                       <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover/link:translate-x-1" />

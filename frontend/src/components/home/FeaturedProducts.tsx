@@ -62,7 +62,7 @@ export const FeaturedProducts: React.FC = () => {
         {/* Section Header with Left/Right Selectable Controls on Mobile */}
         <div className="flex items-end justify-between mb-4 sm:mb-8">
           <div>
-            <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-brand-700 font-bold mb-1 font-primary">
+            <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-[#000000] font-bold mb-1 font-primary">
               Curated Silhouettes
             </p>
             <h2 className="font-primary text-2xl sm:text-3xl lg:text-4xl font-normal text-ink tracking-tight leading-none">
@@ -102,7 +102,7 @@ export const FeaturedProducts: React.FC = () => {
             {/* Desktop View All Link */}
             <Link
               href="/shop"
-              className="hidden sm:inline-flex items-center gap-1.5 font-primary text-xs sm:text-sm font-medium tracking-normal text-ink hover:text-brand-700 transition-colors shrink-0"
+              className="hidden sm:inline-flex items-center gap-1.5 font-primary text-xs sm:text-sm font-medium tracking-normal text-ink hover:text-[#b4b4b4] transition-colors shrink-0"
             >
               <span>View All Bags</span>
               <ArrowRight className="w-3.5 h-3.5" />

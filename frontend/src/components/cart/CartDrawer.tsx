@@ -63,8 +63,8 @@ export const CartDrawer: React.FC = () => {
           </div>
 
           {/* Shipping Benefit Banner */}
-          <div className="bg-brand-50 border-b border-brand-200/50 px-4 py-2.5 text-center text-xs text-brand-900 font-medium flex items-center justify-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <div className="bg-[#f8f8f8] border-b border-[#b4b4b4]/30 px-4 py-2.5 text-center text-xs text-black font-medium flex items-center justify-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-black animate-pulse" />
             <span>You've unlocked <strong>FREE Express Shipping</strong> across India!</span>
           </div>
 
@@ -111,7 +111,7 @@ export const CartDrawer: React.FC = () => {
                           <Link
                             href={`/product/${item.product.slug}`}
                             onClick={closeCartDrawer}
-                            className="text-xs font-semibold text-ink hover:text-brand-700 transition-colors line-clamp-1"
+                            className="text-xs font-semibold text-ink hover:text-[#b4b4b4] transition-colors line-clamp-1"
                           >
                             {item.product.name}
                           </Link>

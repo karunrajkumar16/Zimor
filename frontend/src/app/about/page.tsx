@@ -131,18 +131,18 @@ export default function AboutPage() {
           ========================================================================= */}
       <section
         id="brand-philosophy"
-        className="scroll-mt-24 py-20 sm:py-32 border-b border-line/60 bg-canvas-soft/10"
+        className="scroll-mt-24 py-20 sm:py-32 border-b border-line/60 bg-[#f8f8f8]"
         aria-label="Brand Philosophy"
       >
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-brand-700 font-bold mb-6 font-primary">
+          <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-black font-bold mb-6 font-primary">
             BRAND PHILOSOPHY
           </p>
           <h2 className="sr-only">Brand Philosophy</h2>
           <blockquote className="font-primary text-[28px] sm:text-[40px] lg:text-[48px] font-normal text-ink tracking-tight leading-[1.25] sm:leading-[1.2]">
             &ldquo;Fashion should not be limited to special occasions. Every day is an opportunity to express yourself.&rdquo;
           </blockquote>
-          <div className="w-12 h-0.5 bg-brand-700 mx-auto mt-8" />
+          <div className="w-12 h-0.5 bg-black mx-auto mt-8" />
         </div>
       </section>
 
@@ -158,7 +158,7 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
             {/* Left Column: Narrative Copy */}
             <div className="lg:col-span-7 space-y-6">
-              <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-brand-700 font-bold font-primary">
+              <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-black font-bold font-primary">
                 BRAND STORY
               </p>
               <h2 className="font-primary text-[32px] sm:text-[44px] lg:text-[50px] font-normal text-ink tracking-tight leading-[1.1]">
@@ -197,7 +197,7 @@ export default function AboutPage() {
           ========================================================================= */}
       <section
         id="brand-vision-mission"
-        className="scroll-mt-24 py-14 sm:py-24 border-b border-line/60 bg-canvas-soft/10"
+        className="scroll-mt-24 py-14 sm:py-24 border-b border-line/60 bg-[#f8f8f8]"
         aria-label="Brand Vision and Mission"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -270,23 +270,23 @@ export default function AboutPage() {
             {/* Left Column: Masthead, Brand Philosophy Quote & Editorial Visual */}
             <div className="lg:col-span-5 space-y-6 sm:space-y-8 lg:sticky lg:top-28">
               <div>
-                <p className="text-[11px] uppercase tracking-[0.25em] text-zimor-orange font-medium font-primary mb-2.5">
+                <p className="text-[11px] uppercase tracking-[0.25em] text-black font-medium font-primary mb-2.5">
                   BRAND VALUES
                 </p>
                 <h2
                   id="brand-values-heading"
-                  className="font-primary text-[30px] sm:text-[38px] lg:text-[46px] font-normal text-zimor-black tracking-tight leading-[1.08]"
+                  className="font-primary text-[30px] sm:text-[38px] lg:text-[46px] font-normal text-black tracking-tight leading-[1.08]"
                 >
                   Brand Values
                 </h2>
               </div>
 
               {/* Editorial Brand Philosophy Quote */}
-              <div className="border-l-2 border-zimor-orange pl-4 sm:pl-5 py-0.5">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-zimor-orange font-primary font-medium mb-1.5">
+              <div className="border-l-2 border-black pl-4 sm:pl-5 py-0.5">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-black font-primary font-medium mb-1.5">
                   Brand Philosophy
                 </p>
-                <blockquote className="font-secondary text-[13.5px] sm:text-[15px] lg:text-[16px] text-zimor-brown leading-[1.7] font-normal">
+                <blockquote className="font-secondary text-[13.5px] sm:text-[15px] lg:text-[16px] text-ink-secondary leading-[1.7] font-normal">
                   &ldquo;Fashion should not be limited to special occasions. Every day is an opportunity to express yourself.&rdquo;
                 </blockquote>
               </div>
@@ -315,18 +315,18 @@ export default function AboutPage() {
                 {BRAND_VALUES.map((val) => (
                   <li
                     key={val.number}
-                    className="group py-3.5 sm:py-5 lg:py-6 transition-colors duration-300 hover:bg-[#faf9f6] px-2 sm:px-3 -mx-2 sm:-mx-3"
+                    className="group py-3.5 sm:py-5 lg:py-6 transition-colors duration-300 hover:bg-neutral-50 px-2 sm:px-3 -mx-2 sm:-mx-3"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1 sm:gap-6">
                       <div className="flex items-baseline gap-2.5 sm:gap-3 shrink-0 sm:w-44 lg:w-48">
-                        <span className="font-primary text-[11px] sm:text-xs lg:text-[13px] text-zimor-orange font-medium tracking-[0.16em] shrink-0">
+                        <span className="font-primary text-[11px] sm:text-xs lg:text-[13px] text-black font-medium tracking-[0.16em] shrink-0">
                           {val.number}
                         </span>
-                        <h3 className="font-primary text-[15.5px] sm:text-[18px] lg:text-[20px] font-medium text-zimor-black tracking-tight transition-transform duration-300 group-hover:translate-x-1">
+                        <h3 className="font-primary text-[15.5px] sm:text-[18px] lg:text-[20px] font-medium text-black tracking-tight transition-transform duration-300 group-hover:translate-x-1">
                           {val.title}
                         </h3>
                       </div>
-                      <p className="font-secondary text-[12.5px] sm:text-[13.5px] lg:text-[14.5px] text-zimor-brown font-normal leading-[1.65] pl-5 sm:pl-0 flex-1">
+                      <p className="font-secondary text-[12.5px] sm:text-[13.5px] lg:text-[14.5px] text-ink-secondary font-normal leading-[1.65] pl-5 sm:pl-0 flex-1">
                         {val.description}
                       </p>
                     </div>

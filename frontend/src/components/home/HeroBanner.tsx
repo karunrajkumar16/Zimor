@@ -22,19 +22,19 @@ const SLIDES: CafuneSlide[] = [
     headline: 'ARCHITECTURAL STANCE',
     description:
       'Engineered for modern executive presence. Crafted in 100% superior faux leather with dedicated padded 15.6" laptop protection and an included matching wristlet pouch.',
-    slug: '/product/zimor-delo-tote',
-    editorialImage: '/brandgirl3.webp',
-    editorialAlt: 'Zimor Delo Tote executive editorial campaign in warm daylight',
+    slug: '/shop',
+    editorialImage: '/banners/hero-most-loved-tote.png',
+    editorialAlt: 'Zimor India — Our most-loved tote returns editorial campaign',
   },
   {
-    id: 'classic-shoulder-bag',
+    id: 'the-first-edit',
     eyebrow: 'SIGNATURE EDITION',
     headline: 'SCULPTURAL CRESCENT',
     description:
       'A refined crescent flap silhouette with custom gold magnetic closure, heavyweight canvas trim, and smooth contours designed to move with you from morning to night.',
-    slug: '/product/zimor-classic-shoulder-bag',
-    editorialImage: '/brandgirl2.webp',
-    editorialAlt: 'Zimor Classic Shoulder Bag sculptural crescent editorial',
+    slug: '/shop',
+    editorialImage: '/banners/hero-first-edit.png',
+    editorialAlt: 'Zimor India — The First Edit structured luxury collection',
   },
   {
     id: 'rabota-tote',
@@ -42,9 +42,9 @@ const SLIDES: CafuneSlide[] = [
     headline: 'DUAL-CARRY AGILITY',
     description:
       'The definitive laptop tote for active professionals. Seamlessly transitions between reinforced grab handles and an adjustable crossbody sling on busy transit and flights.',
-    slug: '/product/zimor-rabota-tote',
-    editorialImage: '/image.jpg',
-    editorialAlt: 'Zimor Rabota Tote transit commuter editorial',
+    slug: '/shop',
+    editorialImage: '/banners/hero-model-crescent.png',
+    editorialAlt: 'Zimor India — Contemporary editorial campaign with model and luxury handbag',
   },
 ];
 
@@ -142,8 +142,8 @@ export const HeroBanner: React.FC = () => {
                     transform: isCurrent ? 'scale(1.035)' : 'scale(1.0)',
                   }}
                 />
-                {/* Contrast tint so header and typography are visible */}
-                <div className="absolute inset-0 bg-black/40" />
+                {/* Balanced gradient so transparent header and bottom-left typography remain crisp while banner artwork stays luminous */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-black/30" />
               </div>
 
               {/* Bottom-Left Editorial Headline, Description & Pill CTA */}
@@ -176,10 +176,10 @@ export const HeroBanner: React.FC = () => {
                 {/* Pill Outline CTA Button */}
                 <div className="pt-1 sm:pt-0">
                   <Link
-                    href={slide.slug}
+                    href="/shop"
                     className="inline-flex items-center gap-1.5 sm:gap-2 px-5 py-2.5 sm:px-7 sm:py-3.5 rounded-full border border-white text-white hover:bg-white hover:text-ink font-primary text-xs sm:text-[13.5px] font-medium tracking-normal transition-all duration-300 shadow-md backdrop-blur-xs whitespace-nowrap"
                   >
-                    <span>Discover More</span>
+                    <span>Shop Now</span>
                     <ArrowUpRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                   </Link>
                 </div>

@@ -36,14 +36,15 @@
 @layer base {
   :root {
     /* =========================================================================
-       ZIMOR BRAND GUIDELINES (Page 11) - 6 OFFICIAL COLOUR DESIGN TOKENS
+       ZIMOR NEW 3-COLOR PALETTE DESIGN TOKENS
+       Black (#000000) • Ash Grey (#B4B4B4) • White (#FFFFFF)
        ========================================================================= */
-    --zimor-orange: #b44220;   /* Orange Blossom (Accents, CTAs, Active States) */
-    --zimor-black: #000000;    /* Black (Text, Dark Surfaces) */
-    --zimor-brown: #3f2211;    /* Brown (Secondary Text, Dark Surfaces) */
-    --zimor-cream: #caab8e;    /* Cream (Soft Backgrounds, Cards) */
-    --zimor-ash-grey: #b4b4b4; /* Ash Grey (Borders, Dividers, Disabled States only) */
-    --zimor-white: #ffffff;    /* White (Page Background, Text on Dark/Orange) */
+    --zimor-black: #000000;    /* Black (Text, Dark Surfaces, Primary CTAs) */
+    --zimor-ash-grey: #b4b4b4; /* Ash Grey (Borders, Dividers, Subdued Elements) */
+    --zimor-white: #ffffff;    /* White (Page Background, Clean Surfaces, Light Text) */
+    --zimor-orange: #000000;   /* Mapped to Black */
+    --zimor-brown: #000000;    /* Mapped to Black */
+    --zimor-cream: #ffffff;    /* Mapped to White */
 
     /* Typography Design Tokens */
     --font-primary: "Akzidenz Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -52,13 +53,13 @@
     /* Semantic Roles */
     --canvas-bg: #ffffff;
     --canvas-card: #ffffff;
-    --canvas-soft: #caab8e;
+    --canvas-soft: #f8f8f8;
     --canvas-dark: #000000;
-    --canvas-dark-surface: #3f2211;
+    --canvas-dark-surface: #000000;
     --ink-primary: #000000;
-    --ink-secondary: #3f2211;
+    --ink-secondary: #333333;
     --line-border: #b4b4b4;
-    --accent-orange: #b44220;
+    --accent-orange: #000000;
   }
 
   *,
@@ -127,23 +128,23 @@
   input::-moz-placeholder,
   textarea::-moz-placeholder {
     font-family: var(--font-secondary) !important;
-    color: var(--zimor-brown);
-    opacity: 0.85;
+    color: var(--zimor-ash-grey);
+    opacity: 0.9;
   }
 
   input::placeholder,
   textarea::placeholder {
     font-family: var(--font-secondary) !important;
-    color: var(--zimor-brown);
-    opacity: 0.85; /* Ensures >= 4.5:1 contrast ratio on all light backgrounds */
+    color: var(--zimor-ash-grey);
+    opacity: 0.9;
   }
 
   /* Dark surface placeholder contrast safeguard */
   .bg-canvas-darkSurface input::placeholder,
   .bg-canvas-dark input::placeholder,
   [data-theme="dark"] input::placeholder {
-    color: var(--zimor-white);
-    opacity: 0.85;
+    color: var(--zimor-ash-grey);
+    opacity: 0.9;
   }
 
   /* Headings: Primary Typeface (Akzidenz Grotesk) */
@@ -217,15 +218,12 @@ html.lenis body {
 
 /* Subtle image loading placeholder */
 .bg-canvas-alt {
-  background-color: #caab8e;
+  background-color: #f5f5f5;
 }
 
-/* Contrast Accessibility Rule: Never put white text on Cream or Ash Grey */
-.bg-cream,
+/* Contrast Accessibility Rule: Crisp contrast across Black, Ash Grey, and White */
 .bg-ash-grey,
-.bg-zimor-cream,
 .bg-zimor-ashGrey,
-[data-bg="cream"],
 [data-bg="ash-grey"] {
   color: var(--zimor-black);
 }

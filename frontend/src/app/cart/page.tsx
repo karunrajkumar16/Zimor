@@ -78,8 +78,8 @@ export default function CartPage() {
             {/* Left Items Column */}
             <div className="lg:col-span-8 space-y-4">
               {/* Shipping Highlight */}
-              <div className="p-3.5 bg-brand-50 border border-brand-200/60 rounded flex items-center gap-3 text-xs text-brand-950 font-medium">
-                <Truck className="w-4 h-4 text-brand-700 shrink-0" />
+              <div className="p-3.5 bg-[#f8f8f8] border border-[#b4b4b4]/30 rounded flex items-center gap-3 text-xs text-black font-medium">
+                <Truck className="w-4 h-4 text-black shrink-0" />
                 <span>You qualify for <strong>FREE Express Shipping</strong> across India!</span>
               </div>
 
@@ -103,12 +103,12 @@ export default function CartPage() {
                         <div>
                           <div className="flex items-start justify-between gap-2">
                             <div>
-                              <span className="text-[10px] uppercase tracking-widest text-brand-700 font-bold">
+                              <span className="text-[10px] uppercase tracking-widest text-black font-bold">
                                 {item.product.categoryLabel}
                               </span>
                               <Link
                                 href={`/product/${item.product.slug}`}
-                                className="block text-sm sm:text-base font-bold text-ink hover:text-brand-700 transition-colors"
+                                className="block text-sm sm:base font-bold text-ink hover:text-[#b4b4b4] transition-colors"
                               >
                                 {item.product.name}
                               </Link>
@@ -256,15 +256,15 @@ export default function CartPage() {
               {/* Trust Features */}
               <div className="space-y-2 pt-2 border-t border-line text-[11px] text-ink-muted">
                 <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-3.5 h-3.5 text-brand-700" />
+                  <ShieldCheck className="w-3.5 h-3.5 text-black" />
                   <span>100% Secure Checkout & SSL Encryption</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <RefreshCw className="w-3.5 h-3.5 text-brand-700" />
+                  <RefreshCw className="w-3.5 h-3.5 text-black" />
                   <span>7-Day Return Policy with Doorstep Pickup</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Truck className="w-3.5 h-3.5 text-brand-700" />
+                  <Truck className="w-3.5 h-3.5 text-black" />
                   <span>Cash on Delivery Available</span>
                 </div>
               </div>

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Menu, Search, Heart, ShoppingBag, User, X, ChevronDown } from 'lucide-react';
+import { Menu, Search, Heart, ShoppingBag, User, X, ChevronDown, Mail, MessageSquare, Phone } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { MobileNav } from './MobileNav';
@@ -20,7 +20,9 @@ export const Header: React.FC = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isShopHovered, setIsShopHovered] = useState(false);
+  const [isProfessionHovered, setIsProfessionHovered] = useState(false);
   const [isAboutHovered, setIsAboutHovered] = useState(false);
+  const [isContactHovered, setIsContactHovered] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isProfessionActive, setIsProfessionActive] = useState(false);
 
@@ -58,6 +60,10 @@ export const Header: React.FC = () => {
       if (
         hash === '#profession' ||
         hash === '#shop-by-profession' ||
+        hash === '#lifestyle' ||
+        hash === '#everyday' ||
+        hash === '#work' ||
+        hash === '#travel' ||
         hash === '#corporate-executive' ||
         hash === '#tech-transit' ||
         hash === '#creative-studio'
@@ -106,6 +112,7 @@ export const Header: React.FC = () => {
   };
 
   const handleProfessionClick = (e: React.MouseEvent) => {
+    setIsProfessionHovered(false);
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('scroll_to_profession', 'true');
     }
@@ -123,6 +130,31 @@ export const Header: React.FC = () => {
           window.scrollTo({ top: targetScroll, behavior: 'smooth' });
         }
         window.history.pushState(null, '', '/shop?section=profession#profession');
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
+        setIsProfessionActive(true);
+      }
+    }
+  };
+
+  const handleProfessionSubsectionClick = (sectionId: string, e?: React.MouseEvent) => {
+    setIsProfessionHovered(false);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('scroll_to_section', sectionId);
+    }
+    if (pathname === '/shop') {
+      if (e) e.preventDefault();
+      const el = document.getElementById(sectionId);
+      if (el) {
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.offsetHeight : 80;
+        if (lenis) {
+          lenis.scrollTo(el, { offset: -headerHeight, duration: 1.0 });
+        } else {
+          const rect = el.getBoundingClientRect();
+          const targetScroll = rect.top + window.scrollY - headerHeight;
+          window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+        }
+        window.history.pushState(null, '', `/shop?section=${sectionId}#${sectionId}`);
         window.dispatchEvent(new HashChangeEvent('hashchange'));
         setIsProfessionActive(true);
       }
@@ -205,96 +237,105 @@ export const Header: React.FC = () => {
                     />
                   </Link>
 
-                  {/* Dropdown Menu — Miraggio Clean Typography & Sizing */}
+                  {/* Dropdown Menu — Only Types */}
                   {isShopHovered && (
-                    <div className="absolute top-full left-0 w-[360px] pt-2 z-50">
+                    <div className="absolute top-full left-0 w-56 pt-2 z-50">
                       <div className="bg-white border border-line shadow-lift p-5 rounded-xs text-ink animate-in fade-in-50 duration-150">
-                        <div className="grid grid-cols-2 gap-6 text-left normal-case">
-                          {/* Column 1: BY TYPES */}
-                          <div>
-                            <p className="font-primary font-semibold text-[11px] uppercase tracking-[0.1em] text-ink-muted/80 mb-2.5">
-                              BY TYPES
-                            </p>
-                            <div className="space-y-1">
-                              <Link
-                                href="/shop"
-                                onClick={() => setIsShopHovered(false)}
-                                className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
-                              >
-                                All Handbags
-                              </Link>
-                              <Link
-                                href="/shop?category=tote-bags"
-                                onClick={() => setIsShopHovered(false)}
-                                className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
-                              >
-                                Tote Bags
-                              </Link>
-                              <Link
-                                href="/shop?category=laptop-bags"
-                                onClick={() => setIsShopHovered(false)}
-                                className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
-                              >
-                                Shoulder Bags
-                              </Link>
-                              <Link
-                                href="/shop?category=shoulder-bags"
-                                onClick={() => setIsShopHovered(false)}
-                                className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
-                              >
-                                Crossbody &amp; Slings
-                              </Link>
-                            </div>
-                          </div>
-
-                          {/* Column 2: BY OCCASIONS */}
-                          <div>
-                            <p className="font-primary font-semibold text-[11px] uppercase tracking-[0.1em] text-ink-muted/80 mb-2.5">
-                              BY OCCASIONS
-                            </p>
-                            <div className="space-y-1">
-                              <Link
-                                href="/shop?section=profession#corporate-executive"
-                                onClick={() => setIsShopHovered(false)}
-                                className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
-                              >
-                                Work
-                              </Link>
-                              <Link
-                                href="/shop?section=profession#tech-transit"
-                                onClick={() => setIsShopHovered(false)}
-                                className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
-                              >
-                                Travel
-                              </Link>
-                              <Link
-                                href="/shop?section=profession#creative-studio"
-                                onClick={() => setIsShopHovered(false)}
-                                className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
-                              >
-                                Essentials
-                              </Link>
-                            </div>
-                          </div>
+                        <p className="font-primary font-semibold text-[11px] uppercase tracking-[0.1em] text-ink-muted/80 mb-2.5">
+                          BY TYPES
+                        </p>
+                        <div className="space-y-1 text-left normal-case">
+                          <Link
+                            href="/shop"
+                            onClick={() => setIsShopHovered(false)}
+                            className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
+                          >
+                            All Handbags
+                          </Link>
+                          <Link
+                            href="/shop?category=tote-bags"
+                            onClick={() => setIsShopHovered(false)}
+                            className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
+                          >
+                            Tote Bags
+                          </Link>
+                          <Link
+                            href="/shop?category=laptop-bags"
+                            onClick={() => setIsShopHovered(false)}
+                            className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
+                          >
+                            Shoulder Bags
+                          </Link>
+                          <Link
+                            href="/shop?category=shoulder-bags"
+                            onClick={() => setIsShopHovered(false)}
+                            className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
+                          >
+                            Crossbody &amp; Slings
+                          </Link>
                         </div>
                       </div>
                     </div>
                   )}
                 </div>
 
-                {/* Shop by Profession */}
-                <Link
-                  href="/shop?section=profession#profession"
-                  onClick={handleProfessionClick}
-                  className={`header-nav-link relative inline-flex items-center py-1.5 transition-colors whitespace-nowrap ${isTransparent
-                    ? 'text-white hover:text-white/80'
-                    : isProfessionActive
-                      ? 'text-ink font-semibold after:content-[\'\'] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-ink'
-                      : 'text-ink/80 hover:text-ink'
-                    }`}
+                {/* Shop by Profession ⌵ */}
+                <div
+                  className="relative"
+                  onMouseEnter={() => setIsProfessionHovered(true)}
+                  onMouseLeave={() => setIsProfessionHovered(false)}
                 >
-                  Shop by Profession
-                </Link>
+                  <Link
+                    href="/shop?section=profession#profession"
+                    onClick={handleProfessionClick}
+                    className={`header-nav-link relative inline-flex items-center gap-1.5 py-1.5 transition-colors whitespace-nowrap ${isTransparent
+                      ? 'text-white hover:text-white/80'
+                      : isProfessionActive
+                        ? 'text-ink font-semibold after:content-[\'\'] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-ink'
+                        : 'text-ink/80 hover:text-ink'
+                      }`}
+                  >
+                    <span>Shop by Profession</span>
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 stroke-[1.8] transition-transform duration-200 ${isProfessionHovered ? 'rotate-180' : ''
+                        } ${isTransparent ? 'text-white/80' : 'text-ink-muted'}`}
+                    />
+                  </Link>
+
+                  {/* Dropdown Menu — By Occasions / Profession */}
+                  {isProfessionHovered && (
+                    <div className="absolute top-full left-0 w-60 pt-2 z-50">
+                      <div className="bg-white border border-line shadow-lift p-5 rounded-xs text-ink animate-in fade-in-50 duration-150">
+                        <p className="font-primary font-semibold text-[11px] uppercase tracking-[0.1em] text-ink-muted/80 mb-2.5">
+                          BY OCCASIONS
+                        </p>
+                        <div className="space-y-1 text-left normal-case">
+                          <Link
+                            href="/shop?section=everyday#everyday"
+                            onClick={(e) => handleProfessionSubsectionClick('everyday', e)}
+                            className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
+                          >
+                            Everyday
+                          </Link>
+                          <Link
+                            href="/shop?section=work#work"
+                            onClick={(e) => handleProfessionSubsectionClick('work', e)}
+                            className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
+                          >
+                            Work
+                          </Link>
+                          <Link
+                            href="/shop?section=travel#travel"
+                            onClick={(e) => handleProfessionSubsectionClick('travel', e)}
+                            className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
+                          >
+                            Travel
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </nav>
             </div>
 
@@ -347,7 +388,7 @@ export const Header: React.FC = () => {
                     <div className="absolute top-full left-0 w-64 pt-2 z-50">
                       <div className="bg-white border border-line shadow-lift p-5 rounded-xs text-ink animate-in fade-in-50 duration-150">
                         <p className="font-primary font-semibold text-[11px] uppercase tracking-[0.1em] text-ink-muted/80 mb-2.5">
-                          OUR ATELIER
+                          ABOUT ZIMOR
                         </p>
                         <div className="space-y-1 text-left normal-case">
                           <Link
@@ -391,18 +432,103 @@ export const Header: React.FC = () => {
                   )}
                 </div>
 
-                {/* Contact Us */}
-                <Link
-                  href="/contact"
-                  className={`header-nav-link relative inline-flex items-center py-1.5 transition-colors whitespace-nowrap ${isTransparent
-                    ? 'text-white hover:text-white/80'
-                    : pathname === '/contact'
-                      ? 'text-ink font-semibold after:content-[\'\'] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-ink'
-                      : 'text-ink/80 hover:text-ink'
-                    }`}
+                {/* Contact Us ⌵ */}
+                <div
+                  className="relative"
+                  onMouseEnter={() => setIsContactHovered(true)}
+                  onMouseLeave={() => setIsContactHovered(false)}
                 >
-                  Contact Us
-                </Link>
+                  <Link
+                    href="/contact"
+                    className={`header-nav-link relative inline-flex items-center gap-1.5 py-1.5 transition-colors whitespace-nowrap ${isTransparent
+                      ? 'text-white hover:text-white/80'
+                      : pathname === '/contact'
+                        ? 'text-ink font-semibold after:content-[\'\'] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-ink'
+                        : 'text-ink/80 hover:text-ink'
+                      }`}
+                  >
+                    <span>Contact Us</span>
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 stroke-[1.8] transition-transform duration-200 ${isContactHovered ? 'rotate-180' : ''
+                        } ${isTransparent ? 'text-white/80' : 'text-ink-muted'}`}
+                    />
+                  </Link>
+
+                  {isContactHovered && (
+                    <div className="absolute top-full right-0 w-[280px] pt-2 z-50">
+                      <div className="bg-white border border-line shadow-lift p-4 rounded-xs text-ink animate-in fade-in-50 duration-150">
+                        <p className="font-primary font-semibold text-[11px] uppercase tracking-[0.1em] text-ink-muted/80 mb-3">
+                          DIRECT CONTACT
+                        </p>
+                        <div className="space-y-1.5 text-left normal-case">
+                          {/* 1. Direct Email */}
+                          <a
+                            href="mailto:zimorindia@gmail.com"
+                            onClick={() => setIsContactHovered(false)}
+                            className="flex items-center gap-3 p-2 rounded-xs hover:bg-[#f5f5f5] transition-colors group"
+                          >
+                            <div className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center text-black group-hover:bg-[#EA4335] group-hover:text-white transition-colors shrink-0">
+                              <Mail className="w-3.5 h-3.5" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-primary text-[13px] font-medium text-ink group-hover:text-[#EA4335] transition-colors">
+                                Send an Email
+                              </p>
+                              <p className="text-[11px] text-ink-muted truncate">zimorindia@gmail.com</p>
+                            </div>
+                          </a>
+
+                          {/* 2. Direct WhatsApp */}
+                          <a
+                            href="https://wa.me/918604647888"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => setIsContactHovered(false)}
+                            className="flex items-center gap-3 p-2 rounded-xs hover:bg-[#f5f5f5] transition-colors group"
+                          >
+                            <div className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center text-black group-hover:bg-[#25D366] group-hover:text-white transition-colors shrink-0">
+                              <MessageSquare className="w-3.5 h-3.5" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-primary text-[13px] font-medium text-ink group-hover:text-[#25D366] transition-colors">
+                                WhatsApp
+                              </p>
+                              <p className="text-[11px] text-ink-muted truncate">+91 86046 47888</p>
+                            </div>
+                          </a>
+
+                          {/* 3. Direct Call */}
+                          <a
+                            href="tel:+918604647888"
+                            onClick={() => setIsContactHovered(false)}
+                            className="flex items-center gap-3 p-2 rounded-xs hover:bg-[#f5f5f5] transition-colors group"
+                          >
+                            <div className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center text-black group-hover:bg-[#16A34A] group-hover:text-white transition-colors shrink-0">
+                              <Phone className="w-3.5 h-3.5" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-primary text-[13px] font-medium text-ink group-hover:text-[#16A34A] transition-colors">
+                                Call Us
+                              </p>
+                              <p className="text-[11px] text-ink-muted truncate">+91 86046 47888</p>
+                            </div>
+                          </a>
+
+                          {/* Divider and Visit Contact Page */}
+                          <div className="pt-2 mt-2 border-t border-line">
+                            <Link
+                              href="/contact"
+                              onClick={() => setIsContactHovered(false)}
+                              className="font-primary text-[12px] font-medium text-black hover:underline block text-center py-1 transition-colors"
+                            >
+                              Visit Contact Page →
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </nav>
 
               {/* Action Icons in Cafuné sequence: User, Search, Wishlist, Bag (Far Right) */}
@@ -438,7 +564,7 @@ export const Header: React.FC = () => {
                   <Heart className="w-[19px] h-[19px] sm:w-5 sm:h-5 stroke-[1.35]" />
                   {wishlistCount > 0 && (
                     <span
-                      className={`absolute -top-1 -right-1 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center shadow-xs ${isTransparent ? 'bg-white text-ink' : 'bg-brand-700 text-white'
+                      className={`absolute -top-1 -right-1 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center shadow-xs ${isTransparent ? 'bg-white text-black' : 'bg-black text-white'
                         }`}
                     >
                       {wishlistCount}
@@ -519,7 +645,7 @@ export const Header: React.FC = () => {
                             />
                           </div>
                           <div>
-                            <p className="text-xs font-medium text-ink group-hover:text-brand-700 transition-colors">
+                            <p className="text-xs font-medium text-black group-hover:underline transition-colors">
                               {p.name}
                             </p>
                             <p className="text-[11px] text-ink-muted">

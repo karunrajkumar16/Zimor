@@ -20,7 +20,7 @@ const MASONRY_FRAMES: MasonryFrame[] = [
   // Second Picture: Craftsmanship & Atelier (Cols 6-9, Row 1)
   {
     id: 'frame-craftsmanship',
-    title: 'Artisan\nCraftsmanship',
+    title: 'Rooted in\nCraftsmanship',
     linkText: 'Discover More',
     linkHref: '/about',
     image: '/craftsmanship-atelier.jpg',
@@ -33,7 +33,7 @@ const MASONRY_FRAMES: MasonryFrame[] = [
   // Third Picture: Handbag Details & Macro (Cols 10-12, Row 1)
   {
     id: 'frame-details',
-    title: 'The Rabota\nSilhouette',
+    title: 'Designed for\nEveryday',
     linkText: 'Shop Now',
     linkHref: '/product/zimor-rabota-tote',
     image: '/products/rabota-4.jpg',
@@ -46,8 +46,8 @@ const MASONRY_FRAMES: MasonryFrame[] = [
   // Fifth Picture: Quality & Material Resilience (Cols 1-5, Row 2 — sitting directly below the text panel)
   {
     id: 'frame-quality',
-    title: 'Cruelty-Free\nLuxury',
-    linkText: 'Shop Now',
+    title: 'Details That\nMatter',
+    linkText: 'Explore Details',
     linkHref: '/product/zimor-delo-tote',
     image: '/luxury-bag-tan.jpg',
     alt: 'Luxury cruelty-free leather handbag detailing with refined brass hardware',
@@ -59,8 +59,8 @@ const MASONRY_FRAMES: MasonryFrame[] = [
   // Fourth Picture: Made in India / Provenance (Cols 6-12, Row 2 — ending on same surface as Fifth Picture)
   {
     id: 'frame-made-in-india',
-    title: 'Crafted in\nIndia',
-    linkText: 'Discover More',
+    title: 'Proudly Made\nin India',
+    linkText: 'Our Heritage',
     linkHref: '/about',
     image: '/artisan-heritage-landscape.jpg',
     alt: 'Master artisan in Indian leathercraft atelier surrounded by leather rolls and hand tools',
@@ -154,7 +154,7 @@ export const AboutZimor: React.FC = () => {
         <div className="col-span-2 md:col-start-1 md:col-end-6 md:row-start-1 md:row-end-2 min-h-[320px] md:min-h-0 bg-white p-6 sm:p-8 lg:p-9 xl:p-10 flex flex-col justify-between">
           <div className="space-y-4 sm:space-y-4.5">
             <div>
-              <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.28em] text-brand-700 font-semibold mb-2 font-primary">
+              <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.28em] text-[#000000] font-semibold mb-2 font-primary">
                 About Zimor
               </p>
               <h2 className="font-primary text-[34px] sm:text-[42px] lg:text-[48px] font-normal text-ink tracking-tight leading-[1.15]">
