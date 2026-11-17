@@ -5,6 +5,15 @@ const nextConfig = {
   reactStrictMode: true,
   devIndicators: false,
   allowedDevOrigins: ['192.168.0.103', '192.168.0.104', 'localhost:3000'],
+  async rewrites() {
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5001';
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${backendUrl}/api/:path*`,
+      },
+    ];
+  },
   async redirects() {
     return [
       {
@@ -15,6 +24,7 @@ const nextConfig = {
     ];
   },
   images: {
+    unoptimized: true,
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],

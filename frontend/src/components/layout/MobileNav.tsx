@@ -153,7 +153,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
           {/* Header Bar */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-[#b4b4b4]/30">
             <Link href="/" onClick={onClose} className="relative w-28 h-7">
-              <Image src="/logo.png" alt="Zimor India" fill className="object-contain" priority />
+              <Image src="https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917824/zimor/brand/logo.png" alt="Zimor India" fill className="object-contain" priority />
             </Link>
             <button
               type="button"

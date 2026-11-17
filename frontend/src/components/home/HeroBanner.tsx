@@ -23,7 +23,7 @@ const SLIDES: CafuneSlide[] = [
     description:
       'Engineered for modern executive presence. Crafted in 100% superior faux leather with dedicated padded 15.6" laptop protection and an included matching wristlet pouch.',
     slug: '/shop',
-    editorialImage: '/banners/hero-most-loved-tote.png',
+    editorialImage: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917826/zimor/banners/hero-most-loved-tote.webp',
     editorialAlt: 'Zimor India — Our most-loved tote returns editorial campaign',
   },
   {
@@ -33,7 +33,7 @@ const SLIDES: CafuneSlide[] = [
     description:
       'A refined crescent flap silhouette with custom gold magnetic closure, heavyweight canvas trim, and smooth contours designed to move with you from morning to night.',
     slug: '/shop',
-    editorialImage: '/banners/hero-first-edit.png',
+    editorialImage: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917825/zimor/banners/hero-first-edit.webp',
     editorialAlt: 'Zimor India — The First Edit structured luxury collection',
   },
   {
@@ -43,7 +43,7 @@ const SLIDES: CafuneSlide[] = [
     description:
       'The definitive laptop tote for active professionals. Seamlessly transitions between reinforced grab handles and an adjustable crossbody sling on busy transit and flights.',
     slug: '/shop',
-    editorialImage: '/banners/hero-model-crescent.png',
+    editorialImage: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917826/zimor/banners/hero-model-crescent.webp',
     editorialAlt: 'Zimor India — Contemporary editorial campaign with model and luxury handbag',
   },
 ];

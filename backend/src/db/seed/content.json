@@ -1,0 +1,133 @@
+[
+  {
+    "page": "home",
+    "section": "hero",
+    "data": {
+      "slides": [
+        {
+          "id": "hero-slide-1",
+          "title": "ARCHITECTURAL FORM.\nEVERYDAY PURPOSE.",
+          "subtitle": "Discover our permanent collection of six sculptural silhouettes.",
+          "image": "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917825/zimor/banners/hero-first-edit.webp",
+          "ctaText": "Shop Collection",
+          "ctaLink": "/shop"
+        },
+        {
+          "id": "hero-slide-2",
+          "title": "TIMELESS LUXURY.\nMINIMALIST PURSUIT.",
+          "subtitle": "Engineered with 15.6\" padded protection and brass hardware.",
+          "image": "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917826/zimor/banners/hero-most-loved-tote.webp",
+          "ctaText": "Shop Totes",
+          "ctaLink": "/shop?category=tote-bags"
+        },
+        {
+          "id": "hero-slide-3",
+          "title": "EFFORTLESS TRAVEL.\nCURATED SILHOUETTE.",
+          "subtitle": "French canvas and sculpted crescent lines.",
+          "image": "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917826/zimor/banners/hero-model-crescent.webp",
+          "ctaText": "Explore Shoulder Bags",
+          "ctaLink": "/shop?category=shoulder-bags"
+        }
+      ]
+    },
+    "updatedAt": "2026-11-16T18:00:00.000Z"
+  },
+  {
+    "page": "home",
+    "section": "lifestyle",
+    "data": {
+      "heading": "Shop by Lifestyle",
+      "subheading": "Select your lifestyle to explore the silhouette engineered for your everyday rhythm, work focus, and travel escapes.",
+      "items": [
+        {
+          "id": "everyday",
+          "name": "EVERYDAY",
+          "subtitle": "For the everyday.",
+          "silhouette": "The Delo Collection",
+          "href": "/shop?section=everyday#everyday",
+          "editorialImage": "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917846/zimor/lifestyle/brandgirl3.webp",
+          "macroImage": "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917840/zimor/products/classic-4.webp"
+        },
+        {
+          "id": "work",
+          "name": "WORK",
+          "subtitle": "For what lies ahead.",
+          "silhouette": "The Rabota Collection",
+          "href": "/shop?section=work#work",
+          "editorialImage": "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917850/zimor/about/image.webp",
+          "macroImage": "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917833/zimor/products/rabota-4.webp"
+        },
+        {
+          "id": "travel",
+          "name": "TRAVEL",
+          "subtitle": "For places beyond.",
+          "silhouette": "The Classic Collection",
+          "href": "/shop?section=travel#travel",
+          "editorialImage": "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917845/zimor/lifestyle/brandgirl2.webp",
+          "macroImage": "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917840/zimor/products/classic-4.webp"
+        }
+      ]
+    },
+    "updatedAt": "2026-11-16T18:00:00.000Z"
+  },
+  {
+    "page": "about",
+    "section": "brand_story",
+    "data": {
+      "headline": "Sculpted in Leather, Defined by Function.",
+      "storyParagraphs": [
+        "Zimor was born in 2024 from an uncompromising need: why should modern women choose between delicate designer aesthetics and the pragmatic demands of a high-power workday?",
+        "Our journey began in a boutique leather studio, obsessing over internal weight distribution, padded 15.6\" shock-absorbing sleeves, and French equestrian saddle stitches that withstand a lifetime of use.",
+        "Today, Zimor represents deliberate, quiet luxury. Every edge is meticulously hand-painted, every brass bottom stud is turned on a lathe, and every pocket is mapped to modern daily tech."
+      ]
+    },
+    "updatedAt": "2026-11-16T18:00:00.000Z"
+  },
+  {
+    "page": "about",
+    "section": "vision_mission",
+    "data": {
+      "vision": "To redefine modern luxury workwear by elevating functional carry into an art form of sculptural minimalism.",
+      "mission": "Handcrafting architectural, cruelty-free leather goods in India with uncompromising structural durability, transparent pricing, and zero aesthetic sacrifice."
+    },
+    "updatedAt": "2026-11-16T18:00:00.000Z"
+  },
+  {
+    "page": "policy",
+    "section": "guidelines",
+    "data": {
+      "warranty": "Every Zimor bag is covered by our 1-Year Master Craftsmanship Warranty covering stitching, hardware, and structural edges.",
+      "shipping": "We offer complimentary express air shipping across India on all orders. Standard delivery arrives within 3-5 business days.",
+      "returns": "7-day hassle-free return and exchange policy on unused items in original packaging."
+    },
+    "updatedAt": "2026-11-16T18:00:00.000Z"
+  },
+  {
+    "page": "announcements",
+    "section": "default",
+    "data": {
+      "enabled": true,
+      "items": [
+        {
+          "id": "ann-1",
+          "text": "10% Off Your First Order with Code FIRST10",
+          "badge": "FIRST10",
+          "link": "/shop"
+        },
+        {
+          "id": "ann-2",
+          "text": "Complimentary Express Air Shipping Across India on All Orders",
+          "badge": "SHIPPING",
+          "link": "/shop"
+        },
+        {
+          "id": "ann-3",
+          "text": "Discover the Permanent Atelier Collection: Engineered for 15.6\" Laptops",
+          "badge": "COLLECTION",
+          "link": "/shop?category=tote-bags"
+        }
+      ]
+    },
+    "updatedAt": "2026-11-16T18:00:00.000Z"
+  }
+]

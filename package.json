@@ -1,0 +1,16 @@
+{
+  "name": "zimor",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Zimor Luxury Handbags - Full-Stack Architecture",
+  "scripts": {
+    "dev": "npm --prefix backend run dev & npm --prefix frontend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "npm --prefix backend run dev",
+    "build:frontend": "npm --prefix frontend run build",
+    "build:backend": "npm --prefix backend run build",
+    "build": "npm --prefix backend run build && npm --prefix frontend run build",
+    "start:frontend": "npm --prefix frontend run start",
+    "start:backend": "npm --prefix backend run start"
+  }
+}

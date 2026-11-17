@@ -16,12 +16,12 @@ export const REVIEWS: CustomerReview[] = [
     media: [
       {
         type: 'photo',
-        url: '/products/delo-1.jpg',
+        url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp',
         caption: 'My Delo tote packed for a client presentation at UB City',
       },
       {
         type: 'photo',
-        url: '/products/delo-4.jpg',
+        url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917829/zimor/products/delo-4.webp',
         caption: 'Everything organized inside the dedicated compartments',
       },
     ],
@@ -42,13 +42,13 @@ export const REVIEWS: CustomerReview[] = [
     media: [
       {
         type: 'photo',
-        url: '/products/rabota-1.jpg',
+        url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917831/zimor/products/rabota-1.webp',
         caption: 'Cognac brown finish in natural morning light',
       },
       {
         type: 'video',
         url: 'https://assets.mixkit.co/videos/preview/mixkit-woman-holding-a-leather-handbag-40294-large.mp4',
-        thumbnailUrl: '/products/rabota-3.jpg',
+        thumbnailUrl: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917833/zimor/products/rabota-3.webp',
         caption: 'Hands-on look at the strap drop and interior capacity',
       },
     ],
@@ -69,7 +69,7 @@ export const REVIEWS: CustomerReview[] = [
     media: [
       {
         type: 'photo',
-        url: '/products/classic-1.jpg',
+        url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917835/zimor/products/classic-1.webp',
         caption: 'Arrived beautifully packaged with dust bag and authenticity card',
       },
     ],
@@ -90,13 +90,13 @@ export const REVIEWS: CustomerReview[] = [
     media: [
       {
         type: 'photo',
-        url: '/brandgirl2.webp',
+        url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917845/zimor/lifestyle/brandgirl2.webp',
         caption: 'Styled with relaxed linen blazer for weekend brunch',
       },
       {
         type: 'video',
         url: 'https://assets.mixkit.co/videos/preview/mixkit-young-woman-with-a-shopping-bag-walking-out-of-a-40290-large.mp4',
-        thumbnailUrl: '/brandgirl3.webp',
+        thumbnailUrl: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917846/zimor/lifestyle/brandgirl3.webp',
         caption: 'Walking around Khan Market with the classic shoulder bag',
       },
     ],
@@ -117,7 +117,7 @@ export const REVIEWS: CustomerReview[] = [
     media: [
       {
         type: 'photo',
-        url: '/products/classic-2.jpg',
+        url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917835/zimor/products/classic-2.webp',
         caption: 'Underarm drop is so comfortable during commute',
       },
     ],

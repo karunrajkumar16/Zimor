@@ -267,7 +267,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                   <button
                     type="button"
                     onClick={() => {
-                      setMediaPreview('/products/delo-4.jpg');
+                      setMediaPreview('https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917829/zimor/products/delo-4.webp');
                       setMediaType('photo');
                     }}
                     className="flex items-center gap-2 px-3 py-2 border border-line bg-canvas hover:bg-canvas-alt text-xs rounded text-ink-secondary"

@@ -13,6 +13,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { apiFetch } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 
 const INDIAN_STATES = [
@@ -62,13 +63,16 @@ export default function CheckoutPage() {
   const shippingCharge = shippingMethod === 'priority' ? 199 : 0;
   const finalTotal = total + shippingCharge;
 
+  const [orderError, setOrderError] = useState<string | null>(null);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handlePlaceOrder = (e: React.FormEvent) => {
+  const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsPlacingOrder(true);
+    setOrderError(null);
 
     const paymentLabel =
       paymentMethod === 'upi'
@@ -79,39 +83,90 @@ export default function CheckoutPage() {
             ? 'Net Banking'
             : 'Cash on Delivery';
 
-    const orderPayload = {
-      items: items.map((i) => ({
-        productId: i.productId,
-        name: i.product.name,
-        slug: i.product.slug,
-        image: i.product.images[0]?.url || '/products/delo-1.jpg',
-        color: i.selectedColor,
-        size: i.selectedSize,
-        price: i.product.price,
-        quantity: i.quantity,
-      })),
-      shippingAddress: {
-        fullName: formData.fullName,
-        addressLine1: formData.addressLine1,
-        addressLine2: formData.addressLine2,
-        city: formData.city,
-        state: formData.state,
-        pincode: formData.pincode,
-        phone: formData.phone,
-      },
-      shippingMethod: shippingMethod === 'priority' ? 'Priority Express Air' : 'Standard Free Express',
-      paymentMethod: paymentLabel,
-      subtotal,
-      discount,
-      shippingFee: shippingCharge,
-      total: finalTotal,
-    };
+    try {
+      let paymentId = 'pay_offline';
 
-    setTimeout(() => {
-      const newOrder = createOrder(orderPayload);
+      // If online payment, initialize payment with backend provider
+      if (paymentMethod !== 'cod') {
+        const payRes = await apiFetch('/api/checkout/create-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amount: finalTotal,
+            currency: 'INR',
+            notes: {
+              customerEmail: formData.email,
+              customerName: formData.fullName,
+            },
+          }),
+        });
+
+        const payData = await payRes.json();
+        const pOrder = payData.paymentOrder || payData.order;
+        if (pOrder) {
+          paymentId = pOrder.providerOrderId || pOrder.id || `pay_${Date.now()}`;
+          // Verify payment (Mock verification in dev)
+          await apiFetch('/api/checkout/verify-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpayOrderId: paymentId,
+              razorpayPaymentId: `pay_${Date.now()}`,
+              razorpaySignature: 'sig_dev_verified',
+            }),
+          });
+        }
+      }
+
+      // Submit validated order to backend database
+      const orderRes = await apiFetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: items.map((i) => ({
+            productId: i.productId,
+            productName: i.product.name,
+            slug: i.product.slug,
+            image: i.product.images[0]?.url || 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp',
+            selectedColor: i.selectedColor,
+            selectedSize: i.selectedSize,
+            quantity: i.quantity,
+          })),
+          customer: {
+            name: formData.fullName,
+            email: formData.email,
+            phone: formData.phone,
+          },
+          shippingAddress: {
+            fullName: formData.fullName,
+            line1: formData.addressLine1,
+            line2: formData.addressLine2,
+            city: formData.city,
+            state: formData.state,
+            pincode: formData.pincode,
+            phone: formData.phone,
+          },
+          shippingMethod,
+          promoCode: appliedPromo,
+          paymentMethod: paymentLabel,
+          paymentId,
+        }),
+      });
+
+      const orderData = await orderRes.json();
+      const createdOrder = orderData.order || (orderData.success ? orderData.order : null);
+      if (!createdOrder) {
+        throw new Error(orderData.error || 'Failed to place order');
+      }
+
+      createOrder(createdOrder);
       clearCart();
-      router.push(`/checkout/success?orderId=${newOrder.orderNumber}`);
-    }, 1200);
+      router.push(`/checkout/success?orderId=${createdOrder.orderNumber}`);
+    } catch (err: any) {
+      console.error('Order placement failed:', err);
+      setOrderError(err.message || 'Something went wrong while placing your order. Please try again.');
+      setIsPlacingOrder(false);
+    }
   };
 
   if (items.length === 0) {
@@ -513,6 +568,12 @@ export default function CheckoutPage() {
                   </label>
                 </div>
 
+                {orderError && (
+                  <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded">
+                    {orderError}
+                  </div>
+                )}
+
                 <div className="pt-4 flex justify-between items-center">
                   <button
                     type="button"
@@ -552,7 +613,7 @@ export default function CheckoutPage() {
                 <div key={item.id} className="py-2.5 flex items-center gap-3">
                   <div className="relative w-12 h-12 rounded bg-canvas-alt border border-line overflow-hidden shrink-0">
                     <Image
-                      src={item.product.images[0]?.url || '/products/delo-1.jpg'}
+                      src={item.product.images[0]?.url || 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp'}
                       alt={item.product.name}
                       fill
                       loading="lazy"

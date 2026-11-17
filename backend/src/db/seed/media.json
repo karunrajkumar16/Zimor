@@ -1,0 +1,68 @@
+[
+  {
+    "id": "med-1",
+    "filename": "hero-first-edit.webp",
+    "originalName": "hero-first-edit.webp",
+    "url": "/banners/hero-first-edit.webp",
+    "publicId": "homepage/hero/hero-first-edit",
+    "mimeType": "image/png",
+    "size": 2115330,
+    "folder": "homepage/hero",
+    "createdAt": "2026-11-16T12:00:00.000Z"
+  },
+  {
+    "id": "med-2",
+    "filename": "hero-most-loved-tote.webp",
+    "originalName": "hero-most-loved-tote.webp",
+    "url": "/banners/hero-most-loved-tote.webp",
+    "publicId": "homepage/hero/hero-most-loved-tote",
+    "mimeType": "image/png",
+    "size": 1927588,
+    "folder": "homepage/hero",
+    "createdAt": "2026-11-16T12:00:00.000Z"
+  },
+  {
+    "id": "med-3",
+    "filename": "hero-model-crescent.webp",
+    "originalName": "hero-model-crescent.webp",
+    "url": "/banners/hero-model-crescent.webp",
+    "publicId": "homepage/hero/hero-model-crescent",
+    "mimeType": "image/png",
+    "size": 1612382,
+    "folder": "homepage/hero",
+    "createdAt": "2026-11-16T12:00:00.000Z"
+  },
+  {
+    "id": "med-4",
+    "filename": "delo-1.webp",
+    "originalName": "delo-1.webp",
+    "url": "/products/delo-1.webp",
+    "publicId": "products/delo-1",
+    "mimeType": "image/jpeg",
+    "size": 182400,
+    "folder": "products",
+    "createdAt": "2026-11-16T12:00:00.000Z"
+  },
+  {
+    "id": "med-5",
+    "filename": "rabota-1.webp",
+    "originalName": "rabota-1.webp",
+    "url": "/products/rabota-1.webp",
+    "publicId": "products/rabota-1",
+    "mimeType": "image/jpeg",
+    "size": 195200,
+    "folder": "products",
+    "createdAt": "2026-11-16T12:00:00.000Z"
+  },
+  {
+    "id": "med-6",
+    "filename": "classic-1.webp",
+    "originalName": "classic-1.webp",
+    "url": "/products/classic-1.webp",
+    "publicId": "products/classic-1",
+    "mimeType": "image/jpeg",
+    "size": 172000,
+    "folder": "products",
+    "createdAt": "2026-11-16T12:00:00.000Z"
+  }
+]

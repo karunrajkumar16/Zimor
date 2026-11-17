@@ -90,7 +90,7 @@ export default function CartPage() {
                     <div className="flex gap-4 sm:gap-6">
                       <div className="relative w-24 h-24 sm:w-28 sm:h-28 bg-canvas-alt rounded border border-line overflow-hidden shrink-0">
                         <Image
-                          src={item.product.images[0]?.url || '/products/delo-1.jpg'}
+                          src={item.product.images[0]?.url || 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp'}
                           alt={item.product.name}
                           fill
                           loading="lazy"

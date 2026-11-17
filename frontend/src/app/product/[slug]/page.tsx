@@ -31,7 +31,7 @@ export async function generateMetadata({
       description: product.description,
       images: [
         {
-          url: product.images[0]?.url || '/products/delo-1.jpg',
+          url: product.images[0]?.url || 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp',
           width: 1200,
           height: 800,
           alt: product.name,

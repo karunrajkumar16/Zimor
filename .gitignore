@@ -36,8 +36,14 @@ next-env.d.ts
 */.env*.local
 */.env
 
+# Local Uploads
+.local-uploads
+*/.local-uploads
+
 # Agent artifacts
 .agents
 .taste-skill
 skills-lock.json
 shots
+scratch/
+

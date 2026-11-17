@@ -83,7 +83,7 @@ export default function ContactPage() {
       <section className="relative w-full overflow-hidden min-h-[300px] sm:min-h-[360px] md:min-h-[420px] flex items-center bg-black">
         <div className="absolute inset-0">
           <Image
-            src="/corporate-workspace-horizontal.jpg"
+            src="https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917844/zimor/lifestyle/corporate-workspace-horizontal.webp"
             alt="Zimor Client Support"
             fill
             priority

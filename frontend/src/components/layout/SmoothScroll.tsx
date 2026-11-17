@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
-import Lenis from 'lenis';
+import type Lenis from 'lenis';
 
 interface SmoothScrollContextType {
   lenis: Lenis | null;
@@ -27,31 +27,35 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
   useEffect(() => {
     let lenis: Lenis | null = null;
     let rafId: number | null = null;
+    let isCancelled = false;
 
-    try {
-      const LenisConstructor = (typeof Lenis === 'function' ? Lenis : (Lenis as any)?.default) as typeof Lenis;
-      if (typeof LenisConstructor === 'function') {
-        lenis = new LenisConstructor({
-          lerp: 0.075, // Silky exponential damping (eliminates abrupt stops and stutter)
-          smoothWheel: true,
-          wheelMultiplier: 0.82, // Decreases scroll velocity by ~18% for composed, controlled scrolling
-          touchMultiplier: 1.0,
-          syncTouch: false, // Preserves natural high-refresh mobile gesture physics
-          infinite: false,
-          autoResize: true,
-        });
-        lenisRef.current = lenis;
+    import('lenis')
+      .then((mod) => {
+        if (isCancelled) return;
+        const LenisConstructor = mod.default || mod;
+        if (typeof LenisConstructor === 'function') {
+          lenis = new (LenisConstructor as any)({
+            lerp: 0.075, // Silky exponential damping (eliminates abrupt stops and stutter)
+            smoothWheel: true,
+            wheelMultiplier: 0.82, // Decreases scroll velocity by ~18% for composed, controlled scrolling
+            touchMultiplier: 1.0,
+            syncTouch: false, // Preserves natural high-refresh mobile gesture physics
+            infinite: false,
+            autoResize: true,
+          });
+          lenisRef.current = lenis;
 
-        // Direct 60-120fps RAF loop
-        const raf = (time: number) => {
-          lenis?.raf(time);
+          // Direct 60-120fps RAF loop
+          const raf = (time: number) => {
+            lenis?.raf(time);
+            rafId = requestAnimationFrame(raf);
+          };
           rafId = requestAnimationFrame(raf);
-        };
-        rafId = requestAnimationFrame(raf);
-      }
-    } catch (e) {
-      console.warn('Lenis smooth scroll failed to initialize:', e);
-    }
+        }
+      })
+      .catch((e) => {
+        console.warn('Lenis smooth scroll failed to initialize:', e);
+      });
 
     // Intercept in-page hash links for luxurious buttery glide
     const handleAnchorClick = (e: MouseEvent) => {

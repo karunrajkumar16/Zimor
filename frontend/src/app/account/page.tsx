@@ -67,7 +67,7 @@ export default function AccountPage() {
           <div className="lg:col-span-5 bg-canvas-card border border-line rounded-lg p-6 sm:p-8 space-y-6 shadow-xs">
             <div className="flex items-center gap-4">
               <div className="relative w-16 h-16 rounded-full overflow-hidden border border-line shrink-0 bg-canvas-alt">
-                <Image src={user.avatar} alt={user.name} fill loading="lazy" decoding="async" className="object-cover" />
+                <Image src={user.avatar} alt={user.name} fill unoptimized loading="lazy" decoding="async" className="object-cover" />
               </div>
               <div>
                 <h2 className="text-base font-bold text-ink">{user.name}</h2>
@@ -235,7 +235,7 @@ export default function AccountPage() {
                 <div className="py-2 flex items-center gap-3">
                   <div className="relative w-14 h-14 bg-canvas-alt rounded border border-line overflow-hidden shrink-0">
                     <Image
-                      src={orders[0].items[0]?.image || '/products/delo-1.jpg'}
+                      src={orders[0].items[0]?.image || 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp'}
                       alt={orders[0].items[0]?.name || 'Bag'}
                       fill
                       loading="lazy"

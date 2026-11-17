@@ -39,7 +39,7 @@ export interface Product {
   description: string;
   price: number;
   compareAtPrice: number;
-  category: 'tote-bags' | 'laptop-bags' | 'shoulder-bags';
+  category: 'tote-bags' | 'laptop-bags' | 'shoulder-bags' | string;
   categoryLabel: string;
   colors: ProductColor[];
   defaultColor: string;
@@ -112,9 +112,66 @@ export interface Order {
   discount: number;
   shippingFee: number;
   total: number;
-  status: 'Processing' | 'Confirmed' | 'Dispatched' | 'Out for Delivery' | 'Delivered';
+  status: 'Processing' | 'Confirmed' | 'Dispatched' | 'Shipped' | 'Out for Delivery' | 'Delivered' | 'Cancelled';
   trackingNumber: string;
   courierName: string;
   estimatedDelivery: string;
 }
+
+export interface Address {
+  id: string;
+  fullName: string;
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  pincode: string;
+  phone: string;
+  isDefault: boolean;
+}
+
+export interface Customer {
+  id: string;
+  email: string;
+  name: string;
+  phone?: string;
+  totalSpent?: number;
+  addresses: Address[];
+  orders: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  parentId?: string;
+  createdAt: string;
+}
+
+export interface MediaItem {
+  id: string;
+  filename: string;
+  originalName: string;
+  url: string;
+  publicId?: string;
+  mimeType: string;
+  size: number;
+  width?: number;
+  height?: number;
+  alt?: string;
+  folder: string;
+  productId?: string;
+  createdAt: string;
+}
+
+export interface SiteContent {
+  page: string;
+  section: string;
+  data: Record<string, unknown>;
+  updatedAt: string;
+}
+
 

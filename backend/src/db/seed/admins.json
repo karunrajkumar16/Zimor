@@ -1,0 +1,10 @@
+[
+  {
+    "id": "admin-1",
+    "email": "admin@zimor.in",
+    "passwordHash": "zimor_admin_2024",
+    "name": "Zimor Master Admin",
+    "role": "superadmin",
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  }
+]

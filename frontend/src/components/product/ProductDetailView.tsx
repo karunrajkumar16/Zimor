@@ -138,7 +138,7 @@ export function ProductDetailView({ product }: { product: Product }) {
     if (product.images[colorIndex]) {
       return product.images[colorIndex].url;
     }
-    return product.images[0]?.url || '/products/delo-1.jpg';
+    return product.images[0]?.url || 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp';
   };
 
   return (
@@ -844,7 +844,7 @@ export function ProductDetailView({ product }: { product: Product }) {
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="relative w-10 h-10 overflow-hidden bg-white shrink-0 border border-line">
               <Image
-                src={product.images[0]?.url || '/products/delo-1.jpg'}
+                src={product.images[0]?.url || 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp'}
                 alt={product.name}
                 fill
                 loading="lazy"

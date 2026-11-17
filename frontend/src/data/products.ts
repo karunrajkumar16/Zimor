@@ -27,19 +27,19 @@ export const PRODUCTS: Product[] = [
     numReviews: 4,
     images: [
       {
-        url: '/products/delo-1.jpg',
+        url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp',
         alt: 'ZIMOR Delo Tote in Rust front view with shoulder drop',
       },
       {
-        url: '/products/delo-2.jpg',
+        url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917828/zimor/products/delo-2.webp',
         alt: 'ZIMOR Delo Tote interior compartments and dedicated laptop compartment',
       },
       {
-        url: '/products/delo-3.jpg',
+        url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917829/zimor/products/delo-3.webp',
         alt: 'ZIMOR Delo Tote side profile with detachable matching wristlet pouch',
       },
       {
-        url: '/products/delo-4.jpg',
+        url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917829/zimor/products/delo-4.webp',
         alt: 'ZIMOR Delo Tote flatlay with notebook, planner, charger and essentials',
       },
     ],
@@ -95,18 +95,18 @@ export const PRODUCTS: Product[] = [
     ],
     defaultColor: 'Noir Black',
     sizes: ['Medium'],
-    stock: 0,
+    stock: 18,
     isFeatured: true,
     isComingSoon: true,
     averageRating: 5.0,
     numReviews: 0,
     images: [
       {
-        url: '/products/delo-noir-blur.jpg',
+        url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917830/zimor/products/delo-noir-blur.webp',
         alt: 'ZIMOR Delo Tote Noir — Coming Soon Silhouette',
       },
       {
-        url: '/products/delo-noir-blur-2.jpg',
+        url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917831/zimor/products/delo-noir-blur-2.webp',
         alt: 'ZIMOR Delo Tote Noir — Silhouette Detail',
       },
     ],
@@ -181,19 +181,19 @@ export const PRODUCTS: Product[] = [
     numReviews: 1,
     images: [
       {
-        url: '/products/rabota-1.jpg',
+        url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917831/zimor/products/rabota-1.webp',
         alt: 'ZIMOR Rabota Tote in Cognac Brown with dual handles and structured base',
       },
       {
-        url: '/products/rabota-2.jpg',
+        url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917832/zimor/products/rabota-2.webp',
         alt: 'ZIMOR Rabota Tote interior organization showing laptop sleeve and pockets',
       },
       {
-        url: '/products/rabota-3.jpg',
+        url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917833/zimor/products/rabota-3.webp',
         alt: 'ZIMOR Rabota Tote with detachable crossbody sling strap attached',
       },
       {
-        url: '/products/rabota-4.jpg',
+        url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917833/zimor/products/rabota-4.webp',
         alt: 'ZIMOR Rabota Tote side angle showing smooth metal zipper closure',
       },
     ],
@@ -253,18 +253,18 @@ export const PRODUCTS: Product[] = [
     ],
     defaultColor: 'Espresso Roast',
     sizes: ['Medium'],
-    stock: 0,
+    stock: 18,
     isFeatured: true,
     isComingSoon: true,
     averageRating: 5.0,
     numReviews: 0,
     images: [
       {
-        url: '/products/rabota-espresso-blur.jpg',
+        url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917834/zimor/products/rabota-espresso-blur.webp',
         alt: 'ZIMOR Rabota Tote Espresso — Coming Soon Silhouette',
       },
       {
-        url: '/products/rabota-espresso-blur-2.jpg',
+        url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917834/zimor/products/rabota-espresso-blur-2.webp',
         alt: 'ZIMOR Rabota Tote Espresso — Silhouette Detail',
       },
     ],
@@ -323,19 +323,19 @@ export const PRODUCTS: Product[] = [
     numReviews: 5,
     images: [
       {
-        url: '/products/classic-1.jpg',
+        url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917835/zimor/products/classic-1.webp',
         alt: 'ZIMOR Classic Shoulder Bag in Cream with faux leather trim front view',
       },
       {
-        url: '/products/classic-2.jpg',
+        url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917835/zimor/products/classic-2.webp',
         alt: 'ZIMOR Classic Shoulder Bag styled on shoulder showing compact crescent profile',
       },
       {
-        url: '/products/classic-3.jpg',
+        url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917838/zimor/products/classic-3.webp',
         alt: 'ZIMOR Classic Shoulder Bag interior showing magnetic flap and card pockets',
       },
       {
-        url: '/products/classic-4.jpg',
+        url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917840/zimor/products/classic-4.webp',
         alt: 'ZIMOR Classic Shoulder Bag gold metal hardware and stitching detail',
       },
     ],
@@ -388,18 +388,18 @@ export const PRODUCTS: Product[] = [
     ],
     defaultColor: 'Saddle Tan',
     sizes: ['Small'],
-    stock: 0,
+    stock: 18,
     isFeatured: true,
     isComingSoon: true,
     averageRating: 5.0,
     numReviews: 0,
     images: [
       {
-        url: '/products/classic-tan-blur.jpg',
+        url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917841/zimor/products/classic-tan-blur.webp',
         alt: 'ZIMOR Classic Shoulder Bag Saddle Tan — Coming Soon Silhouette',
       },
       {
-        url: '/products/classic-tan-blur-2.jpg',
+        url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917841/zimor/products/classic-tan-blur-2.webp',
         alt: 'ZIMOR Classic Shoulder Bag Saddle Tan — Silhouette Detail',
       },
     ],

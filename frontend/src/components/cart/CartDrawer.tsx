@@ -98,7 +98,7 @@ export const CartDrawer: React.FC = () => {
                   <div className="flex gap-3">
                     <div className="relative w-20 h-20 bg-canvas-alt shrink-0 border border-line rounded overflow-hidden">
                       <Image
-                        src={item.product.images[0]?.url || '/products/delo-1.jpg'}
+                        src={item.product.images[0]?.url || 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp'}
                         alt={item.product.name}
                         fill
                         className="object-cover"

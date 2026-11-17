@@ -347,7 +347,7 @@ export const Header: React.FC = () => {
                 aria-label="Zimor India Home"
               >
                 <Image
-                  src="/logo.png"
+                  src="https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917824/zimor/brand/logo.png"
                   alt="Zimor India"
                   width={392}
                   height={169}

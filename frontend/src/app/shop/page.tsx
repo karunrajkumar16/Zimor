@@ -50,8 +50,8 @@ const LIFESTYLE_SUBSECTIONS = [
       "5 solid brass protective bottom studs",
       "Matching detachable wristlet pouch included",
     ],
-    horizontalImage: "/corporate-workspace-horizontal.jpg",
-    editorialImage: "/corporate-executive-editorial.jpg",
+    horizontalImage: "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917844/zimor/lifestyle/corporate-workspace-horizontal.webp",
+    editorialImage: "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917843/zimor/lifestyle/corporate-executive-editorial.webp",
     subtitleFilterText: "Everyday Carry · 15.6\" Laptop Fit",
     icon: Briefcase,
     products: [
@@ -72,8 +72,8 @@ const LIFESTYLE_SUBSECTIONS = [
       "Dual grab handles + 110cm detachable sling",
       "Full-zip top closure + cosmetic pouch",
     ],
-    horizontalImage: "/tech-commute-workspace-horizontal.jpg",
-    editorialImage: "/tech-commute-editorial.jpg",
+    horizontalImage: "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917844/zimor/lifestyle/tech-commute-workspace-horizontal.webp",
+    editorialImage: "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917842/zimor/lifestyle/tech-commute-editorial.webp",
     subtitleFilterText: "Work & Focus · 15\" Dual-Carry",
     icon: Laptop,
     products: [
@@ -94,8 +94,8 @@ const LIFESTYLE_SUBSECTIONS = [
       "Heavyweight French canvas with vegan leather trim",
       "Luminous gold-tone clasp & underarm contour",
     ],
-    horizontalImage: "/artisan-heritage-landscape.jpg",
-    editorialImage: "/brandgirl2.webp",
+    horizontalImage: "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917847/zimor/about/artisan-heritage-landscape.webp",
+    editorialImage: "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917845/zimor/lifestyle/brandgirl2.webp",
     subtitleFilterText: "Travel & Escapes · Underarm Fit",
     icon: Sparkles,
     products: [

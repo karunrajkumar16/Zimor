@@ -1,13 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
-import { CartProvider } from '@/context/CartContext';
-import { WishlistProvider } from '@/context/WishlistContext';
-import { AuthProvider } from '@/context/AuthContext';
-import { AnnouncementBar } from '@/components/layout/AnnouncementBar';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
-import { CartDrawer } from '@/components/cart/CartDrawer';
-import { SmoothScroll } from '@/components/layout/SmoothScroll';
+import { StorefrontLayoutWrapper } from '@/components/layout/StorefrontLayoutWrapper';
 
 export const viewport: Viewport = {
   themeColor: '#000000',
@@ -41,7 +34,7 @@ export const metadata: Metadata = {
       'Structured, elegant leather workbags crafted for the modern professional with 15.6" laptop compartments.',
     images: [
       {
-        url: '/products/delo-1.jpg',
+        url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp',
         width: 1200,
         height: 800,
         alt: 'Zimor India Premium Workbags',
@@ -79,19 +72,7 @@ export default function RootLayout({
         />
       </head>
       <body className="font-secondary antialiased bg-canvas text-ink flex flex-col min-h-screen font-normal">
-        <SmoothScroll>
-          <AuthProvider>
-            <WishlistProvider>
-              <CartProvider>
-                <AnnouncementBar />
-                <Header />
-                <div className="flex-1">{children}</div>
-                <Footer />
-                <CartDrawer />
-              </CartProvider>
-            </WishlistProvider>
-          </AuthProvider>
-        </SmoothScroll>
+        <StorefrontLayoutWrapper>{children}</StorefrontLayoutWrapper>
       </body>
     </html>
   );

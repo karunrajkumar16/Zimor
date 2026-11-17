@@ -28,4 +28,7 @@ next-env.d.ts
 # Environment variables
 .env*.local
 .env
+.env.local
+.local-uploads/
+*.local
 

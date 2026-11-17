@@ -1,0 +1,7 @@
+[
+  {"id":"cat-1","name":"Tote Bags","slug":"tote-bags","description":"Spacious structured totes for work and everyday","createdAt":"2024-01-01T00:00:00Z"},
+  {"id":"cat-2","name":"Shoulder Bags","slug":"shoulder-bags","description":"Classic shoulder silhouettes","createdAt":"2024-01-01T00:00:00Z"},
+  {"id":"cat-3","name":"Everyday","slug":"everyday","description":"For the everyday","createdAt":"2024-01-01T00:00:00Z"},
+  {"id":"cat-4","name":"Work","slug":"work","description":"For what lies ahead","createdAt":"2024-01-01T00:00:00Z"},
+  {"id":"cat-5","name":"Travel","slug":"travel","description":"For places beyond","createdAt":"2024-01-01T00:00:00Z"}
+]

@@ -29,8 +29,8 @@ const PILLARS: PolenePillar[] = [
     subtitle: 'For the everyday.',
     silhouette: 'The Delo Collection',
     href: '/shop?section=everyday#everyday',
-    editorialImage: '/brandgirl3.webp',
-    macroImage: '/products/classic-4.jpg',
+    editorialImage: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917846/zimor/lifestyle/brandgirl3.webp',
+    macroImage: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917840/zimor/products/classic-4.webp',
     icon: Briefcase,
   },
   {
@@ -42,8 +42,8 @@ const PILLARS: PolenePillar[] = [
     subtitle: 'For what lies ahead.',
     silhouette: 'The Rabota Collection',
     href: '/shop?section=work#work',
-    editorialImage: '/image.jpg',
-    macroImage: '/products/rabota-4.jpg',
+    editorialImage: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917850/zimor/about/image.webp',
+    macroImage: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917833/zimor/products/rabota-4.webp',
     icon: Laptop,
   },
   {
@@ -55,8 +55,8 @@ const PILLARS: PolenePillar[] = [
     subtitle: 'For places beyond.',
     silhouette: 'The Classic Collection',
     href: '/shop?section=travel#travel',
-    editorialImage: '/brandgirl2.webp',
-    macroImage: '/products/classic-4.jpg',
+    editorialImage: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917845/zimor/lifestyle/brandgirl2.webp',
+    macroImage: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917840/zimor/products/classic-4.webp',
     icon: Sparkles,
   },
 ];
@@ -292,12 +292,12 @@ export const LifestyleDiscovery: React.FC = () => {
               muted
               playsInline
               preload="metadata"
-              poster="/craftsmanship-atelier.jpg"
+              poster="https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917849/zimor/about/craftsmanship-atelier.webp"
               className="w-full h-full object-cover object-center"
               aria-label="Artisanal leather craftsmanship and luxury handbag creation in India"
             >
-              <source src="/cafune-craftsmanship.mp4" type="video/mp4" />
-              <source src="/craftsmanship.mp4" type="video/mp4" />
+              <source src="https://res.cloudinary.com/kbeyfu3d/video/upload/v1794917863/zimor/videos/cafune-craftsmanship.mp4" type="video/mp4" />
+              <source src="https://res.cloudinary.com/kbeyfu3d/video/upload/v1794917866/zimor/videos/craftsmanship.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           </div>
@@ -312,7 +312,7 @@ export const LifestyleDiscovery: React.FC = () => {
             {/* Inset Landscape Photograph */}
             <div className="relative w-full max-w-[460px] aspect-[3/2] overflow-hidden mb-7 sm:mb-9">
               <Image
-                src="/artisan-heritage-landscape.jpg"
+                src="https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917847/zimor/about/artisan-heritage-landscape.webp"
                 alt="Crafted in India artisan heritage"
                 fill
                 sizes="(max-width: 768px) 100vw, 460px"

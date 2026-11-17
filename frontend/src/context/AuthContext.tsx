@@ -38,7 +38,7 @@ const DEFAULT_USER: UserProfile = {
   phone: '+91 98765 43210',
   designation: 'Senior Strategy Consultant',
   city: 'Bengaluru',
-  avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=160&auto=format&fit=crop&q=80',
+  avatar: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917845/zimor/lifestyle/brandgirl2.webp',
   addresses: [
     {
       id: 'addr-1',
@@ -77,7 +77,7 @@ const INITIAL_ORDERS: Order[] = [
         productId: 'zimor-delo-tote-rust',
         name: 'ZIMOR DELO TOTE',
         slug: 'zimor-delo-tote',
-        image: '/products/delo-1.jpg',
+        image: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp',
         color: 'Rust Caramel',
         size: 'Medium (15.6" Laptop)',
         price: 2999,
@@ -113,7 +113,7 @@ const INITIAL_ORDERS: Order[] = [
         productId: 'zimor-classic-shoulder-bag-cream',
         name: 'ZIMOR CLASSIC SHOULDER BAG',
         slug: 'zimor-classic-shoulder-bag',
-        image: '/products/classic-1.jpg',
+        image: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917835/zimor/products/classic-1.webp',
         color: 'Cream Canvas',
         size: 'Small (Everyday Carry)',
         price: 1699,

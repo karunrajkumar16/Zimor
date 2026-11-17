@@ -109,7 +109,7 @@ export default function AboutPage() {
           {/* Editorial Visual Canvas */}
           <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] lg:aspect-[24/9] min-h-[280px] sm:min-h-[400px] overflow-hidden bg-black">
             <Image
-              src="/corporate-workspace-horizontal.jpg"
+              src="https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917844/zimor/lifestyle/corporate-workspace-horizontal.webp"
               alt="ZIMOR Premium fashion and accessories collection overview"
               fill
               priority
@@ -175,7 +175,7 @@ export default function AboutPage() {
             <div className="lg:col-span-5">
               <div className="relative w-full aspect-[4/5] sm:aspect-[3/4] overflow-hidden bg-canvas">
                 <Image
-                  src="/craftsmanship-atelier.jpg"
+                  src="https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917849/zimor/about/craftsmanship-atelier.webp"
                   alt="Precision, care and attention to detail in craftsmanship"
                   fill
                   loading="lazy"
@@ -208,7 +208,7 @@ export default function AboutPage() {
               className="scroll-mt-28 group relative w-full aspect-[4/5] sm:aspect-[1/1] lg:aspect-[4/3] min-h-[420px] sm:min-h-[460px] overflow-hidden bg-black flex flex-col justify-end p-6 sm:p-8 lg:p-10"
             >
               <Image
-                src="/brand-vision-duo-colleagues.jpg"
+                src="https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917848/zimor/about/brand-vision-duo-colleagues.webp"
                 alt="ZIMOR Brand Vision – Inspiring women through distinctive design and accessible premium fashion"
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
@@ -234,7 +234,7 @@ export default function AboutPage() {
               className="scroll-mt-28 group relative w-full aspect-[4/5] sm:aspect-[1/1] lg:aspect-[4/3] min-h-[420px] sm:min-h-[460px] overflow-hidden bg-black flex flex-col justify-end p-6 sm:p-8 lg:p-10"
             >
               <Image
-                src="/brand-mission-leather.jpg"
+                src="https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917847/zimor/about/brand-mission-leather.webp"
                 alt="ZIMOR Brand Mission – Fashion-forward handbags and meticulous craftsmanship"
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
@@ -295,7 +295,7 @@ export default function AboutPage() {
               <div className="hidden md:block">
                 <div className="relative w-full aspect-[4/5] overflow-hidden bg-white border border-line/40">
                   <Image
-                    src="/about/brand-values-craft.webp"
+                    src="https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917850/zimor/about/brand-values-craft.webp"
                     alt="Artisanal leathercraft and precision stitching at the Zimor atelier"
                     fill
                     unoptimized

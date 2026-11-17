@@ -23,7 +23,7 @@ const MASONRY_FRAMES: MasonryFrame[] = [
     title: 'Rooted in\nCraftsmanship',
     linkText: 'Discover More',
     linkHref: '/about',
-    image: '/craftsmanship-atelier.jpg',
+    image: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917849/zimor/about/craftsmanship-atelier.webp',
     alt: 'Artisan hand-stitching luxury leather with needle and waxed thread',
     gridClasses:
       'col-span-1 md:col-start-6 md:col-end-10 md:row-start-1 md:row-end-2 min-h-[260px] md:min-h-0',
@@ -36,7 +36,7 @@ const MASONRY_FRAMES: MasonryFrame[] = [
     title: 'Designed for\nEveryday',
     linkText: 'Shop Now',
     linkHref: '/product/zimor-rabota-tote',
-    image: '/products/rabota-4.jpg',
+    image: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917833/zimor/products/rabota-4.webp',
     alt: 'Macro texture of Zimor Rabota luxury bag showing zipper and grain',
     gridClasses:
       'col-span-1 md:col-start-10 md:col-end-13 md:row-start-1 md:row-end-2 min-h-[260px] md:min-h-0',
@@ -49,7 +49,7 @@ const MASONRY_FRAMES: MasonryFrame[] = [
     title: 'Details That\nMatter',
     linkText: 'Explore Details',
     linkHref: '/product/zimor-delo-tote',
-    image: '/luxury-bag-tan.jpg',
+    image: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917845/zimor/lifestyle/luxury-bag-tan.webp',
     alt: 'Luxury cruelty-free leather handbag detailing with refined brass hardware',
     gridClasses:
       'col-span-2 md:col-start-1 md:col-end-6 md:row-start-2 md:row-end-3 min-h-[280px] md:min-h-0',
@@ -62,7 +62,7 @@ const MASONRY_FRAMES: MasonryFrame[] = [
     title: 'Proudly Made\nin India',
     linkText: 'Our Heritage',
     linkHref: '/about',
-    image: '/artisan-heritage-landscape.jpg',
+    image: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917847/zimor/about/artisan-heritage-landscape.webp',
     alt: 'Master artisan in Indian leathercraft atelier surrounded by leather rolls and hand tools',
     gridClasses:
       'col-span-2 md:col-start-6 md:col-end-13 md:row-start-2 md:row-end-3 min-h-[280px] md:min-h-0',

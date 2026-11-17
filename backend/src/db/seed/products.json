@@ -1,0 +1,481 @@
+[
+  {
+    "id": "zimor-delo-tote-rust",
+    "name": "ZIMOR DELO TOTE",
+    "slug": "zimor-delo-tote",
+    "tagline": "Structured Elegance for Daily Commutes & Boardroom Presence",
+    "description": "Designed for modern professionals, the ZIMOR Delo Tote combines elegance, organization, and everyday functionality. Crafted from Superior Faux leather with a structured silhouette, it comfortably fits laptops up to 15.6 inches while keeping your essentials neatly organized.",
+    "price": 2999,
+    "compareAtPrice": 5199,
+    "category": "tote-bags",
+    "categoryLabel": "Tote Bags",
+    "colors": [
+      {
+        "name": "Rust",
+        "hex": "#C73030"
+      },
+      {
+        "name": "Noir Black",
+        "hex": "#1C1917"
+      }
+    ],
+    "defaultColor": "Rust",
+    "sizes": [
+      "Medium"
+    ],
+    "stock": 13,
+    "isFeatured": true,
+    "isComingSoon": false,
+    "averageRating": 4.8,
+    "numReviews": 4,
+    "images": [
+      {
+        "url": "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp",
+        "alt": "ZIMOR Delo Tote in Rust front view with shoulder drop"
+      },
+      {
+        "url": "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917828/zimor/products/delo-2.webp",
+        "alt": "ZIMOR Delo Tote interior compartments and dedicated laptop compartment"
+      },
+      {
+        "url": "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917829/zimor/products/delo-3.webp",
+        "alt": "ZIMOR Delo Tote side profile with detachable matching wristlet pouch"
+      },
+      {
+        "url": "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917829/zimor/products/delo-4.webp",
+        "alt": "ZIMOR Delo Tote flatlay with notebook, planner, charger and essentials"
+      }
+    ],
+    "features": [
+      "Spacious main compartment with dedicated laptop section (fits up to 15.6\")",
+      "Multiple interior pockets, card slots, pen holders, key holder, and zip pocket for easy organization",
+      "Front and back quick-access zip pockets",
+      "Superior Faux leather with durable hardware and refined caramel accents",
+      "Comfortable shoulder handles for all-day carry Includes a matching detachable wristlet pouch for essentials",
+      "Ideal for work, office, travel, meetings, and daily use",
+      "A perfect blend of sophistication and practicality, the ZIMOR Delo Tote Bag transitions effortlessly from the office to after-hours."
+    ],
+    "material": [
+      "Superior Faux leather exterior",
+      "Durable polyester lining",
+      "High-quality metal hardware and zippers"
+    ],
+    "careInstructions": [
+      "Wipe clean with a soft, dry or slightly damp cloth",
+      "Avoid prolonged exposure to direct sunlight, heat, and moisture",
+      "Store in a dust bag when not in use",
+      "Do not machine wash or tumble dry",
+      "Avoid overloading to maintain the bag’s shape and structure"
+    ],
+    "dimensions": {
+      "length": "40 cm",
+      "height": "30 cm",
+      "width": "15 cm",
+      "strapDrop": "14 cm",
+      "weight": "0.70 kg"
+    },
+    "suitableProfessions": [
+      "corporate-executive",
+      "consultant",
+      "legal-finance"
+    ],
+    "laptopCompatibility": "Up to 15.6 inch (MacBook Pro 16\", ThinkPad, Dell XPS)"
+  },
+  {
+    "id": "zimor-delo-tote-noir",
+    "name": "ZIMOR DELO TOTE — NOIR",
+    "slug": "zimor-delo-tote-noir",
+    "tagline": "Timeless Monochromatic Power for Modern Executives",
+    "description": "Riva hits that perfect sweet spot between subtle and striking. The pebbled texture and contrast stitch detail feel elevated, while the golden buckle adds a soft shine. She fits a 14-inch laptop effortlessly and keeps everything in place with thoughtful pockets. Carry her with your workwear staples for a refined vibe, or add a charm and team her with casual co-ords for a chic weekend moment.",
+    "whyYoullLoveIt": "Riva hits that perfect sweet spot between subtle and striking. The pebbled texture and contrast stitch detail feel elevated, while the golden buckle adds a soft shine. She fits a 14-inch laptop effortlessly and keeps everything in place with thoughtful pockets. Carry her with your workwear staples for a refined vibe, or add a charm and team her with casual co-ords for a chic weekend moment.",
+    "price": 2999,
+    "compareAtPrice": 5199,
+    "category": "tote-bags",
+    "categoryLabel": "Tote Bags",
+    "colors": [
+      {
+        "name": "Noir Black",
+        "hex": "#1C1917"
+      },
+      {
+        "name": "Rust",
+        "hex": "#C73030"
+      }
+    ],
+    "defaultColor": "Noir Black",
+    "sizes": [
+      "Medium"
+    ],
+    "stock": 15,
+    "isFeatured": true,
+    "isComingSoon": true,
+    "averageRating": 5,
+    "numReviews": 0,
+    "images": [
+      {
+        "url": "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917830/zimor/products/delo-noir-blur.webp",
+        "alt": "ZIMOR Delo Tote Noir — Coming Soon Silhouette"
+      },
+      {
+        "url": "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917831/zimor/products/delo-noir-blur-2.webp",
+        "alt": "ZIMOR Delo Tote Noir — Silhouette Detail"
+      }
+    ],
+    "features": [
+      "Fits 14 Inch Laptop",
+      "Zipper Closure",
+      "One Main Compartment",
+      "Golden Buckle Detailing"
+    ],
+    "material": [
+      "PU"
+    ],
+    "strap": "Shoulder Strap",
+    "netQuantity": "1N Bag",
+    "careInstructions": [
+      "Wipe clean with a soft, dry or slightly damp cloth",
+      "Store in a cool dry space inside the complimentary dust bag",
+      "Avoid overloading to maintain the bag’s shape and structure"
+    ],
+    "dimensions": {
+      "length": "Top Length - 39cm, Bottom Length - 30cm",
+      "height": "26cm",
+      "width": "13cm",
+      "strapDrop": "26cm",
+      "weight": "0.70 kg"
+    },
+    "shippingPolicy": [
+      "Orders are dispatched within 24–48 hours of confirmation.",
+      "Delivery takes 2–7 business days from the order date."
+    ],
+    "returnPolicy": [
+      "Orders placed during events like \"Buy 2 Get 1 FREE - Miraggio Style Hour\" are not eligible for return & exchange.",
+      "Returns, exchanges, or replacements are accepted for unused items within 7 days of delivery. (Items must have original tags, dust bags, and boxes intact.)",
+      "Customised or promotional items are not eligible for return/exchange.",
+      "In case of any damage, defective item, missing item, empty parcel, or any other issue, please contact us within 24 hours of delivery. Kindly share a proper unboxing video along with a few clear pictures of the bag and box from all sides.",
+      "For any assistance, write to us at Zimorindia@gmail.com or call us at +91 89536 96928 from Monday to Saturday 10:00 am to 7:00 pm",
+      "Pick-up and delivery will be handled by Zimor.",
+      "For returns on Cash on Delivery orders, the refund will be credited to your bank account within 5–7 working days, as per standard banking timelines."
+    ],
+    "moreInformation": {
+      "importedAndMarketedBy": "Zimor India, Shivdaspur, manduadih, varanasi, uttar pradesh- 221103",
+      "customerCare": "Reach out to us at Zimorindia@gmail.com or call us at +91 89536 96928",
+      "countryOfOrigin": "India"
+    },
+    "suitableProfessions": [
+      "legal-finance",
+      "corporate-executive",
+      "tech-founder"
+    ],
+    "laptopCompatibility": "Fits 14 Inch Laptop effortlessly"
+  },
+  {
+    "id": "zimor-rabota-tote-cognac",
+    "name": "ZIMOR RABOTA TOTE",
+    "slug": "zimor-rabota-tote",
+    "tagline": "Dual-Carry Versatility with Detachable Sling for Dynamic Workdays",
+    "description": "Carry everything you need in style with the Zimor Rabota Tote Bag. Designed for work and everyday use, this structured tote features a spacious interior that fits up to a 15\" laptop, along with dedicated compartments for effortless organization. Crafted from Superior Faux leather, it comes with a secure zipper closure, comfortable handles, and an adjustable detachable sling strap for versatile carrying.",
+    "price": 2999,
+    "compareAtPrice": 5199,
+    "category": "laptop-bags",
+    "categoryLabel": "Laptop Bags",
+    "colors": [
+      {
+        "name": "Cognac Brown",
+        "hex": "#9C2C2C"
+      },
+      {
+        "name": "Espresso Roast",
+        "hex": "#3D2B1F"
+      }
+    ],
+    "defaultColor": "Cognac Brown",
+    "sizes": [
+      "Medium"
+    ],
+    "stock": 9,
+    "isFeatured": true,
+    "isComingSoon": false,
+    "averageRating": 5,
+    "numReviews": 1,
+    "images": [
+      {
+        "url": "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917831/zimor/products/rabota-1.webp",
+        "alt": "ZIMOR Rabota Tote in Cognac Brown with dual handles and structured base"
+      },
+      {
+        "url": "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917832/zimor/products/rabota-2.webp",
+        "alt": "ZIMOR Rabota Tote interior organization showing laptop sleeve and pockets"
+      },
+      {
+        "url": "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917833/zimor/products/rabota-3.webp",
+        "alt": "ZIMOR Rabota Tote with detachable crossbody sling strap attached"
+      },
+      {
+        "url": "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917833/zimor/products/rabota-4.webp",
+        "alt": "ZIMOR Rabota Tote side angle showing smooth metal zipper closure"
+      }
+    ],
+    "features": [
+      "Superior Faux Leather",
+      "Zipper Closure",
+      "Adjustable & Detachable Sling Strap",
+      "Fits up to a 15\" Laptop",
+      "1 Laptop Compartment",
+      "3 Card Slots",
+      "4 Slip Pockets",
+      "1 Zipper Pocket",
+      "2 Pen Slots",
+      "1 Key Holder",
+      "1 cosmetic pouch",
+      "A perfect blend of functionality and elegance for work, travel, and everyday essentials."
+    ],
+    "material": [
+      "Superior Faux Exterior",
+      "Durable polyester lining",
+      "High-quality metal hardware and zippers"
+    ],
+    "careInstructions": [
+      "Wipe clean with a soft, dry or slightly damp cloth",
+      "Avoid prolonged exposure to direct sunlight, heat, and moisture",
+      "Store in a dust bag when not in use",
+      "Do not machine wash or tumble dry",
+      "Avoid overloading to maintain the bag’s shape and structure"
+    ],
+    "dimensions": {
+      "length": "40 cm",
+      "height": "30 cm",
+      "width": "15 cm",
+      "strapDrop": "14 cm (5.51\" handle drop + adjustable sling)",
+      "weight": "0.70 kg"
+    },
+    "suitableProfessions": [
+      "tech-founder",
+      "consultant",
+      "creative-director"
+    ],
+    "laptopCompatibility": "Up to 15 inch (MacBook Air 15\", MacBook Pro 14\", ThinkPad)"
+  },
+  {
+    "id": "zimor-rabota-tote-espresso",
+    "name": "ZIMOR RABOTA TOTE — ESPRESSO",
+    "slug": "zimor-rabota-tote-espresso",
+    "tagline": "Deep Earthy Tones for Architects, Creators & Technologists",
+    "description": "The versatile Rabota Tote reimagined in rich Espresso Roast. Engineered for professionals on the move who need seamless transitions between meetings, client sites, and weekend transit. Comes complete with detachable crossbody strap and integrated cosmetic pouch.",
+    "price": 2999,
+    "compareAtPrice": 5199,
+    "category": "laptop-bags",
+    "categoryLabel": "Laptop Bags",
+    "colors": [
+      {
+        "name": "Espresso Roast",
+        "hex": "#3D2B1F"
+      },
+      {
+        "name": "Cognac Brown",
+        "hex": "#9C2C2C"
+      }
+    ],
+    "defaultColor": "Espresso Roast",
+    "sizes": [
+      "Medium"
+    ],
+    "stock": 18,
+    "isFeatured": true,
+    "isComingSoon": true,
+    "averageRating": 5,
+    "numReviews": 0,
+    "images": [
+      {
+        "url": "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917834/zimor/products/rabota-espresso-blur.webp",
+        "alt": "ZIMOR Rabota Tote Espresso — Coming Soon Silhouette"
+      },
+      {
+        "url": "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917834/zimor/products/rabota-espresso-blur-2.webp",
+        "alt": "ZIMOR Rabota Tote Espresso — Silhouette Detail"
+      }
+    ],
+    "features": [
+      "Rich Espresso faux leather exterior that ages beautifully with use",
+      "Includes detachable long strap for hands-free shoulder or crossbody commute",
+      "Dedicated padded laptop compartment (up to 15\" screen size)",
+      "Organized multi-pocket divider: 4 slip pockets, 3 card slots, 2 pen loops",
+      "Includes standalone matching mini zipper pouch",
+      "Sturdy structured base that stands on its own"
+    ],
+    "material": [
+      "Superior Faux Exterior",
+      "Durable polyester lining",
+      "High-quality metal hardware and zippers"
+    ],
+    "careInstructions": [
+      "Clean with a soft dry cloth",
+      "Avoid placing next to sharp objects or abrasive surfaces",
+      "Keep stuffed with tissue when stored long-term to retain structure"
+    ],
+    "dimensions": {
+      "length": "40 cm",
+      "height": "30 cm",
+      "width": "15 cm",
+      "strapDrop": "14 cm (5.51\" handle drop + adjustable sling)",
+      "weight": "0.70 kg"
+    },
+    "suitableProfessions": [
+      "tech-founder",
+      "creative-director",
+      "academic-doctor"
+    ],
+    "laptopCompatibility": "Up to 15 inch (MacBook Pro 14\", Dell XPS 13/15)"
+  },
+  {
+    "id": "zimor-classic-shoulder-bag-cream",
+    "name": "ZIMOR CLASSIC SHOULDER BAG",
+    "slug": "zimor-classic-shoulder-bag",
+    "tagline": "Minimalist Crescent Silhouette with Elegant Gold-Tone Hardware",
+    "description": "Elevate your everyday style with this Zimor Classic Shoulder Bag featuring Superior faux leather trim and elegant gold-tone hardware. Designed with a sleek crescent silhouette, non adjustable strap, and secure flap closure, it offers just the right space for your daily essentials while maintaining a sophisticated, minimalist look.",
+    "price": 1699,
+    "compareAtPrice": 2999,
+    "category": "shoulder-bags",
+    "categoryLabel": "Shoulder Bags",
+    "colors": [
+      {
+        "name": "Cream",
+        "hex": "#FFF6F0"
+      },
+      {
+        "name": "Saddle Tan",
+        "hex": "#8C5835"
+      }
+    ],
+    "defaultColor": "Cream",
+    "sizes": [
+      "Small"
+    ],
+    "stock": 14,
+    "isFeatured": true,
+    "isComingSoon": false,
+    "averageRating": 4.6,
+    "numReviews": 5,
+    "images": [
+      {
+        "url": "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917835/zimor/products/classic-1.webp",
+        "alt": "ZIMOR Classic Shoulder Bag in Cream with faux leather trim front view"
+      },
+      {
+        "url": "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917835/zimor/products/classic-2.webp",
+        "alt": "ZIMOR Classic Shoulder Bag styled on shoulder showing compact crescent profile"
+      },
+      {
+        "url": "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917838/zimor/products/classic-3.webp",
+        "alt": "ZIMOR Classic Shoulder Bag interior showing magnetic flap and card pockets"
+      },
+      {
+        "url": "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917840/zimor/products/classic-4.webp",
+        "alt": "ZIMOR Classic Shoulder Bag gold metal hardware and stitching detail"
+      }
+    ],
+    "features": [
+      "Elevate your everyday style with this Zimor Classic Shoulder Bag featuring Superior faux leather trim and elegant gold-tone hardware.",
+      "Designed with a sleek crescent silhouette, non adjustable strap, and secure flap closure.",
+      "Closure: Magnetic Flap",
+      "Occasion: Casual, Work, Travel, Everyday Use"
+    ],
+    "material": [
+      "Exterior: Superior Canvas with Faux Leather Trim",
+      "Interior: Soft Polyester Lining",
+      "Hardware: Gold-Tone Metal Accents"
+    ],
+    "careInstructions": [
+      "Wipe clean with a soft, damp cloth.",
+      "Do not machine wash or tumble dry.",
+      "Avoid prolonged exposure to direct sunlight and moisture.",
+      "Store in a cool, dry place when not in use.",
+      "Keep away from sharp objects to prevent scratches and snags.",
+      "Use a dust bag for storage to maintain shape and appearance."
+    ],
+    "dimensions": {
+      "length": "26 cm (10.23\")",
+      "height": "19 cm (7.48\")",
+      "width": "9.5 cm (3.76\")",
+      "strapDrop": "25.4 cm (10\")",
+      "weight": "Lightweight for everyday comfort"
+    },
+    "suitableProfessions": [
+      "creative-director",
+      "academic-doctor",
+      "consultant"
+    ],
+    "laptopCompatibility": "Fits iPad mini / Kindle, wallet, smartphone & daily beauty essentials"
+  },
+  {
+    "id": "zimor-classic-shoulder-bag-tan",
+    "name": "ZIMOR CLASSIC SHOULDER BAG — SADDLE TAN",
+    "slug": "zimor-classic-shoulder-bag-tan",
+    "tagline": "All-Weather Faux Leather in Warm Saddle Tan for Evening Glam & Brunches",
+    "description": "An all-leather edition of our popular crescent shoulder bag in warm Saddle Tan. Delivers an effortless French-girl aesthetic with structured curved contours and luminous gold hardware. Transitions seamlessly from daytime meetings to twilight dinners.",
+    "price": 1699,
+    "compareAtPrice": 2999,
+    "category": "shoulder-bags",
+    "categoryLabel": "Shoulder Bags",
+    "colors": [
+      {
+        "name": "Saddle Tan",
+        "hex": "#8C5835"
+      },
+      {
+        "name": "Cream",
+        "hex": "#FFF6F0"
+      }
+    ],
+    "defaultColor": "Saddle Tan",
+    "sizes": [
+      "Small"
+    ],
+    "stock": 18,
+    "isFeatured": true,
+    "isComingSoon": true,
+    "averageRating": 5,
+    "numReviews": 0,
+    "images": [
+      {
+        "url": "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917841/zimor/products/classic-tan-blur.webp",
+        "alt": "ZIMOR Classic Shoulder Bag Saddle Tan — Coming Soon Silhouette"
+      },
+      {
+        "url": "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917841/zimor/products/classic-tan-blur-2.webp",
+        "alt": "ZIMOR Classic Shoulder Bag Saddle Tan — Silhouette Detail"
+      }
+    ],
+    "features": [
+      "Full Superior Faux Leather body in luminous warm Saddle Tan tone",
+      "Architectural curved silhouette with tailored edge painting",
+      "Concealed high-strength magnetic snap closure",
+      "Tucked under-arm ergonomic shoulder strap with 10\" drop",
+      "Interior zip wall pocket and quick-access slip pocket",
+      "Scratch-resistant water-resistant exterior finish"
+    ],
+    "material": [
+      "Exterior: 100% Superior Faux Leather in Saddle Tan grain",
+      "Interior: Tonal polyester twill lining",
+      "Hardware: High-shine polished gold-tone hardware"
+    ],
+    "careInstructions": [
+      "Wipe with a soft damp cloth",
+      "Store in a cool dry space away from sharp jewelry",
+      "Use the included dust bag for seasonal storage"
+    ],
+    "dimensions": {
+      "length": "26 cm (10.23\")",
+      "height": "19 cm (7.48\")",
+      "width": "9.5 cm (3.76\")",
+      "strapDrop": "25.4 cm (10\")",
+      "weight": "Lightweight for everyday comfort"
+    },
+    "suitableProfessions": [
+      "creative-director",
+      "legal-finance",
+      "academic-doctor"
+    ],
+    "laptopCompatibility": "Fits Kindle, sunglasses case, phone, power bank & cardholder"
+  }
+]
