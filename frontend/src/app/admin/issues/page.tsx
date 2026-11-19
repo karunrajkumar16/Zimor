@@ -87,7 +87,7 @@ export default function AdminIssuesPage() {
         <div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Order Issues & Returns Resolution Desk</h1>
           <p className={`text-xs mt-1 ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
-            Manage patron support tickets, defect claims, transit damages, and size exchange requests.
+            Manage user support tickets, defect claims, transit damages, and size exchange requests.
           </p>
         </div>
 
@@ -145,7 +145,7 @@ export default function AdminIssuesPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search ticket #, order #, patron, reason..."
+              placeholder="Search ticket #, order #, user, reason..."
               className={`w-full pl-9 pr-4 py-2 border rounded text-xs focus:outline-none focus:border-[#B44220] transition-colors ${
                 isDark
                   ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA] placeholder-[#8A837C]'
@@ -185,7 +185,7 @@ export default function AdminIssuesPage() {
               >
                 <th className="py-3 px-4">Ticket ID</th>
                 <th className="py-3 px-4">Order #</th>
-                <th className="py-3 px-4">Patron</th>
+                <th className="py-3 px-4">User</th>
                 <th className="py-3 px-4">Issue Category</th>
                 <th className="py-3 px-4">Date Filed</th>
                 <th className="py-3 px-4">Status</th>
@@ -294,7 +294,7 @@ export default function AdminIssuesPage() {
                 </button>
               </div>
 
-              {/* Patron Info */}
+              {/* User Info */}
               <div className={`p-3.5 rounded-md border text-xs space-y-1 ${
                 isDark ? 'bg-[#1E1C1A] border-[#36312C]' : 'bg-[#FAF7F2] border-[#E5DFD7]'
               }`}>
@@ -306,10 +306,10 @@ export default function AdminIssuesPage() {
                 </p>
               </div>
 
-              {/* Patron Description */}
+              {/* User Description */}
               <div className="space-y-1.5 text-xs">
                 <span className={`font-bold uppercase tracking-wider text-[10px] ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
-                  Patron Statement
+                  User Statement
                 </span>
                 <p className={`p-3 rounded border leading-relaxed ${
                   isDark ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA]' : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F]'

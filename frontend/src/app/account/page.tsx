@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { AlertCircle, ShieldCheck, ArrowRight, Sparkles, LogOut, Check } from 'lucide-react';
+import { AlertCircle, ShieldCheck, ArrowRight, Sparkles, LogOut, Check, Mail, Lock, User as UserIcon, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useWishlist } from '@/context/WishlistContext';
 
@@ -29,6 +29,8 @@ function AccountContent() {
     orders,
     authError,
     loginWithGoogle,
+    loginWithEmail,
+    registerWithEmail,
     logout,
     updateProfile,
     addAddress,
@@ -46,6 +48,15 @@ function AccountContent() {
   const [downloadingNumber, setDownloadingNumber] = useState<string | null>(null);
   const [showSignOutModal, setShowSignOutModal] = useState(false);
 
+  // Email & Password Auth State
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+  const [emailInput, setEmailInput] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
+  const [nameInput, setNameInput] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+
   // Sync tab with URL search parameter
   useEffect(() => {
     const tabParam = searchParams.get('tab') as AccountTab;
@@ -62,6 +73,41 @@ function AccountContent() {
   const handleGoogleSignIn = () => {
     setIsLoggingIn(true);
     loginWithGoogle('/account');
+  };
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError(null);
+    clearAuthError();
+    setIsSubmitting(true);
+
+    try {
+      if (authMode === 'login') {
+        const res = await loginWithEmail(emailInput, passwordInput);
+        if (!res.success) {
+          setFormError(res.error || 'Failed to sign in. Please verify your credentials.');
+        }
+      } else {
+        if (!nameInput.trim()) {
+          setFormError('Please enter your full name.');
+          setIsSubmitting(false);
+          return;
+        }
+        if (passwordInput.length < 6) {
+          setFormError('Password must be at least 6 characters long.');
+          setIsSubmitting(false);
+          return;
+        }
+        const res = await registerWithEmail(nameInput.trim(), emailInput, passwordInput);
+        if (!res.success) {
+          setFormError(res.error || 'Failed to create account.');
+        }
+      }
+    } catch (err: any) {
+      setFormError(err.message || 'Authentication failed.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleConfirmSignOut = async () => {
@@ -91,7 +137,7 @@ function AccountContent() {
     );
   }
 
-  // 2. Unauthenticated Patron Sign-In (Editorial Zara / Louis Vuitton styling)
+  // 2. Unauthenticated User Sign-In (Editorial Zara / Louis Vuitton styling)
   if (!isAuthenticated || !user) {
     return (
       <div className="bg-[#FAF8F5] min-h-screen py-12 sm:py-20 border-b border-[#000000]/10">
@@ -115,27 +161,29 @@ function AccountContent() {
             </div>
 
             <div className="space-y-1.5">
-              <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-[#B44220]">
-                ZIMOR Atelier Concierge
-              </span>
               <h1 className="font-primary text-2xl sm:text-3xl font-normal text-[#000000] tracking-tight">
-                Patron Sign In
+                {authMode === 'login' ? 'User Sign In' : 'Create Account'}
               </h1>
               <p className="font-secondary text-xs text-[#666666] leading-relaxed max-w-xs mx-auto">
-                Sign in to manage your orders, track dispatches, update delivery destinations, and curate your personal wishlist.
+                {authMode === 'login'
+                  ? 'Sign in to manage your orders, track dispatches, update delivery destinations, and curate your personal wishlist.'
+                  : 'Register to unlock express checkout, track dispatches across India, and manage your personal collection.'}
               </p>
             </div>
 
-            {authError && (
+            {(authError || formError) && (
               <div className="p-3 bg-red-50 border border-red-200 text-xs text-red-800 flex items-start gap-2 text-left">
                 <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
                 <div className="flex-1">
                   <p className="font-semibold">Authentication issue</p>
-                  <p className="text-[11px] mt-0.5">{authError}</p>
+                  <p className="text-[11px] mt-0.5">{formError || authError}</p>
                 </div>
                 <button
                   type="button"
-                  onClick={clearAuthError}
+                  onClick={() => {
+                    setFormError(null);
+                    clearAuthError();
+                  }}
                   className="text-xs text-red-500 hover:text-red-700"
                 >
                   ✕
@@ -148,7 +196,7 @@ function AccountContent() {
               <button
                 type="button"
                 onClick={handleGoogleSignIn}
-                disabled={isLoggingIn}
+                disabled={isLoggingIn || isSubmitting}
                 className="w-full flex items-center justify-center gap-3 bg-white hover:bg-neutral-50 active:bg-neutral-100 text-[#1f1f1f] border border-[#747775]/40 hover:border-[#747775] py-3 px-4 text-xs font-medium uppercase tracking-[0.1em] shadow-xs transition-all duration-150 disabled:opacity-60 cursor-pointer"
               >
                 <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
@@ -173,10 +221,135 @@ function AccountContent() {
               </button>
             </div>
 
+            {/* Divider: OR WITH EMAIL */}
+            <div className="relative my-4 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-[#000000]/10" />
+              </div>
+              <span className="relative bg-white px-3 text-[10px] uppercase font-secondary tracking-[0.2em] text-[#888888]">
+                or with email
+              </span>
+            </div>
+
+            {/* Email & Password Form */}
+            <form onSubmit={handleEmailSubmit} className="space-y-4 text-left">
+              {authMode === 'register' && (
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-medium uppercase tracking-[0.1em] text-[#222222]">
+                    Full Name
+                  </label>
+                  <div className="relative">
+                    <UserIcon className="w-4 h-4 text-[#888888] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={nameInput}
+                      onChange={(e) => setNameInput(e.target.value)}
+                      required
+                      placeholder="e.g. Karun Singh"
+                      className="w-full pl-10 pr-3 py-2.5 bg-white border border-[#000000]/20 text-xs text-[#000000] placeholder-[#999999] focus:outline-none focus:border-[#000000] transition-colors rounded-none"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-1">
+                <label className="block text-[11px] font-medium uppercase tracking-[0.1em] text-[#222222]">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-[#888888] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="email"
+                    value={emailInput}
+                    onChange={(e) => setEmailInput(e.target.value)}
+                    required
+                    autoComplete="email"
+                    placeholder="name@domain.com"
+                    className="w-full pl-10 pr-3 py-2.5 bg-white border border-[#000000]/20 text-xs text-[#000000] placeholder-[#999999] focus:outline-none focus:border-[#000000] transition-colors rounded-none"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-[11px] font-medium uppercase tracking-[0.1em] text-[#222222]">
+                  Password
+                </label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-[#888888] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={passwordInput}
+                    onChange={(e) => setPasswordInput(e.target.value)}
+                    required
+                    minLength={6}
+                    autoComplete={authMode === 'login' ? 'current-password' : 'new-password'}
+                    placeholder="••••••••••••"
+                    className="w-full pl-10 pr-10 py-2.5 bg-white border border-[#000000]/20 text-xs text-[#000000] placeholder-[#999999] focus:outline-none focus:border-[#000000] transition-colors rounded-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888888] hover:text-[#000000] transition-colors cursor-pointer"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting || isLoggingIn}
+                className="w-full py-3 px-4 bg-[#000000] hover:bg-[#222222] active:bg-[#000000] text-white text-xs font-medium uppercase tracking-[0.12em] transition-colors disabled:opacity-60 cursor-pointer flex items-center justify-center gap-2 mt-2"
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Processing...</span>
+                  </>
+                ) : (
+                  <span>{authMode === 'login' ? 'Sign In' : 'Create Account'}</span>
+                )}
+              </button>
+
+              <div className="text-center pt-2 text-xs text-[#666666] font-secondary">
+                {authMode === 'login' ? (
+                  <p>
+                    Don&apos;t have an account?{' '}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuthMode('register');
+                        setFormError(null);
+                        clearAuthError();
+                      }}
+                      className="text-[#000000] font-semibold underline underline-offset-4 hover:text-[#B44220] transition-colors cursor-pointer"
+                    >
+                      Create an account
+                    </button>
+                  </p>
+                ) : (
+                  <p>
+                    Already have an account?{' '}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuthMode('login');
+                        setFormError(null);
+                        clearAuthError();
+                      }}
+                      className="text-[#000000] font-semibold underline underline-offset-4 hover:text-[#B44220] transition-colors cursor-pointer"
+                    >
+                      Sign in
+                    </button>
+                  </p>
+                )}
+              </div>
+            </form>
+
             {/* Atelier Member Benefits */}
             <div className="pt-4 border-t border-[#000000]/10 text-left space-y-2 text-xs text-[#555555]">
               <p className="text-[10px] uppercase font-bold tracking-[0.16em] text-[#000000]">
-                Patron Privileges
+                User Privileges
               </p>
               <ul className="space-y-1.5 text-[11px] text-[#666666]">
                 <li className="flex items-center gap-2">
@@ -204,7 +377,7 @@ function AccountContent() {
     );
   }
 
-  // 3. Authenticated Patron Dashboard
+  // 3. Authenticated User Dashboard
   return (
     <div className="bg-[#FFFFFF] min-h-screen py-6 sm:py-12 border-b border-[#000000]/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

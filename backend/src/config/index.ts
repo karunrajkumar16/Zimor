@@ -35,11 +35,11 @@ export const config = {
   },
   useMockPayment: process.env.USE_MOCK_PAYMENT !== 'false',
 
-  // Auth (Strict Two-Account Allowlist)
+  // Admin Authentication Allowlist (Strictly 2 Authorized Accounts)
   adminAllowedEmails: (process.env.ADMIN_ALLOWED_EMAILS || 'karunsingh1602@gmail.com,zimorindia@gmail.com')
     .toLowerCase()
     .split(',')
-    .map((e) => e.trim())
+    .map((e) => e.trim().toLowerCase())
     .filter(Boolean),
   jwtSecret: process.env.ADMIN_JWT_SECRET || 'zimor_secret_jwt_key_2024_luxury_atelier_token',
 

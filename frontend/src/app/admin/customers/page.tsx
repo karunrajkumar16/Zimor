@@ -66,9 +66,9 @@ export default function AdminCustomersPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Users & Patrons CRM</h1>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Users Directory</h1>
           <p className={`text-xs mt-1 ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
-            Comprehensive patron directory, order frequencies, lifetime customer spend, and contact channels.
+            Comprehensive user directory, order frequencies, lifetime customer spend, and contact channels.
           </p>
         </div>
 
@@ -76,7 +76,7 @@ export default function AdminCustomersPage() {
           <span className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${
             isDark ? 'bg-[#1E1C1A] border-[#36312C] text-[#B4B4B4]' : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#5A534E]'
           }`}>
-            Total Patrons: {customers.length}
+            Total Users: {customers.length}
           </span>
         </div>
       </div>
@@ -85,7 +85,7 @@ export default function AdminCustomersPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className={`p-4 rounded-lg border ${cardBg}`}>
           <span className={`text-[11px] font-semibold uppercase tracking-wider ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
-            Registered Patrons
+            Registered Users
           </span>
           <p className="text-2xl font-bold mt-1">{customers.length}</p>
           <p className={`text-[10px] mt-1 ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>Acquired through storefront checkout</p>
@@ -93,7 +93,7 @@ export default function AdminCustomersPage() {
 
         <div className={`p-4 rounded-lg border ${cardBg}`}>
           <span className={`text-[11px] font-semibold uppercase tracking-wider ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
-            VIP Repeat Patrons
+            VIP Repeat Users
           </span>
           <p className="text-2xl font-bold mt-1 text-[#B44220] dark:text-[#E07A5F]">{vipCount}</p>
           <p className={`text-[10px] mt-1 ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>Multi-silhouette purchasers</p>
@@ -106,11 +106,11 @@ export default function AdminCustomersPage() {
           <p className="text-2xl font-bold mt-1 text-[#2E7D5A] dark:text-[#52B788]">
             ₹{totalSpendAll.toLocaleString('en-IN')}
           </p>
-          <p className={`text-[10px] mt-1 ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>Gross patron lifetime value</p>
+          <p className={`text-[10px] mt-1 ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>Gross user lifetime value</p>
         </div>
       </div>
 
-      {/* Patrons Directory Table */}
+      {/* Users Directory Table */}
       <div className={`rounded-lg border overflow-hidden ${cardBg}`}>
         {/* Search Bar */}
         <div className={`p-4 border-b flex items-center justify-between gap-3 ${isDark ? 'border-[#36312C]' : 'border-[#E5DFD7]'}`}>
@@ -120,7 +120,7 @@ export default function AdminCustomersPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search patrons by name, email, phone..."
+              placeholder="Search users by name, email, phone..."
               className={`w-full pl-9 pr-4 py-2 border rounded text-xs focus:outline-none focus:border-[#B44220] transition-colors ${
                 isDark
                   ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA] placeholder-[#8A837C]'
@@ -145,7 +145,7 @@ export default function AdminCustomersPage() {
                     : 'border-[#E5DFD7] bg-[#EEE8DF] text-[#5A534E]'
                 }`}
               >
-                <th className="py-3 px-4">Patron Name</th>
+                <th className="py-3 px-4">User Name</th>
                 <th className="py-3 px-4">Email</th>
                 <th className="py-3 px-4">Phone</th>
                 <th className="py-3 px-4">Orders</th>
@@ -158,13 +158,13 @@ export default function AdminCustomersPage() {
               {loading ? (
                 <tr>
                   <td colSpan={7} className={`py-12 text-center text-xs ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
-                    Loading registered patrons...
+                    Loading registered users...
                   </td>
                 </tr>
               ) : filteredCustomers.length === 0 ? (
                 <tr>
                   <td colSpan={7} className={`py-12 text-center text-xs ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
-                    No registered patrons found. Customer profiles will appear here as orders are placed.
+                    No registered users found. Customer profiles will appear here as orders are placed.
                   </td>
                 </tr>
               ) : (
@@ -216,7 +216,7 @@ export default function AdminCustomersPage() {
                       <td className="py-3.5 px-4">
                         {isVip ? (
                           <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#B44220]/15 text-[#B44220] dark:text-[#E07A5F] border border-[#B44220]/30">
-                            VIP Patron
+                            VIP User
                           </span>
                         ) : (
                           <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
@@ -261,7 +261,7 @@ export default function AdminCustomersPage() {
             <div className={`flex items-center justify-between border-b pb-3 ${
               isDark ? 'border-[#36312C]' : 'border-[#E5DFD7]'
             }`}>
-              <h3 className="text-sm font-bold">Patron Profile</h3>
+              <h3 className="text-sm font-bold">User Profile</h3>
               <button
                 onClick={() => setSelectedCustomer(null)}
                 className={`transition-colors ${isDark ? 'text-[#8A837C] hover:text-[#E8E1DA]' : 'text-[#8C837A] hover:text-[#24211F]'}`}

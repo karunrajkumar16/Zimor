@@ -33,6 +33,7 @@ const CustomerSchema = new Schema(
     googleId: { type: String, sparse: true, index: true },
     avatar: { type: String },
     authProvider: { type: String, enum: ['google', 'local'], default: 'google' },
+    passwordHash: { type: String, select: false },
     addresses: [AddressSchema],
     orders: [{ type: String }],
   },
@@ -44,6 +45,7 @@ const CustomerSchema = new Schema(
         ret.id = ret._id?.toString();
         delete ret._id;
         delete ret.__v;
+        delete ret.passwordHash;
         return ret;
       },
     },

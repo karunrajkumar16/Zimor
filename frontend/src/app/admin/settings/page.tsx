@@ -364,7 +364,7 @@ export default function AdminSettingsPage() {
                 </span>
               </div>
               <p className="text-[11px] text-[#7A7269] mb-3 leading-relaxed">
-                Last Updated: 17 November 2026. Stored in MongoDB Atlas (<code className="text-[10px]">SiteContent.privacy-policy</code>). Covers personal information handling, cookies, third-party disclosures, and patron rights.
+                Last Updated: 17 November 2026. Stored in MongoDB Atlas (<code className="text-[10px]">SiteContent.privacy-policy</code>). Covers personal information handling, cookies, third-party disclosures, and user rights.
               </p>
               <div className="flex items-center justify-between pt-2 border-t border-[#E5DFD7] dark:border-[#36312C]">
                 <span className="text-[10px] text-[#8C837A]">Status: Immutable</span>

@@ -176,7 +176,7 @@ export default function AdminOrdersPage() {
               >
                 <th className="py-3 px-4">Order #</th>
                 <th className="py-3 px-4">Date</th>
-                <th className="py-3 px-4">Patron</th>
+                <th className="py-3 px-4">User</th>
                 <th className="py-3 px-4">Items</th>
                 <th className="py-3 px-4">Total</th>
                 <th className="py-3 px-4">Status</th>
@@ -223,7 +223,7 @@ export default function AdminOrdersPage() {
 
                     <td className="py-3.5 px-4">
                       <p className="font-semibold text-[#24211F] dark:text-[#E8E1DA]">
-                        {ord.shippingAddress?.fullName || 'Patron'}
+                        {ord.shippingAddress?.fullName || 'User'}
                       </p>
                       <p className="text-[10px] text-[#8C837A] dark:text-[#8A837C]">
                         {ord.shippingAddress?.phone}

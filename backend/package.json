@@ -8,7 +8,6 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "test": "tsx test-suite.ts",
-    "provision:admins": "tsx scripts/provision-admins.ts",
     "start": "node dist/server.js"
   },
   "dependencies": {

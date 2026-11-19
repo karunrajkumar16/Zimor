@@ -66,7 +66,10 @@ export class JsonDatabaseProvider implements DatabaseProvider {
       products = products.filter((p) => p.category === filters.category);
     }
     if (filters?.isFeatured !== undefined) {
-      products = products.filter((p) => p.isFeatured === filters.isFeatured);
+      products = products.filter((p) => (filters.isFeatured ? p.isFeatured === true : p.isFeatured !== true));
+    }
+    if (filters?.isPublished !== undefined) {
+      products = products.filter((p) => (filters.isPublished ? p.isPublished !== false : p.isPublished === false));
     }
     if (filters?.search) {
       const q = filters.search.toLowerCase();

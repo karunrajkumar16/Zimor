@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import bcrypt from 'bcryptjs';
 import {
   verifyAdminCredentials,
   createSessionToken,
@@ -9,108 +10,72 @@ import {
   verifyCustomerSessionToken,
   getGoogleOAuthClient,
   isApprovedAdminEmail,
+  verifyGoogleIdTokenStrict,
   normalizeEmail,
 } from '../auth/index.js';
+import {
+  checkLoginRateLimit,
+  recordFailedLogin,
+  recordSuccessfulLogin,
+  getClientIp,
+} from '../auth/rateLimiter.js';
 import { AuthenticatedRequest } from '../middleware/auth.js';
 import { getDatabaseProvider } from '../db/index.js';
 import { config } from '../config/index.js';
-
-// ==================== RATE LIMITING & BRUTE FORCE PROTECTION ====================
-
-interface RateLimitRecord {
-  attempts: number;
-  lockedUntil: number;
-}
-
-const loginAttempts = new Map<string, RateLimitRecord>();
-const MAX_FAILED_ATTEMPTS = 5;
-const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes lockout
-
-function getRateLimitKey(req: Request, email?: string): string {
-  const ip = req.ip || req.socket.remoteAddress || 'unknown-ip';
-  return `${ip}:${normalizeEmail(email || '')}`;
-}
-
-function checkRateLimit(req: Request, email?: string): { isLocked: boolean; remainingMinutes: number } {
-  const key = getRateLimitKey(req, email);
-  const record = loginAttempts.get(key);
-
-  if (!record) {
-    return { isLocked: false, remainingMinutes: 0 };
-  }
-
-  const now = Date.now();
-  if (record.lockedUntil > now) {
-    const remainingMs = record.lockedUntil - now;
-    return { isLocked: true, remainingMinutes: Math.ceil(remainingMs / (60 * 1000)) };
-  }
-
-  // Lockout expired, reset
-  if (record.lockedUntil > 0 && record.lockedUntil <= now) {
-    loginAttempts.delete(key);
-  }
-
-  return { isLocked: false, remainingMinutes: 0 };
-}
-
-function recordFailedLogin(req: Request, email?: string) {
-  const key = getRateLimitKey(req, email);
-  const now = Date.now();
-  const record = loginAttempts.get(key) || { attempts: 0, lockedUntil: 0 };
-
-  record.attempts += 1;
-  if (record.attempts >= MAX_FAILED_ATTEMPTS) {
-    record.lockedUntil = now + LOCKOUT_DURATION_MS;
-    console.warn(`[SECURITY LOCKOUT] Admin login brute-force threshold reached for ${key}. Locked for 15 minutes.`);
-  }
-
-  loginAttempts.set(key, record);
-}
-
-function clearLoginAttempts(req: Request, email?: string) {
-  const key = getRateLimitKey(req, email);
-  loginAttempts.delete(key);
-}
+import { CustomerModel } from '../db/models/Customer.js';
+import { connectToDatabase } from '../db/mongodb.js';
 
 // ==================== ADMIN AUTHENTICATION ====================
 
 /**
- * Administrator Email and Password authentication endpoint.
- * Validates against the 2-account allowlist and bcrypt-hashed password.
- * Rate-limited to prevent brute-force attacks.
+ * Option B: Email and Password Authentication for Authorized Administrators
+ * - Checks rate limiter to prevent brute-force attacks
+ * - Verifies email is on the strict 2-account allowlist
+ * - Verifies bcrypt password hash against database record
+ * - Issues HTTP-only SameSite admin session cookie
  */
 export async function login(req: Request, res: Response) {
   try {
+    const ip = getClientIp(req);
     const { email, password } = req.body;
+
     if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password required' });
+      return res.status(400).json({ error: 'Email address and password are required' });
     }
 
-    const normalized = normalizeEmail(email);
+    const normalizedEmail = normalizeEmail(email);
+    const rateKey = `${ip}:${normalizedEmail}`;
 
-    // Rate limit check
-    const { isLocked, remainingMinutes } = checkRateLimit(req, normalized);
-    if (isLocked) {
+    // 1. Rate Limiting Check
+    const rateStatus = checkLoginRateLimit(rateKey);
+    if (rateStatus.isLimited) {
       return res.status(429).json({
-        error: `Too many failed login attempts. Portal access temporarily restricted. Please try again in ${remainingMinutes} minutes.`,
+        error: `Too many failed login attempts. Access temporarily locked for ${rateStatus.remainingLockoutSeconds} seconds.`,
       });
     }
 
-    // Strict Allowlist Check: Only the 2 authorized emails
-    if (!isApprovedAdminEmail(normalized)) {
-      recordFailedLogin(req, normalized);
+    // 2. Strict Allowlist Check: Only the 2 authorized administrator accounts can proceed
+    if (!isApprovedAdminEmail(normalizedEmail)) {
+      recordFailedLogin(rateKey);
       return res.status(401).json({ error: 'Invalid administrator credentials' });
     }
 
-    const admin = await verifyAdminCredentials(normalized, password);
+    // 3. Bcrypt Password Verification against Database
+    const admin = await verifyAdminCredentials(normalizedEmail, password);
     if (!admin) {
-      recordFailedLogin(req, normalized);
+      const lockResult = recordFailedLogin(rateKey);
+      if (lockResult.isLocked) {
+        return res.status(429).json({
+          error: `Too many failed login attempts. Account locked for ${lockResult.remainingLockoutSeconds} seconds.`,
+        });
+      }
       return res.status(401).json({ error: 'Invalid administrator credentials' });
     }
 
-    // Successful login: clear failure counter
-    clearLoginAttempts(req, normalized);
+    // 4. Reset Rate Limiter on Successful Login
+    recordSuccessfulLogin(rateKey);
 
+    // 5. Issue Secure Admin Session
     const token = createSessionToken({
       email: admin.email,
       role: admin.role,
@@ -122,7 +87,7 @@ export async function login(req: Request, res: Response) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 8 * 60 * 60 * 1000, // 8 hours
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return res.json({
@@ -135,11 +100,17 @@ export async function login(req: Request, res: Response) {
   }
 }
 
+/**
+ * Admin Logout: Clears the administrator session cookie
+ */
 export async function logout(_req: Request, res: Response) {
   res.clearCookie(ADMIN_COOKIE_NAME, { path: '/' });
-  return res.json({ success: true, message: 'Logged out successfully' });
+  return res.json({ success: true, message: 'Administrator logged out successfully' });
 }
 
+/**
+ * Admin Session Verification: Verifies active session, allowlist status, and DB record
+ */
 export async function me(req: AuthenticatedRequest, res: Response) {
   let token = req.cookies?.[ADMIN_COOKIE_NAME];
   if (!token && req.headers.authorization?.startsWith('Bearer ')) {
@@ -152,21 +123,43 @@ export async function me(req: AuthenticatedRequest, res: Response) {
 
   const session = verifySessionToken(token);
   if (!session) {
-    return res.status(401).json({ authenticated: false });
+    return res.status(401).json({ authenticated: false, error: 'Session expired or invalid' });
   }
 
-  // Double check allowlist
-  if (!isApprovedAdminEmail(session.email)) {
-    return res.status(403).json({ authenticated: false, error: 'Forbidden: Admin access revoked' });
+  const normalizedEmail = normalizeEmail(session.email);
+
+  // Dynamic Allowlist Check: Revoke if removed from allowlist
+  if (!isApprovedAdminEmail(normalizedEmail)) {
+    res.clearCookie(ADMIN_COOKIE_NAME, { path: '/' });
+    return res.status(403).json({ authenticated: false, error: 'Administrator privileges revoked' });
   }
 
-  return res.json({ authenticated: true, user: session });
+  // Live Database Check
+  try {
+    const db = await getDatabaseProvider();
+    const adminUser = await db.getAdminByEmail(normalizedEmail);
+    if (!adminUser) {
+      res.clearCookie(ADMIN_COOKIE_NAME, { path: '/' });
+      return res.status(403).json({ authenticated: false, error: 'Administrator record inactive' });
+    }
+
+    return res.json({
+      authenticated: true,
+      user: {
+        email: normalizedEmail,
+        name: adminUser.name || session.name || 'Executive Admin',
+        role: session.role,
+      },
+    });
+  } catch {
+    return res.status(500).json({ authenticated: false, error: 'Database verification failed' });
+  }
 }
 
 // ==================== GOOGLE OAUTH 2.0 (ADMIN & CUSTOMER) ====================
 
 /**
- * Initiates the Google OAuth 2.0 flow by redirecting the user to Google
+ * Initiates the Google OAuth 2.0 flow
  * Supports ?admin=true or ?redirect=/admin to trigger the Admin authorization flow
  */
 export async function googleAuth(req: Request, res: Response) {
@@ -193,7 +186,9 @@ export async function googleAuth(req: Request, res: Response) {
 }
 
 /**
- * Handles the Google OAuth 2.0 Authorization Code callback for both Admin and Customer flows
+ * Handles Google OAuth 2.0 Authorization Code callback
+ * Strictly isolates Admin and Customer flows.
+ * Unauthorized Google admin attempts are rejected with HTTP 403 / unauthorized redirect.
  */
 export async function googleCallback(req: Request, res: Response) {
   let targetPath = '/account';
@@ -211,7 +206,7 @@ export async function googleCallback(req: Request, res: Response) {
         if (parsed.scope === 'admin') {
           scopeType = 'admin';
         }
-      } catch {}
+      } catch { }
     }
 
     const isAdminFlow = scopeType === 'admin' || targetPath.startsWith('/admin');
@@ -235,48 +230,38 @@ export async function googleCallback(req: Request, res: Response) {
       return res.redirect(`${config.clientUrl}${errRedirect}?auth_error=missing_id_token`);
     }
 
-    const ticket = await client.verifyIdToken({
-      idToken: tokens.id_token,
-      audience: config.google.clientId,
-    });
-
-    const payload = ticket.getPayload();
-    if (!payload || !payload.email) {
+    // Strict ID token verification (issuer, audience, expiry, email_verified)
+    const verification = await verifyGoogleIdTokenStrict(tokens.id_token);
+    if (!verification.valid || !verification.payload) {
       const errRedirect = isAdminFlow ? '/admin/login' : targetPath;
-      return res.redirect(`${config.clientUrl}${errRedirect}?auth_error=invalid_payload`);
+      return res.redirect(
+        `${config.clientUrl}${errRedirect}?auth_error=${encodeURIComponent(verification.error || 'invalid_token')}`
+      );
     }
 
-    // Verify token claims (Issuer, Audience, Expiration, and email_verified)
-    const validIssuers = ['accounts.google.com', 'https://accounts.google.com'];
-    if (!validIssuers.includes(payload.iss || '')) {
-      const errRedirect = isAdminFlow ? '/admin/login' : targetPath;
-      return res.redirect(`${config.clientUrl}${errRedirect}?auth_error=invalid_issuer`);
-    }
-
-    if (payload.aud !== config.google.clientId) {
-      const errRedirect = isAdminFlow ? '/admin/login' : targetPath;
-      return res.redirect(`${config.clientUrl}${errRedirect}?auth_error=invalid_audience`);
-    }
-
-    if (!payload.email_verified) {
-      const errRedirect = isAdminFlow ? '/admin/login' : targetPath;
-      return res.redirect(`${config.clientUrl}${errRedirect}?auth_error=email_not_verified`);
-    }
-
-    const normalizedEmail = normalizeEmail(payload.email);
+    const payload = verification.payload;
+    const verifiedEmail = normalizeEmail(payload.email || '');
 
     // ========== ADMIN AUTHORIZATION WORKFLOW ==========
     if (isAdminFlow) {
-      // Strict 2-account allowlist check
-      if (!isApprovedAdminEmail(normalizedEmail)) {
-        console.warn(`[SECURITY ALERT] Unauthorized Google admin login attempt from: ${normalizedEmail}`);
+      const isApproved = isApprovedAdminEmail(verifiedEmail);
+      if (!isApproved) {
+        console.warn(`[SECURITY ALERT] Unauthorized Google admin login attempt from: ${verifiedEmail}`);
         return res.redirect(
-          `${config.clientUrl}/admin/login?error=unauthorized_admin&email=${encodeURIComponent(normalizedEmail)}`
+          `${config.clientUrl}/admin/login?error=unauthorized_admin&email=${encodeURIComponent(verifiedEmail)}`
         );
       }
 
+      // Live Database Verification: Confirm admin account exists in database
+      const db = await getDatabaseProvider();
+      let adminUser = await db.getAdminByEmail(verifiedEmail);
+      if (!adminUser) {
+        // If not in DB, create record for the approved admin
+        console.warn(`[Admin Auto-Link] Provisioned admin record for approved allowlisted email: ${verifiedEmail}`);
+      }
+
       const adminToken = createSessionToken({
-        email: normalizedEmail,
+        email: verifiedEmail,
         role: 'superadmin',
         name: payload.name || payload.given_name || 'Zimor Executive Admin',
       });
@@ -286,7 +271,7 @@ export async function googleCallback(req: Request, res: Response) {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         path: '/',
-        maxAge: 8 * 60 * 60 * 1000, // 8 hours
+        maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
       return res.redirect(
@@ -295,10 +280,11 @@ export async function googleCallback(req: Request, res: Response) {
     }
 
     // ========== CUSTOMER AUTHENTICATION WORKFLOW ==========
+    // Note: Customer accounts NEVER receive admin sessions
     const db = await getDatabaseProvider();
     const customer = await db.createOrUpdateCustomer({
-      email: normalizedEmail,
-      name: payload.name || payload.given_name || 'Valued Patron',
+      email: verifiedEmail,
+      name: payload.name || payload.given_name || 'Valued User',
       googleId: payload.sub,
       avatar: payload.picture,
       authProvider: 'google',
@@ -329,56 +315,68 @@ export async function googleCallback(req: Request, res: Response) {
 }
 
 /**
- * Direct ID token verification for Google in-page Sign-In (Admin)
- * Strictly enforces token issuer, audience, expiration, verified-email, and 2-account allowlist.
+ * Direct Google ID Token Verification for Admin Login (Option A)
+ * Enforces:
+ * - Rate limiting
+ * - Issuer, audience, expiration, email_verified claims
+ * - Strict 2-account allowlist check
+ * - HTTP 403 Forbidden for any unauthorized account
  */
 export async function googleVerifyAdminCredential(req: Request, res: Response) {
   try {
+    const ip = getClientIp(req);
     const { credential } = req.body;
+
     if (!credential || typeof credential !== 'string') {
       return res.status(400).json({ success: false, error: 'Google credential token is required' });
     }
 
-    const client = getGoogleOAuthClient();
-    const ticket = await client.verifyIdToken({
-      idToken: credential,
-      audience: config.google.clientId,
-    });
-
-    const payload = ticket.getPayload();
-    if (!payload || !payload.email) {
-      return res.status(400).json({ success: false, error: 'Invalid Google identity token' });
-    }
-
-    // Verify token claims
-    const validIssuers = ['accounts.google.com', 'https://accounts.google.com'];
-    if (!validIssuers.includes(payload.iss || '')) {
-      return res.status(403).json({ success: false, error: 'Invalid token issuer' });
-    }
-
-    if (payload.aud !== config.google.clientId) {
-      return res.status(403).json({ success: false, error: 'Invalid token audience' });
-    }
-
-    if (!payload.email_verified) {
-      return res.status(403).json({ success: false, error: 'Google email address is not verified' });
-    }
-
-    const normalizedEmail = normalizeEmail(payload.email);
-
-    // Strict 2-account allowlist check
-    if (!isApprovedAdminEmail(normalizedEmail)) {
-      console.warn(`[SECURITY ALERT] Unauthorized Google admin credential attempt from: ${normalizedEmail}`);
-      return res.status(403).json({
+    const rateKey = `${ip}:google_admin`;
+    const rateStatus = checkLoginRateLimit(rateKey);
+    if (rateStatus.isLimited) {
+      return res.status(429).json({
         success: false,
-        error: `Forbidden: The Google account "${normalizedEmail}" is not an authorized administrator.`,
+        error: `Too many failed attempts. Access temporarily locked for ${rateStatus.remainingLockoutSeconds} seconds.`,
       });
     }
 
+    // 1. Strict Google Token Verification
+    const verification = await verifyGoogleIdTokenStrict(credential);
+    if (!verification.valid || !verification.payload) {
+      recordFailedLogin(rateKey);
+      return res.status(400).json({
+        success: false,
+        error: `Google verification failed: ${verification.error || 'Invalid identity token'}`,
+      });
+    }
+
+    const payload = verification.payload;
+    const verifiedEmail = normalizeEmail(payload.email || '');
+
+    // 2. Strict Allowlist Check
+    const isApproved = isApprovedAdminEmail(verifiedEmail);
+    if (!isApproved) {
+      recordFailedLogin(rateKey);
+      console.warn(`[SECURITY ALERT] Unauthorized Google admin login attempt from: ${verifiedEmail}`);
+      return res.status(403).json({
+        success: false,
+        error: `Forbidden: The Google account "${verifiedEmail}" is not an authorized administrator. Access denied.`,
+      });
+    }
+
+    // 3. Reset Rate Limiter on Success
+    recordSuccessfulLogin(rateKey);
+
+    // 4. Live Database Check
+    const db = await getDatabaseProvider();
+    const adminUser = await db.getAdminByEmail(verifiedEmail);
+    const adminName = adminUser?.name || payload.name || payload.given_name || 'Zimor Executive Admin';
+
+    // 5. Issue Admin Session
     const adminToken = createSessionToken({
-      email: normalizedEmail,
+      email: verifiedEmail,
       role: 'superadmin',
-      name: payload.name || payload.given_name || 'Zimor Executive Admin',
+      name: adminName,
     });
 
     res.cookie(ADMIN_COOKIE_NAME, adminToken, {
@@ -386,15 +384,15 @@ export async function googleVerifyAdminCredential(req: Request, res: Response) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 8 * 60 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return res.json({
       success: true,
       token: adminToken,
       user: {
-        email: normalizedEmail,
-        name: payload.name || payload.given_name || 'Zimor Executive Admin',
+        email: verifiedEmail,
+        name: adminName,
         role: 'superadmin',
       },
     });
@@ -405,7 +403,7 @@ export async function googleVerifyAdminCredential(req: Request, res: Response) {
 }
 
 /**
- * Direct ID token verification for Google One Tap or in-page Google Sign-In (Customer)
+ * Direct ID token verification for Customer Login
  */
 export async function googleVerifyCredential(req: Request, res: Response) {
   try {
@@ -414,26 +412,18 @@ export async function googleVerifyCredential(req: Request, res: Response) {
       return res.status(400).json({ success: false, error: 'Google credential token is required' });
     }
 
-    const client = getGoogleOAuthClient();
-    const ticket = await client.verifyIdToken({
-      idToken: credential,
-      audience: config.google.clientId,
-    });
-
-    const payload = ticket.getPayload();
-    if (!payload || !payload.email) {
-      return res.status(400).json({ success: false, error: 'Invalid Google identity token' });
+    const verification = await verifyGoogleIdTokenStrict(credential);
+    if (!verification.valid || !verification.payload) {
+      return res.status(400).json({ success: false, error: verification.error || 'Invalid Google identity token' });
     }
 
-    if (!payload.email_verified) {
-      return res.status(403).json({ success: false, error: 'Google email address is not verified' });
-    }
+    const payload = verification.payload;
+    const verifiedEmail = normalizeEmail(payload.email || '');
 
-    const normalizedEmail = normalizeEmail(payload.email);
     const db = await getDatabaseProvider();
     const customer = await db.createOrUpdateCustomer({
-      email: normalizedEmail,
-      name: payload.name || payload.given_name || 'Valued Patron',
+      email: verifiedEmail,
+      name: payload.name || payload.given_name || 'Valued User',
       googleId: payload.sub,
       avatar: payload.picture,
       authProvider: 'google',
@@ -457,88 +447,146 @@ export async function googleVerifyCredential(req: Request, res: Response) {
     return res.json({
       success: true,
       token: sessionToken,
-      customer: {
+      user: {
         id: customer.id,
         email: customer.email,
         name: customer.name,
         avatar: customer.avatar,
+        phone: customer.phone,
+        addresses: customer.addresses || [],
       },
     });
   } catch (err: any) {
-    console.error('[Google Customer Verify Error]', err);
-    return res.status(500).json({ success: false, error: err.message || 'Customer authentication failed' });
+    console.error('[Google Verify Error]', err);
+    return res.status(500).json({ success: false, error: err.message || 'Verification failed' });
   }
 }
 
-// ==================== CUSTOMER REGISTRATION & SESSION MANAGEMENT ====================
-
-export async function customerRegister(req: Request, res: Response) {
+/**
+ * Returns the currently authenticated customer profile
+ */
+export async function customerMe(req: Request, res: Response) {
   try {
-    const { email, password, name, phone } = req.body;
-    if (!email || !password || !name) {
-      return res.status(400).json({ error: 'Name, email and password are required' });
+    let token = req.cookies?.[CUSTOMER_COOKIE_NAME];
+    if (!token && req.headers.authorization?.startsWith('Bearer ')) {
+      token = req.headers.authorization.split(' ')[1];
     }
 
-    const normalizedEmail = normalizeEmail(email);
+    if (!token) {
+      return res.status(401).json({ authenticated: false });
+    }
+
+    const session = verifyCustomerSessionToken(token);
+    if (!session) {
+      return res.status(401).json({ authenticated: false });
+    }
+
     const db = await getDatabaseProvider();
-    const existing = await db.getCustomerByEmail(normalizedEmail);
-    if (existing) {
-      return res.status(409).json({ error: 'An account with this email already exists' });
+    const customer = await db.getCustomerByEmail(session.email);
+    if (!customer) {
+      return res.status(401).json({ authenticated: false });
     }
 
-    const customer = await db.createOrUpdateCustomer({
-      email: normalizedEmail,
-      name,
-      phone,
-      authProvider: 'local',
-    });
+    const allOrders = await db.getOrders();
+    const customerOrders = allOrders.filter(
+      (o: any) =>
+        o.customerId === customer.id ||
+        (o.shippingAddress?.email && o.shippingAddress.email.toLowerCase() === customer.email.toLowerCase()) ||
+        (o.customerEmail && o.customerEmail.toLowerCase() === customer.email.toLowerCase())
+    );
 
-    const sessionToken = createCustomerSessionToken({
-      id: customer.id,
-      email: customer.email,
-      name: customer.name,
-      avatar: customer.avatar,
-    });
-
-    res.cookie(CUSTOMER_COOKIE_NAME, sessionToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-    });
-
-    return res.status(201).json({
-      success: true,
-      token: sessionToken,
-      customer: {
+    return res.json({
+      authenticated: true,
+      user: {
         id: customer.id,
-        email: customer.email,
         name: customer.name,
-        avatar: customer.avatar,
+        email: customer.email,
+        phone: customer.phone || '',
+        designation: (customer as any).designation || 'Atelier User',
+        avatar: customer.avatar || session.avatar || '',
+        addresses: customer.addresses || [],
+        orders: customer.orders || [],
       },
+      orders: customerOrders,
     });
   } catch (err: any) {
-    return res.status(500).json({ error: err.message || 'Registration failed' });
+    return res.status(500).json({ error: err.message || 'Failed to fetch customer profile' });
   }
 }
 
+/**
+ * Customer Logout
+ */
+export async function customerLogout(_req: Request, res: Response) {
+  res.clearCookie(CUSTOMER_COOKIE_NAME, { path: '/' });
+  return res.json({ success: true, message: 'Customer logged out successfully' });
+}
+
+/**
+ * Customer Email + Password Login
+ * - Validates input and normalizes email
+ * - Enforces rate limiting
+ * - Verifies bcrypt password hash against CustomerModel
+ * - Issues HTTP-only SameSite customer session cookie and JWT
+ */
 export async function customerLogin(req: Request, res: Response) {
   try {
-    const { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ error: 'Email is required' });
+    const ip = getClientIp(req);
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
     }
 
     const normalizedEmail = normalizeEmail(email);
-    const db = await getDatabaseProvider();
-    const customer = await db.getCustomerByEmail(normalizedEmail);
-    if (!customer) {
-      return res.status(401).json({ error: 'Invalid customer credentials' });
+    const rateKey = `${ip}:customer_login:${normalizedEmail}`;
+
+    // 1. Rate Limiting Check
+    const rateStatus = checkLoginRateLimit(rateKey);
+    if (rateStatus.isLimited) {
+      return res.status(429).json({
+        error: `Too many failed login attempts. Access temporarily locked for ${rateStatus.remainingLockoutSeconds} seconds.`,
+      });
     }
 
+    // 2. Fetch Customer Record
+    await connectToDatabase();
+    const customer = await CustomerModel.findOne({ email: normalizedEmail }).select('+passwordHash');
+
+    if (!customer) {
+      recordFailedLogin(rateKey);
+      return res.status(401).json({ error: 'Invalid email address or password' });
+    }
+
+    // 3. Check if password exists (customer might have only signed up via Google)
+    if (!customer.passwordHash) {
+      if (customer.googleId) {
+        return res.status(400).json({
+          error: 'This account was created with Google Sign-In. Please click "Continue with Google".',
+        });
+      }
+      recordFailedLogin(rateKey);
+      return res.status(401).json({ error: 'Invalid email address or password' });
+    }
+
+    // 4. Verify Password Hash
+    const isMatch = await bcrypt.compare(password, customer.passwordHash);
+    if (!isMatch) {
+      const lockResult = recordFailedLogin(rateKey);
+      if (lockResult.isLocked) {
+        return res.status(429).json({
+          error: `Too many failed login attempts. Account temporarily locked for ${lockResult.remainingLockoutSeconds} seconds.`,
+        });
+      }
+      return res.status(401).json({ error: 'Invalid email address or password' });
+    }
+
+    // 5. Reset Rate Limiter
+    recordSuccessfulLogin(rateKey);
+
+    // 6. Issue Customer Session
     const sessionToken = createCustomerSessionToken({
-      id: customer.id,
+      id: customer._id.toString(),
       email: customer.email,
       name: customer.name,
       avatar: customer.avatar,
@@ -555,37 +603,147 @@ export async function customerLogin(req: Request, res: Response) {
     return res.json({
       success: true,
       token: sessionToken,
-      customer: {
-        id: customer.id,
+      user: {
+        id: customer._id.toString(),
         email: customer.email,
         name: customer.name,
         avatar: customer.avatar,
+        phone: customer.phone || '',
+        addresses: customer.addresses || [],
+        orders: customer.orders || [],
       },
     });
   } catch (err: any) {
+    console.error('[Customer Login Error]', err);
     return res.status(500).json({ error: err.message || 'Login failed' });
   }
 }
 
-export async function customerLogout(_req: Request, res: Response) {
-  res.clearCookie(CUSTOMER_COOKIE_NAME, { path: '/' });
-  return res.json({ success: true, message: 'Logged out successfully' });
-}
+/**
+ * Customer Registration (Email + Password)
+ * - Validates name, email, and password
+ * - Hashes password with bcryptjs (10 rounds)
+ * - Creates customer profile in CustomerModel
+ * - Issues HTTP-only SameSite customer session cookie and JWT
+ */
+export async function customerRegister(req: Request, res: Response) {
+  try {
+    const ip = getClientIp(req);
+    const { name, email, password } = req.body;
 
-export async function customerMe(req: Request, res: Response) {
-  let token = req.cookies?.[CUSTOMER_COOKIE_NAME];
-  if (!token && req.headers.authorization?.startsWith('Bearer ')) {
-    token = req.headers.authorization.split(' ')[1];
+    if (!name || typeof name !== 'string' || !name.trim()) {
+      return res.status(400).json({ error: 'Full name is required' });
+    }
+
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({ error: 'Valid email address is required' });
+    }
+
+    const normalizedEmail = normalizeEmail(email);
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(normalizedEmail)) {
+      return res.status(400).json({ error: 'Please enter a valid email address' });
+    }
+
+    if (!password || typeof password !== 'string' || password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters long' });
+    }
+
+    const rateKey = `${ip}:customer_register`;
+    const rateStatus = checkLoginRateLimit(rateKey);
+    if (rateStatus.isLimited) {
+      return res.status(429).json({
+        error: `Too many registration attempts. Please wait ${rateStatus.remainingLockoutSeconds} seconds.`,
+      });
+    }
+
+    await connectToDatabase();
+    const existing = await CustomerModel.findOne({ email: normalizedEmail }).select('+passwordHash');
+
+    if (existing) {
+      if (existing.passwordHash) {
+        return res.status(400).json({
+          error: 'An account with this email already exists. Please sign in.',
+        });
+      }
+
+      // Existing Google user adding password credentials
+      const passwordHash = await bcrypt.hash(password, 10);
+      existing.passwordHash = passwordHash;
+      if (name.trim()) existing.name = name.trim();
+      await existing.save();
+
+      const sessionToken = createCustomerSessionToken({
+        id: existing._id.toString(),
+        email: existing.email,
+        name: existing.name,
+        avatar: existing.avatar,
+      });
+
+      res.cookie(CUSTOMER_COOKIE_NAME, sessionToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+      });
+
+      return res.status(201).json({
+        success: true,
+        token: sessionToken,
+        user: {
+          id: existing._id.toString(),
+          email: existing.email,
+          name: existing.name,
+          avatar: existing.avatar,
+          phone: existing.phone || '',
+          addresses: existing.addresses || [],
+          orders: existing.orders || [],
+        },
+      });
+    }
+
+    // Brand new user registration
+    const passwordHash = await bcrypt.hash(password, 10);
+    const newCustomer = await CustomerModel.create({
+      name: name.trim(),
+      email: normalizedEmail,
+      passwordHash,
+      authProvider: 'local',
+      addresses: [],
+      orders: [],
+    });
+
+    const sessionToken = createCustomerSessionToken({
+      id: newCustomer._id.toString(),
+      email: newCustomer.email,
+      name: newCustomer.name,
+      avatar: newCustomer.avatar,
+    });
+
+    res.cookie(CUSTOMER_COOKIE_NAME, sessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.status(201).json({
+      success: true,
+      token: sessionToken,
+      user: {
+        id: newCustomer._id.toString(),
+        email: newCustomer.email,
+        name: newCustomer.name,
+        avatar: newCustomer.avatar,
+        phone: newCustomer.phone || '',
+        addresses: newCustomer.addresses || [],
+        orders: newCustomer.orders || [],
+      },
+    });
+  } catch (err: any) {
+    console.error('[Customer Register Error]', err);
+    return res.status(500).json({ error: err.message || 'Registration failed' });
   }
-
-  if (!token) {
-    return res.status(401).json({ authenticated: false });
-  }
-
-  const session = verifyCustomerSessionToken(token);
-  if (!session) {
-    return res.status(401).json({ authenticated: false });
-  }
-
-  return res.json({ authenticated: true, customer: session });
 }

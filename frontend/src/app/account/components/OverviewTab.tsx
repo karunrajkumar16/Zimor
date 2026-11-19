@@ -260,7 +260,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
             <div className="flex justify-between py-1">
               <span className="text-[#888888]">Profession</span>
               <span className="font-medium text-[#000000]">
-                {user.designation || 'Atelier Patron'}
+                {user.designation || 'Atelier User'}
               </span>
             </div>
           </div>

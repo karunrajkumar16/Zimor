@@ -53,14 +53,14 @@ export const AccountHeader: React.FC<AccountHeaderProps> = ({
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center gap-1 text-[9.5px] sm:text-[10px] font-semibold uppercase tracking-[0.2em] text-[#B44220]">
                 <Sparkles className="w-2.5 h-2.5" />
-                Atelier Patron
+                Atelier User
               </span>
             </div>
             <h1 className="font-primary text-2xl sm:text-3xl font-normal text-[#000000] tracking-tight">
               {user.name}
             </h1>
             <p className="font-secondary text-xs text-[#777777] truncate max-w-xs sm:max-w-md">
-              {user.email} • {user.designation || 'Patron'}
+              {user.email} • {user.designation || 'User'}
             </p>
           </div>
         </div>

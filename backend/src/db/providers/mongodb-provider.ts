@@ -38,7 +38,11 @@ export class MongoDatabaseProvider implements DatabaseProvider {
       query.category = filters.category;
     }
     if (filters?.isFeatured !== undefined) {
-      query.isFeatured = filters.isFeatured;
+      if (filters.isFeatured) {
+        query.isFeatured = true;
+      } else {
+        query.isFeatured = { $ne: true };
+      }
     }
     if (filters?.isPublished !== undefined) {
       if (filters.isPublished) {

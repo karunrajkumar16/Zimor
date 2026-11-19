@@ -57,9 +57,9 @@ const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
-    title: 'PATRON RELATIONSHIPS',
+    title: 'USER RELATIONSHIPS',
     items: [
-      { label: 'Users & Patrons', href: '/admin/customers', icon: Users },
+      { label: 'Users Directory', href: '/admin/customers', icon: Users },
       { label: 'Customer Reviews', href: '/admin/reviews', icon: Star },
     ],
   },

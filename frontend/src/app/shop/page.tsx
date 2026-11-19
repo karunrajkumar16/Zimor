@@ -16,15 +16,10 @@ import {
   RotateCcw,
   ChevronDown,
 } from 'lucide-react';
-import dynamic from 'next/dynamic';
 import { useProducts } from '@/context/ProductContext';
 import { ProductCard } from '@/components/product/ProductCard';
 import { Product } from '@/types';
-
-const QuickViewModal = dynamic(
-  () => import('@/components/product/QuickViewModal'),
-  { ssr: false }
-);
+import QuickViewModal from '@/components/product/QuickViewModal';
 
 // Category name mapping for active filter display
 const CATEGORY_NAMES: Record<string, string> = {

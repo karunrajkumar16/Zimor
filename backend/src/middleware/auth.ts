@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { verifySessionToken, isApprovedAdminEmail, ADMIN_COOKIE_NAME, normalizeEmail } from '../auth/index.js';
-import { config } from '../config/index.js';
+import { verifySessionToken, isApprovedAdminEmail, normalizeEmail, ADMIN_COOKIE_NAME } from '../auth/index.js';
+import { getDatabaseProvider } from '../db/index.js';
 
 export interface AuthenticatedRequest extends Request {
   admin?: {
@@ -10,11 +10,7 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 
-/**
- * Middleware ensuring only authenticated and approved administrators can access protected endpoints.
- * Validates HMAC token signature, expiration, admin role, and allowlist membership.
- */
-export function requireAdminAuth(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+export async function requireAdminAuth(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
     let token = req.cookies?.[ADMIN_COOKIE_NAME];
 
@@ -26,46 +22,36 @@ export function requireAdminAuth(req: AuthenticatedRequest, res: Response, next:
       return res.status(401).json({ error: 'Unauthorized: Admin authentication required' });
     }
 
+    // 1. Cryptographic token & expiry verification
     const session = verifySessionToken(token);
     if (!session) {
       return res.status(401).json({ error: 'Unauthorized: Invalid or expired admin session' });
     }
 
-    // Role check
-    if (session.role !== 'admin' && session.role !== 'superadmin') {
-      return res.status(403).json({ error: 'Forbidden: Customer accounts cannot access admin portal' });
+    // 2. Strict Role Verification: Must be administrator role (customers strictly denied)
+    if (session.role !== 'superadmin' && session.role !== 'admin') {
+      return res.status(403).json({ error: 'Forbidden: Insufficient privileges' });
     }
 
-    // Re-verify against allowlist
+    // 3. Dynamic Allowlist Check: Verify email is currently in the 2-account allowlist
     const normalizedEmail = normalizeEmail(session.email);
     if (!isApprovedAdminEmail(normalizedEmail)) {
-      return res.status(403).json({ error: 'Forbidden: Account is not an authorized administrator' });
+      return res.status(403).json({ error: 'Forbidden: Admin access revoked or account not authorized' });
     }
 
-    // CSRF Protection for state-changing browser requests
-    const method = req.method.toUpperCase();
-    if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
-      const origin = req.headers.origin || req.headers.referer;
-      if (origin) {
-        try {
-          const originHost = new URL(origin).host;
-          const allowedHost = new URL(config.clientUrl).host;
-          // In development, also accept localhost:3000 / localhost:5001
-          const isAllowed =
-            originHost === allowedHost ||
-            originHost.startsWith('localhost') ||
-            originHost.startsWith('127.0.0.1');
-
-          if (!isAllowed) {
-            return res.status(403).json({ error: 'Forbidden: Cross-site request rejected (CSRF protection)' });
-          }
-        } catch {
-          // If URL parsing fails, continue if bearer token is present
-        }
-      }
+    // 4. Live Database Check: Verify admin account is active in database
+    const db = await getDatabaseProvider();
+    const adminUser = await db.getAdminByEmail(normalizedEmail);
+    if (!adminUser) {
+      return res.status(403).json({ error: 'Forbidden: Administrator record not active' });
     }
 
-    req.admin = session;
+    req.admin = {
+      email: normalizedEmail,
+      role: session.role,
+      name: adminUser.name || session.name || 'Executive Admin',
+    };
+
     next();
   } catch (err: any) {
     return res.status(500).json({ error: err.message || 'Authentication error' });

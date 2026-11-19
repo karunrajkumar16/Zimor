@@ -20,13 +20,9 @@ function AdminLoginForm() {
     if (errParam === 'unauthorized_admin') {
       setError(
         emailParam
-          ? `Access Denied: The Google account "${emailParam}" is not an authorized administrator. Only designated ZIMOR atelier accounts are permitted access.`
+          ? `Access Denied: The Google account "${emailParam}" is not an authorized administrator. Only designated atelier administrators may access this portal.`
           : 'Access Denied: This Google account is not an authorized administrator.'
       );
-    } else if (errParam === 'email_not_verified') {
-      setError('Access Denied: The Google account email has not been verified by Google.');
-    } else if (errParam === 'invalid_issuer' || errParam === 'invalid_audience') {
-      setError('Access Denied: Invalid Google identity token claims.');
     } else if (errParam) {
       setError(`Authentication failed: ${decodeURIComponent(errParam)}`);
     }
@@ -34,7 +30,6 @@ function AdminLoginForm() {
 
   const handleGoogleAdminLogin = () => {
     setIsLoading(true);
-    setError(null);
     window.location.href = apiUrl('/api/auth/google?admin=true&redirect=/admin');
   };
 
@@ -66,7 +61,7 @@ function AdminLoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-[#191715] text-[#E8E1DA] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#191715] text-[#E8E1DA] flex items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-md bg-[#24211F] border border-[#36312C] rounded-lg p-6 sm:p-8 shadow-2xl space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-2">
@@ -74,9 +69,7 @@ function AdminLoginForm() {
             <ShieldCheck className="w-6 h-6 stroke-[1.8]" />
           </div>
           <h1 className="font-primary text-2xl font-bold tracking-widest text-[#E8E1DA]">ZIMOR</h1>
-          <p className="text-[11px] uppercase tracking-wider text-[#B4B4B4] font-mono">
-            Atelier Executive Portal
-          </p>
+          <p className="text-[11px] font-mono uppercase tracking-widest text-[#B4B4B4]">Atelier Control Portal</p>
         </div>
 
         {error && (
@@ -87,7 +80,7 @@ function AdminLoginForm() {
         )}
 
         {/* Option A: Google Sign-In */}
-        <div className="space-y-3">
+        <div className="space-y-2">
           <button
             type="button"
             onClick={handleGoogleAdminLogin}
@@ -115,12 +108,12 @@ function AdminLoginForm() {
             <span>Continue with Google</span>
           </button>
           <p className="text-[10px] text-center text-[#8A837C]">
-            Two-account policy: access is restricted strictly to authorized administrative accounts.
+            Authorized administrator identity verification required
           </p>
         </div>
 
         {/* Divider: OR */}
-        <div className="relative flex items-center justify-center">
+        <div className="relative flex items-center justify-center my-4">
           <div className="border-t border-[#36312C] w-full" />
           <span className="bg-[#24211F] px-3 text-[10px] uppercase font-mono tracking-widest text-[#8A837C] absolute">
             OR
@@ -139,8 +132,8 @@ function AdminLoginForm() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
-                className="w-full pl-10 pr-4 py-2.5 bg-[#1E1C1A] border border-[#36312C] rounded text-xs text-[#E8E1DA] placeholder-[#78726C] focus:outline-none focus:border-[#B44220] transition-colors"
-                placeholder="admin@zimorindia.com"
+                className="w-full pl-10 pr-4 py-2 bg-[#1E1C1A] border border-[#36312C] rounded text-xs text-[#E8E1DA] placeholder-[#78726C] focus:outline-none focus:border-[#B44220] transition-colors"
+                placeholder="admin@zimor.com"
               />
             </div>
           </div>
@@ -155,7 +148,7 @@ function AdminLoginForm() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 autoComplete="current-password"
-                className="w-full pl-10 pr-4 py-2.5 bg-[#1E1C1A] border border-[#36312C] rounded text-xs text-[#E8E1DA] placeholder-[#78726C] focus:outline-none focus:border-[#B44220] transition-colors"
+                className="w-full pl-10 pr-4 py-2 bg-[#1E1C1A] border border-[#36312C] rounded text-xs text-[#E8E1DA] placeholder-[#78726C] focus:outline-none focus:border-[#B44220] transition-colors"
                 placeholder="••••••••••••"
               />
             </div>
@@ -167,7 +160,7 @@ function AdminLoginForm() {
             className="w-full py-2.5 px-4 bg-[#B44220] hover:bg-[#9B381B] text-[#F7F5F2] font-semibold text-xs rounded flex items-center justify-center gap-2 transition-colors disabled:opacity-50 shadow-md cursor-pointer"
           >
             {isLoading ? (
-              <span>Signing in...</span>
+              <span>Authenticating...</span>
             ) : (
               <>
                 <span>Sign In</span>

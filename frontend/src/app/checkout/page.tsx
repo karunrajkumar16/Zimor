@@ -267,7 +267,7 @@ export default function CheckoutPage() {
                 {!isAuthenticated ? (
                   <div className="p-3 bg-neutral-50 border border-line rounded flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                     <div>
-                      <p className="font-semibold text-ink">Have a ZIMOR patron account?</p>
+                      <p className="font-semibold text-ink">Have a ZIMOR account?</p>
                       <p className="text-[11px] text-ink-muted">Sign in with Google to auto-fill delivery details and track this order.</p>
                     </div>
                     <button
@@ -290,7 +290,7 @@ export default function CheckoutPage() {
                       Signed in as <strong className="text-ink">{user?.name}</strong> ({user?.email})
                     </span>
                     <span className="text-[10px] bg-black text-white px-2 py-0.5 rounded font-mono font-semibold">
-                      Patron Verified
+                      User Verified
                     </span>
                   </div>
                 )}

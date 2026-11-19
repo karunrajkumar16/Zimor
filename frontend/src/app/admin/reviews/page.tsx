@@ -89,7 +89,7 @@ export default function AdminReviewsPage() {
         <div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Customer Reviews Management</h1>
           <p className={`text-xs mt-1 ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
-            Moderate patron feedback, approve verified buyer reviews, and curate featured PDP testimonials.
+            Moderate user feedback, approve verified buyer reviews, and curate featured PDP testimonials.
           </p>
         </div>
 
@@ -116,7 +116,7 @@ export default function AdminReviewsPage() {
           <p className="text-2xl font-bold mt-1">
             {avgRating} <span className={`text-xs font-normal ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>/ 5.0</span>
           </p>
-          <p className={`text-[10px] mt-1 ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>Based on {reviews.length} patron submissions</p>
+          <p className={`text-[10px] mt-1 ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>Based on {reviews.length} user submissions</p>
         </div>
 
         <div className={`p-4 rounded-lg border ${cardBg}`}>
@@ -156,7 +156,7 @@ export default function AdminReviewsPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by patron name, silhouette, review text..."
+              placeholder="Search by user name, silhouette, review text..."
               className={`w-full pl-9 pr-4 py-2 border rounded text-xs focus:outline-none focus:border-[#B44220] transition-colors ${
                 isDark
                   ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA] placeholder-[#8A837C]'
@@ -258,7 +258,7 @@ export default function AdminReviewsPage() {
                       {rev.verifiedBuyer && (
                         <span className="inline-flex items-center gap-1 text-[10px] text-[#2E7D5A] dark:text-[#52B788] font-medium">
                           <ShieldCheck className="w-3 h-3" />
-                          <span>Verified Patron</span>
+                          <span>Verified User</span>
                         </span>
                       )}
                     </div>

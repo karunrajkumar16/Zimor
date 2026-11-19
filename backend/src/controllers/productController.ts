@@ -8,11 +8,12 @@ export async function getProducts(req: Request, res: Response) {
 
     const products = await db.getProducts({
       category: category as string,
-      isFeatured: featured === 'true' ? true : undefined,
+      isFeatured: featured === 'true' ? true : featured === 'false' ? false : undefined,
       isPublished: published === 'true' ? true : published === 'false' ? false : undefined,
       search: search as string,
     });
 
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     return res.json({ products });
   } catch (err: any) {
     return res.status(500).json({ error: err.message || 'Failed to fetch products' });

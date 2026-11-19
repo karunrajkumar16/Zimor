@@ -23,11 +23,11 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const fetchProducts = useCallback(async () => {
     try {
-      const res = await apiFetch('/api/products');
+      const res = await apiFetch('/api/products', { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data.products)) {
-          // Normalize IDs and fallback colors if missing
+          // Normalize IDs, booleans, and fallback colors if missing
           const normalized: Product[] = data.products.map((p: any) => ({
             ...p,
             id: p.id || p._id?.toString() || p.slug,
@@ -35,6 +35,8 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
             colors: p.colors && p.colors.length > 0 ? p.colors : [{ name: p.defaultColor || 'Standard', hex: '#1C1917' }],
             images: p.images && p.images.length > 0 ? p.images : [{ url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp', alt: p.name }],
             suitableProfessions: p.suitableProfessions || [],
+            isPublished: p.isPublished !== false,
+            isFeatured: Boolean(p.isFeatured),
           }));
           setAllProducts(normalized);
           setError(null);

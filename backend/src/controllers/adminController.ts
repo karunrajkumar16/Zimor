@@ -57,7 +57,7 @@ export async function getStats(req: Request, res: Response) {
     const totalCustomers = customers.length;
     const averageOrderValue = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
 
-    // Conversion rate: real calculation based on actual patrons & orders
+    // Conversion rate: real calculation based on actual users & orders
     const conversionRate = totalCustomers > 0 && totalOrders > 0
       ? Number(((totalOrders / totalCustomers) * 100).toFixed(2))
       : 0;

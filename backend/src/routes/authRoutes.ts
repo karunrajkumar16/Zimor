@@ -9,6 +9,8 @@ import {
   googleVerifyAdminCredential,
   customerMe,
   customerLogout,
+  customerLogin,
+  customerRegister,
 } from '../controllers/authController.js';
 
 const router = Router();
@@ -24,7 +26,9 @@ router.get('/google', googleAuth);
 router.get('/google/callback', googleCallback);
 router.post('/google/verify', googleVerifyCredential);
 
-// Customer Session Management
+// Customer Session & Direct Authentication Management
+router.post('/customer/login', customerLogin);
+router.post('/customer/register', customerRegister);
 router.get('/customer/me', customerMe);
 router.post('/customer/logout', customerLogout);
 

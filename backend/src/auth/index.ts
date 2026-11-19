@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
-import { OAuth2Client } from 'google-auth-library';
+import { OAuth2Client, TokenPayload } from 'google-auth-library';
 import { config } from '../config/index.js';
 
 export const ADMIN_COOKIE_NAME = 'zimor_admin_session';
@@ -23,15 +23,16 @@ export interface CustomerSession {
 }
 
 /**
- * Normalizes an email address by trimming whitespace and converting to lowercase
+ * Normalizes an email by trimming whitespace and converting to lowercase.
  */
 export function normalizeEmail(email: string): string {
-  return (email || '').trim().toLowerCase();
+  if (!email || typeof email !== 'string') return '';
+  return email.trim().toLowerCase();
 }
 
 /**
- * Checks if an email is present in the backend ADMIN_ALLOWED_EMAILS allowlist.
- * Strictly permits only the 2 authorized administrator accounts.
+ * Checks whether an email is in the strict 2-account backend allowlist.
+ * The ONLY authorized administrator email addresses are configured in ADMIN_ALLOWED_EMAILS.
  */
 export function isApprovedAdminEmail(email: string): boolean {
   if (!email) return false;
@@ -40,15 +41,16 @@ export function isApprovedAdminEmail(email: string): boolean {
 }
 
 /**
- * Creates a cryptographically signed HMAC-SHA256 admin session token (8 hours expiration)
+ * Creates an HMAC-SHA256 signed admin session token.
+ * Expires in 7 days.
  */
 export function createSessionToken(session: { email: string; role: 'superadmin' | 'admin'; name?: string }): string {
   const normalizedEmail = normalizeEmail(session.email);
   const payload: AdminSession = {
     email: normalizedEmail,
     role: session.role,
-    name: session.name || 'Executive Admin',
-    exp: Date.now() + 8 * 60 * 60 * 1000, // 8 hours
+    name: session.name,
+    exp: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
   };
 
   const data = Buffer.from(JSON.stringify(payload)).toString('base64url');
@@ -57,7 +59,8 @@ export function createSessionToken(session: { email: string; role: 'superadmin' 
 }
 
 /**
- * Verifies the HMAC-SHA256 signature, expiration, admin role, and allowlist membership
+ * Verifies an admin session token signature and expiration.
+ * Enforces role check (only 'superadmin' or 'admin').
  */
 export function verifySessionToken(token: string): AdminSession | null {
   try {
@@ -74,12 +77,12 @@ export function verifySessionToken(token: string): AdminSession | null {
       return null;
     }
 
-    // Role check: must be admin or superadmin (never customer)
-    if (payload.role !== 'admin' && payload.role !== 'superadmin') {
+    // Role boundary: Must be administrator role
+    if (payload.role !== 'superadmin' && payload.role !== 'admin') {
       return null;
     }
 
-    // Allowlist check: must remain an active approved administrator
+    // Allowlist check: Revoke token immediately if email is no longer on the authorized allowlist
     if (!isApprovedAdminEmail(payload.email)) {
       return null;
     }
@@ -91,11 +94,13 @@ export function verifySessionToken(token: string): AdminSession | null {
 }
 
 /**
- * Creates a customer session token (30 days expiration)
+ * Creates an HMAC-SHA256 signed customer session token.
+ * Customer sessions are kept strictly separated from administrator sessions.
  */
 export function createCustomerSessionToken(session: { id: string; email: string; name: string; avatar?: string }): string {
   const payload: CustomerSession = {
     ...session,
+    email: normalizeEmail(session.email),
     role: 'customer',
     exp: Date.now() + 30 * 24 * 60 * 60 * 1000, // 30 days
   };
@@ -106,7 +111,7 @@ export function createCustomerSessionToken(session: { id: string; email: string;
 }
 
 /**
- * Verifies a customer session token
+ * Verifies customer session token.
  */
 export function verifyCustomerSessionToken(token: string): CustomerSession | null {
   try {
@@ -129,9 +134,6 @@ export function verifyCustomerSessionToken(token: string): CustomerSession | nul
   }
 }
 
-/**
- * Instantiates the Google OAuth2 client with backend credentials
- */
 export function getGoogleOAuthClient(): OAuth2Client {
   return new OAuth2Client(
     config.google.clientId,
@@ -141,32 +143,84 @@ export function getGoogleOAuthClient(): OAuth2Client {
 }
 
 /**
- * Verifies administrator email and password against bcrypt-hashed credentials.
- * Rejects any non-allowlisted email immediately.
- * Never stores or compares plaintext passwords.
+ * Strict Google ID token verification:
+ * Checks token signature, issuer, audience, expiration, and email_verified claim.
+ */
+export async function verifyGoogleIdTokenStrict(idToken: string): Promise<{
+  valid: boolean;
+  payload?: TokenPayload;
+  error?: string;
+}> {
+  try {
+    const client = getGoogleOAuthClient();
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: config.google.clientId,
+    });
+
+    const payload = ticket.getPayload();
+    if (!payload) {
+      return { valid: false, error: 'Empty token payload' };
+    }
+
+    // Verify Issuer
+    const validIssuers = ['accounts.google.com', 'https://accounts.google.com'];
+    if (!payload.iss || !validIssuers.includes(payload.iss)) {
+      return { valid: false, error: 'Invalid Google token issuer' };
+    }
+
+    // Verify Audience
+    if (payload.aud !== config.google.clientId) {
+      return { valid: false, error: 'Google token audience mismatch' };
+    }
+
+    // Verify Expiration
+    if (!payload.exp || payload.exp * 1000 <= Date.now()) {
+      return { valid: false, error: 'Google token has expired' };
+    }
+
+    // Verify Email Verified Claim
+    if (payload.email_verified !== true) {
+      return { valid: false, error: 'Google email address is not verified' };
+    }
+
+    if (!payload.email) {
+      return { valid: false, error: 'Google token does not contain an email address' };
+    }
+
+    return { valid: true, payload };
+  } catch (err: any) {
+    return { valid: false, error: err.message || 'Google token verification failed' };
+  }
+}
+
+/**
+ * Verifies email and password credentials for an administrator.
+ * Only the two authorized administrator accounts in ADMIN_ALLOWED_EMAILS can authenticate.
+ * Uses bcrypt password hashing (never plaintext).
  */
 export async function verifyAdminCredentials(
   email: string,
   pass: string
 ): Promise<{ email: string; role: 'superadmin' | 'admin'; name: string } | null> {
+  if (!email || !pass) return null;
   const normalized = normalizeEmail(email);
 
-  // 1. Strict allowlist boundary
+  // 1. Strict Allowlist check: Only authorized administrator emails are permitted
   if (!isApprovedAdminEmail(normalized)) {
     return null;
   }
 
-  // 2. Fetch administrator record from database
+  // 2. Fetch admin user from database
   try {
     const { getDatabaseProvider } = await import('../db/index.js');
     const db = await getDatabaseProvider();
     const adminUser = await db.getAdminByEmail(normalized);
-
     if (!adminUser || !adminUser.passwordHash) {
       return null;
     }
 
-    // 3. Compare with bcrypt
+    // 3. Bcrypt comparison (securely reject any plaintext or non-matching password)
     const isMatch = await bcrypt.compare(pass, adminUser.passwordHash);
     if (!isMatch) {
       return null;
@@ -178,18 +232,7 @@ export async function verifyAdminCredentials(
       name: adminUser.name || 'Executive Admin',
     };
   } catch (err) {
-    console.error('[verifyAdminCredentials] Database authentication error:', err);
+    console.error('[verifyAdminCredentials] DB lookup error:', err);
     return null;
   }
-}
-
-/**
- * Hashes a plaintext password using bcrypt with salt rounds = 12
- */
-export async function hashAdminPassword(plaintext: string): Promise<string> {
-  if (!plaintext || plaintext.length < 8) {
-    throw new Error('Admin password must be at least 8 characters in length');
-  }
-  const salt = await bcrypt.genSalt(12);
-  return bcrypt.hash(plaintext, salt);
 }

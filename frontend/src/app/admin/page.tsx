@@ -370,7 +370,7 @@ export default function AdminDashboardPage() {
             </span>
           </div>
           <p className={`text-xs mt-1 ${isDark ? 'text-[#8A837C]' : 'text-[#7A7269]'}`}>
-            Live transaction telemetry, multi-silhouette sales performance & patron metrics.
+            Live transaction telemetry, multi-silhouette sales performance & user metrics.
           </p>
         </div>
 
@@ -561,7 +561,7 @@ export default function AdminDashboardPage() {
                 {data ? data.metrics.totalCustomers : '0'}
               </p>
               <p className={`text-[10px] mt-1 truncate ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
-                Registered luxury patrons
+                Registered luxury users
               </p>
             </div>
           </div>
@@ -1818,7 +1818,7 @@ export default function AdminDashboardPage() {
             <thead>
               <tr className={`border-b ${isDark ? 'border-[#36312C] text-[#8A837C]' : 'border-[#E5DFD7] text-[#8C837A]'}`}>
                 <th className="py-2.5 px-3 uppercase tracking-wider font-semibold">Order</th>
-                <th className="py-2.5 px-3 uppercase tracking-wider font-semibold">Patron</th>
+                <th className="py-2.5 px-3 uppercase tracking-wider font-semibold">User</th>
                 <th className="py-2.5 px-3 uppercase tracking-wider font-semibold">Date</th>
                 <th className="py-2.5 px-3 uppercase tracking-wider font-semibold">Status</th>
                 <th className="py-2.5 px-3 uppercase tracking-wider font-semibold text-right">Total</th>
@@ -1837,7 +1837,7 @@ export default function AdminDashboardPage() {
                       {ord.orderNumber}
                     </td>
                     <td className="py-2.5 px-3 truncate max-w-[140px]">
-                      {ord.shippingAddress?.fullName || 'Valued Patron'}
+                      {ord.shippingAddress?.fullName || 'Valued User'}
                     </td>
                     <td className="py-2.5 px-3 text-[11px] opacity-80 truncate">
                       {ord.date}

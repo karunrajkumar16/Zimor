@@ -111,7 +111,7 @@ export const AccountNav: React.FC<AccountNavProps> = ({
       {/* Desktop Editorial Left Sidebar Navigation */}
       <aside className="hidden lg:block w-64 shrink-0 space-y-1" aria-label="Account Tabs Desktop">
         <p className="text-[10px] uppercase tracking-[0.2em] font-semibold text-[#888888] px-3.5 pb-2">
-          Patron Menu
+          User Menu
         </p>
         <nav className="space-y-1">
           {navItems.map((item) => {

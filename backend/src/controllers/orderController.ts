@@ -43,7 +43,7 @@ export async function trackOrder(req: Request, res: Response) {
     }
 
     if (email && order.shippingAddress?.phone) {
-      // Optional check if patron wants strict email verification
+      // Optional check if user wants strict email verification
     }
 
     return res.json({ order });

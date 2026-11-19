@@ -134,7 +134,7 @@ export default function AdminPaymentsPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search transaction ID, order #, patron..."
+              placeholder="Search transaction ID, order #, user..."
               className={`w-full pl-9 pr-4 py-2 border rounded text-xs focus:outline-none focus:border-[#B44220] transition-colors ${
                 isDark
                   ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA] placeholder-[#8A837C]'
@@ -174,7 +174,7 @@ export default function AdminPaymentsPage() {
               >
                 <th className="py-3 px-4">Transaction ID</th>
                 <th className="py-3 px-4">Order #</th>
-                <th className="py-3 px-4">Patron</th>
+                <th className="py-3 px-4">User</th>
                 <th className="py-3 px-4">Method</th>
                 <th className="py-3 px-4">Gateway</th>
                 <th className="py-3 px-4">Amount</th>

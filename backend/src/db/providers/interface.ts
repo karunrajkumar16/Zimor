@@ -24,6 +24,7 @@ export interface Customer {
   googleId?: string;
   avatar?: string;
   authProvider?: 'google' | 'local';
+  passwordHash?: string;
   addresses: Address[];
   orders: string[];
   createdAt: string;

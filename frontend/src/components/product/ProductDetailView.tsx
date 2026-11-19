@@ -18,15 +18,10 @@ import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useProducts } from '@/context/ProductContext';
 import { apiFetch } from '@/lib/api';
-import dynamic from 'next/dynamic';
 import { ProductGallery } from '@/components/product/ProductGallery';
 import { ProductCard } from '@/components/product/ProductCard';
 import { FAQAccordion } from '@/components/faq/FAQAccordion';
-
-const ReviewModal = dynamic(
-  () => import('@/components/product/ReviewModal'),
-  { ssr: false }
-);
+import ReviewModal from '@/components/product/ReviewModal';
 
 export function ProductDetailView({ product }: { product: Product }) {
   const router = useRouter();
@@ -134,7 +129,7 @@ export function ProductDetailView({ product }: { product: Product }) {
   const handleAddReview = async (newRev: Partial<CustomerReview>) => {
     try {
       const payload = {
-        userName: newRev.userName || 'Verified Patron',
+        userName: newRev.userName || 'Verified User',
         userCity: newRev.userCity || 'India',
         rating: newRev.rating || 5,
         title: newRev.title || 'Exceptional Handbag',
@@ -750,7 +745,7 @@ export function ProductDetailView({ product }: { product: Product }) {
           {/* Reviews List */}
           {reviewsList.length === 0 ? (
             <div className="text-center py-12 px-4 rounded-xl border border-line bg-canvas/40 space-y-3">
-              <p className="text-sm font-medium text-ink">No patron reviews yet</p>
+              <p className="text-sm font-medium text-ink">No reviews yet</p>
               <p className="text-xs text-ink-muted max-w-md mx-auto">
                 Be the first to share your experience with the {product.name}. Your verified feedback guides our atelier craftsmen.
               </p>

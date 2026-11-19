@@ -1,10 +1,16 @@
 [
   {
     "id": "admin-1",
-    "email": "admin@zimor.in",
-    "passwordHash": "zimor_admin_2024",
-    "name": "Zimor Master Admin",
+    "email": "karunsingh1602@gmail.com",
+    "name": "Karun Rajkumar Singh",
     "role": "superadmin",
-    "createdAt": "2024-01-01T00:00:00.000Z"
+    "createdAt": "2026-11-19T12:18:38.941Z"
+  },
+  {
+    "id": "admin-2",
+    "email": "zimorindia@gmail.com",
+    "name": "Zimor India Admin",
+    "role": "superadmin",
+    "createdAt": "2026-11-19T19:31:13.162Z"
   }
 ]

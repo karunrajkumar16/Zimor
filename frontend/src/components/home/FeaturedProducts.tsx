@@ -3,15 +3,10 @@
 import React, { useState, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
-import dynamic from 'next/dynamic';
 import { Product } from '@/types';
 import { useProducts } from '@/context/ProductContext';
 import { ProductCard } from '@/components/product/ProductCard';
-
-const QuickViewModal = dynamic(
-  () => import('@/components/product/QuickViewModal'),
-  { ssr: false }
-);
+import QuickViewModal from '@/components/product/QuickViewModal';
 
 export const FeaturedProducts: React.FC = () => {
   const { products } = useProducts();
@@ -20,13 +15,7 @@ export const FeaturedProducts: React.FC = () => {
   const trackRef = useRef<HTMLDivElement>(null);
 
   const featuredList: Product[] = useMemo(() => {
-    const explicitlyFeatured = products.filter((p) => p.isFeatured);
-    if (explicitlyFeatured.length >= 4) return explicitlyFeatured.slice(0, 4);
-    if (explicitlyFeatured.length > 0) {
-      const rest = products.filter((p) => !p.isFeatured);
-      return [...explicitlyFeatured, ...rest].slice(0, 4);
-    }
-    return products.slice(0, 4);
+    return products.filter((p) => p.isPublished === true && p.isFeatured === true);
   }, [products]);
 
   // Synchronize mobile active index on scroll
@@ -116,46 +105,57 @@ export const FeaturedProducts: React.FC = () => {
         {/* Product Display:
             - Mobile: Horizontal swipeable & selectable carousel showing 1-2 products at a time
             - Desktop: Full 4-Column Luxury Grid (lg:grid lg:grid-cols-4) */}
-        <div
-          ref={trackRef}
-          onScroll={handleScroll}
-          className="flex lg:grid lg:grid-cols-4 overflow-x-auto lg:overflow-visible snap-x snap-mandatory scroll-smooth no-scrollbar gap-3 sm:gap-5 lg:gap-7 pb-2 -mx-4 px-4 sm:mx-0 sm:px-0"
-          style={{
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-            WebkitOverflowScrolling: 'touch',
-            touchAction: 'pan-x pan-y',
-            overscrollBehaviorX: 'contain',
-          }}
-        >
-          {featuredList.map((product) => (
-            <div
-              key={product.id}
-              className="w-[47vw] min-w-[165px] max-w-[215px] sm:w-[32vw] lg:w-auto lg:max-w-none shrink-0 snap-start"
-            >
-              <ProductCard
-                product={product}
-                onQuickView={(p) => setQuickViewProduct(p)}
-              />
-            </div>
-          ))}
-        </div>
+        {featuredList.length === 0 ? (
+          <div className="text-center py-12 px-4 rounded-xl border border-line bg-canvas/40 space-y-2">
+            <p className="text-sm font-medium text-ink">No featured silhouettes currently selected</p>
+            <p className="text-xs text-ink-muted">
+              Select &quot;Featured on Homepage&quot; in Admin Product Studio to curate silhouettes here.
+            </p>
+          </div>
+        ) : (
+          <div
+            ref={trackRef}
+            onScroll={handleScroll}
+            className="flex lg:grid lg:grid-cols-4 overflow-x-auto lg:overflow-visible snap-x snap-mandatory scroll-smooth no-scrollbar gap-3 sm:gap-5 lg:gap-7 pb-2 -mx-4 px-4 sm:mx-0 sm:px-0"
+            style={{
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              WebkitOverflowScrolling: 'touch',
+              touchAction: 'pan-x pan-y',
+              overscrollBehaviorX: 'contain',
+            }}
+          >
+            {featuredList.map((product) => (
+              <div
+                key={product.id}
+                className="w-[47vw] min-w-[165px] max-w-[215px] sm:w-[32vw] lg:w-auto lg:max-w-none shrink-0 snap-start"
+              >
+                <ProductCard
+                  product={product}
+                  onQuickView={(p) => setQuickViewProduct(p)}
+                />
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Mobile Slide Position Indicators (Dots) */}
-        <div className="flex lg:hidden items-center justify-center gap-1.5 mt-3 mb-2">
-          {featuredList.map((product, idx) => (
-            <button
-              key={'dot-' + product.id}
-              type="button"
-              onClick={() => scrollToProduct(idx)}
-              className={`transition-all duration-300 rounded-full ${activeMobileIndex === idx
-                ? 'w-5 h-1 bg-ink'
-                : 'w-1 h-1 bg-line hover:bg-ink-muted'
-                }`}
-              aria-label={`Go to product ${idx + 1}`}
-            />
-          ))}
-        </div>
+        {featuredList.length > 1 && (
+          <div className="flex lg:hidden items-center justify-center gap-1.5 mt-3 mb-2">
+            {featuredList.map((product, idx) => (
+              <button
+                key={'dot-' + product.id}
+                type="button"
+                onClick={() => scrollToProduct(idx)}
+                className={`transition-all duration-300 rounded-full ${activeMobileIndex === idx
+                  ? 'w-5 h-1 bg-ink'
+                  : 'w-1 h-1 bg-line hover:bg-ink-muted'
+                  }`}
+                aria-label={`Go to product ${idx + 1}`}
+              />
+            ))}
+          </div>
+        )}
 
         {/* View All CTA Button — Mobile & Desktop */}
         <div className="mt-8 sm:mt-14 text-center">

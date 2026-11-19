@@ -36,6 +36,8 @@ interface AuthContextType {
   orders: Order[];
   authError: string | null;
   loginWithGoogle: (redirectPath?: string) => void;
+  loginWithEmail: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  registerWithEmail: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<boolean>;
   addAddress: (address: Omit<UserAddress, 'id'>) => Promise<boolean>;
@@ -72,7 +74,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             name: data.user.name,
             email: data.user.email,
             phone: data.user.phone || '',
-            designation: data.user.designation || 'Atelier Patron',
+            designation: data.user.designation || 'Atelier User',
             city: data.user.city || (data.user.addresses?.[0]?.city ?? ''),
             avatar: data.user.avatar || '',
             addresses: data.user.addresses || [],
@@ -131,6 +133,64 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     window.location.href = authUrl;
   }, []);
 
+  const loginWithEmail = useCallback(async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      setAuthError(null);
+      const res = await apiFetch('/api/auth/customer/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        const errorMsg = data.error || 'Login failed. Please check your credentials.';
+        setAuthError(errorMsg);
+        return { success: false, error: errorMsg };
+      }
+
+      if (data.token && typeof window !== 'undefined') {
+        sessionStorage.setItem('zimor_customer_token', data.token);
+        localStorage.setItem('zimor_customer_token', data.token);
+      }
+
+      await fetchSession();
+      return { success: true };
+    } catch (err: any) {
+      const errorMsg = err.message || 'An unexpected error occurred during login.';
+      setAuthError(errorMsg);
+      return { success: false, error: errorMsg };
+    }
+  }, [fetchSession]);
+
+  const registerWithEmail = useCallback(async (name: string, email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      setAuthError(null);
+      const res = await apiFetch('/api/auth/customer/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        const errorMsg = data.error || 'Registration failed. Please check your information.';
+        setAuthError(errorMsg);
+        return { success: false, error: errorMsg };
+      }
+
+      if (data.token && typeof window !== 'undefined') {
+        sessionStorage.setItem('zimor_customer_token', data.token);
+        localStorage.setItem('zimor_customer_token', data.token);
+      }
+
+      await fetchSession();
+      return { success: true };
+    } catch (err: any) {
+      const errorMsg = err.message || 'An unexpected error occurred during registration.';
+      setAuthError(errorMsg);
+      return { success: false, error: errorMsg };
+    }
+  }, [fetchSession]);
+
   const logout = useCallback(async () => {
     try {
       await apiFetch('/api/auth/customer/logout', { method: 'POST' });
@@ -169,7 +229,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       return false;
     } catch (err) {
-      console.error('[AuthContext] Failed updating patron profile:', err);
+      console.error('[AuthContext] Failed updating user profile:', err);
       return false;
     }
   }, []);
@@ -279,6 +339,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       orders,
       authError,
       loginWithGoogle,
+      loginWithEmail,
+      registerWithEmail,
       logout,
       updateProfile,
       addAddress,
@@ -296,6 +358,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       orders,
       authError,
       loginWithGoogle,
+      loginWithEmail,
+      registerWithEmail,
       logout,
       updateProfile,
       addAddress,

@@ -23,7 +23,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ user, onUpdateProfile })
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(user.name || '');
   const [phone, setPhone] = useState(user.phone || '');
-  const [designation, setDesignation] = useState(user.designation || 'Atelier Patron');
+  const [designation, setDesignation] = useState(user.designation || 'Atelier User');
   const [isSaving, setIsSaving] = useState(false);
   const [successToast, setSuccessToast] = useState(false);
   const [errorToast, setErrorToast] = useState<string | null>(null);
@@ -66,7 +66,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ user, onUpdateProfile })
   const handleCancel = () => {
     setName(user.name || '');
     setPhone(user.phone || '');
-    setDesignation(user.designation || 'Atelier Patron');
+    setDesignation(user.designation || 'Atelier User');
     setIsEditing(false);
     setErrorToast(null);
   };
@@ -136,7 +136,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ user, onUpdateProfile })
               {user.name}
             </h3>
             <p className="font-secondary text-xs text-[#777777]">
-              {user.designation || 'Atelier Patron'}
+              {user.designation || 'Atelier User'}
             </p>
             <div className="flex items-center gap-1.5 text-[11px] text-emerald-700 font-medium pt-1">
               <ShieldCheck className="w-3.5 h-3.5" />
@@ -257,7 +257,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ user, onUpdateProfile })
                   Profession
                 </span>
                 <p className="font-medium text-sm text-[#000000]">
-                  {user.designation || 'Atelier Patron'}
+                  {user.designation || 'Atelier User'}
                 </p>
               </div>
             </div>

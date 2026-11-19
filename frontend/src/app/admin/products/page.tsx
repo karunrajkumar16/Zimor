@@ -120,7 +120,7 @@ export default function AdminProductsPage() {
     setFormWidth(prod.dimensions?.width || '15 cm');
     setFormStrapDrop(prod.dimensions?.strapDrop || '14 cm');
     setFormWeight(prod.dimensions?.weight || '0.70 kg');
-    setFormIsFeatured(prod.isFeatured ?? true);
+    setFormIsFeatured(Boolean(prod.isFeatured));
     setFormIsComingSoon(prod.isComingSoon ?? false);
     setFormIsPublished(prod.isPublished !== false);
     setMessage(null);
@@ -158,7 +158,7 @@ export default function AdminProductsPage() {
     setFormWidth('15 cm');
     setFormStrapDrop('14 cm');
     setFormWeight('0.70 kg');
-    setFormIsFeatured(true);
+    setFormIsFeatured(false);
     setFormIsComingSoon(false);
     setFormIsPublished(true);
     setMessage(null);
