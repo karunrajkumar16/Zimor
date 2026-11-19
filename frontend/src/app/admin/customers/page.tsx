@@ -288,13 +288,13 @@ export default function AdminCustomersPage() {
 
               <div>
                 <span className={`text-[10px] font-semibold uppercase ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>Lifetime Orders</span>
-                <p className="font-semibold">{selectedCustomer.orders?.length || 1} orders</p>
+                <p className="font-semibold">{selectedCustomer.orders?.length ?? (selectedCustomer as any).orderCount ?? 0} orders</p>
               </div>
 
               <div>
                 <span className={`text-[10px] font-semibold uppercase ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>Cumulative Spend</span>
                 <p className="font-bold text-[#2E7D5A] dark:text-[#52B788] text-sm">
-                  ₹{(selectedCustomer.totalSpent || 2999).toLocaleString('en-IN')}
+                  ₹{(selectedCustomer.totalSpent ?? 0).toLocaleString('en-IN')}
                 </p>
               </div>
             </div>

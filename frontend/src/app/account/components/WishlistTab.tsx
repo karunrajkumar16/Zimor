@@ -140,9 +140,9 @@ export const WishlistTab: React.FC = () => {
                       <span className="font-semibold text-[#000000]">
                         ₹{product.price.toLocaleString('en-IN')}
                       </span>
-                      {product.originalPrice && product.originalPrice > product.price && (
+                      {product.compareAtPrice && product.compareAtPrice > product.price && (
                         <span className="text-[#888888] line-through text-[11px]">
-                          ₹{product.originalPrice.toLocaleString('en-IN')}
+                          ₹{product.compareAtPrice.toLocaleString('en-IN')}
                         </span>
                       )}
                     </div>

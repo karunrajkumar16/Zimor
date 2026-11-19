@@ -81,6 +81,62 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   const [adminUser, setAdminUser] = useState<{ email: string; name: string; role?: string } | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [alerts, setAlerts] = useState<Array<{
+    id: string;
+    title: string;
+    subtitle: string;
+    type: 'order' | 'inventory';
+  }>>([]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    Promise.allSettled([
+      apiFetch('/api/orders').then((r) => (r.ok ? r.json() : null)),
+      apiFetch('/api/products').then((r) => (r.ok ? r.json() : null)),
+    ])
+      .then(([ordersRes, productsRes]) => {
+        const liveAlerts: Array<{
+          id: string;
+          title: string;
+          subtitle: string;
+          type: 'order' | 'inventory';
+        }> = [];
+
+        if (ordersRes.status === 'fulfilled' && ordersRes.value?.orders) {
+          const orders = ordersRes.value.orders;
+          const recentOrders = orders.slice(0, 3);
+          for (const ord of recentOrders) {
+            liveAlerts.push({
+              id: ord._id || ord.orderNumber,
+              title: `Order ${ord.orderNumber || ord._id?.slice(-6)} ${ord.status || 'Received'}`,
+              subtitle: `${ord.items?.[0]?.productTitle || ord.items?.[0]?.title || 'Atelier Item'} • ₹${(ord.totalAmount || ord.total || 0).toLocaleString('en-IN')}`,
+              type: 'order',
+            });
+          }
+        }
+
+        if (productsRes.status === 'fulfilled' && productsRes.value?.products) {
+          const products = productsRes.value.products;
+          const lowStock = products.filter(
+            (p: any) => typeof p.inventory === 'number' && p.inventory > 0 && p.inventory <= 5
+          );
+          for (const p of lowStock.slice(0, 2)) {
+            liveAlerts.push({
+              id: p._id || p.slug,
+              title: 'Inventory Threshold Alert',
+              subtitle: `${p.title} remaining stock: ${p.inventory} units`,
+              type: 'inventory',
+            });
+          }
+        }
+
+        setAlerts(liveAlerts);
+      })
+      .catch(() => {
+        setAlerts([]);
+      });
+  }, [isAuthenticated]);
 
   const isLoginPage = pathname === '/admin/login' || pathname?.startsWith('/admin/login');
 
@@ -384,7 +440,9 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
                 aria-label="View notifications"
               >
                 <Bell className="w-4 h-4" />
-                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#B44220]" />
+                {alerts.length > 0 && (
+                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#B44220]" />
+                )}
               </button>
 
               {notificationsOpen && (
@@ -396,24 +454,39 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
                     <span className="text-xs font-semibold tracking-wider font-mono uppercase">
                       Atelier Alerts
                     </span>
-                    <span className="text-[10px] text-[#B44220] font-mono">2 Unread</span>
+                    <span className="text-[10px] text-[#B44220] font-mono">
+                      {alerts.length} {alerts.length === 1 ? 'Alert' : 'Alerts'}
+                    </span>
                   </div>
-                  <div className="space-y-2 text-xs">
-                    <div className="p-2 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-                      <div>
-                        <p className="font-medium">Order ZMR-2026-8111 Confirmed</p>
-                        <p className="text-[10px] opacity-80 mt-0.5">Delo Tote (Rust) • ₹2,999 verified payment</p>
-                      </div>
+                  {alerts.length === 0 ? (
+                    <div className="py-6 text-center">
+                      <CheckCircle2 className="w-5 h-5 mx-auto text-emerald-600 mb-1.5 opacity-80" />
+                      <p className="text-xs font-medium">All Systems Operational</p>
+                      <p className="text-[10px] opacity-60 mt-0.5">No pending order alerts or inventory warnings</p>
                     </div>
-                    <div className="p-2 rounded bg-amber-500/10 text-amber-700 dark:text-amber-400 flex items-start gap-2">
-                      <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-                      <div>
-                        <p className="font-medium">Inventory Threshold Alert</p>
-                        <p className="text-[10px] opacity-80 mt-0.5">Rabota Tote (Espresso) remaining stock: 9 units</p>
-                      </div>
+                  ) : (
+                    <div className="space-y-2 text-xs">
+                      {alerts.map((alert) => (
+                        <div
+                          key={alert.id}
+                          className={`p-2 rounded flex items-start gap-2 ${alert.type === 'inventory'
+                            ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400'
+                            : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+                            }`}
+                        >
+                          {alert.type === 'inventory' ? (
+                            <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                          ) : (
+                            <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+                          )}
+                          <div>
+                            <p className="font-medium">{alert.title}</p>
+                            <p className="text-[10px] opacity-80 mt-0.5">{alert.subtitle}</p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
             </div>
