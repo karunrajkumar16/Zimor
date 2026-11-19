@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { CartProvider } from '@/context/CartContext';
 import { WishlistProvider } from '@/context/WishlistContext';
 import { AuthProvider } from '@/context/AuthContext';
+import { ProductProvider } from '@/context/ProductContext';
 import { AnnouncementBar } from '@/components/layout/AnnouncementBar';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -25,15 +26,17 @@ export function StorefrontLayoutWrapper({ children }: { children: React.ReactNod
   return (
     <SmoothScroll>
       <AuthProvider>
-        <WishlistProvider>
-          <CartProvider>
-            <AnnouncementBar />
-            <Header />
-            <div className="flex-1">{children}</div>
-            <Footer />
-            <CartDrawer />
-          </CartProvider>
-        </WishlistProvider>
+        <ProductProvider>
+          <WishlistProvider>
+            <CartProvider>
+              <AnnouncementBar />
+              <Header />
+              <div className="flex-1">{children}</div>
+              <Footer />
+              <CartDrawer />
+            </CartProvider>
+          </WishlistProvider>
+        </ProductProvider>
       </AuthProvider>
     </SmoothScroll>
   );

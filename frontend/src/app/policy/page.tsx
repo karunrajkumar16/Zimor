@@ -918,13 +918,33 @@ export default function PolicyPage() {
         </nav>
 
         {/* Header Masthead */}
-        <div className="space-y-2 text-center max-w-2xl mx-auto">
+        <div className="space-y-3 text-center max-w-2xl mx-auto">
           <h1 className="font-primary text-2xl sm:text-4xl lg:text-5xl font-normal text-black tracking-tight leading-[1.12]">
             Zimor Policies &amp; Care
           </h1>
           <p className="font-secondary text-xs sm:text-sm text-[#333333] leading-relaxed max-w-xl mx-auto">
             Essential guidelines governing shipping across India, cancellations, 7-day returns, warranty protection, and product care.
           </p>
+
+          {/* Quick Legal Documents Navigation */}
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-2.5">
+            <Link
+              href="/privacy-policy"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#FAF7F2] hover:bg-[#F2ECE1] border border-[#E5DFD7] text-black font-secondary text-xs transition-colors"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-[#B44220]" />
+              <span>Privacy Policy</span>
+              <ArrowRight className="w-3 h-3 text-[#8A837C]" />
+            </Link>
+            <Link
+              href="/terms-of-service"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#FAF7F2] hover:bg-[#F2ECE1] border border-[#E5DFD7] text-black font-secondary text-xs transition-colors"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-[#B44220]" />
+              <span>Terms of Service</span>
+              <ArrowRight className="w-3 h-3 text-[#8A837C]" />
+            </Link>
+          </div>
         </div>
 
         {/* Six Policies Accordion Container */}

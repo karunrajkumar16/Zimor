@@ -43,6 +43,7 @@ const ProductSchema = new Schema(
     defaultColor: { type: String, required: true },
     sizes: [{ type: String }],
     stock: { type: Number, default: 0 },
+    isPublished: { type: Boolean, default: true, index: true },
     isFeatured: { type: Boolean, default: false, index: true },
     isComingSoon: { type: Boolean, default: false },
     averageRating: { type: Number, default: 5.0 },

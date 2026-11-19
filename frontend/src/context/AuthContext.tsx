@@ -38,6 +38,10 @@ interface AuthContextType {
   loginWithGoogle: (redirectPath?: string) => void;
   logout: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<boolean>;
+  addAddress: (address: Omit<UserAddress, 'id'>) => Promise<boolean>;
+  updateAddress: (id: string, updates: Partial<UserAddress>) => Promise<boolean>;
+  deleteAddress: (id: string) => Promise<boolean>;
+  setDefaultAddress: (id: string) => Promise<boolean>;
   createOrder: (
     orderData: Omit<
       Order,
@@ -170,6 +174,60 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  const addAddress = useCallback(
+    async (address: Omit<UserAddress, 'id'>): Promise<boolean> => {
+      if (!user) return false;
+      const newAddress: UserAddress = {
+        ...address,
+        id: `addr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        isDefault: address.isDefault || !user.addresses || user.addresses.length === 0,
+      };
+      let updatedList = user.addresses ? [...user.addresses] : [];
+      if (newAddress.isDefault) {
+        updatedList = updatedList.map((a) => ({ ...a, isDefault: false }));
+      }
+      updatedList.push(newAddress);
+      return await updateProfile({ addresses: updatedList });
+    },
+    [user, updateProfile]
+  );
+
+  const updateAddress = useCallback(
+    async (id: string, updates: Partial<UserAddress>): Promise<boolean> => {
+      if (!user || !user.addresses) return false;
+      let updatedList = user.addresses.map((a) => (a.id === id ? { ...a, ...updates } : a));
+      if (updates.isDefault) {
+        updatedList = updatedList.map((a) => (a.id === id ? { ...a, isDefault: true } : { ...a, isDefault: false }));
+      }
+      return await updateProfile({ addresses: updatedList });
+    },
+    [user, updateProfile]
+  );
+
+  const deleteAddress = useCallback(
+    async (id: string): Promise<boolean> => {
+      if (!user || !user.addresses) return false;
+      let updatedList = user.addresses.filter((a) => a.id !== id);
+      if (updatedList.length > 0 && !updatedList.some((a) => a.isDefault)) {
+        updatedList[0] = { ...updatedList[0], isDefault: true };
+      }
+      return await updateProfile({ addresses: updatedList });
+    },
+    [user, updateProfile]
+  );
+
+  const setDefaultAddress = useCallback(
+    async (id: string): Promise<boolean> => {
+      if (!user || !user.addresses) return false;
+      const updatedList = user.addresses.map((a) => ({
+        ...a,
+        isDefault: a.id === id,
+      }));
+      return await updateProfile({ addresses: updatedList });
+    },
+    [user, updateProfile]
+  );
+
   const createOrder = useCallback(
     async (
       orderData: Omit<
@@ -223,6 +281,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       loginWithGoogle,
       logout,
       updateProfile,
+      addAddress,
+      updateAddress,
+      deleteAddress,
+      setDefaultAddress,
       createOrder,
       getOrderById,
       refreshSession: fetchSession,
@@ -236,6 +298,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       loginWithGoogle,
       logout,
       updateProfile,
+      addAddress,
+      updateAddress,
+      deleteAddress,
+      setDefaultAddress,
       createOrder,
       getOrderById,
       fetchSession,

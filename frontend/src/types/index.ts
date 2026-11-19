@@ -45,6 +45,7 @@ export interface Product {
   defaultColor: string;
   sizes: string[];
   stock: number;
+  isPublished?: boolean;
   isFeatured: boolean;
   isComingSoon?: boolean;
   averageRating: number;

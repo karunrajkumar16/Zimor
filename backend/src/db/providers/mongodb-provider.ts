@@ -11,6 +11,7 @@ import { CustomerModel } from '../models/Customer';
 import { SiteContentModel } from '../models/SiteContent';
 import { MediaItemModel } from '../models/MediaItem';
 import { AdminUserModel } from '../models/AdminUser';
+import { ReviewModel } from '../models/Review';
 import { Product, Order, CustomerReview } from '../../types/index.js';
 import {
   DatabaseProvider,
@@ -39,12 +40,19 @@ export class MongoDatabaseProvider implements DatabaseProvider {
     if (filters?.isFeatured !== undefined) {
       query.isFeatured = filters.isFeatured;
     }
+    if (filters?.isPublished !== undefined) {
+      if (filters.isPublished) {
+        query.isPublished = { $ne: false };
+      } else {
+        query.isPublished = false;
+      }
+    }
     if (filters?.search) {
       const regex = new RegExp(filters.search, 'i');
       query.$or = [{ name: regex }, { description: regex }, { tagline: regex }, { slug: regex }];
     }
 
-    const docs = await ProductModel.find(query).lean();
+    const docs = await ProductModel.find(query).sort({ createdAt: -1 }).lean();
     return docs.map((d: any) => ({
       ...d,
       id: d._id ? d._id.toString() : d.id,
@@ -80,14 +88,26 @@ export class MongoDatabaseProvider implements DatabaseProvider {
 
   async updateProduct(id: string, data: Partial<Product>): Promise<Product | null> {
     await connectToDatabase();
-    const updated = await ProductModel.findByIdAndUpdate(id, data, { new: true }).lean();
+    let updated: any = null;
+    if (mongoose.isValidObjectId(id)) {
+      updated = await ProductModel.findByIdAndUpdate(id, data, { new: true }).lean();
+    }
+    if (!updated) {
+      updated = await ProductModel.findOneAndUpdate({ $or: [{ slug: id }, { id }] }, data, { new: true }).lean();
+    }
     if (!updated) return null;
     return { ...updated, id: (updated as any)._id?.toString() || (updated as any).id } as Product;
   }
 
   async deleteProduct(id: string): Promise<boolean> {
     await connectToDatabase();
-    const res = await ProductModel.findByIdAndDelete(id);
+    let res: any = null;
+    if (mongoose.isValidObjectId(id)) {
+      res = await ProductModel.findByIdAndDelete(id);
+    }
+    if (!res) {
+      res = await ProductModel.findOneAndDelete({ $or: [{ slug: id }, { id }] });
+    }
     return !!res;
   }
 
@@ -217,11 +237,13 @@ export class MongoDatabaseProvider implements DatabaseProvider {
     });
 
     if (existing) {
-      if (data.name && !existing.name) existing.name = data.name;
-      if (data.phone) existing.phone = data.phone;
+      if (data.name) existing.name = data.name;
+      if (data.phone !== undefined) existing.phone = data.phone;
+      if ((data as any).designation !== undefined) (existing as any).designation = (data as any).designation;
       if (data.googleId) existing.googleId = data.googleId;
       if (data.avatar) existing.avatar = data.avatar;
       if (data.authProvider) existing.authProvider = data.authProvider;
+      if (data.addresses !== undefined) (existing as any).addresses = data.addresses;
       if (data.orders) {
         existing.orders = Array.from(new Set([...(existing.orders || []), ...data.orders]));
       }
@@ -282,13 +304,21 @@ export class MongoDatabaseProvider implements DatabaseProvider {
     return { ...doc, id: (doc as any)._id?.toString() || (doc as any).id } as AdminUser;
   }
 
-  // REVIEWS (Mock/Empty for now in Mongo)
-  async getReviewsBySlug(_slug: string): Promise<CustomerReview[]> {
-    return [];
+  // REVIEWS
+  async getReviewsBySlug(slug: string): Promise<CustomerReview[]> {
+    await connectToDatabase();
+    const query = slug ? { productSlug: slug } : {};
+    const docs = await ReviewModel.find(query).sort({ createdAt: -1 }).lean();
+    return docs.map((d: any) => ({
+      ...d,
+      id: d._id ? d._id.toString() : d.id,
+    })) as CustomerReview[];
   }
 
   async createReview(data: Omit<CustomerReview, 'id'>): Promise<CustomerReview> {
-    return { ...data, id: `rev-${Date.now()}` };
+    await connectToDatabase();
+    const created = await ReviewModel.create(data);
+    return created.toJSON() as CustomerReview;
   }
 
   // MEDIA

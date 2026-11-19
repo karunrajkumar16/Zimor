@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Save, Check, X } from 'lucide-react';
+import Link from 'next/link';
+import { Save, Check, X, Lock, ExternalLink, ShieldCheck, FileText } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { useAdminTheme } from '@/context/AdminThemeContext';
 
@@ -83,20 +84,51 @@ export default function AdminContentPolicyPage() {
         </button>
       </div>
 
-      {message && (
-        <div
-          className={`p-3 rounded text-xs flex items-center justify-between border ${
-            message.type === 'success'
-              ? 'bg-[#2E7D5A]/15 border-[#2E7D5A]/30 text-[#2E7D5A] dark:text-[#52B788]'
-              : 'bg-[#B9382C]/15 border-[#B9382C]/30 text-[#B9382C] dark:text-[#F28B82]'
-          }`}
-        >
-          <span>{message.text}</span>
-          <button onClick={() => setMessage(null)} className="opacity-70 hover:opacity-100">
-            <X className="w-3.5 h-3.5" />
-          </button>
+      {/* Statutory Legal Policies — Protected & Immutable Directive */}
+      <div className={`p-4 rounded-lg border ${
+        isDark ? 'bg-[#1E1C1A] border-[#36312C]' : 'bg-[#FAF7F2] border-[#E5DFD7]'
+      }`}>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-full bg-[#B44220]/15 text-[#B44220] flex items-center justify-center shrink-0 mt-0.5">
+              <Lock className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#B44220]">
+                  Protected Legal Documents (Editing Disabled)
+                </h3>
+                <span className="text-[10px] px-2 py-0.5 rounded font-mono bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-medium">
+                  Immutable in MongoDB Atlas
+                </span>
+              </div>
+              <p className={`text-xs mt-1 leading-relaxed ${isDark ? 'text-[#8A837C]' : 'text-[#6E6760]'}`}>
+                The <strong>Privacy Policy</strong> and <strong>Terms of Service</strong> are legally protected, immutable documents. Content editing for these documents is strictly disabled across all administrative interfaces.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              href="/privacy-policy"
+              target="_blank"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-[#E5DFD7] dark:border-[#36312C] hover:border-[#B44220] transition-colors"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>View Privacy Policy</span>
+              <ExternalLink className="w-3 h-3 text-[#8A837C]" />
+            </Link>
+            <Link
+              href="/terms-of-service"
+              target="_blank"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-[#E5DFD7] dark:border-[#36312C] hover:border-[#B44220] transition-colors"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>View Terms of Service</span>
+              <ExternalLink className="w-3 h-3 text-[#8A837C]" />
+            </Link>
+          </div>
         </div>
-      )}
+      </div>
 
       {loading || !content ? (
         <div className={`p-16 text-center text-xs ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>Loading policy content...</div>

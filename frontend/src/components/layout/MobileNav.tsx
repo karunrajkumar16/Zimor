@@ -16,7 +16,7 @@ import {
 import { useWishlist } from '@/context/WishlistContext';
 import { useCart } from '@/context/CartContext';
 import { SOCIAL_LINKS } from '@/data/social';
-import { InstagramIcon, FacebookIcon, PinterestIcon, YoutubeIcon } from './Footer';
+import { InstagramIcon, FacebookIcon, PinterestIcon, YoutubeIcon, ThreadsIcon } from './Footer';
 
 interface MobileNavProps {
   isOpen: boolean;
@@ -305,6 +305,15 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
               aria-label="Facebook"
             >
               <FacebookIcon className="w-3.5 h-3.5" />
+            </a>
+            <a
+              href={SOCIAL_LINKS.threads}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-8 h-8 rounded-full bg-black/5 border border-[#b4b4b4]/30 text-[#000000] flex items-center justify-center transition-all duration-300 hover:scale-110 hover:bg-black hover:border-black hover:text-white hover:shadow-sm"
+              aria-label="Threads"
+            >
+              <ThreadsIcon className="w-3.5 h-3.5" />
             </a>
           </div>
           <div className="pt-2 border-t border-[#b4b4b4]/25 flex items-center justify-between text-[10px] text-[#555555]">

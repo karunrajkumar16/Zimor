@@ -18,11 +18,18 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}): Pro
   const headers = new Headers(options.headers || {});
 
   if (typeof window !== 'undefined') {
+    const isAdminTarget =
+      endpoint.includes('/admin') ||
+      endpoint === '/api/auth/me' ||
+      endpoint === '/api/auth/logout' ||
+      (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin'));
+
     const adminToken = localStorage.getItem('zimor_admin_token');
     const customerToken =
       sessionStorage.getItem('zimor_customer_token') ||
       localStorage.getItem('zimor_customer_token');
-    const token = adminToken || customerToken;
+
+    const token = isAdminTarget ? adminToken : (customerToken || adminToken);
     if (token && !headers.has('Authorization')) {
       headers.set('Authorization', `Bearer ${token}`);
     }

@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { Product } from '@/types';
-import { PRODUCTS } from '@/data/products';
+import { useProducts } from '@/context/ProductContext';
 import { ProductCard } from '@/components/product/ProductCard';
 
 const QuickViewModal = dynamic(
@@ -13,18 +13,21 @@ const QuickViewModal = dynamic(
   { ssr: false }
 );
 
-// Curated 4 flagship silhouettes representing all Zimor silhouettes
-const FEATURED_PRODUCTS: Product[] = [
-  PRODUCTS.find((p) => p.id === 'zimor-delo-tote-rust') || PRODUCTS[0],
-  PRODUCTS.find((p) => p.id === 'zimor-rabota-tote-cognac') || PRODUCTS[2],
-  PRODUCTS.find((p) => p.id === 'zimor-classic-shoulder-bag-cream') || PRODUCTS[4],
-  PRODUCTS.find((p) => p.id === 'zimor-delo-tote-noir') || PRODUCTS[1],
-];
-
 export const FeaturedProducts: React.FC = () => {
+  const { products } = useProducts();
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [activeMobileIndex, setActiveMobileIndex] = useState(0);
   const trackRef = useRef<HTMLDivElement>(null);
+
+  const featuredList: Product[] = useMemo(() => {
+    const explicitlyFeatured = products.filter((p) => p.isFeatured);
+    if (explicitlyFeatured.length >= 4) return explicitlyFeatured.slice(0, 4);
+    if (explicitlyFeatured.length > 0) {
+      const rest = products.filter((p) => !p.isFeatured);
+      return [...explicitlyFeatured, ...rest].slice(0, 4);
+    }
+    return products.slice(0, 4);
+  }, [products]);
 
   // Synchronize mobile active index on scroll
   const handleScroll = () => {
@@ -33,7 +36,7 @@ export const FeaturedProducts: React.FC = () => {
     if (scrollWidth > clientWidth) {
       const cardWidth = trackRef.current.children[0]?.clientWidth || clientWidth * 0.48;
       const index = Math.round(scrollLeft / cardWidth);
-      setActiveMobileIndex(Math.min(FEATURED_PRODUCTS.length - 1, Math.max(0, index)));
+      setActiveMobileIndex(Math.min(featuredList.length - 1, Math.max(0, index)));
     }
   };
 
@@ -52,7 +55,7 @@ export const FeaturedProducts: React.FC = () => {
   };
 
   const handleNext = () => {
-    const nextIndex = Math.min(FEATURED_PRODUCTS.length - 1, activeMobileIndex + 1);
+    const nextIndex = Math.min(featuredList.length - 1, activeMobileIndex + 1);
     scrollToProduct(nextIndex);
   };
 
@@ -88,8 +91,8 @@ export const FeaturedProducts: React.FC = () => {
               <button
                 type="button"
                 onClick={handleNext}
-                disabled={activeMobileIndex >= FEATURED_PRODUCTS.length - 2}
-                className={`w-8 h-8 rounded-full border border-line flex items-center justify-center text-ink transition-all ${activeMobileIndex >= FEATURED_PRODUCTS.length - 2
+                disabled={activeMobileIndex >= featuredList.length - 2}
+                className={`w-8 h-8 rounded-full border border-line flex items-center justify-center text-ink transition-all ${activeMobileIndex >= featuredList.length - 2
                   ? 'opacity-30 cursor-not-allowed'
                   : 'hover:border-black hover:bg-canvas-card active:scale-95'
                   }`}
@@ -125,7 +128,7 @@ export const FeaturedProducts: React.FC = () => {
             overscrollBehaviorX: 'contain',
           }}
         >
-          {FEATURED_PRODUCTS.map((product) => (
+          {featuredList.map((product) => (
             <div
               key={product.id}
               className="w-[47vw] min-w-[165px] max-w-[215px] sm:w-[32vw] lg:w-auto lg:max-w-none shrink-0 snap-start"
@@ -140,7 +143,7 @@ export const FeaturedProducts: React.FC = () => {
 
         {/* Mobile Slide Position Indicators (Dots) */}
         <div className="flex lg:hidden items-center justify-center gap-1.5 mt-3 mb-2">
-          {FEATURED_PRODUCTS.map((product, idx) => (
+          {featuredList.map((product, idx) => (
             <button
               key={'dot-' + product.id}
               type="button"
@@ -160,7 +163,7 @@ export const FeaturedProducts: React.FC = () => {
             href="/shop"
             className="group inline-flex items-center justify-center gap-2 px-7 py-3 sm:px-12 sm:py-4 rounded-full border border-ink text-ink hover:bg-ink hover:text-white transition-all duration-300 font-primary text-xs sm:text-sm font-medium tracking-normal shadow-xs hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
           >
-            <span>View All Bags ({PRODUCTS.length})</span>
+            <span>View All Bags ({products.length})</span>
             <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
           </Link>
           <p className="text-[10px] sm:text-xs text-ink-muted mt-3 uppercase tracking-wider font-secondary">

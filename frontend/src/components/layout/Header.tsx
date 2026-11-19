@@ -7,14 +7,15 @@ import { usePathname } from 'next/navigation';
 import { Menu, Search, Heart, ShoppingBag, User, X, ChevronDown, Mail, MessageSquare, Phone } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
+import { useProducts } from '@/context/ProductContext';
 import { MobileNav } from './MobileNav';
-import { PRODUCTS } from '@/data/products';
 import { useLenisScroll } from './SmoothScroll';
 
 export const Header: React.FC = () => {
   const pathname = usePathname();
   const { itemCount, openCartDrawer } = useCart();
   const { wishlistCount } = useWishlist();
+  const { products } = useProducts();
   const { lenis } = useLenisScroll();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -180,11 +181,12 @@ export const Header: React.FC = () => {
   const isTransparent = isHome && !isScrolled;
 
   const filteredSearch = searchQuery.trim()
-    ? PRODUCTS.filter(
+    ? products.filter(
       (p) =>
         p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.categoryLabel.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.suitableProfessions.some((pr) => pr.toLowerCase().includes(searchQuery.toLowerCase()))
+        (p.categoryLabel && p.categoryLabel.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (p.category && p.category.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (Array.isArray(p.suitableProfessions) && p.suitableProfessions.some((pr) => pr.toLowerCase().includes(searchQuery.toLowerCase())))
     )
     : [];
 

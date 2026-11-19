@@ -77,12 +77,8 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { toggleTheme, isDark } = useAdminTheme();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
-  const [adminUser, setAdminUser] = useState<{ email: string; name: string; role?: string } | null>({
-    email: 'admin@zimor.in',
-    name: 'Zimor Executive Admin',
-    role: 'superadmin',
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [adminUser, setAdminUser] = useState<{ email: string; name: string; role?: string } | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
@@ -91,24 +87,32 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (isLoginPage) return;
 
-    const token = typeof window !== 'undefined' ? localStorage.getItem('zimor_admin_token') : null;
-    if (!token && typeof window !== 'undefined') {
-      localStorage.setItem('zimor_admin_token', 'dev_admin_session_token_' + Date.now());
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlToken = urlParams.get('admin_token');
+      if (urlToken) {
+        localStorage.setItem('zimor_admin_token', urlToken);
+        window.history.replaceState({}, '', pathname || '/admin');
+      }
     }
 
     apiFetch('/api/auth/me')
       .then((res) => {
-        if (!res.ok) throw new Error('Not logged in');
+        if (!res.ok) throw new Error('Not authenticated');
         return res.json();
       })
       .then((data) => {
-        if (data.authenticated) {
+        if (data.authenticated && data.user) {
           setIsAuthenticated(true);
           setAdminUser(data.user);
+        } else {
+          setIsAuthenticated(false);
+          router.replace('/admin/login');
         }
       })
       .catch(() => {
-        // Dev fallback retains default authenticated admin
+        setIsAuthenticated(false);
+        router.replace('/admin/login');
       });
   }, [pathname, isLoginPage, router]);
 
@@ -129,9 +133,8 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   if (isAuthenticated === null) {
     return (
       <div
-        className={`min-h-screen flex items-center justify-center p-6 ${
-          isDark ? 'bg-[#191715] text-[#E8E1DA]' : 'bg-[#F7F5F2] text-[#24211F]'
-        }`}
+        className={`min-h-screen flex items-center justify-center p-6 ${isDark ? 'bg-[#191715] text-[#E8E1DA]' : 'bg-[#F7F5F2] text-[#24211F]'
+          }`}
       >
         <div className="w-8 h-8 border-2 border-[#B44220] border-t-transparent rounded-full animate-spin" />
       </div>
@@ -141,9 +144,8 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   if (!isAuthenticated) {
     return (
       <div
-        className={`min-h-screen flex items-center justify-center p-6 ${
-          isDark ? 'bg-[#191715] text-[#E8E1DA]' : 'bg-[#F7F5F2] text-[#24211F]'
-        }`}
+        className={`min-h-screen flex items-center justify-center p-6 ${isDark ? 'bg-[#191715] text-[#E8E1DA]' : 'bg-[#F7F5F2] text-[#24211F]'
+          }`}
       >
         <div className="flex flex-col items-center gap-4 text-center max-w-sm">
           <div className="w-8 h-8 border-2 border-current border-t-transparent rounded-full animate-spin text-[#B44220]" />
@@ -174,9 +176,8 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
 
   return (
     <div
-      className={`min-h-screen flex flex-col lg:flex-row font-sans transition-colors duration-150 ${
-        isDark ? 'bg-[#191715] text-[#E8E1DA]' : 'bg-[#F7F5F2] text-[#24211F]'
-      }`}
+      className={`min-h-screen flex flex-col lg:flex-row font-sans transition-colors duration-150 ${isDark ? 'bg-[#191715] text-[#E8E1DA]' : 'bg-[#F7F5F2] text-[#24211F]'
+        }`}
     >
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
@@ -188,19 +189,16 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
 
       {/* Audi CRM-Style Precision Sidebar */}
       <aside
-        className={`fixed lg:sticky top-0 h-screen w-64 z-50 flex flex-col shrink-0 border-r transition-transform duration-200 lg:translate-x-0 ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } ${
-          isDark
+        className={`fixed lg:sticky top-0 h-screen w-64 z-50 flex flex-col shrink-0 border-r transition-transform duration-200 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          } ${isDark
             ? 'bg-[#1E1C1A] border-[#36312C]'
             : 'bg-[#FFFFFF] border-[#E5DFD7]'
-        }`}
+          }`}
       >
         {/* Brand Header */}
         <div
-          className={`h-16 px-5 flex items-center justify-between border-b shrink-0 ${
-            isDark ? 'border-[#36312C]' : 'border-[#E5DFD7]'
-          }`}
+          className={`h-16 px-5 flex items-center justify-between border-b shrink-0 ${isDark ? 'border-[#36312C]' : 'border-[#E5DFD7]'
+            }`}
         >
           <Link href="/admin" className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-md flex items-center justify-center font-bold text-xs tracking-wider bg-[#B44220] text-[#F7F5F2]">
@@ -211,9 +209,8 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
                 ZIMOR
               </span>
               <span
-                className={`text-[9px] font-mono tracking-wider uppercase block mt-1 ${
-                  isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'
-                }`}
+                className={`text-[9px] font-mono tracking-wider uppercase block mt-1 ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'
+                  }`}
               >
                 Executive CRM
               </span>
@@ -234,9 +231,8 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
           {NAV_SECTIONS.map((section) => (
             <div key={section.title} className="space-y-1">
               <p
-                className={`px-3 text-[9px] font-mono font-semibold tracking-widest uppercase mb-2 ${
-                  isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'
-                }`}
+                className={`px-3 text-[9px] font-mono font-semibold tracking-widest uppercase mb-2 ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'
+                  }`}
               >
                 {section.title}
               </p>
@@ -248,13 +244,12 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
                     key={item.href}
                     href={item.href}
                     onClick={() => setIsSidebarOpen(false)}
-                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                      isActive
-                        ? 'bg-[#B44220] text-[#FFFFFF] font-semibold'
-                        : isDark
+                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${isActive
+                      ? 'bg-[#B44220] text-[#FFFFFF] font-semibold'
+                      : isDark
                         ? 'text-[#B4B4B4] hover:text-[#E8E1DA] hover:bg-[#2A2724]'
                         : 'text-[#5A534E] hover:text-[#24211F] hover:bg-[#F2ECE4]'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center gap-2.5">
                       <Icon className={`w-4 h-4 ${isActive ? 'text-[#FFFFFF] stroke-[2.2]' : 'stroke-[1.8]'}`} />
@@ -262,11 +257,10 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
                     </div>
                     {item.badge && (
                       <span
-                        className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${
-                          isActive
-                            ? 'bg-white/20 text-white'
-                            : 'bg-[#B44220]/15 text-[#B44220] dark:text-[#E07A5F]'
-                        }`}
+                        className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${isActive
+                          ? 'bg-white/20 text-white'
+                          : 'bg-[#B44220]/15 text-[#B44220] dark:text-[#E07A5F]'
+                          }`}
                       >
                         {item.badge}
                       </span>
@@ -279,9 +273,8 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
 
           {/* Quick SLA & Live System Status Badge */}
           <div
-            className={`p-3 rounded-xl border space-y-1.5 mt-4 ${
-              isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FAF8F5] border-[#E8E2D9]'
-            }`}
+            className={`p-3 rounded-xl border space-y-1.5 mt-4 ${isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FAF8F5] border-[#E8E2D9]'
+              }`}
           >
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-[#B44220] dark:text-[#E07A5F]">
@@ -313,9 +306,8 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
             }`}
         >
           <div
-            className={`flex items-center justify-between p-2 rounded-lg border ${
-              isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
-            }`}
+            className={`flex items-center justify-between p-2 rounded-lg border ${isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
+              }`}
           >
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-7 h-7 rounded flex items-center justify-center text-xs font-bold shrink-0 bg-[#B44220] text-white">
@@ -326,9 +318,8 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
                   {adminUser?.name || 'Administrator'}
                 </p>
                 <p
-                  className={`text-[10px] font-mono truncate leading-tight mt-0.5 ${
-                    isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'
-                  }`}
+                  className={`text-[10px] font-mono truncate leading-tight mt-0.5 ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'
+                    }`}
                 >
                   {adminUser?.email || 'admin@zimor.in'}
                 </p>
@@ -338,11 +329,10 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
             <button
               onClick={handleLogout}
               title="Sign Out"
-              className={`p-1.5 rounded transition-colors ${
-                isDark
-                  ? 'text-[#8A837C] hover:text-[#F28B82] hover:bg-[#B9382C]/15'
-                  : 'text-[#8C837A] hover:text-[#9C281D] hover:bg-[#B9382C]/10'
-              }`}
+              className={`p-1.5 rounded transition-colors ${isDark
+                ? 'text-[#8A837C] hover:text-[#F28B82] hover:bg-[#B9382C]/15'
+                : 'text-[#8C837A] hover:text-[#9C281D] hover:bg-[#B9382C]/10'
+                }`}
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -354,11 +344,10 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
       <div className="flex-1 flex flex-col min-w-0 min-h-screen">
         {/* Top Navbar */}
         <header
-          className={`h-16 px-4 sm:px-6 lg:px-8 flex items-center justify-between border-b shrink-0 sticky top-0 z-30 backdrop-blur-md ${
-            isDark
-              ? 'bg-[#191715]/95 border-[#36312C]'
-              : 'bg-[#F7F5F2]/95 border-[#E5DFD7]'
-          }`}
+          className={`h-16 px-4 sm:px-6 lg:px-8 flex items-center justify-between border-b shrink-0 sticky top-0 z-30 backdrop-blur-md ${isDark
+            ? 'bg-[#191715]/95 border-[#36312C]'
+            : 'bg-[#F7F5F2]/95 border-[#E5DFD7]'
+            }`}
         >
           {/* Left: Breadcrumb / Section Title */}
           <div className="flex items-center gap-3">
@@ -387,11 +376,10 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
             <div className="relative">
               <button
                 onClick={() => setNotificationsOpen(!notificationsOpen)}
-                className={`relative p-2 rounded-lg border transition-colors ${
-                  isDark
-                    ? 'bg-[#24211F] border-[#36312C] text-[#E8E1DA] hover:border-[#8A837C]'
-                    : 'bg-[#FFFFFF] border-[#E5DFD7] text-[#24211F] hover:border-[#8C837A]'
-                }`}
+                className={`relative p-2 rounded-lg border transition-colors ${isDark
+                  ? 'bg-[#24211F] border-[#36312C] text-[#E8E1DA] hover:border-[#8A837C]'
+                  : 'bg-[#FFFFFF] border-[#E5DFD7] text-[#24211F] hover:border-[#8C837A]'
+                  }`}
                 title="Notifications"
                 aria-label="View notifications"
               >
@@ -401,9 +389,8 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
 
               {notificationsOpen && (
                 <div
-                  className={`absolute right-0 mt-2 w-80 rounded-xl border p-3 z-50 shadow-lg ${
-                    isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
-                  }`}
+                  className={`absolute right-0 mt-2 w-80 rounded-xl border p-3 z-50 shadow-lg ${isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
+                    }`}
                 >
                   <div className="flex items-center justify-between pb-2 mb-2 border-b border-inherit">
                     <span className="text-xs font-semibold tracking-wider font-mono uppercase">
@@ -435,11 +422,10 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
             <button
               onClick={toggleTheme}
               aria-label={`Switch to ${isDark ? 'Light' : 'Dark'} mode`}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-                isDark
-                  ? 'bg-[#24211F] border-[#36312C] text-[#E8E1DA] hover:border-[#8A837C]'
-                  : 'bg-[#FFFFFF] border-[#E5DFD7] text-[#24211F] hover:border-[#8C837A]'
-              }`}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${isDark
+                ? 'bg-[#24211F] border-[#36312C] text-[#E8E1DA] hover:border-[#8A837C]'
+                : 'bg-[#FFFFFF] border-[#E5DFD7] text-[#24211F] hover:border-[#8C837A]'
+                }`}
             >
               {isDark ? (
                 <>
@@ -456,11 +442,10 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
 
             {/* Superadmin Role Badge */}
             <div
-              className={`hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-mono uppercase tracking-wider border ${
-                isDark
-                  ? 'bg-[#B44220]/10 border-[#B44220]/30 text-[#E8A593]'
-                  : 'bg-[#B44220]/10 border-[#B44220]/20 text-[#B44220]'
-              }`}
+              className={`hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-mono uppercase tracking-wider border ${isDark
+                ? 'bg-[#B44220]/10 border-[#B44220]/30 text-[#E8A593]'
+                : 'bg-[#B44220]/10 border-[#B44220]/20 text-[#B44220]'
+                }`}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-[#B44220]" />
               <span>SUPERADMIN</span>

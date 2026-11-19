@@ -1,6 +1,8 @@
-export const SOCIAL_LINKS = {
-  instagram: 'https://www.instagram.com/zimorindia?cplk=MXF2aXBiNzluNTFuNg==',
-  pinterest: 'https://pin.it/2gHyYAB2z',
-  youtube: 'https://youtube.com/@zimorindia-z3p4i?si=GfpG0DurOo-vez_m',
-  facebook: 'https://www.facebook.com/share/196tKvMHB3/',
-} as const;
+export const SOCIAL_LINKS: Record<'instagram' | 'facebook' | 'pinterest' | 'youtube' | 'threads', string> = {
+  instagram: 'https://www.instagram.com/zimorworld/',
+  facebook: 'https://www.facebook.com/share/1Fc7XXTj2F/',
+  pinterest: 'https://pin.it/4uigbL9Ia',
+  youtube: 'https://youtube.com/@zimorworld-z3p4i?si=VCZI4SNBN1czSifG',
+  threads: 'https://www.threads.com/@zimorworld',
+};
+

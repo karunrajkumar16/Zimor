@@ -70,6 +70,7 @@ export default function AdminProductsPage() {
   const [formWeight, setFormWeight] = useState('0.70 kg');
   const [formIsFeatured, setFormIsFeatured] = useState(true);
   const [formIsComingSoon, setFormIsComingSoon] = useState(false);
+  const [formIsPublished, setFormIsPublished] = useState(true);
 
   // New Image input temporary state
   const [newImageUrl, setNewImageUrl] = useState('');
@@ -121,6 +122,7 @@ export default function AdminProductsPage() {
     setFormWeight(prod.dimensions?.weight || '0.70 kg');
     setFormIsFeatured(prod.isFeatured ?? true);
     setFormIsComingSoon(prod.isComingSoon ?? false);
+    setFormIsPublished(prod.isPublished !== false);
     setMessage(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -158,6 +160,7 @@ export default function AdminProductsPage() {
     setFormWeight('0.70 kg');
     setFormIsFeatured(true);
     setFormIsComingSoon(false);
+    setFormIsPublished(true);
     setMessage(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -202,6 +205,7 @@ export default function AdminProductsPage() {
       },
       isFeatured: formIsFeatured,
       isComingSoon: formIsComingSoon,
+      isPublished: formIsPublished,
     };
 
     try {
@@ -245,6 +249,25 @@ export default function AdminProductsPage() {
       }
     } catch (err) {
       console.error('Failed to delete product', err);
+    }
+  };
+
+  const handleTogglePublish = async (prod: Product) => {
+    const currentStatus = prod.isPublished !== false;
+    const newStatus = !currentStatus;
+    try {
+      const res = await apiFetch(`/api/products/${prod.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isPublished: newStatus }),
+      });
+      if (res.ok) {
+        setProducts((prev) =>
+          prev.map((p) => (p.id === prod.id ? { ...p, isPublished: newStatus } : p))
+        );
+      }
+    } catch (err) {
+      console.error('Failed to toggle publish status:', err);
     }
   };
 
@@ -781,6 +804,19 @@ export default function AdminProductsPage() {
                   <p className="text-[11px] text-slate-400">Display Coming Soon badge and Notify Me action</p>
                 </div>
               </label>
+
+              <label className="flex items-center gap-3 p-3.5 rounded border border-slate-200 dark:border-neutral-700 cursor-pointer sm:col-span-2">
+                <input
+                  type="checkbox"
+                  checked={formIsPublished}
+                  onChange={(e) => setFormIsPublished(e.target.checked)}
+                  className="w-4 h-4 rounded text-black focus:ring-0"
+                />
+                <div>
+                  <p className="font-semibold">Published on Live Storefront</p>
+                  <p className="text-[11px] text-slate-400">When enabled, this silhouette is visible on the shop page, search, and category listings.</p>
+                </div>
+              </label>
             </div>
           </div>
 
@@ -953,15 +989,25 @@ export default function AdminProductsPage() {
                       </td>
 
                       <td className="py-3 px-4">
-                        {p.isComingSoon ? (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#C07D2B]/10 text-[#9C611B] dark:bg-[#C07D2B]/15 dark:text-[#F0B265] border border-[#C07D2B]/25">
-                            Coming Soon
-                          </span>
-                        ) : (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#2E7D5A]/10 text-[#25684A] dark:bg-[#2E7D5A]/15 dark:text-[#62C697] border border-[#2E7D5A]/25">
-                            Live &amp; In Stock
-                          </span>
-                        )}
+                        <div className="flex flex-col gap-1 items-start">
+                          <button
+                            type="button"
+                            onClick={() => handleTogglePublish(p)}
+                            className={`px-2 py-0.5 rounded text-[10px] font-semibold border transition-all cursor-pointer ${
+                              p.isPublished !== false
+                                ? 'bg-[#2E7D5A]/10 text-[#25684A] dark:bg-[#2E7D5A]/15 dark:text-[#62C697] border-[#2E7D5A]/25 hover:bg-[#2E7D5A]/20'
+                                : 'bg-slate-500/10 text-slate-500 dark:text-slate-400 border-slate-500/25 hover:bg-slate-500/20'
+                            }`}
+                            title="Click to toggle publication on storefront"
+                          >
+                            {p.isPublished !== false ? '● Published' : '○ Hidden / Draft'}
+                          </button>
+                          {p.isComingSoon && (
+                            <span className="px-2 py-0.5 rounded text-[9px] font-semibold bg-[#C07D2B]/10 text-[#9C611B] dark:bg-[#C07D2B]/15 dark:text-[#F0B265] border border-[#C07D2B]/25">
+                              Coming Soon
+                            </span>
+                          )}
+                        </div>
                       </td>
 
                       <td className="py-3 px-4 text-right">

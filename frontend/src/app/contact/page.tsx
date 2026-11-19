@@ -10,6 +10,7 @@ import {
   PinterestIcon,
   YoutubeIcon,
   FacebookIcon,
+  ThreadsIcon,
 } from '@/components/layout/Footer';
 
 function WhatsAppIcon({ className = 'w-5 h-5' }: { className?: string }) {
@@ -31,7 +32,7 @@ function GmailIcon({ className = 'w-5 h-5' }: { className?: string }) {
 const SOCIAL_CHANNELS = [
   {
     name: 'Instagram',
-    handle: '@zimorindia',
+    handle: '@zimorworld',
     href: SOCIAL_LINKS.instagram,
     Icon: InstagramIcon,
     hoverBg: 'group-hover:bg-gradient-to-tr group-hover:from-[#f09433] group-hover:via-[#dc2743] group-hover:to-[#bc1888] group-hover:border-transparent group-hover:text-white',
@@ -39,7 +40,7 @@ const SOCIAL_CHANNELS = [
   },
   {
     name: 'Pinterest',
-    handle: 'Zimor India',
+    handle: 'Zimor',
     href: SOCIAL_LINKS.pinterest,
     Icon: PinterestIcon,
     hoverBg: 'group-hover:bg-[#E60023] group-hover:border-[#E60023] group-hover:text-white',
@@ -47,7 +48,7 @@ const SOCIAL_CHANNELS = [
   },
   {
     name: 'YouTube',
-    handle: '@zimorindia-z3p4i',
+    handle: '@zimorworld-z3p4i',
     href: SOCIAL_LINKS.youtube,
     Icon: YoutubeIcon,
     hoverBg: 'group-hover:bg-[#FF0000] group-hover:border-[#FF0000] group-hover:text-white',
@@ -55,11 +56,19 @@ const SOCIAL_CHANNELS = [
   },
   {
     name: 'Facebook',
-    handle: 'Zimor India',
+    handle: 'Zimor',
     href: SOCIAL_LINKS.facebook,
     Icon: FacebookIcon,
     hoverBg: 'group-hover:bg-[#1877F2] group-hover:border-[#1877F2] group-hover:text-white',
     description: 'Community updates & releases',
+  },
+  {
+    name: 'Threads',
+    handle: '@zimorworld',
+    href: SOCIAL_LINKS.threads,
+    Icon: ThreadsIcon,
+    hoverBg: 'group-hover:bg-black group-hover:border-black group-hover:text-white',
+    description: 'Conversations & brand chronicles',
   },
 ];
 
@@ -264,8 +273,8 @@ export default function ContactPage() {
             Discover behind-the-scenes leathercraft, campaign visuals, and curated styling updates across all our official handles.
           </p>
 
-          {/* Social Channels 4-Card Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-5xl mx-auto">
+          {/* Social Channels 5-Card Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 max-w-6xl mx-auto">
             {SOCIAL_CHANNELS.map((item) => {
               const Icon = item.Icon;
               return (

@@ -1,13 +1,27 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { Package, MapPin, Edit3, Check, LogOut, AlertCircle, ShieldCheck, ArrowRight } from 'lucide-react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { AlertCircle, ShieldCheck, ArrowRight, Sparkles, LogOut, Check } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useWishlist } from '@/context/WishlistContext';
 
-export default function AccountPage() {
+import { AccountHeader } from './components/AccountHeader';
+import { AccountNav, AccountTab } from './components/AccountNav';
+import { OverviewTab } from './components/OverviewTab';
+import { OrdersTab } from './components/OrdersTab';
+import { ProfileTab } from './components/ProfileTab';
+import { AddressesTab } from './components/AddressesTab';
+import { WishlistTab } from './components/WishlistTab';
+import { Order } from '@/types';
+import { OrderDetailsModal } from './components/OrderDetailsModal';
+
+function AccountContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialTab = (searchParams.get('tab') as AccountTab) || 'overview';
+
   const {
     user,
     isAuthenticated,
@@ -17,33 +31,32 @@ export default function AccountPage() {
     loginWithGoogle,
     logout,
     updateProfile,
+    addAddress,
+    updateAddress,
+    deleteAddress,
+    setDefaultAddress,
     clearAuthError,
   } = useAuth();
+
   const { wishlistCount } = useWishlist();
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [designation, setDesignation] = useState('');
-  const [savedSuccess, setSavedSuccess] = useState(false);
+  const [activeTab, setActiveTab] = useState<AccountTab>(initialTab);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [downloadingNumber, setDownloadingNumber] = useState<string | null>(null);
+  const [showSignOutModal, setShowSignOutModal] = useState(false);
 
+  // Sync tab with URL search parameter
   useEffect(() => {
-    if (user) {
-      setName(user.name || '');
-      setPhone(user.phone || '');
-      setDesignation(user.designation || 'Atelier Patron');
+    const tabParam = searchParams.get('tab') as AccountTab;
+    if (tabParam && ['overview', 'orders', 'profile', 'addresses', 'wishlist'].includes(tabParam)) {
+      setActiveTab(tabParam);
     }
-  }, [user]);
+  }, [searchParams]);
 
-  const handleSaveProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const success = await updateProfile({ name, phone, designation });
-    if (success) {
-      setIsEditing(false);
-      setSavedSuccess(true);
-      setTimeout(() => setSavedSuccess(false), 2500);
-    }
+  const handleSelectTab = (tab: AccountTab) => {
+    setActiveTab(tab);
+    router.replace(`/account?tab=${tab}`, { scroll: false });
   };
 
   const handleGoogleSignIn = () => {
@@ -51,52 +64,70 @@ export default function AccountPage() {
     loginWithGoogle('/account');
   };
 
-  // Loading state
+  const handleConfirmSignOut = async () => {
+    setShowSignOutModal(false);
+    await logout();
+  };
+
+  const handleDownloadInvoice = (orderNumber: string) => {
+    setDownloadingNumber(orderNumber);
+    setTimeout(() => {
+      setDownloadingNumber(null);
+      alert(`Digital Tax Invoice for Order #${orderNumber} has been downloaded.`);
+    }, 1000);
+  };
+
+  // 1. Loading State
   if (isLoading) {
     return (
-      <div className="bg-canvas min-h-screen py-24 flex items-center justify-center">
+      <div className="bg-[#FFFFFF] min-h-[70vh] flex items-center justify-center">
         <div className="text-center space-y-3">
-          <div className="w-8 h-8 border-2 border-ink border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="font-mono text-xs text-ink-muted uppercase tracking-widest">
-            Authenticating Atelier Session...
+          <div className="w-8 h-8 border-2 border-[#000000] border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="font-secondary text-xs text-[#888888] uppercase tracking-[0.2em]">
+            Connecting to Atelier Session...
           </p>
         </div>
       </div>
     );
   }
 
-  // Unauthenticated Patron Sign-In View
+  // 2. Unauthenticated Patron Sign-In (Editorial Zara / Louis Vuitton styling)
   if (!isAuthenticated || !user) {
     return (
-      <div className="bg-canvas min-h-screen py-12 sm:py-20 border-b border-line">
+      <div className="bg-[#FAF8F5] min-h-screen py-12 sm:py-20 border-b border-[#000000]/10">
         <div className="max-w-md mx-auto px-4 sm:px-6">
           {/* Breadcrumb */}
-          <nav className="text-[11px] text-ink-muted uppercase tracking-wider flex items-center justify-center gap-2 mb-8">
-            <Link href="/" className="hover:text-ink">Home</Link>
+          <nav
+            className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-[#888888] flex items-center justify-center gap-2 mb-8 font-secondary"
+            aria-label="Breadcrumb"
+          >
+            <Link href="/" className="hover:text-[#000000] transition-colors">
+              Home
+            </Link>
             <span>/</span>
-            <span className="text-ink font-semibold">Account Sign In</span>
+            <span className="text-[#000000] font-semibold">Account Sign In</span>
           </nav>
 
-          {/* Auth Card */}
-          <div className="bg-canvas-card border border-line rounded-xl p-8 sm:p-10 shadow-sm space-y-6 text-center">
-            <div className="w-12 h-12 rounded-full bg-ink text-white font-mono font-bold text-lg flex items-center justify-center mx-auto tracking-wider shadow-inner">
+          {/* Editorial Sign-In Container */}
+          <div className="bg-white border border-[#B4B4B4]/40 p-8 sm:p-10 space-y-6 text-center shadow-xs">
+            <div className="w-12 h-12 bg-[#000000] text-white font-primary font-normal text-xl flex items-center justify-center mx-auto tracking-widest">
               Z
             </div>
 
-            <div>
-              <span className="text-[10px] font-mono uppercase tracking-widest text-[#B44220] font-bold">
+            <div className="space-y-1.5">
+              <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-[#B44220]">
                 ZIMOR Atelier Concierge
               </span>
-              <h1 className="font-primary text-2xl sm:text-3xl font-normal text-ink tracking-tight mt-1">
+              <h1 className="font-primary text-2xl sm:text-3xl font-normal text-[#000000] tracking-tight">
                 Patron Sign In
               </h1>
-              <p className="text-xs text-ink-secondary mt-2 leading-relaxed">
-                Sign in to manage your luxury orders, shipment dispatches, saved delivery addresses, and personal concierge.
+              <p className="font-secondary text-xs text-[#666666] leading-relaxed max-w-xs mx-auto">
+                Sign in to manage your orders, track dispatches, update delivery destinations, and curate your personal wishlist.
               </p>
             </div>
 
             {authError && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-800 flex items-start gap-2 text-left">
+              <div className="p-3 bg-red-50 border border-red-200 text-xs text-red-800 flex items-start gap-2 text-left">
                 <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
                 <div className="flex-1">
                   <p className="font-semibold">Authentication issue</p>
@@ -112,16 +143,15 @@ export default function AccountPage() {
               </div>
             )}
 
-            {/* Google Sign In Button */}
+            {/* Google OAuth Button */}
             <div className="pt-2">
               <button
                 type="button"
                 onClick={handleGoogleSignIn}
                 disabled={isLoggingIn}
-                className="w-full flex items-center justify-center gap-3 bg-white hover:bg-neutral-50 active:bg-neutral-100 text-[#1f1f1f] border border-[#747775]/40 hover:border-[#747775] rounded-lg py-3 px-4 font-sans text-sm font-medium shadow-xs transition-all duration-150 disabled:opacity-60 cursor-pointer"
+                className="w-full flex items-center justify-center gap-3 bg-white hover:bg-neutral-50 active:bg-neutral-100 text-[#1f1f1f] border border-[#747775]/40 hover:border-[#747775] py-3 px-4 text-xs font-medium uppercase tracking-[0.1em] shadow-xs transition-all duration-150 disabled:opacity-60 cursor-pointer"
               >
-                {/* Official Google G Logo */}
-                <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                   <path
                     fill="#4285F4"
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -143,9 +173,30 @@ export default function AccountPage() {
               </button>
             </div>
 
-            <div className="pt-4 border-t border-line/60 flex items-center justify-center gap-1.5 text-[11px] text-ink-muted">
+            {/* Atelier Member Benefits */}
+            <div className="pt-4 border-t border-[#000000]/10 text-left space-y-2 text-xs text-[#555555]">
+              <p className="text-[10px] uppercase font-bold tracking-[0.16em] text-[#000000]">
+                Patron Privileges
+              </p>
+              <ul className="space-y-1.5 text-[11px] text-[#666666]">
+                <li className="flex items-center gap-2">
+                  <Check className="w-3.5 h-3.5 text-[#B44220] shrink-0" />
+                  <span>Real-time express shipment tracking across India</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-3.5 h-3.5 text-[#B44220] shrink-0" />
+                  <span>Private curated wishlist synced across devices</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-3.5 h-3.5 text-[#B44220] shrink-0" />
+                  <span>1-Click express checkout with saved destinations</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="pt-2 flex items-center justify-center gap-1.5 text-[10.5px] text-[#888888]">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Verified TLS 1.3 end-to-end encrypted session</span>
+              <span>TLS 1.3 256-Bit Encrypted Session</span>
             </div>
           </div>
         </div>
@@ -153,298 +204,153 @@ export default function AccountPage() {
     );
   }
 
-  // Authenticated Patron Dashboard View
+  // 3. Authenticated Patron Dashboard
   return (
-    <div className="bg-canvas min-h-screen py-10 sm:py-16 border-b border-line">
+    <div className="bg-[#FFFFFF] min-h-screen py-6 sm:py-12 border-b border-[#000000]/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Breadcrumb */}
-        <nav className="text-[11px] text-ink-muted uppercase tracking-wider flex items-center gap-2 mb-6">
-          <Link href="/" className="hover:text-ink">Home</Link>
+        {/* Breadcrumb Navigation */}
+        <nav
+          className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-[#888888] flex items-center gap-2 mb-6 font-secondary"
+          aria-label="Breadcrumb"
+        >
+          <Link href="/" className="hover:text-[#000000] transition-colors">
+            Home
+          </Link>
           <span>/</span>
-          <span className="text-ink font-semibold">Patron Account</span>
+          <Link
+            href="/account"
+            onClick={() => handleSelectTab('overview')}
+            className="hover:text-[#000000] transition-colors"
+          >
+            Account
+          </Link>
+          <span>/</span>
+          <span className="text-[#000000] font-semibold capitalize">
+            {activeTab === 'overview'
+              ? 'Overview'
+              : activeTab === 'orders'
+              ? 'My Orders'
+              : activeTab === 'profile'
+              ? 'My Profile'
+              : activeTab === 'addresses'
+              ? 'Saved Addresses'
+              : 'Wishlist'}
+          </span>
         </nav>
 
-        {/* Header with Title and Sign Out */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-line pb-6 mb-8 gap-4">
-          <div>
-            <h1 className="font-primary text-[32px] sm:text-[42px] font-normal text-ink tracking-tight">
-              My Profile & Dashboard
-            </h1>
-            <p className="text-xs sm:text-sm text-ink-secondary mt-1">
-              Welcome back, {user.name}. Manage your delivery preferences and active orders.
-            </p>
-          </div>
+        {/* Account Header */}
+        <AccountHeader
+          user={user}
+          ordersCount={orders.length}
+          onNavigateToOrders={() => handleSelectTab('orders')}
+          onSignOut={() => setShowSignOutModal(true)}
+        />
 
-          <div className="flex items-center gap-3 self-start sm:self-auto">
-            <Link
-              href="/account/orders"
-              className="inline-flex items-center gap-2 bg-ink hover:bg-ink-secondary text-white font-primary text-sm font-medium tracking-normal py-2.5 px-5 rounded transition-colors"
-            >
-              <Package className="w-4 h-4" />
-              <span>All Orders ({orders.length})</span>
-            </Link>
+        {/* Mobile Horizontal Tab Navigation */}
+        <AccountNav
+          activeTab={activeTab}
+          onSelectTab={handleSelectTab}
+          onSignOut={() => setShowSignOutModal(true)}
+          ordersCount={orders.length}
+          addressesCount={user.addresses?.length || 0}
+          wishlistCount={wishlistCount}
+        />
 
-            <button
-              type="button"
-              onClick={logout}
-              className="inline-flex items-center gap-1.5 border border-line hover:border-red-300 hover:text-red-700 bg-canvas text-ink-secondary text-xs font-semibold py-2.5 px-4 rounded transition-colors"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Sign Out</span>
-            </button>
-          </div>
-        </div>
-
-        {savedSuccess && (
-          <div className="mb-6 p-3 bg-emerald-50 border border-emerald-200 rounded text-xs text-emerald-800 flex items-center gap-2">
-            <Check className="w-4 h-4 text-emerald-600" />
-            <span>Profile details updated successfully!</span>
-          </div>
-        )}
-
-        {/* Dashboard Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Column: Profile Card */}
-          <div className="lg:col-span-5 bg-canvas-card border border-line rounded-lg p-6 sm:p-8 space-y-6 shadow-xs">
-            <div className="flex items-center gap-4">
-              <div className="relative w-16 h-16 rounded-full overflow-hidden border border-line shrink-0 bg-neutral-100 flex items-center justify-center font-bold text-lg text-ink">
-                {user.avatar ? (
-                  <Image
-                    src={user.avatar}
-                    alt={user.name}
-                    fill
-                    unoptimized
-                    loading="lazy"
-                    decoding="async"
-                    className="object-cover"
-                  />
-                ) : (
-                  <span>{user.name.charAt(0).toUpperCase()}</span>
-                )}
-              </div>
-              <div>
-                <h2 className="text-base font-bold text-ink">{user.name}</h2>
-                <p className="text-xs text-[#555555] font-medium">{user.designation || 'Atelier Patron'}</p>
-                <p className="text-xs text-ink-muted">{user.city || 'India'}</p>
-              </div>
-            </div>
-
-            {isEditing ? (
-              <form onSubmit={handleSaveProfile} className="space-y-3 pt-3 border-t border-line text-xs">
-                <div>
-                  <label className="block font-semibold text-ink mb-1">Full Name</label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full p-2 bg-canvas border border-line rounded focus:outline-none focus:border-black"
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold text-ink mb-1">Phone</label>
-                  <input
-                    type="text"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+91 98765 43210"
-                    className="w-full p-2 bg-canvas border border-line rounded focus:outline-none focus:border-black"
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold text-ink mb-1">Designation / Role</label>
-                  <input
-                    type="text"
-                    value={designation}
-                    onChange={(e) => setDesignation(e.target.value)}
-                    placeholder="e.g. Architect, Creative Director"
-                    className="w-full p-2 bg-canvas border border-line rounded focus:outline-none focus:border-black"
-                  />
-                </div>
-                <div className="flex gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsEditing(false)}
-                    className="px-3 py-1.5 border border-line rounded text-ink-secondary"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-1.5 bg-ink hover:bg-ink-secondary text-white rounded font-medium transition-colors"
-                  >
-                    Save Changes
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <div className="space-y-3 pt-3 border-t border-line text-xs text-ink-secondary">
-                <div className="flex justify-between py-1 border-b border-line/50">
-                  <span className="text-ink-muted">Email:</span>
-                  <span className="font-medium text-ink truncate max-w-[200px]">{user.email}</span>
-                </div>
-                <div className="flex justify-between py-1 border-b border-line/50">
-                  <span className="text-ink-muted">Phone:</span>
-                  <span className="font-medium text-ink">{user.phone || '—'}</span>
-                </div>
-                <div className="flex justify-between py-1 border-b border-line/50">
-                  <span className="text-ink-muted">Profession:</span>
-                  <span className="font-medium text-ink">{user.designation || 'Atelier Patron'}</span>
-                </div>
-                <div className="flex justify-between items-center pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsEditing(true)}
-                    className="inline-flex items-center gap-1.5 text-xs text-black hover:text-[#b4b4b4] font-semibold"
-                  >
-                    <Edit3 className="w-3.5 h-3.5" />
-                    <span>Edit Personal Details</span>
-                  </button>
-                </div>
-              </div>
+        {/* Desktop Layout: Left Sidebar + Right Main Content Pane */}
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
+          {/* Main Content Area */}
+          <main className="flex-1 w-full min-w-0">
+            {activeTab === 'overview' && (
+              <OverviewTab
+                user={user}
+                orders={orders}
+                wishlistCount={wishlistCount}
+                onNavigateTab={handleSelectTab}
+                onViewOrderDetails={(order) => setSelectedOrder(order)}
+              />
             )}
 
-            {/* Quick Stats Banner */}
-            <div className="grid grid-cols-2 gap-3 pt-3 border-t border-line text-center">
-              <Link
-                href="/account/orders"
-                className="p-3 bg-canvas rounded border border-line hover:border-black transition-colors"
-              >
-                <p className="text-xl font-bold text-ink">{orders.length}</p>
-                <p className="text-[11px] text-ink-muted">Past Orders</p>
-              </Link>
-              <Link
-                href="/wishlist"
-                className="p-3 bg-canvas rounded border border-line hover:border-black transition-colors"
-              >
-                <p className="text-xl font-bold text-ink">{wishlistCount}</p>
-                <p className="text-[11px] text-ink-muted">Wishlist Items</p>
-              </Link>
-            </div>
-          </div>
+            {activeTab === 'orders' && <OrdersTab orders={orders} />}
 
-          {/* Right Column: Saved Delivery Addresses & Recent Order Peek */}
-          <div className="lg:col-span-7 space-y-6">
-            {/* Saved Addresses */}
-            <div className="bg-canvas-card border border-line rounded-lg p-6 sm:p-8 space-y-4 shadow-xs">
-              <div className="flex items-center justify-between border-b border-line pb-3">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-ink flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-black" />
-                  Saved Delivery Addresses
-                </h3>
-                <span className="text-xs text-ink-muted">
-                  {user.addresses?.length || 0} saved
-                </span>
-              </div>
-
-              {(!user.addresses || user.addresses.length === 0) ? (
-                <div className="py-8 text-center text-xs text-ink-muted">
-                  No saved addresses. Your delivery addresses will be saved automatically upon checkout.
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {user.addresses.map((addr) => (
-                    <div
-                      key={addr.id}
-                      className={`p-4 rounded border text-xs space-y-1 relative ${
-                        addr.isDefault
-                          ? 'border-black bg-neutral-50 ring-1 ring-black'
-                          : 'border-line bg-canvas'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-bold text-ink">{addr.label || 'Delivery Address'}</span>
-                        {addr.isDefault && (
-                          <span className="text-[10px] bg-black text-white font-semibold px-2 py-0.5 rounded">
-                            Default
-                          </span>
-                        )}
-                      </div>
-                      <p className="font-medium text-ink">{addr.fullName}</p>
-                      <p className="text-ink-secondary">{addr.addressLine1}</p>
-                      {addr.addressLine2 && <p className="text-ink-secondary">{addr.addressLine2}</p>}
-                      <p className="text-ink-secondary">
-                        {addr.city}, {addr.state} - {addr.pincode}
-                      </p>
-                      <p className="text-ink-muted pt-1">Phone: {addr.phone}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Most Recent Order Sneak Peek */}
-            {orders.length > 0 ? (
-              <div className="bg-canvas-card border border-line rounded-lg p-6 sm:p-8 space-y-4 shadow-xs">
-                <div className="flex items-center justify-between border-b border-line pb-3">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-ink flex items-center gap-2">
-                    <Package className="w-4 h-4 text-black" />
-                    Latest Active Order
-                  </h3>
-                  <Link
-                    href="/account/orders"
-                    className="text-xs font-semibold text-black hover:underline"
-                  >
-                    View All →
-                  </Link>
-                </div>
-
-                <div className="flex items-center justify-between text-xs">
-                  <div>
-                    <p className="font-bold text-ink">Order #{orders[0].orderNumber}</p>
-                    <p className="text-ink-muted">Placed on {orders[0].date}</p>
-                  </div>
-                  <span className="px-2.5 py-1 bg-neutral-100 text-black font-semibold rounded text-xs">
-                    {orders[0].status}
-                  </span>
-                </div>
-
-                <div className="py-2 flex items-center gap-3">
-                  <div className="relative w-14 h-14 bg-canvas-alt rounded border border-line overflow-hidden shrink-0">
-                    <Image
-                      src={orders[0].items?.[0]?.image || 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp'}
-                      alt={orders[0].items?.[0]?.name || 'Bag'}
-                      fill
-                      loading="lazy"
-                      decoding="async"
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="text-xs">
-                    <p className="font-bold text-ink">{orders[0].items?.[0]?.name}</p>
-                    <p className="text-ink-muted text-[11px]">
-                      {orders[0].items?.[0]?.color} • Total: ₹{orders[0].total?.toLocaleString('en-IN')}
-                    </p>
-                  </div>
-                </div>
-
-                {orders[0].trackingNumber && (
-                  <Link
-                    href="/account/orders"
-                    className="block text-center bg-canvas hover:bg-canvas-alt border border-line py-2.5 rounded text-xs font-semibold text-ink transition-colors"
-                  >
-                    Track Package Delivery ({orders[0].courierName || 'Courier'}: {orders[0].trackingNumber})
-                  </Link>
-                )}
-              </div>
-            ) : (
-              <div className="bg-canvas-card border border-line rounded-lg p-6 sm:p-8 text-center space-y-3 shadow-xs">
-                <Package className="w-8 h-8 text-ink-muted mx-auto" />
-                <h3 className="text-sm font-bold text-ink">No Orders Placed Yet</h3>
-                <p className="text-xs text-ink-secondary max-w-sm mx-auto">
-                  Explore the ZIMOR collection to experience handcrafted luxury silhouettes.
-                </p>
-                <Link
-                  href="/shop"
-                  className="inline-flex items-center gap-1.5 bg-ink text-white text-xs font-semibold px-4 py-2 rounded hover:bg-ink-secondary transition-colors"
-                >
-                  <span>Explore Silhouettes</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
+            {activeTab === 'profile' && (
+              <ProfileTab user={user} onUpdateProfile={updateProfile} />
             )}
-          </div>
+
+            {activeTab === 'addresses' && (
+              <AddressesTab
+                addresses={user.addresses || []}
+                onAddAddress={addAddress}
+                onUpdateAddress={updateAddress}
+                onDeleteAddress={deleteAddress}
+                onSetDefaultAddress={setDefaultAddress}
+              />
+            )}
+
+            {activeTab === 'wishlist' && <WishlistTab />}
+          </main>
         </div>
       </div>
+
+      {/* Global Order Details Modal */}
+      <OrderDetailsModal
+        order={selectedOrder}
+        onClose={() => setSelectedOrder(null)}
+        onDownloadInvoice={handleDownloadInvoice}
+        isDownloading={Boolean(downloadingNumber)}
+      />
+
+      {/* Sign Out Confirmation Modal */}
+      {showSignOutModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="bg-white max-w-sm w-full border border-[#000000]/10 p-6 space-y-4 shadow-xl">
+            <div className="w-10 h-10 rounded-full bg-[#FAF8F5] border border-[#B4B4B4]/40 flex items-center justify-center text-[#B44220]">
+              <LogOut className="w-4 h-4" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="font-primary text-lg font-normal text-[#000000]">
+                Sign Out of Account
+              </h3>
+              <p className="font-secondary text-xs text-[#777777] leading-relaxed">
+                Are you sure you want to end your current session on this device?
+              </p>
+            </div>
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowSignOutModal(false)}
+                className="px-4 py-2 border border-[#B4B4B4]/40 hover:border-[#000000] text-xs font-medium uppercase tracking-wider text-[#555555] hover:text-[#000000] transition-colors cursor-pointer"
+              >
+                Stay Signed In
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmSignOut}
+                className="px-4 py-2 bg-[#000000] hover:bg-[#B44220] text-white text-xs font-medium uppercase tracking-wider transition-colors cursor-pointer"
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+export default function AccountPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="bg-[#FFFFFF] min-h-[70vh] flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-[#000000] border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <AccountContent />
+    </Suspense>
   );
 }

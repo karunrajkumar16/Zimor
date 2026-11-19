@@ -37,6 +37,10 @@ export const config = {
 
   // Auth
   adminEmail: process.env.ADMIN_EMAIL || 'admin@zimor.in',
+  adminAllowedEmails: (process.env.ADMIN_ALLOWED_EMAILS || process.env.ADMIN_EMAIL || 'admin@zimor.in')
+    .toLowerCase()
+    .split(',')
+    .map((e) => e.trim()),
   adminPassword: process.env.ADMIN_PASSWORD || 'zimor_admin_2024',
   jwtSecret: process.env.ADMIN_JWT_SECRET || 'zimor_secret_jwt_key_2024_luxury_atelier_token',
 

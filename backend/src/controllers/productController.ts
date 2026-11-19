@@ -4,11 +4,12 @@ import { getDatabaseProvider } from '../db/index.js';
 export async function getProducts(req: Request, res: Response) {
   try {
     const db = await getDatabaseProvider();
-    const { category, featured, search } = req.query;
+    const { category, featured, search, published } = req.query;
 
     const products = await db.getProducts({
       category: category as string,
       isFeatured: featured === 'true' ? true : undefined,
+      isPublished: published === 'true' ? true : published === 'false' ? false : undefined,
       search: search as string,
     });
 

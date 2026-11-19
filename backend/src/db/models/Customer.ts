@@ -9,8 +9,11 @@ export interface CustomerDocument extends Omit<Customer, 'id'>, Document {
 const AddressSchema = new Schema(
   {
     id: { type: String, required: true },
+    label: { type: String, default: 'Home' },
     fullName: { type: String, required: true },
-    line1: { type: String, required: true },
+    addressLine1: { type: String },
+    line1: { type: String },
+    addressLine2: { type: String },
     line2: { type: String },
     city: { type: String, required: true },
     state: { type: String, required: true },
@@ -26,6 +29,7 @@ const CustomerSchema = new Schema(
     email: { type: String, required: true, unique: true, index: true },
     name: { type: String, required: true },
     phone: { type: String },
+    designation: { type: String },
     googleId: { type: String, sparse: true, index: true },
     avatar: { type: String },
     authProvider: { type: String, enum: ['google', 'local'], default: 'google' },

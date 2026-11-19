@@ -17,7 +17,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { PRODUCTS } from '@/data/products';
+import { useProducts } from '@/context/ProductContext';
 import { ProductCard } from '@/components/product/ProductCard';
 import { Product } from '@/types';
 
@@ -35,11 +35,10 @@ const CATEGORY_NAMES: Record<string, string> = {
   'crossbody-bags': 'Crossbody Bags',
 };
 
-// Three Distinct Lifestyle Subsections with authentic editorial photography
-const LIFESTYLE_SUBSECTIONS = [
+// Three Distinct Lifestyle Subsections template metadata
+const LIFESTYLE_BASE_CONFIG = [
   {
     id: "everyday",
-    number: "",
     eyebrow: "EVERYDAY",
     title: "Everyday",
     archetype: "EVERYDAY",
@@ -54,14 +53,10 @@ const LIFESTYLE_SUBSECTIONS = [
     editorialImage: "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917843/zimor/lifestyle/corporate-executive-editorial.webp",
     subtitleFilterText: "Everyday Carry · 15.6\" Laptop Fit",
     icon: Briefcase,
-    products: [
-      PRODUCTS.find((p) => p.id === "zimor-delo-tote-rust") || PRODUCTS[0],
-      PRODUCTS.find((p) => p.id === "zimor-delo-tote-noir") || PRODUCTS[1],
-    ],
+    slugs: ["zimor-delo-tote-rust", "zimor-delo-tote-noir"],
   },
   {
     id: "work",
-    number: "",
     eyebrow: "WORK",
     title: "Work",
     archetype: "WORK",
@@ -76,14 +71,10 @@ const LIFESTYLE_SUBSECTIONS = [
     editorialImage: "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917842/zimor/lifestyle/tech-commute-editorial.webp",
     subtitleFilterText: "Work & Focus · 15\" Dual-Carry",
     icon: Laptop,
-    products: [
-      PRODUCTS.find((p) => p.id === "zimor-rabota-tote-cognac") || PRODUCTS[2],
-      PRODUCTS.find((p) => p.id === "zimor-rabota-tote-espresso") || PRODUCTS[3],
-    ],
+    slugs: ["zimor-rabota-tote-cognac", "zimor-rabota-tote-espresso"],
   },
   {
     id: "travel",
-    number: "",
     eyebrow: "TRAVEL",
     title: "Travel",
     archetype: "TRAVEL",
@@ -98,14 +89,12 @@ const LIFESTYLE_SUBSECTIONS = [
     editorialImage: "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917845/zimor/lifestyle/brandgirl2.webp",
     subtitleFilterText: "Travel & Escapes · Underarm Fit",
     icon: Sparkles,
-    products: [
-      PRODUCTS.find((p) => p.id === "zimor-classic-shoulder-bag-cream") || PRODUCTS[4],
-      PRODUCTS.find((p) => p.id === "zimor-classic-shoulder-bag-tan") || PRODUCTS[5],
-    ],
+    slugs: ["zimor-classic-shoulder-bag-cream", "zimor-classic-shoulder-bag-tan"],
   },
 ];
 
 function ShopContent() {
+  const { products } = useProducts();
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get('category') || 'all';
   const initialProfession = searchParams.get('profession') || 'all';
@@ -123,44 +112,98 @@ function ShopContent() {
     setSelectedColor('all');
   };
 
-  // Filter & Sort Logic covering all 6 products, categories, and professions
+  // Lifestyle Subsections resolved dynamically against current products
+  const lifestyleSubsections = useMemo(() => {
+    return LIFESTYLE_BASE_CONFIG.map((cfg) => {
+      const matched = cfg.slugs
+        .map((slug) => products.find((p) => p.slug === slug || p.id === slug))
+        .filter((p): p is Product => Boolean(p));
+
+      // Fallback to first available products if exact slugs aren't matched
+      const fallbackProducts = matched.length > 0 ? matched : products.slice(0, 2);
+
+      return {
+        ...cfg,
+        number: "",
+        products: fallbackProducts,
+      };
+    });
+  }, [products]);
+
+  // Category counts calculated dynamically from live products
+  const categoryCounts = useMemo(() => {
+    const total = products.length;
+    const totes = products.filter((p) => {
+      const cat = (p.category || '').toLowerCase();
+      const catLabel = (p.categoryLabel || '').toLowerCase();
+      const name = (p.name || '').toLowerCase();
+      return cat === 'tote-bags' || catLabel.includes('tote') || name.includes('tote');
+    }).length;
+
+    const laptop = products.filter((p) => {
+      const cat = (p.category || '').toLowerCase();
+      const catLabel = (p.categoryLabel || '').toLowerCase();
+      const name = (p.name || '').toLowerCase();
+      return cat === 'laptop-bags' || catLabel.includes('laptop') || Boolean(p.laptopCompatibility) || name.includes('laptop') || name.includes('rabota');
+    }).length;
+
+    const shoulder = products.filter((p) => {
+      const cat = (p.category || '').toLowerCase();
+      const catLabel = (p.categoryLabel || '').toLowerCase();
+      const name = (p.name || '').toLowerCase();
+      return cat === 'shoulder-bags' || catLabel.includes('shoulder') || name.includes('shoulder') || name.includes('classic');
+    }).length;
+
+    return { total, totes, laptop, shoulder };
+  }, [products]);
+
+  // Filter & Sort Logic covering all live products, categories, and professions
   const filteredProducts = useMemo(() => {
-    let result = [...PRODUCTS];
+    let result = [...products];
 
     // Category filter logic
     if (selectedCategory !== 'all') {
-      if (selectedCategory === 'office-bags') {
-        result = result.filter((p) => p.id.startsWith('zimor-delo'));
-      } else if (selectedCategory === 'tote-bags') {
-        result = result.filter((p) => p.id.startsWith('zimor-delo') || p.id.startsWith('zimor-rabota'));
-      } else if (selectedCategory === 'laptop-bags') {
-        result = result.filter((p) => p.id.startsWith('zimor-rabota'));
-      } else if (selectedCategory === 'shoulder-bags') {
-        result = result.filter((p) => p.id.startsWith('zimor-classic'));
-      } else if (selectedCategory === 'crossbody-bags') {
-        result = result.filter((p) => p.id.startsWith('zimor-rabota') || p.id.startsWith('zimor-classic'));
-      } else {
-        result = result.filter((p) => p.category === selectedCategory);
-      }
+      result = result.filter((p) => {
+        const cat = (p.category || '').toLowerCase();
+        const catLabel = (p.categoryLabel || '').toLowerCase();
+        const name = (p.name || '').toLowerCase();
+
+        if (selectedCategory === 'office-bags') {
+          return cat === 'office-bags' || cat === 'tote-bags' || catLabel.includes('office') || catLabel.includes('tote') || name.includes('delo') || name.includes('rabota');
+        }
+        if (selectedCategory === 'tote-bags') {
+          return cat === 'tote-bags' || catLabel.includes('tote') || name.includes('tote');
+        }
+        if (selectedCategory === 'laptop-bags') {
+          return cat === 'laptop-bags' || catLabel.includes('laptop') || Boolean(p.laptopCompatibility) || name.includes('laptop') || name.includes('rabota');
+        }
+        if (selectedCategory === 'shoulder-bags') {
+          return cat === 'shoulder-bags' || catLabel.includes('shoulder') || name.includes('shoulder') || name.includes('classic');
+        }
+        if (selectedCategory === 'crossbody-bags') {
+          return cat === 'crossbody-bags' || catLabel.includes('crossbody') || name.includes('crossbody');
+        }
+        return cat === selectedCategory || catLabel.includes(selectedCategory);
+      });
     }
 
     // Profession / Lifestyle filter logic
     if (selectedProfession !== 'all') {
       if (selectedProfession === 'everyday' || selectedProfession === 'corporate-executive') {
-        result = result.filter((p) => p.id.startsWith('zimor-delo'));
+        result = result.filter((p) => (p.id && p.id.startsWith('zimor-delo')) || p.category === 'tote-bags' || (p.suitableProfessions && p.suitableProfessions.includes(selectedProfession)));
       } else if (selectedProfession === 'work' || selectedProfession === 'tech-transit' || selectedProfession === 'tech-founder') {
-        result = result.filter((p) => p.id.startsWith('zimor-rabota'));
+        result = result.filter((p) => (p.id && p.id.startsWith('zimor-rabota')) || p.category === 'laptop-bags' || (p.suitableProfessions && p.suitableProfessions.includes(selectedProfession)));
       } else if (selectedProfession === 'travel' || selectedProfession === 'creative-studio' || selectedProfession === 'creative-director') {
-        result = result.filter((p) => p.id.startsWith('zimor-classic'));
+        result = result.filter((p) => (p.id && p.id.startsWith('zimor-classic')) || p.category === 'shoulder-bags' || (p.suitableProfessions && p.suitableProfessions.includes(selectedProfession)));
       } else {
-        result = result.filter((p) => p.suitableProfessions.includes(selectedProfession));
+        result = result.filter((p) => p.suitableProfessions && p.suitableProfessions.includes(selectedProfession));
       }
     }
 
     // Color filter logic
     if (selectedColor !== 'all') {
       result = result.filter((p) =>
-        p.colors.some((c) => c.name.toLowerCase().includes(selectedColor.toLowerCase()))
+        Array.isArray(p.colors) && p.colors.some((c) => c.name.toLowerCase().includes(selectedColor.toLowerCase()))
       );
     }
 
@@ -173,7 +216,7 @@ function ShopContent() {
         result.sort((a, b) => b.price - a.price);
         break;
       case 'rating':
-        result.sort((a, b) => b.averageRating - a.averageRating);
+        result.sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0));
         break;
       case 'featured':
       default:
@@ -186,7 +229,7 @@ function ShopContent() {
     }
 
     return result;
-  }, [selectedCategory, selectedProfession, selectedColor, sortBy]);
+  }, [products, selectedCategory, selectedProfession, selectedColor, sortBy]);
 
   const hasActiveFilters =
     selectedCategory !== 'all' || selectedProfession !== 'all' || selectedColor !== 'all';
@@ -197,7 +240,7 @@ function ShopContent() {
       return CATEGORY_NAMES[selectedCategory] || selectedCategory;
     }
     if (selectedProfession !== 'all') {
-      const match = LIFESTYLE_SUBSECTIONS.find((p) => p.id === selectedProfession);
+      const match = lifestyleSubsections.find((p) => p.id === selectedProfession);
       return match ? match.archetype : selectedProfession;
     }
     if (selectedColor !== 'all') {
@@ -283,7 +326,7 @@ function ShopContent() {
               </p>
             </div>
             <p className="text-[11px] sm:text-xs text-ink-muted font-secondary shrink-0">
-              Showing <strong>{filteredProducts.length}</strong> of {PRODUCTS.length} silhouettes
+              Showing <strong>{filteredProducts.length}</strong> of {categoryCounts.total} silhouettes
             </p>
           </div>
 
@@ -305,7 +348,7 @@ function ShopContent() {
                   : 'bg-white border border-line text-ink-secondary hover:text-ink hover:border-ink/40'
                   }`}
               >
-                All ({PRODUCTS.length})
+                All ({categoryCounts.total})
               </button>
               <button
                 type="button"
@@ -315,7 +358,7 @@ function ShopContent() {
                   : 'bg-white border border-line text-ink-secondary hover:text-ink hover:border-ink/40'
                   }`}
               >
-                Totes (4)
+                Totes ({categoryCounts.totes})
               </button>
               <button
                 type="button"
@@ -325,7 +368,7 @@ function ShopContent() {
                   : 'bg-white border border-line text-ink-secondary hover:text-ink hover:border-ink/40'
                   }`}
               >
-                Laptop Bags (2)
+                Laptop Bags ({categoryCounts.laptop})
               </button>
               <button
                 type="button"
@@ -335,7 +378,7 @@ function ShopContent() {
                   : 'bg-white border border-line text-ink-secondary hover:text-ink hover:border-ink/40'
                   }`}
               >
-                Shoulder Bags (2)
+                Shoulder Bags ({categoryCounts.shoulder})
               </button>
 
               {/* Color Dropdown on Desktop */}
@@ -535,7 +578,7 @@ function ShopContent() {
 
           {/* Subsections: Asymmetric 3-Part Grid (Top-Left, Bottom-Left, Half-Right) */}
           <div className="space-y-16 sm:space-y-24">
-            {LIFESTYLE_SUBSECTIONS.map((subsection) => {
+            {lifestyleSubsections.map((subsection) => {
               const IconComp = subsection.icon;
 
               return (

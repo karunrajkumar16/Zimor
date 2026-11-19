@@ -14,10 +14,10 @@ import {
   Check,
 } from 'lucide-react';
 import { Product, CustomerReview } from '@/types';
-import { PRODUCTS } from '@/data/products';
-import { getReviewsForProduct } from '@/data/reviews';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
+import { useProducts } from '@/context/ProductContext';
+import { apiFetch } from '@/lib/api';
 import dynamic from 'next/dynamic';
 import { ProductGallery } from '@/components/product/ProductGallery';
 import { ProductCard } from '@/components/product/ProductCard';
@@ -43,11 +43,26 @@ export function ProductDetailView({ product }: { product: Product }) {
     more: false,
     faq: false,
   });
-  const [reviewsList, setReviewsList] = useState<CustomerReview[]>(getReviewsForProduct(product.slug));
+  const [reviewsList, setReviewsList] = useState<CustomerReview[]>([]);
   const [selectedReview, setSelectedReview] = useState<CustomerReview | null>(null);
   const [isWriteReviewOpen, setIsWriteReviewOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [showStickyBottomBar, setShowStickyBottomBar] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    apiFetch(`/api/reviews?slug=${encodeURIComponent(product.slug)}`)
+      .then((res) => (res.ok ? res.json() : { reviews: [] }))
+      .then((data) => {
+        if (isMounted && Array.isArray(data.reviews)) {
+          setReviewsList(data.reviews);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      isMounted = false;
+    };
+  }, [product.slug]);
 
   // Delivery pincode checker state
   const [pincode, setPincode] = useState('');
@@ -55,14 +70,15 @@ export function ProductDetailView({ product }: { product: Product }) {
 
   const buyBoxRef = useRef<HTMLDivElement | null>(null);
 
+  const { products } = useProducts();
   const inWishlist = isInWishlist(product.id);
   const youMayAlsoLike = useMemo(
-    () => PRODUCTS.filter((p) => p.slug !== product.slug).slice(0, 3),
-    [product]
+    () => products.filter((p) => p.slug !== product.slug && p.id !== product.id).slice(0, 3),
+    [products, product]
   );
   const recentlyViewed = useMemo(
-    () => PRODUCTS.filter((p) => p.slug !== product.slug).slice(3, 6),
-    [product]
+    () => products.filter((p) => p.slug !== product.slug && p.id !== product.id).slice(3, 6),
+    [products, product]
   );
 
   const discountPercent = Math.round(
@@ -115,22 +131,35 @@ export function ProductDetailView({ product }: { product: Product }) {
     }
   };
 
-  const handleAddReview = (newRev: Partial<CustomerReview>) => {
-    const created: CustomerReview = {
-      id: `rev-${Date.now()}`,
-      userName: newRev.userName || 'Verified Customer',
-      userCity: newRev.userCity || 'India',
-      rating: newRev.rating || 5,
-      title: newRev.title || 'Exceptional Bag',
-      comment: newRev.comment || '',
-      verifiedPurchase: true,
-      date: 'Just now',
-      productSlug: product.slug,
-      productName: product.name,
-      media: newRev.media,
-      helpfulCount: 1,
-    };
-    setReviewsList([created, ...reviewsList]);
+  const handleAddReview = async (newRev: Partial<CustomerReview>) => {
+    try {
+      const payload = {
+        userName: newRev.userName || 'Verified Patron',
+        userCity: newRev.userCity || 'India',
+        rating: newRev.rating || 5,
+        title: newRev.title || 'Exceptional Handbag',
+        comment: newRev.comment || '',
+        productSlug: product.slug,
+        productName: product.name,
+        media: newRev.media || [],
+      };
+
+      const res = await apiFetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.review) {
+          setReviewsList((prev) => [data.review, ...prev]);
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to submit review to backend:', err);
+    }
   };
 
   // Helper to find representative image for a color swatch
@@ -719,47 +748,63 @@ export function ProductDetailView({ product }: { product: Product }) {
           </div>
 
           {/* Reviews List */}
-          <div className="space-y-6">
-            {reviewsList.map((rev) => (
-              <div
-                key={rev.id}
-                className="border-b border-line/60 pb-5 space-y-2"
+          {reviewsList.length === 0 ? (
+            <div className="text-center py-12 px-4 rounded-xl border border-line bg-canvas/40 space-y-3">
+              <p className="text-sm font-medium text-ink">No patron reviews yet</p>
+              <p className="text-xs text-ink-muted max-w-md mx-auto">
+                Be the first to share your experience with the {product.name}. Your verified feedback guides our atelier craftsmen.
+              </p>
+              <button
+                type="button"
+                onClick={() => setIsWriteReviewOpen(true)}
+                className="mt-2 inline-flex items-center justify-center px-5 py-2 rounded-full bg-ink text-white text-xs font-medium hover:bg-ink/80 transition-colors cursor-pointer"
               >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="flex items-center gap-1 text-black mb-1">
-                      {[1, 2, 3, 4, 5].map((s) => (
-                        <Star
-                          key={s}
-                          className={`w-3.5 h-3.5 ${s <= rev.rating ? 'fill-black text-black' : 'text-line'
-                            }`}
-                        />
-                      ))}
+                Write the First Review
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {reviewsList.map((rev) => (
+                <div
+                  key={rev.id}
+                  className="border-b border-line/60 pb-5 space-y-2"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="flex items-center gap-1 text-black mb-1">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <Star
+                            key={s}
+                            className={`w-3.5 h-3.5 ${s <= rev.rating ? 'fill-black text-black' : 'text-line'
+                              }`}
+                          />
+                        ))}
+                      </div>
+                      <h4 className="text-sm font-semibold text-ink">{rev.title}</h4>
                     </div>
-                    <h4 className="text-sm font-semibold text-ink">{rev.title}</h4>
+                    <span className="text-[11px] text-ink-muted">{rev.date}</span>
                   </div>
-                  <span className="text-[11px] text-ink-muted">{rev.date}</span>
-                </div>
 
-                <p className="text-xs sm:text-[13px] text-ink-secondary leading-relaxed">
-                  "{rev.comment}"
-                </p>
+                  <p className="text-xs sm:text-[13px] text-ink-secondary leading-relaxed">
+                    &ldquo;{rev.comment}&rdquo;
+                  </p>
 
-                <div className="pt-1 flex items-center justify-between text-xs text-ink-muted">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-ink">{rev.userName}</span>
-                    {rev.userCity && <span>• {rev.userCity}</span>}
-                    {rev.verifiedPurchase && (
-                      <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700">
-                        <CheckCircle className="w-3 h-3 text-emerald-600" />
-                        Verified Buyer
-                      </span>
-                    )}
+                  <div className="pt-1 flex items-center justify-between text-xs text-ink-muted">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-ink">{rev.userName}</span>
+                      {rev.userCity && <span>• {rev.userCity}</span>}
+                      {rev.verifiedPurchase && (
+                        <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700">
+                          <CheckCircle className="w-3 h-3 text-emerald-600" />
+                          Verified Buyer
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* ============================================================ */}

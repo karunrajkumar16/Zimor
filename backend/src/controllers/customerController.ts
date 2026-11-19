@@ -27,13 +27,14 @@ export async function updateCustomerProfile(req: Request, res: Response) {
       return res.status(401).json({ error: 'Invalid or expired session' });
     }
 
-    const { name, phone, addresses } = req.body;
+    const { name, phone, addresses, designation } = req.body;
     const db = await getDatabaseProvider();
     const updated = await db.createOrUpdateCustomer({
       email: session.email,
       ...(name ? { name } : {}),
       ...(phone !== undefined ? { phone } : {}),
-      ...(addresses ? { addresses } : {}),
+      ...(addresses !== undefined ? { addresses } : {}),
+      ...(designation !== undefined ? { designation } : {}),
     });
 
     return res.json({ success: true, user: updated });

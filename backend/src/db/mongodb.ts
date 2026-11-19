@@ -2,8 +2,7 @@
 // Cached Mongoose connection for Next.js App Router and Vercel serverless
 
 import mongoose from 'mongoose';
-
-const MONGODB_URI = process.env.MONGODB_URI;
+import { config } from '../config/index.js';
 
 interface MongooseCache {
   conn: typeof mongoose | null;
@@ -22,8 +21,9 @@ if (!cached) {
 }
 
 export async function connectToDatabase(): Promise<typeof mongoose> {
-  if (!MONGODB_URI) {
-    throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
+  const uri = process.env.MONGODB_URI || config.mongoUri;
+  if (!uri) {
+    throw new Error('Please define the MONGODB_URI environment variable inside backend/.env');
   }
 
   if (cached!.conn) {
@@ -36,7 +36,7 @@ export async function connectToDatabase(): Promise<typeof mongoose> {
       maxPoolSize: 10,
     };
 
-    cached!.promise = mongoose.connect(MONGODB_URI, opts).then((m) => {
+    cached!.promise = mongoose.connect(uri, opts).then((m) => {
       console.log('[MongoDB] Successfully connected to cluster');
       return m;
     });

@@ -39,6 +39,15 @@ export function YoutubeIcon({ className = 'w-4 h-4' }: { className?: string }) {
   );
 }
 
+export function ThreadsIcon({ className = 'w-4 h-4' }: { className?: string }) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 192 192" aria-hidden="true">
+      <path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4101 44.745 97.2583 44.745 97.1065 44.745C75.8776 44.745 59.9882 58.7491 56.4954 80.8252C53.0026 102.901 62.5937 123.328 80.7067 132.33C94.2755 139.074 109.112 138.835 121.724 131.758C127.348 128.601 131.737 124.085 134.789 118.397L116.899 108.563C114.978 112.148 112.019 114.868 108.384 116.711C99.2773 121.325 87.4048 119.387 77.2917 112.016C70.7634 107.255 67.2458 100.125 67.3828 91.9567C74.636 94.7571 82.5292 96.0622 90.7667 95.7725C104.991 95.2718 117.818 90.1706 127.532 81.3972C133.003 76.4589 137.078 70.1873 139.362 63.2205C141.011 71.867 141.677 80.5986 141.537 88.9883ZM96.4867 63.8187C107.616 63.8187 114.654 69.9678 117.067 78.8576C110.029 84.1481 100.999 87.2721 91.3196 87.6133C85.5786 87.8179 80.1278 86.8288 75.1487 84.7479C77.494 72.8428 85.8306 63.8187 96.4867 63.8187Z" />
+      <path d="M148.243 145.497C133.084 159.222 113.623 166.776 93.4475 166.776C54.4984 166.776 22.8481 135.126 22.8481 96.1766C22.8481 57.2275 54.4984 25.5771 93.4475 25.5771C132.397 25.5771 164.047 57.2275 164.047 96.1766C164.047 106.879 161.464 117.382 156.495 126.793L138.832 117.469C142.146 111.192 143.869 104.187 143.869 96.1766C143.869 68.3698 121.254 45.7551 93.4475 45.7551C65.6406 45.7551 43.026 68.3698 43.026 96.1766C43.026 123.983 65.6406 146.598 93.4475 146.598C108.01 146.598 121.983 141.139 132.842 131.315L148.243 145.497Z" />
+    </svg>
+  );
+}
+
 export const Footer: React.FC = () => {
   // Mobile accordion state for clean Miraggio-style progressive disclosure
   const [openSection, setOpenSection] = useState<string | null>(null);
@@ -157,6 +166,17 @@ export const Footer: React.FC = () => {
               >
                 <FacebookIcon className="w-4 h-4 transition-transform duration-300 group-hover/fb:scale-110" />
               </a>
+
+              {/* Threads */}
+              <a
+                href={SOCIAL_LINKS.threads}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group/threads w-9 h-9 rounded-full bg-white/5 border border-[#b4b4b4]/25 text-[#b4b4b4] flex items-center justify-center transition-all duration-300 hover:scale-110 hover:bg-white hover:border-white hover:text-black hover:shadow-[0_0_16px_rgba(255,255,255,0.5)]"
+                aria-label="Threads"
+              >
+                <ThreadsIcon className="w-4 h-4 transition-transform duration-300 group-hover/threads:scale-110" />
+              </a>
             </div>
           </div>
 
@@ -204,62 +224,123 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* Column 3: POLICIES (All 6 Policies Listed) */}
-          <div className="lg:col-span-3 space-y-3.5 sm:space-y-4 border-t sm:border-t-0 border-[#b4b4b4]/15 pt-4 sm:pt-0">
-            <button
-              type="button"
-              onClick={() => toggleSection('policies')}
-              className="w-full flex items-center justify-between sm:pointer-events-none text-left"
-            >
-              <h4 className="font-primary text-[11.5px] sm:text-[12.5px] font-semibold uppercase tracking-[0.18em] text-white">
-                POLICIES
-              </h4>
-              <ChevronDown
-                className={`w-4 h-4 text-[#b4b4b4] sm:hidden transition-transform duration-200 ${
-                  openSection === 'policies' ? 'rotate-180' : ''
+          {/* Column 3: Reorganized Policy Groups (LEGAL, ORDER POLICIES, PRODUCT CARE) */}
+          <div className="lg:col-span-4 flex flex-col sm:grid sm:grid-cols-2 gap-8 sm:gap-6 lg:gap-8">
+            {/* Group 1: LEGAL */}
+            <div className="order-1 space-y-3.5 sm:space-y-4 border-t sm:border-t-0 border-[#b4b4b4]/15 pt-4 sm:pt-0">
+              <button
+                type="button"
+                onClick={() => toggleSection('legal')}
+                className="w-full flex items-center justify-between sm:pointer-events-none text-left"
+              >
+                <h4 className="font-primary text-[11.5px] sm:text-[12.5px] font-semibold uppercase tracking-[0.18em] text-white">
+                  LEGAL
+                </h4>
+                <ChevronDown
+                  className={`w-4 h-4 text-[#b4b4b4] sm:hidden transition-transform duration-200 ${
+                    openSection === 'legal' ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+              <ul
+                className={`space-y-2.5 font-secondary text-xs sm:text-[13px] text-[#b4b4b4] ${
+                  openSection === 'legal' ? 'block' : 'hidden sm:block'
                 }`}
-              />
-            </button>
-            <ul
-              className={`space-y-2.5 font-secondary text-xs sm:text-[13px] text-[#b4b4b4] ${
-                openSection === 'policies' ? 'block' : 'hidden sm:block'
-              }`}
-            >
-              <li>
-                <Link href="/policy#shipping" className="hover:text-white transition-colors">
-                  Shipping Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/policy#cancellation" className="hover:text-white transition-colors">
-                  Cancellation Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/policy#returns" className="hover:text-white transition-colors">
-                  Returns &amp; Exchanges
-                </Link>
-              </li>
-              <li>
-                <Link href="/policy#refund" className="hover:text-white transition-colors">
-                  Refund Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/policy#warranty" className="hover:text-white transition-colors">
-                  Warranty Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/policy#care" className="hover:text-white transition-colors">
-                  Bag Care Guide
-                </Link>
-              </li>
-            </ul>
+              >
+                <li>
+                  <Link href="/privacy-policy" className="hover:text-white transition-colors">
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/terms-of-service" className="hover:text-white transition-colors">
+                    Terms of Service
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Group 2: ORDER POLICIES */}
+            <div className="order-2 sm:row-span-2 space-y-3.5 sm:space-y-4 border-t sm:border-t-0 border-[#b4b4b4]/15 pt-4 sm:pt-0">
+              <button
+                type="button"
+                onClick={() => toggleSection('order-policies')}
+                className="w-full flex items-center justify-between sm:pointer-events-none text-left"
+              >
+                <h4 className="font-primary text-[11.5px] sm:text-[12.5px] font-semibold uppercase tracking-[0.18em] text-white">
+                  ORDER POLICIES
+                </h4>
+                <ChevronDown
+                  className={`w-4 h-4 text-[#b4b4b4] sm:hidden transition-transform duration-200 ${
+                    openSection === 'order-policies' ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+              <ul
+                className={`space-y-2.5 font-secondary text-xs sm:text-[13px] text-[#b4b4b4] ${
+                  openSection === 'order-policies' ? 'block' : 'hidden sm:block'
+                }`}
+              >
+                <li>
+                  <Link href="/policy#shipping" className="hover:text-white transition-colors">
+                    Shipping Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/policy#cancellation" className="hover:text-white transition-colors">
+                    Cancellation Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/policy#returns" className="hover:text-white transition-colors">
+                    Returns &amp; Exchanges
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/policy#refund" className="hover:text-white transition-colors">
+                    Refund Policy
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Group 3: PRODUCT CARE */}
+            <div className="order-3 space-y-3.5 sm:space-y-4 border-t sm:border-t-0 border-[#b4b4b4]/15 pt-4 sm:pt-0">
+              <button
+                type="button"
+                onClick={() => toggleSection('product-care')}
+                className="w-full flex items-center justify-between sm:pointer-events-none text-left"
+              >
+                <h4 className="font-primary text-[11.5px] sm:text-[12.5px] font-semibold uppercase tracking-[0.18em] text-white">
+                  PRODUCT CARE
+                </h4>
+                <ChevronDown
+                  className={`w-4 h-4 text-[#b4b4b4] sm:hidden transition-transform duration-200 ${
+                    openSection === 'product-care' ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+              <ul
+                className={`space-y-2.5 font-secondary text-xs sm:text-[13px] text-[#b4b4b4] ${
+                  openSection === 'product-care' ? 'block' : 'hidden sm:block'
+                }`}
+              >
+                <li>
+                  <Link href="/policy#warranty" className="hover:text-white transition-colors">
+                    Warranty Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/policy#care" className="hover:text-white transition-colors">
+                    Bag Care Guide
+                  </Link>
+                </li>
+              </ul>
+            </div>
           </div>
 
           {/* Column 4: CONTACT US */}
-          <div className="lg:col-span-4 space-y-3.5 sm:space-y-4 border-t sm:border-t-0 border-[#b4b4b4]/15 pt-4 sm:pt-0">
+          <div className="lg:col-span-3 space-y-3.5 sm:space-y-4 border-t sm:border-t-0 border-[#b4b4b4]/15 pt-4 sm:pt-0">
             <h4 className="font-primary text-[11.5px] sm:text-[12.5px] font-semibold uppercase tracking-[0.18em] text-white">
               CONTACT US
             </h4>
@@ -294,6 +375,14 @@ export const Footer: React.FC = () => {
         <div className="mt-12 pt-7 border-t border-[#b4b4b4]/20 flex flex-col sm:flex-row items-center justify-between gap-4 font-secondary text-[11px] sm:text-xs text-[#b4b4b4]">
           <p>© 2026 Zimor India. All rights reserved. Thoughtfully Designed &amp; Crafted in India.</p>
           <div className="flex flex-wrap items-center gap-3 text-[#b4b4b4]/80">
+            <Link href="/privacy-policy" className="hover:text-white transition-colors">
+              Privacy Policy
+            </Link>
+            <span>•</span>
+            <Link href="/terms-of-service" className="hover:text-white transition-colors">
+              Terms of Service
+            </Link>
+            <span>•</span>
             <span>100% Encrypted Payments</span>
             <span>•</span>
             <span>UPI / Cards / NetBanking / COD</span>

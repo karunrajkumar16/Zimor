@@ -94,13 +94,60 @@ export function getGoogleOAuthClient(): OAuth2Client {
   );
 }
 
+export async function isApprovedAdminEmail(email: string): Promise<boolean> {
+  if (!email) return false;
+  const normalized = email.toLowerCase().trim();
+  if (config.adminAllowedEmails.includes(normalized)) return true;
+  if (normalized === config.adminEmail.toLowerCase().trim()) return true;
+
+  try {
+    const { getDatabaseProvider } = await import('../db/index.js');
+    const db = await getDatabaseProvider();
+    const adminUser = await db.getAdminByEmail(normalized);
+    if (adminUser) return true;
+  } catch (err) {
+    console.error('[isApprovedAdminEmail] DB lookup error:', err);
+  }
+  return false;
+}
+
+export async function verifyAndCreateAdminGoogleSession(payload: { email: string; name?: string; sub: string }): Promise<string | null> {
+  const isApproved = await isApprovedAdminEmail(payload.email);
+  if (!isApproved) {
+    return null;
+  }
+
+  return createSessionToken({
+    email: payload.email,
+    role: 'superadmin',
+    name: payload.name || 'Executive Admin',
+  });
+}
+
 export async function verifyAdminCredentials(email: string, pass: string): Promise<{ email: string; role: 'superadmin' | 'admin'; name: string } | null> {
-  if (email.toLowerCase() === config.adminEmail.toLowerCase() && pass === config.adminPassword) {
+  const normalized = email.toLowerCase().trim();
+  if (normalized === config.adminEmail.toLowerCase() && pass === config.adminPassword) {
     return {
       email: config.adminEmail,
       role: 'superadmin',
       name: 'Zimor Executive Admin',
     };
   }
+
+  try {
+    const { getDatabaseProvider } = await import('../db/index.js');
+    const db = await getDatabaseProvider();
+    const adminUser = await db.getAdminByEmail(normalized);
+    if (adminUser && (adminUser.passwordHash === pass || (adminUser as any).password === pass)) {
+      return {
+        email: adminUser.email,
+        role: adminUser.role,
+        name: adminUser.name || 'Executive Admin',
+      };
+    }
+  } catch (err) {
+    console.error('[verifyAdminCredentials] DB lookup error:', err);
+  }
+
   return null;
 }

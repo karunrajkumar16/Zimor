@@ -6,6 +6,7 @@ import {
   googleAuth,
   googleCallback,
   googleVerifyCredential,
+  googleVerifyAdminCredential,
   customerMe,
   customerLogout,
 } from '../controllers/authController.js';
@@ -16,6 +17,7 @@ const router = Router();
 router.post('/login', login);
 router.post('/logout', logout);
 router.get('/me', me);
+router.post('/google/verify-admin', googleVerifyAdminCredential);
 
 // Customer Google OAuth 2.0
 router.get('/google', googleAuth);

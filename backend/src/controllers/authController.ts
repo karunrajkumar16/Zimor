@@ -8,6 +8,7 @@ import {
   createCustomerSessionToken,
   verifyCustomerSessionToken,
   getGoogleOAuthClient,
+  isApprovedAdminEmail,
 } from '../auth/index.js';
 import { AuthenticatedRequest } from '../middleware/auth.js';
 import { getDatabaseProvider } from '../db/index.js';
@@ -68,28 +69,26 @@ export async function me(req: AuthenticatedRequest, res: Response) {
 
   const session = verifySessionToken(token);
   if (!session) {
-    if (token?.startsWith('dev_admin_session_token_') && process.env.NODE_ENV !== 'production') {
-      return res.json({
-        authenticated: true,
-        user: { email: 'admin@zimor.in', name: 'Zimor Executive Admin', role: 'superadmin' },
-      });
-    }
     return res.status(401).json({ authenticated: false });
   }
 
   return res.json({ authenticated: true, user: session });
 }
 
-// ==================== CUSTOMER / GOOGLE OAUTH ====================
+// ==================== GOOGLE OAUTH 2.0 (ADMIN & CUSTOMER) ====================
 
 /**
  * Initiates the Google OAuth 2.0 flow by redirecting the user to Google
+ * Supports ?admin=true or ?redirect=/admin to trigger the Admin authorization flow
  */
 export async function googleAuth(req: Request, res: Response) {
   try {
     const client = getGoogleOAuthClient();
-    const redirect = (req.query.redirect as string) || '/account';
-    const state = Buffer.from(JSON.stringify({ redirect })).toString('base64url');
+    const isAdmin = req.query.admin === 'true' || String(req.query.scope) === 'admin';
+    const redirect = (req.query.redirect as string) || (isAdmin ? '/admin' : '/account');
+    const scopeType = isAdmin || redirect.startsWith('/admin') ? 'admin' : 'customer';
+
+    const state = Buffer.from(JSON.stringify({ redirect, scope: scopeType })).toString('base64url');
 
     const authUrl = client.generateAuthUrl({
       access_type: 'offline',
@@ -106,10 +105,11 @@ export async function googleAuth(req: Request, res: Response) {
 }
 
 /**
- * Handles the Google OAuth 2.0 Authorization Code callback
+ * Handles the Google OAuth 2.0 Authorization Code callback for both Admin and Customer flows
  */
 export async function googleCallback(req: Request, res: Response) {
   let targetPath = '/account';
+  let scopeType = 'customer';
 
   try {
     const { code, state, error } = req.query;
@@ -120,23 +120,31 @@ export async function googleCallback(req: Request, res: Response) {
         if (parsed.redirect && typeof parsed.redirect === 'string' && parsed.redirect.startsWith('/')) {
           targetPath = parsed.redirect;
         }
+        if (parsed.scope === 'admin') {
+          scopeType = 'admin';
+        }
       } catch {}
     }
 
+    const isAdminFlow = scopeType === 'admin' || targetPath.startsWith('/admin');
+
     if (error) {
       console.warn('[Google OAuth Consent Denied/Error]', error);
-      return res.redirect(`${config.clientUrl}${targetPath}?auth_error=${encodeURIComponent(String(error))}`);
+      const errRedirect = isAdminFlow ? '/admin/login' : targetPath;
+      return res.redirect(`${config.clientUrl}${errRedirect}?auth_error=${encodeURIComponent(String(error))}`);
     }
 
     if (!code || typeof code !== 'string') {
-      return res.redirect(`${config.clientUrl}${targetPath}?auth_error=missing_code`);
+      const errRedirect = isAdminFlow ? '/admin/login' : targetPath;
+      return res.redirect(`${config.clientUrl}${errRedirect}?auth_error=missing_code`);
     }
 
     const client = getGoogleOAuthClient();
     const { tokens } = await client.getToken(code);
 
     if (!tokens.id_token) {
-      return res.redirect(`${config.clientUrl}${targetPath}?auth_error=missing_id_token`);
+      const errRedirect = isAdminFlow ? '/admin/login' : targetPath;
+      return res.redirect(`${config.clientUrl}${errRedirect}?auth_error=missing_id_token`);
     }
 
     const ticket = await client.verifyIdToken({
@@ -146,9 +154,40 @@ export async function googleCallback(req: Request, res: Response) {
 
     const payload = ticket.getPayload();
     if (!payload || !payload.email) {
-      return res.redirect(`${config.clientUrl}${targetPath}?auth_error=invalid_payload`);
+      const errRedirect = isAdminFlow ? '/admin/login' : targetPath;
+      return res.redirect(`${config.clientUrl}${errRedirect}?auth_error=invalid_payload`);
     }
 
+    // ========== ADMIN AUTHORIZATION WORKFLOW ==========
+    if (isAdminFlow) {
+      const isApproved = await isApprovedAdminEmail(payload.email);
+      if (!isApproved) {
+        console.warn(`[SECURITY ALERT] Unauthorized Google admin login attempt from: ${payload.email}`);
+        return res.redirect(
+          `${config.clientUrl}/admin/login?error=unauthorized_admin&email=${encodeURIComponent(payload.email)}`
+        );
+      }
+
+      const adminToken = createSessionToken({
+        email: payload.email,
+        role: 'superadmin',
+        name: payload.name || payload.given_name || 'Zimor Executive Admin',
+      });
+
+      res.cookie(ADMIN_COOKIE_NAME, adminToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      return res.redirect(
+        `${config.clientUrl}/admin?auth=success&admin_token=${encodeURIComponent(adminToken)}`
+      );
+    }
+
+    // ========== CUSTOMER AUTHENTICATION WORKFLOW ==========
     const db = await getDatabaseProvider();
     const customer = await db.createOrUpdateCustomer({
       email: payload.email,
@@ -177,7 +216,67 @@ export async function googleCallback(req: Request, res: Response) {
     return res.redirect(`${config.clientUrl}${targetPath}${separator}auth=success&token=${encodeURIComponent(sessionToken)}`);
   } catch (err: any) {
     console.error('[Google OAuth Callback Error]', err);
-    return res.redirect(`${config.clientUrl}${targetPath}?auth_error=${encodeURIComponent(err.message || 'authentication_failed')}`);
+    const errRedirect = targetPath.startsWith('/admin') ? '/admin/login' : targetPath;
+    return res.redirect(`${config.clientUrl}${errRedirect}?auth_error=${encodeURIComponent(err.message || 'authentication_failed')}`);
+  }
+}
+
+/**
+ * Direct ID token verification for Google One Tap or in-page Google Sign-In (Admin)
+ */
+export async function googleVerifyAdminCredential(req: Request, res: Response) {
+  try {
+    const { credential } = req.body;
+    if (!credential || typeof credential !== 'string') {
+      return res.status(400).json({ success: false, error: 'Google credential token is required' });
+    }
+
+    const client = getGoogleOAuthClient();
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: config.google.clientId,
+    });
+
+    const payload = ticket.getPayload();
+    if (!payload || !payload.email) {
+      return res.status(400).json({ success: false, error: 'Invalid Google identity token' });
+    }
+
+    const isApproved = await isApprovedAdminEmail(payload.email);
+    if (!isApproved) {
+      console.warn(`[SECURITY ALERT] Unauthorized Google admin credential attempt from: ${payload.email}`);
+      return res.status(403).json({
+        success: false,
+        error: `Access Denied: The Google account "${payload.email}" is not an authorized administrator.`,
+      });
+    }
+
+    const adminToken = createSessionToken({
+      email: payload.email,
+      role: 'superadmin',
+      name: payload.name || payload.given_name || 'Zimor Executive Admin',
+    });
+
+    res.cookie(ADMIN_COOKIE_NAME, adminToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.json({
+      success: true,
+      token: adminToken,
+      user: {
+        email: payload.email,
+        name: payload.name || payload.given_name || 'Zimor Executive Admin',
+        role: 'superadmin',
+      },
+    });
+  } catch (err: any) {
+    console.error('[Google Admin Verify Error]', err);
+    return res.status(500).json({ success: false, error: err.message || 'Admin authentication failed' });
   }
 }
 
@@ -285,6 +384,7 @@ export async function customerMe(req: Request, res: Response) {
         name: customer.name,
         email: customer.email,
         phone: customer.phone || '',
+        designation: (customer as any).designation || 'Atelier Patron',
         avatar: customer.avatar || session.avatar || '',
         addresses: customer.addresses || [],
         orders: customer.orders || [],

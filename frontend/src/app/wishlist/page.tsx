@@ -5,14 +5,15 @@ import Image from 'next/image';
 import { Heart, ShoppingBag, Trash2, ArrowRight } from 'lucide-react';
 import { useWishlist } from '@/context/WishlistContext';
 import { useCart } from '@/context/CartContext';
-import { PRODUCTS } from '@/data/products';
+import { useProducts } from '@/context/ProductContext';
 import { Product } from '@/types';
 
 export default function WishlistPage() {
   const { wishlistIds, removeFromWishlist, clearWishlist } = useWishlist();
   const { addItem } = useCart();
+  const { products } = useProducts();
 
-  const savedProducts = PRODUCTS.filter((p) => wishlistIds.includes(p.id));
+  const savedProducts = products.filter((p) => wishlistIds.includes(p.id) || (p.slug && wishlistIds.includes(p.slug)));
 
   const handleMoveToCart = (product: Product) => {
     addItem(product, 1);

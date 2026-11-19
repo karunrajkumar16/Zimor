@@ -18,6 +18,16 @@ export async function upsertContent(req: Request, res: Response) {
   try {
     const { page } = req.params;
     const { section = 'default', data } = req.body;
+
+    // IMMUTABLE LEGAL POLICIES PROTECTION:
+    // Neither the Admin Dashboard nor any API request can alter the Privacy Policy or Terms of Service
+    const protectedPages = ['privacy-policy', 'terms-of-service', 'legal-privacy-policy', 'legal-terms-of-service'];
+    if (protectedPages.includes(page)) {
+      return res.status(403).json({
+        error: 'Forbidden: Legal policy documents (Privacy Policy and Terms of Service) are protected, immutable legal content and cannot be modified.',
+      });
+    }
+
     const db = await getDatabaseProvider();
     const updated = await db.upsertContent(page, section, data);
     return res.json({ content: updated });

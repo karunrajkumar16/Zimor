@@ -29,8 +29,11 @@ export class CloudinaryProvider implements MediaProvider {
     alt?: string;
   }): Promise<UploadResult> {
     return new Promise((resolve, reject) => {
+      const targetFolder = options.folder.startsWith('zimor')
+        ? options.folder
+        : `zimor/${options.folder}`;
       const uploadOptions: Record<string, unknown> = {
-        folder: `zimor/${options.folder}`,
+        folder: targetFolder,
         resource_type: options.mimeType.startsWith('video') ? 'video' : 'image',
         use_filename: true,
         unique_filename: true,
