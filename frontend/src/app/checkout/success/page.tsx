@@ -31,7 +31,7 @@ function SuccessContent() {
               Thank You for Your Order!
             </h1>
             <p className="text-xs sm:text-sm text-ink-secondary max-w-md mx-auto">
-              We have received your order <strong>#{currentOrder?.orderNumber || 'ZMR-2026-8941'}</strong>. A confirmation email and SMS with live tracking updates have been sent to your contact details.
+              We have received your order <strong>#{currentOrder?.orderNumber || orderId || 'CONFIRMED'}</strong>. A confirmation email and SMS with live tracking updates have been sent to your contact details.
             </p>
           </div>
 

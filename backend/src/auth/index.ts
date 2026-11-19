@@ -1,12 +1,23 @@
 import crypto from 'crypto';
+import { OAuth2Client } from 'google-auth-library';
 import { config } from '../config/index.js';
 
 export const ADMIN_COOKIE_NAME = 'zimor_admin_session';
+export const CUSTOMER_COOKIE_NAME = 'zimor_customer_session';
 
 export interface AdminSession {
   email: string;
   role: 'superadmin' | 'admin';
   name?: string;
+  exp: number;
+}
+
+export interface CustomerSession {
+  id: string;
+  email: string;
+  name: string;
+  avatar?: string;
+  role: 'customer';
   exp: number;
 }
 
@@ -40,6 +51,47 @@ export function verifySessionToken(token: string): AdminSession | null {
   } catch {
     return null;
   }
+}
+
+export function createCustomerSessionToken(session: { id: string; email: string; name: string; avatar?: string }): string {
+  const payload: CustomerSession = {
+    ...session,
+    role: 'customer',
+    exp: Date.now() + 30 * 24 * 60 * 60 * 1000, // 30 days
+  };
+
+  const data = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const signature = crypto.createHmac('sha256', config.jwtSecret).update(data).digest('base64url');
+  return `${data}.${signature}`;
+}
+
+export function verifyCustomerSessionToken(token: string): CustomerSession | null {
+  try {
+    const [data, signature] = token.split('.');
+    if (!data || !signature) return null;
+
+    const expectedSignature = crypto.createHmac('sha256', config.jwtSecret).update(data).digest('base64url');
+    if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))) {
+      return null;
+    }
+
+    const payload: CustomerSession = JSON.parse(Buffer.from(data, 'base64url').toString('utf-8'));
+    if (payload.exp < Date.now() || payload.role !== 'customer') {
+      return null;
+    }
+
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+export function getGoogleOAuthClient(): OAuth2Client {
+  return new OAuth2Client(
+    config.google.clientId,
+    config.google.clientSecret,
+    config.google.callbackUrl
+  );
 }
 
 export async function verifyAdminCredentials(email: string, pass: string): Promise<{ email: string; role: 'superadmin' | 'admin'; name: string } | null> {

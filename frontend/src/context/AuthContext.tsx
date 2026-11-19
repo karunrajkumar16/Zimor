@@ -2,213 +2,204 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { Order } from '@/types';
+import { apiFetch, BACKEND_URL } from '@/lib/api';
+
+export interface UserAddress {
+  id: string;
+  label?: string;
+  fullName: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  pincode: string;
+  phone: string;
+  isDefault: boolean;
+}
 
 export interface UserProfile {
+  id?: string;
   name: string;
   email: string;
-  phone: string;
+  phone?: string;
   designation?: string;
-  city: string;
-  avatar: string;
-  addresses: {
-    id: string;
-    label: string;
-    fullName: string;
-    addressLine1: string;
-    addressLine2?: string;
-    city: string;
-    state: string;
-    pincode: string;
-    phone: string;
-    isDefault: boolean;
-  }[];
+  city?: string;
+  avatar?: string;
+  addresses: UserAddress[];
+  orders?: string[];
 }
 
 interface AuthContextType {
-  user: UserProfile;
+  user: UserProfile | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
   orders: Order[];
-  updateProfile: (updates: Partial<UserProfile>) => void;
-  createOrder: (orderData: Omit<Order, 'id' | 'orderNumber' | 'date' | 'status' | 'trackingNumber' | 'courierName' | 'estimatedDelivery'>) => Order;
+  authError: string | null;
+  loginWithGoogle: (redirectPath?: string) => void;
+  logout: () => Promise<void>;
+  updateProfile: (updates: Partial<UserProfile>) => Promise<boolean>;
+  createOrder: (
+    orderData: Omit<
+      Order,
+      'id' | 'orderNumber' | 'date' | 'status' | 'trackingNumber' | 'courierName' | 'estimatedDelivery'
+    >
+  ) => Promise<Order>;
   getOrderById: (id: string) => Order | undefined;
+  refreshSession: () => Promise<void>;
+  clearAuthError: () => void;
 }
-
-const DEFAULT_USER: UserProfile = {
-  name: 'Ananya Sharma',
-  email: 'ananya.sharma@example.com',
-  phone: '+91 98765 43210',
-  designation: 'Senior Strategy Consultant',
-  city: 'Bengaluru',
-  avatar: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917845/zimor/lifestyle/brandgirl2.webp',
-  addresses: [
-    {
-      id: 'addr-1',
-      label: 'Office (Indiranagar)',
-      fullName: 'Ananya Sharma',
-      addressLine1: 'Tower B, 4th Floor, Tech Hub',
-      addressLine2: '100ft Road, Indiranagar',
-      city: 'Bengaluru',
-      state: 'Karnataka',
-      pincode: '560038',
-      phone: '+91 98765 43210',
-      isDefault: true,
-    },
-    {
-      id: 'addr-2',
-      label: 'Home (Koramangala)',
-      fullName: 'Ananya Sharma',
-      addressLine1: 'Villa 14, Palm Meadows',
-      addressLine2: '4th Block, Koramangala',
-      city: 'Bengaluru',
-      state: 'Karnataka',
-      pincode: '560034',
-      phone: '+91 98765 43210',
-      isDefault: false,
-    },
-  ],
-};
-
-const INITIAL_ORDERS: Order[] = [
-  {
-    id: 'ord-1082',
-    orderNumber: 'ZMR-2026-8941',
-    date: 'October 28, 2026',
-    items: [
-      {
-        productId: 'zimor-delo-tote-rust',
-        name: 'ZIMOR DELO TOTE',
-        slug: 'zimor-delo-tote',
-        image: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp',
-        color: 'Rust Caramel',
-        size: 'Medium (15.6" Laptop)',
-        price: 2999,
-        quantity: 1,
-      },
-    ],
-    shippingAddress: {
-      fullName: 'Ananya Sharma',
-      addressLine1: 'Tower B, 4th Floor, Tech Hub, 100ft Road',
-      addressLine2: 'Indiranagar',
-      city: 'Bengaluru',
-      state: 'Karnataka',
-      pincode: '560038',
-      phone: '+91 98765 43210',
-    },
-    shippingMethod: 'Express Air Shipping',
-    paymentMethod: 'UPI (Google Pay)',
-    subtotal: 2999,
-    discount: 300,
-    shippingFee: 0,
-    total: 2699,
-    status: 'Delivered',
-    trackingNumber: 'BLR-EXP-9920194',
-    courierName: 'BlueDart Express',
-    estimatedDelivery: 'November 2, 2026',
-  },
-  {
-    id: 'ord-1083',
-    orderNumber: 'ZMR-2026-9182',
-    date: 'November 08, 2026',
-    items: [
-      {
-        productId: 'zimor-classic-shoulder-bag-cream',
-        name: 'ZIMOR CLASSIC SHOULDER BAG',
-        slug: 'zimor-classic-shoulder-bag',
-        image: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917835/zimor/products/classic-1.webp',
-        color: 'Cream Canvas',
-        size: 'Small (Everyday Carry)',
-        price: 1699,
-        quantity: 1,
-      },
-    ],
-    shippingAddress: {
-      fullName: 'Ananya Sharma',
-      addressLine1: 'Villa 14, Palm Meadows, 4th Block',
-      addressLine2: 'Koramangala',
-      city: 'Bengaluru',
-      state: 'Karnataka',
-      pincode: '560034',
-      phone: '+91 98765 43210',
-    },
-    shippingMethod: 'Standard Courier Delivery',
-    paymentMethod: 'Credit Card (HDFC Visa)',
-    subtotal: 1699,
-    discount: 0,
-    shippingFee: 0,
-    total: 1699,
-    status: 'Dispatched',
-    trackingNumber: 'DEL-XPR-8492011',
-    courierName: 'Delhivery Surface',
-    estimatedDelivery: 'November 14, 2026',
-  },
-];
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const USER_STORAGE = 'zimor_user_v1';
-const ORDERS_STORAGE = 'zimor_orders_v1';
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserProfile>(DEFAULT_USER);
-  const [orders, setOrders] = useState<Order[]>(INITIAL_ORDERS);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchSession = useCallback(async () => {
     try {
-      const savedUser = localStorage.getItem(USER_STORAGE);
-      if (savedUser) setUser(JSON.parse(savedUser));
-      const savedOrders = localStorage.getItem(ORDERS_STORAGE);
-      if (savedOrders) setOrders(JSON.parse(savedOrders));
-    } catch (e) {
-      console.error('Failed reading user from storage', e);
+      const res = await apiFetch('/api/auth/customer/me');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.authenticated && data.user) {
+          setUser({
+            id: data.user.id,
+            name: data.user.name,
+            email: data.user.email,
+            phone: data.user.phone || '',
+            designation: data.user.designation || 'Atelier Patron',
+            city: data.user.city || (data.user.addresses?.[0]?.city ?? ''),
+            avatar: data.user.avatar || '',
+            addresses: data.user.addresses || [],
+            orders: data.user.orders || [],
+          });
+          if (Array.isArray(data.orders)) {
+            setOrders(data.orders);
+          }
+          return;
+        }
+      }
+      setUser(null);
+      setOrders([]);
+    } catch (err) {
+      console.error('[AuthContext] Failed to retrieve customer session:', err);
+      setUser(null);
+      setOrders([]);
     } finally {
-      setIsLoaded(true);
+      setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    if (!isLoaded) return;
-    try {
-      localStorage.setItem(USER_STORAGE, JSON.stringify(user));
-      localStorage.setItem(ORDERS_STORAGE, JSON.stringify(orders));
-    } catch (e) {
-      console.error('Failed saving user to storage', e);
-    }
-  }, [user, orders, isLoaded]);
+    // Check URL parameters for OAuth callback results
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+      const error = params.get('auth_error');
 
-  const updateProfile = useCallback((updates: Partial<UserProfile>) => {
-    setUser((prev) => ({ ...prev, ...updates }));
+      if (token) {
+        sessionStorage.setItem('zimor_customer_token', token);
+        localStorage.setItem('zimor_customer_token', token);
+      }
+
+      if (error) {
+        setAuthError(decodeURIComponent(error));
+      }
+
+      // Clean the query string without reloading the page
+      if (token || error || params.get('auth')) {
+        params.delete('token');
+        params.delete('auth');
+        params.delete('auth_error');
+        const newSearch = params.toString();
+        const newPath = window.location.pathname + (newSearch ? `?${newSearch}` : '');
+        window.history.replaceState({}, document.title, newPath);
+      }
+    }
+
+    fetchSession();
+  }, [fetchSession]);
+
+  const loginWithGoogle = useCallback((redirectPath?: string) => {
+    const target = redirectPath || (typeof window !== 'undefined' ? window.location.pathname : '/account');
+    const authUrl = `${BACKEND_URL}/api/auth/google?redirect=${encodeURIComponent(target)}`;
+    window.location.href = authUrl;
+  }, []);
+
+  const logout = useCallback(async () => {
+    try {
+      await apiFetch('/api/auth/customer/logout', { method: 'POST' });
+    } catch (e) {
+      console.error('[AuthContext] Logout failed:', e);
+    } finally {
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('zimor_customer_token');
+        localStorage.removeItem('zimor_customer_token');
+      }
+      setUser(null);
+      setOrders([]);
+    }
+  }, []);
+
+  const updateProfile = useCallback(async (updates: Partial<UserProfile>): Promise<boolean> => {
+    try {
+      const res = await apiFetch('/api/customers/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success && data.user) {
+        setUser((prev) =>
+          prev
+            ? {
+                ...prev,
+                ...data.user,
+                addresses: data.user.addresses || prev.addresses,
+              }
+            : data.user
+        );
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error('[AuthContext] Failed updating patron profile:', err);
+      return false;
+    }
   }, []);
 
   const createOrder = useCallback(
-    (
+    async (
       orderData: Omit<
         Order,
         'id' | 'orderNumber' | 'date' | 'status' | 'trackingNumber' | 'courierName' | 'estimatedDelivery'
       >
-    ): Order => {
-      const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-      const orderNumber = `ZMR-2026-${randomSuffix}`;
-      const trackingNumber = `IND-EXP-${Math.floor(1000000 + Math.random() * 9000000)}`;
+    ): Promise<Order> => {
+      try {
+        const res = await apiFetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...orderData,
+            customerId: user?.id,
+            customerEmail: user?.email,
+          }),
+        });
 
-      const newOrder: Order = {
-        ...orderData,
-        id: `ord-${Date.now()}`,
-        orderNumber,
-        date: new Date().toLocaleDateString('en-IN', {
-          month: 'long',
-          day: 'numeric',
-          year: 'numeric',
-        }),
-        status: 'Confirmed',
-        trackingNumber,
-        courierName: 'BlueDart Express',
-        estimatedDelivery: 'In 4–6 business days',
-      };
-
-      setOrders((prev) => [newOrder, ...prev]);
-      return newOrder;
+        const data = await res.json();
+        if (res.ok && data.order) {
+          setOrders((prev) => [data.order, ...prev]);
+          return data.order;
+        }
+        throw new Error(data.error || 'Failed to place order');
+      } catch (e) {
+        console.error('[AuthContext] Order creation failed:', e);
+        throw e;
+      }
     },
-    []
+    [user]
   );
 
   const getOrderById = useCallback(
@@ -218,15 +209,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [orders]
   );
 
+  const clearAuthError = useCallback(() => {
+    setAuthError(null);
+  }, []);
+
   const contextValue = useMemo(
     () => ({
       user,
+      isAuthenticated: Boolean(user),
+      isLoading,
       orders,
+      authError,
+      loginWithGoogle,
+      logout,
       updateProfile,
       createOrder,
       getOrderById,
+      refreshSession: fetchSession,
+      clearAuthError,
     }),
-    [user, orders, updateProfile, createOrder, getOrderById]
+    [
+      user,
+      isLoading,
+      orders,
+      authError,
+      loginWithGoogle,
+      logout,
+      updateProfile,
+      createOrder,
+      getOrderById,
+      fetchSession,
+      clearAuthError,
+    ]
   );
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
@@ -239,4 +253,3 @@ export const useAuth = () => {
   }
   return context;
 };
-

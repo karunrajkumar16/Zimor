@@ -36,7 +36,7 @@ export default function AdminInventoryPage() {
         setProducts(data.products);
         const map: Record<string, number> = {};
         data.products.forEach((p: Product) => {
-          map[p.id] = p.stock ?? 15;
+          map[p.id] = p.stock ?? 0;
         });
         setStockChanges(map);
       }

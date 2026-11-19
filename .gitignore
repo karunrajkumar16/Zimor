@@ -46,4 +46,6 @@ next-env.d.ts
 skills-lock.json
 shots
 scratch/
+backups/
+*/backups/
 

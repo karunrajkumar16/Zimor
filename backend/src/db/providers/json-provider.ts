@@ -233,6 +233,11 @@ export class JsonDatabaseProvider implements DatabaseProvider {
     return customers.find((c) => c.email.toLowerCase() === email.toLowerCase()) || null;
   }
 
+  async getCustomerByGoogleId(googleId: string): Promise<Customer | null> {
+    const customers = await this.getCustomers();
+    return customers.find((c) => c.googleId === googleId) || null;
+  }
+
   async createOrUpdateCustomer(data: Partial<Customer> & { email: string }): Promise<Customer> {
     const customers = await this.getCustomers();
     const idx = customers.findIndex((c) => c.email.toLowerCase() === data.email.toLowerCase());

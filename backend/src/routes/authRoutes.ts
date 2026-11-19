@@ -1,10 +1,29 @@
 import { Router } from 'express';
-import { login, logout, me } from '../controllers/authController.js';
+import {
+  login,
+  logout,
+  me,
+  googleAuth,
+  googleCallback,
+  googleVerifyCredential,
+  customerMe,
+  customerLogout,
+} from '../controllers/authController.js';
 
 const router = Router();
 
+// Admin Authentication
 router.post('/login', login);
 router.post('/logout', logout);
 router.get('/me', me);
+
+// Customer Google OAuth 2.0
+router.get('/google', googleAuth);
+router.get('/google/callback', googleCallback);
+router.post('/google/verify', googleVerifyCredential);
+
+// Customer Session Management
+router.get('/customer/me', customerMe);
+router.post('/customer/logout', customerLogout);
 
 export default router;

@@ -184,7 +184,20 @@ export default function AdminOrdersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E5DFD7] dark:divide-[#36312C]">
-              {filteredOrders.map((ord) => {
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-xs text-[#8C837A] dark:text-[#8A837C]">
+                    Loading orders pipeline...
+                  </td>
+                </tr>
+              ) : filteredOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-xs text-[#8C837A] dark:text-[#8A837C]">
+                    No client orders found in the pipeline. Verified storefront purchases will appear here.
+                  </td>
+                </tr>
+              ) : (
+                filteredOrders.map((ord) => {
                 const statusBadge =
                   ord.status === 'Delivered'
                     ? 'bg-[#2E7D5A]/10 text-[#25684A] dark:bg-[#2E7D5A]/15 dark:text-[#62C697] border border-[#2E7D5A]/25'
@@ -262,7 +275,8 @@ export default function AdminOrdersPage() {
                     </td>
                   </tr>
                 );
-              })}
+              })
+              )}
             </tbody>
           </table>
         </div>

@@ -39,4 +39,11 @@ export const config = {
   adminEmail: process.env.ADMIN_EMAIL || 'admin@zimor.in',
   adminPassword: process.env.ADMIN_PASSWORD || 'zimor_admin_2024',
   jwtSecret: process.env.ADMIN_JWT_SECRET || 'zimor_secret_jwt_key_2024_luxury_atelier_token',
+
+  // Google OAuth
+  google: {
+    clientId: process.env.GOOGLE_CLIENT_ID || '',
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+    callbackUrl: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:5001/api/auth/google/callback',
+  },
 };

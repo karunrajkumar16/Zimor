@@ -32,48 +32,9 @@ interface IssueTicket {
   resolutionNote?: string;
 }
 
-const DEFAULT_ISSUES: IssueTicket[] = [
-  {
-    id: 'ISSUE-2026-104',
-    orderNumber: 'ZMR-2026-8111',
-    customerName: 'Pooja Sharma',
-    customerPhone: '+91 9876543210',
-    customerEmail: 'pooja@example.com',
-    category: 'Missing Accessory',
-    description: 'Received Delo Tote in Rust in pristine condition, but the matching detachable wristlet pouch was missing from inside the main zipper pocket.',
-    date: 'Yesterday, 06:30 PM',
-    status: 'Under Review',
-    resolutionNote: 'Warehouse packing video audited. Replacement wristlet pouch packaged for BlueDart dispatch.',
-  },
-  {
-    id: 'ISSUE-2026-098',
-    orderNumber: 'ZMR-2026-7490',
-    customerName: 'Tara Deshmukh',
-    customerPhone: '+91 9811234567',
-    customerEmail: 'tara.d@designstudio.com',
-    category: 'Size Exchange',
-    description: 'Classic Shoulder Bag in Cream is stunning, but I would like to exchange it for the Delo Tote in Noir Black to accommodate my 14" office laptop.',
-    date: 'Nov 14, 2026',
-    status: 'Resolved',
-    resolutionNote: 'Customer placed difference payment for Delo Tote. Reverse pickup completed by Delhivery.',
-  },
-  {
-    id: 'ISSUE-2026-091',
-    orderNumber: 'ZMR-2026-6819',
-    customerName: 'Rhea Nambiar',
-    customerPhone: '+91 9988776655',
-    customerEmail: 'rhea.nambiar@gmail.com',
-    category: 'Transit Damage',
-    description: 'Outer carton box had severe corner dent from courier transit. Bag structure is intact but request replacement dust bag.',
-    date: 'Nov 11, 2026',
-    status: 'Resolved',
-    resolutionNote: 'Complimentary luxury dust bag and atelier care kit dispatched via BlueDart AWB #ZMR-EXP-99214.',
-  },
-];
-
 export default function AdminIssuesPage() {
   const { isDark } = useAdminTheme();
-  const [issues, setIssues] = useState<IssueTicket[]>(DEFAULT_ISSUES);
+  const [issues, setIssues] = useState<IssueTicket[]>([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [selectedIssue, setSelectedIssue] = useState<IssueTicket | null>(null);
@@ -167,7 +128,9 @@ export default function AdminIssuesPage() {
           <span className={`text-[11px] font-semibold uppercase tracking-wider ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
             Average Resolution Time
           </span>
-          <p className="text-2xl font-bold mt-1 text-[#C86D48] dark:text-[#D1825F]">18.4 Hours</p>
+          <p className="text-2xl font-bold mt-1 text-[#C86D48] dark:text-[#D1825F]">
+            {issues.length === 0 ? '—' : '18.4 Hours'}
+          </p>
           <p className={`text-[10px] mt-1 ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>Target SLA: &lt; 24 hours</p>
         </div>
       </div>
@@ -230,7 +193,14 @@ export default function AdminIssuesPage() {
               </tr>
             </thead>
             <tbody className={`divide-y ${isDark ? 'divide-[#36312C]' : 'divide-[#E5DFD7]'}`}>
-              {filtered.map((iss) => (
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className={`py-12 text-center text-xs ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
+                    No customer issues or support tickets recorded.
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((iss) => (
                 <tr
                   key={iss.id}
                   className={`transition-colors cursor-pointer ${
@@ -291,7 +261,8 @@ export default function AdminIssuesPage() {
                     </button>
                   </td>
                 </tr>
-              ))}
+              ))
+              )}
             </tbody>
           </table>
         </div>

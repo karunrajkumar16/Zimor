@@ -21,6 +21,9 @@ export interface Customer {
   email: string;
   name: string;
   phone?: string;
+  googleId?: string;
+  avatar?: string;
+  authProvider?: 'google' | 'local';
   addresses: Address[];
   orders: string[];
   createdAt: string;
@@ -120,6 +123,7 @@ export interface DatabaseProvider {
   // Customers
   getCustomers(): Promise<Customer[]>;
   getCustomerByEmail(email: string): Promise<Customer | null>;
+  getCustomerByGoogleId(googleId: string): Promise<Customer | null>;
   createOrUpdateCustomer(data: Partial<Customer> & { email: string }): Promise<Customer>;
 
   // Categories

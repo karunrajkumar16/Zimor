@@ -28,78 +28,9 @@ interface PaymentRecord {
   date: string;
 }
 
-const DEFAULT_TRANSACTIONS: PaymentRecord[] = [
-  {
-    id: 'pay_rzp_live_94821',
-    orderId: 'ZMR-2026-8367',
-    customerName: 'Aanya Verma',
-    customerEmail: 'aanya@example.com',
-    amount: 2700,
-    method: 'UPI / QR Code',
-    gateway: 'Mock Sandbox',
-    status: 'Captured',
-    date: 'Today, 11:20 PM',
-  },
-  {
-    id: 'pay_rzp_live_91802',
-    orderId: 'ZMR-2026-8111',
-    customerName: 'Pooja Sharma',
-    customerEmail: 'pooja@example.com',
-    amount: 2999,
-    method: 'Credit / Debit Card',
-    gateway: 'Mock Sandbox',
-    status: 'Captured',
-    date: 'Yesterday, 04:15 PM',
-  },
-  {
-    id: 'pay_rzp_live_88491',
-    orderId: 'ZMR-2026-7842',
-    customerName: 'Dr. Meera Sen',
-    customerEmail: 'meera.sen@hospital.in',
-    amount: 2999,
-    method: 'Net Banking',
-    gateway: 'Razorpay Live',
-    status: 'Captured',
-    date: 'Nov 15, 2026',
-  },
-  {
-    id: 'pay_rzp_live_83904',
-    orderId: 'ZMR-2026-7490',
-    customerName: 'Tara Deshmukh',
-    customerEmail: 'tara.d@designstudio.com',
-    amount: 1699,
-    method: 'UPI / QR Code',
-    gateway: 'Razorpay Live',
-    status: 'Captured',
-    date: 'Nov 14, 2026',
-  },
-  {
-    id: 'pay_rzp_live_79401',
-    orderId: 'ZMR-2026-7104',
-    customerName: 'Sanya Kapoor',
-    customerEmail: 'sanya.kapoor@venture.in',
-    amount: 2999,
-    method: 'Credit Card',
-    gateway: 'Razorpay Live',
-    status: 'Captured',
-    date: 'Nov 12, 2026',
-  },
-  {
-    id: 'pay_cod_manual_60192',
-    orderId: 'ZMR-2026-6819',
-    customerName: 'Rhea Nambiar',
-    customerEmail: 'rhea.nambiar@gmail.com',
-    amount: 2999,
-    method: 'Cash on Delivery',
-    gateway: 'COD Express',
-    status: 'Pending',
-    date: 'Nov 10, 2026',
-  },
-];
-
 export default function AdminPaymentsPage() {
   const { isDark } = useAdminTheme();
-  const [payments, setPayments] = useState<PaymentRecord[]>(DEFAULT_TRANSACTIONS);
+  const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -252,7 +183,14 @@ export default function AdminPaymentsPage() {
               </tr>
             </thead>
             <tbody className={`divide-y ${isDark ? 'divide-[#36312C]' : 'divide-[#E5DFD7]'}`}>
-              {filtered.map((tx) => (
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="py-12 text-center text-xs opacity-60">
+                    No payment transactions recorded yet. Real gateway captures will record here automatically.
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((tx) => (
                 <tr
                   key={tx.id}
                   className={`transition-colors ${
@@ -306,7 +244,8 @@ export default function AdminPaymentsPage() {
                     {tx.date}
                   </td>
                 </tr>
-              ))}
+                ))
+              )}
             </tbody>
           </table>
         </div>

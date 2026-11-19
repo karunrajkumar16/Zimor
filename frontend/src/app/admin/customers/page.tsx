@@ -54,8 +54,8 @@ export default function AdminCustomersPage() {
     );
   });
 
-  const totalSpendAll = customers.reduce((sum, c) => sum + (c.totalSpent || 2999), 0);
-  const vipCount = customers.filter((c) => (c.orders?.length || 1) > 1 || (c.totalSpent || 0) > 5000).length;
+  const totalSpendAll = customers.reduce((sum, c) => sum + (c.totalSpent || 0), 0);
+  const vipCount = customers.filter((c) => (c.orders?.length || 0) > 1 || (c.totalSpent || 0) > 5000).length;
 
   const cardBg = isDark
     ? 'bg-[#24211F] border-[#36312C]'
@@ -155,82 +155,96 @@ export default function AdminCustomersPage() {
               </tr>
             </thead>
             <tbody className={`divide-y ${isDark ? 'divide-[#36312C]' : 'divide-[#E5DFD7]'}`}>
-              {filteredCustomers.map((cust) => {
-                const orderCount = cust.orders?.length || 1;
-                const totalSpent = cust.totalSpent || 2999;
-                const isVip = orderCount > 1 || totalSpent > 5000;
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className={`py-12 text-center text-xs ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
+                    Loading registered patrons...
+                  </td>
+                </tr>
+              ) : filteredCustomers.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className={`py-12 text-center text-xs ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
+                    No registered patrons found. Customer profiles will appear here as orders are placed.
+                  </td>
+                </tr>
+              ) : (
+                filteredCustomers.map((cust) => {
+                  const orderCount = cust.orders?.length || 0;
+                  const totalSpent = cust.totalSpent || 0;
+                  const isVip = orderCount > 1 || totalSpent > 5000;
 
-                return (
-                  <tr
-                    key={cust.id}
-                    className={`transition-colors ${
-                      isDark ? 'hover:bg-[#2C2825]' : 'hover:bg-[#F3EEE6]'
-                    }`}
-                  >
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-2.5">
-                        <div
-                          className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-[10px] border ${
+                  return (
+                    <tr
+                      key={cust.id}
+                      className={`transition-colors ${
+                        isDark ? 'hover:bg-[#2C2825]' : 'hover:bg-[#F3EEE6]'
+                      }`}
+                    >
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-2.5">
+                          <div
+                            className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-[10px] border ${
+                              isDark
+                                ? 'bg-[#1E1C1A] border-[#36312C] text-[#E07A5F]'
+                                : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#B44220]'
+                            }`}
+                          >
+                            {cust.name ? cust.name[0].toUpperCase() : 'P'}
+                          </div>
+                          <span className="font-semibold">
+                            {cust.name}
+                          </span>
+                        </div>
+                      </td>
+
+                      <td className={`py-3.5 px-4 font-mono ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
+                        {cust.email}
+                      </td>
+
+                      <td className={`py-3.5 px-4 font-mono ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
+                        {cust.phone || '—'}
+                      </td>
+
+                      <td className="py-3.5 px-4 font-semibold">
+                        {orderCount} order{orderCount !== 1 ? 's' : ''}
+                      </td>
+
+                      <td className="py-3.5 px-4 font-bold">
+                        ₹{totalSpent.toLocaleString('en-IN')}
+                      </td>
+
+                      <td className="py-3.5 px-4">
+                        {isVip ? (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#B44220]/15 text-[#B44220] dark:text-[#E07A5F] border border-[#B44220]/30">
+                            VIP Patron
+                          </span>
+                        ) : (
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
                             isDark
-                              ? 'bg-[#1E1C1A] border-[#36312C] text-[#E07A5F]'
-                              : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#B44220]'
+                              ? 'bg-[#1E1C1A] text-[#B4B4B4] border-[#36312C]'
+                              : 'bg-[#EDE7DE] text-[#5A534E] border-[#E5DFD7]'
+                          }`}>
+                            Standard
+                          </span>
+                        )}
+                      </td>
+
+                      <td className="py-3.5 px-4 text-right">
+                        <button
+                          onClick={() => setSelectedCustomer(cust)}
+                          className={`px-2.5 py-1 rounded text-xs font-semibold border transition-colors ${
+                            isDark
+                              ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA] hover:border-[#B44220]'
+                              : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F] hover:border-[#B44220]'
                           }`}
                         >
-                          {cust.name ? cust.name[0].toUpperCase() : 'P'}
-                        </div>
-                        <span className="font-semibold">
-                          {cust.name}
-                        </span>
-                      </div>
-                    </td>
-
-                    <td className={`py-3.5 px-4 font-mono ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
-                      {cust.email}
-                    </td>
-
-                    <td className={`py-3.5 px-4 font-mono ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
-                      {cust.phone || '—'}
-                    </td>
-
-                    <td className="py-3.5 px-4 font-semibold">
-                      {orderCount} order{orderCount > 1 ? 's' : ''}
-                    </td>
-
-                    <td className="py-3.5 px-4 font-bold">
-                      ₹{totalSpent.toLocaleString('en-IN')}
-                    </td>
-
-                    <td className="py-3.5 px-4">
-                      {isVip ? (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#B44220]/15 text-[#B44220] dark:text-[#E07A5F] border border-[#B44220]/30">
-                          VIP Patron
-                        </span>
-                      ) : (
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
-                          isDark
-                            ? 'bg-[#1E1C1A] text-[#B4B4B4] border-[#36312C]'
-                            : 'bg-[#EDE7DE] text-[#5A534E] border-[#E5DFD7]'
-                        }`}>
-                          Standard
-                        </span>
-                      )}
-                    </td>
-
-                    <td className="py-3.5 px-4 text-right">
-                      <button
-                        onClick={() => setSelectedCustomer(cust)}
-                        className={`px-2.5 py-1 rounded text-xs font-semibold border transition-colors ${
-                          isDark
-                            ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA] hover:border-[#B44220]'
-                            : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F] hover:border-[#B44220]'
-                        }`}
-                      >
-                        Inspect
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
+                          Inspect
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

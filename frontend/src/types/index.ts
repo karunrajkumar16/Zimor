@@ -135,6 +135,9 @@ export interface Customer {
   email: string;
   name: string;
   phone?: string;
+  googleId?: string;
+  avatar?: string;
+  authProvider?: 'google' | 'local';
   totalSpent?: number;
   addresses: Address[];
   orders: string[];

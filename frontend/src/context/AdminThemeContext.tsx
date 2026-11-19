@@ -52,7 +52,7 @@ export function AdminThemeProvider({ children }: { children: React.ReactNode }) 
         isDark: theme === 'dark',
       }}
     >
-      <div className={theme === 'dark' ? 'admin-dark' : 'admin-light'}>
+      <div className={theme === 'dark' ? 'dark admin-dark' : 'admin-light'}>
         {children}
       </div>
     </AdminThemeContext.Provider>

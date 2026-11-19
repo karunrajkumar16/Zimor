@@ -60,7 +60,7 @@ export class MongoDatabaseProvider implements DatabaseProvider {
 
   async getProductById(id: string): Promise<Product | null> {
     await connectToDatabase();
-    let doc = null;
+    let doc: any = null;
     if (mongoose.isValidObjectId(id)) {
       doc = await ProductModel.findById(id).lean();
     }
@@ -194,25 +194,47 @@ export class MongoDatabaseProvider implements DatabaseProvider {
 
   async getCustomerByEmail(email: string): Promise<Customer | null> {
     await connectToDatabase();
-    const doc = await CustomerModel.findOne({ email }).lean();
+    const doc = await CustomerModel.findOne({ email: email.toLowerCase().trim() }).lean();
+    if (!doc) return null;
+    return { ...doc, id: (doc as any)._id?.toString() || (doc as any).id } as Customer;
+  }
+
+  async getCustomerByGoogleId(googleId: string): Promise<Customer | null> {
+    await connectToDatabase();
+    const doc = await CustomerModel.findOne({ googleId }).lean();
     if (!doc) return null;
     return { ...doc, id: (doc as any)._id?.toString() || (doc as any).id } as Customer;
   }
 
   async createOrUpdateCustomer(data: Partial<Customer> & { email: string }): Promise<Customer> {
     await connectToDatabase();
-    const existing = await CustomerModel.findOne({ email: data.email });
+    const normalizedEmail = data.email.toLowerCase().trim();
+    const existing = await CustomerModel.findOne({
+      $or: [
+        { email: normalizedEmail },
+        ...(data.googleId ? [{ googleId: data.googleId }] : []),
+      ],
+    });
+
     if (existing) {
-      if (data.name) existing.name = data.name;
+      if (data.name && !existing.name) existing.name = data.name;
       if (data.phone) existing.phone = data.phone;
+      if (data.googleId) existing.googleId = data.googleId;
+      if (data.avatar) existing.avatar = data.avatar;
+      if (data.authProvider) existing.authProvider = data.authProvider;
       if (data.orders) {
-        existing.orders = Array.from(new Set([...existing.orders, ...data.orders]));
+        existing.orders = Array.from(new Set([...(existing.orders || []), ...data.orders]));
       }
       await existing.save();
       return existing.toJSON() as Customer;
     }
 
-    const created = await CustomerModel.create(data);
+    const created = await CustomerModel.create({
+      ...data,
+      email: normalizedEmail,
+      addresses: data.addresses || [],
+      orders: data.orders || [],
+    });
     return created.toJSON() as Customer;
   }
 

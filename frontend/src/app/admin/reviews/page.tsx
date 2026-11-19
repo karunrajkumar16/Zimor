@@ -34,72 +34,9 @@ interface CustomerReview {
   featured?: boolean;
 }
 
-const DEFAULT_REVIEWS: CustomerReview[] = [
-  {
-    id: 'rev-01',
-    productName: 'ZIMOR DELO TOTE',
-    productImage: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp',
-    productSlug: 'zimor-delo-tote',
-    customerName: 'Ananya Sharma',
-    customerEmail: 'ananya.s@lawcorp.in',
-    rating: 5,
-    title: 'The architectural structure holds my 15.6" laptop effortlessly',
-    body: 'As a corporate lawyer in Mumbai, finding a structured tote that fits my 15.6" Dell XPS without losing its silhouette was impossible until the Delo Tote. The caramel interior accent and brass hardware feel exceptionally premium.',
-    date: 'Nov 12, 2026',
-    verifiedBuyer: true,
-    status: 'Approved',
-    featured: true,
-  },
-  {
-    id: 'rev-02',
-    productName: 'ZIMOR RABOTA TOTE',
-    productImage: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917831/zimor/products/rabota-1.webp',
-    productSlug: 'zimor-rabota-tote',
-    customerName: 'Priya Nambiar',
-    customerEmail: 'priya.n@techconsulting.com',
-    rating: 5,
-    title: 'Dual carry versatility makes boardroom transitions seamless',
-    body: 'The detachable crossbody sling makes airport terminals a breeze, and unhooking it transforms it into an elegant structured executive tote. The dedicated cosmetic pouch included was a thoughtful touch.',
-    date: 'Nov 10, 2026',
-    verifiedBuyer: true,
-    status: 'Approved',
-    featured: true,
-  },
-  {
-    id: 'rev-03',
-    productName: 'ZIMOR CLASSIC SHOULDER BAG',
-    productImage: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917835/zimor/products/classic-1.webp',
-    productSlug: 'zimor-classic-shoulder-bag',
-    customerName: 'Kavya Rao',
-    customerEmail: 'kavya.rao@design.studio',
-    rating: 5,
-    title: 'Minimalist crescent contour with luminous gold finish',
-    body: 'Understated Parisian silhouette with just the right capacity for Kindle, cardholder, and lipstick. The magnetic closure clicks with reassuring precision.',
-    date: 'Nov 08, 2026',
-    verifiedBuyer: true,
-    status: 'Approved',
-    featured: false,
-  },
-  {
-    id: 'rev-04',
-    productName: 'ZIMOR DELO TOTE — NOIR',
-    productImage: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917830/zimor/products/delo-noir-blur.webp',
-    productSlug: 'zimor-delo-tote-noir',
-    customerName: 'Meghna Kapoor',
-    customerEmail: 'meghna.k@gmail.com',
-    rating: 4,
-    title: 'Stunning pebbled texture, wish it came with silver hardware too',
-    body: 'The pebbled grain is scratch-resistant and cleans with a single soft wipe. Highly recommend for corporate executives.',
-    date: 'Nov 05, 2026',
-    verifiedBuyer: true,
-    status: 'Pending',
-    featured: false,
-  },
-];
-
 export default function AdminReviewsPage() {
   const { isDark } = useAdminTheme();
-  const [reviews, setReviews] = useState<CustomerReview[]>(DEFAULT_REVIEWS);
+  const [reviews, setReviews] = useState<CustomerReview[]>([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [ratingFilter, setRatingFilter] = useState('All');
@@ -263,7 +200,12 @@ export default function AdminReviewsPage() {
 
         {/* Reviews Cards List */}
         <div className={`divide-y ${isDark ? 'divide-[#36312C]' : 'divide-[#E5DFD7]'}`}>
-          {filtered.map((rev) => (
+          {filtered.length === 0 ? (
+            <div className="py-16 text-center text-xs opacity-60">
+              No customer reviews recorded yet. Genuine client feedback will populate here once submitted.
+            </div>
+          ) : (
+            filtered.map((rev) => (
             <div
               key={rev.id}
               className={`p-5 transition-colors space-y-3 ${
@@ -408,7 +350,8 @@ export default function AdminReviewsPage() {
                 </button>
               </div>
             </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </div>
