@@ -45,4 +45,6 @@ export interface PaymentProvider {
   }): Promise<RefundResult>;
   
   getOrder(providerOrderId: string): Promise<PaymentOrder | null>;
+  
+  getPayment(paymentId: string): Promise<any>;
 }

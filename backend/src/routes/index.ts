@@ -9,6 +9,7 @@ import contentRoutes from './contentRoutes.js';
 import authRoutes from './authRoutes.js';
 import adminRoutes from './adminRoutes.js';
 import reviewRoutes from './reviewRoutes.js';
+import issueRoutes from './issueRoutes.js';
 
 const apiRouter = Router();
 
@@ -23,5 +24,6 @@ apiRouter.use('/content', contentRoutes);
 apiRouter.use('/reviews', reviewRoutes);
 apiRouter.use('/auth', authRoutes);
 apiRouter.use('/admin', adminRoutes);
+apiRouter.use('/issues', issueRoutes);
 
 export default apiRouter;

@@ -2,18 +2,21 @@
 // Switch from mock: set USE_MOCK_PAYMENT=false and provide RAZORPAY_* env vars
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
-import { PaymentProvider, PaymentOrder, PaymentVerificationResult, RefundResult } from './interface';
+import { PaymentProvider, PaymentOrder, PaymentVerificationResult, RefundResult } from './interface.js';
+import { config } from '../../config/index.js';
 
 let razorpay: Razorpay | null = null;
 
 function getRazorpay(): Razorpay {
   if (!razorpay) {
-    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    const keyId = process.env.RAZORPAY_KEY_ID || config.razorpay.keyId;
+    const keySecret = process.env.RAZORPAY_KEY_SECRET || config.razorpay.keySecret;
+    if (!keyId || !keySecret) {
       throw new Error('RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET are required');
     }
     razorpay = new Razorpay({
-      key_id: process.env.RAZORPAY_KEY_ID,
-      key_secret: process.env.RAZORPAY_KEY_SECRET,
+      key_id: keyId,
+      key_secret: keySecret,
     });
   }
   return razorpay;
@@ -51,14 +54,16 @@ export class RazorpayProvider implements PaymentProvider {
     razorpayPaymentId: string;
     razorpaySignature: string;
   }): Promise<PaymentVerificationResult> {
-    const secret = process.env.RAZORPAY_KEY_SECRET || '';
+    const secret = process.env.RAZORPAY_KEY_SECRET || config.razorpay.keySecret || '';
     const body = `${params.razorpayOrderId}|${params.razorpayPaymentId}`;
     const expectedSignature = crypto
       .createHmac('sha256', secret)
       .update(body)
       .digest('hex');
     
-    if (expectedSignature !== params.razorpaySignature) {
+    const expBuf = Buffer.from(expectedSignature, 'utf8');
+    const sigBuf = Buffer.from(params.razorpaySignature, 'utf8');
+    if (expBuf.length !== sigBuf.length || !crypto.timingSafeEqual(expBuf, sigBuf)) {
       return {
         success: false,
         orderId: params.razorpayOrderId,
@@ -99,5 +104,10 @@ export class RazorpayProvider implements PaymentProvider {
       receipt: (order as any).receipt || '',
       createdAt: new Date().toISOString(),
     };
+  }
+
+  async getPayment(paymentId: string): Promise<any> {
+    const rz = getRazorpay();
+    return await rz.payments.fetch(paymentId);
   }
 }

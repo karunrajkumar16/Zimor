@@ -29,6 +29,8 @@ export interface Customer {
   orders: string[];
   createdAt: string;
   updatedAt: string;
+  isDemo?: boolean;
+  demoExpiresAt?: Date;
 }
 
 export interface Address {

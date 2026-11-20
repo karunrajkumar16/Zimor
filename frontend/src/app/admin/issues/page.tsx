@@ -30,15 +30,38 @@ interface IssueTicket {
   date: string;
   status: 'Open' | 'Under Review' | 'Replacement Sent' | 'Refund Issued' | 'Resolved';
   resolutionNote?: string;
+  isDemo?: boolean;
 }
 
 export default function AdminIssuesPage() {
   const { isDark } = useAdminTheme();
   const [issues, setIssues] = useState<IssueTicket[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [selectedIssue, setSelectedIssue] = useState<IssueTicket | null>(null);
   const [newResolutionNote, setNewResolutionNote] = useState('');
+
+  const fetchIssues = async () => {
+    setLoading(true);
+    try {
+      const res = await apiFetch('/api/issues');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.issues) {
+          setIssues(data.issues);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load issues from server:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchIssues();
+  }, []);
 
   const filtered = issues.filter((iss) => {
     const q = search.toLowerCase();
@@ -52,14 +75,28 @@ export default function AdminIssuesPage() {
     return matchesSearch && matchesStatus;
   });
 
-  const handleUpdateStatus = (id: string, newStatus: IssueTicket['status']) => {
+  const handleUpdateStatus = async (id: string, newStatus: IssueTicket['status']) => {
+    const noteToSave = newResolutionNote || selectedIssue?.resolutionNote;
+    try {
+      await apiFetch(`/api/issues/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: newStatus,
+          resolutionNote: noteToSave,
+        }),
+      });
+    } catch (err) {
+      console.error('Failed to update issue in backend:', err);
+    }
+
     setIssues((prev) =>
       prev.map((iss) =>
         iss.id === id
           ? {
               ...iss,
               status: newStatus,
-              resolutionNote: newResolutionNote || iss.resolutionNote,
+              resolutionNote: noteToSave || iss.resolutionNote,
             }
           : iss
       )
@@ -68,7 +105,7 @@ export default function AdminIssuesPage() {
       setSelectedIssue({
         ...selectedIssue,
         status: newStatus,
-        resolutionNote: newResolutionNote || selectedIssue.resolutionNote,
+        resolutionNote: noteToSave || selectedIssue.resolutionNote,
       });
     }
     setNewResolutionNote('');
@@ -209,7 +246,14 @@ export default function AdminIssuesPage() {
                   onClick={() => setSelectedIssue(iss)}
                 >
                   <td className="py-3.5 px-4 font-mono font-bold">
-                    {iss.id}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span>{iss.id}</span>
+                      {(iss.isDemo || iss.orderNumber?.startsWith('DEMO-') || iss.customerName?.includes('[DEMO]')) && (
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30">
+                          DEMO
+                        </span>
+                      )}
+                    </div>
                   </td>
 
                   <td className={`py-3.5 px-4 font-mono ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>

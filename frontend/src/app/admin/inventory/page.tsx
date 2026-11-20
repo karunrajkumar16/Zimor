@@ -13,14 +13,32 @@ import {
   Save,
   RefreshCw,
   Sliders,
+  History,
+  ArrowDownRight,
+  ArrowUpRight,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { useAdminTheme } from '@/context/AdminThemeContext';
 import type { Product } from '@/types';
 
+interface InventoryMovement {
+  id: string;
+  productId: string;
+  productName: string;
+  variationColor: string;
+  type: 'SALE_DEDUCTION' | 'RETURN_RESTOCK' | 'QUALITY_HOLD' | 'ATELIER_INWARD';
+  quantity: number;
+  balanceAfter: number;
+  referenceOrder?: string;
+  note: string;
+  timestamp: string;
+  isDemo?: boolean;
+}
+
 export default function AdminInventoryPage() {
   const { isDark } = useAdminTheme();
   const [products, setProducts] = useState<Product[]>([]);
+  const [movements, setMovements] = useState<InventoryMovement[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [stockChanges, setStockChanges] = useState<Record<string, number>>({});
@@ -30,15 +48,23 @@ export default function AdminInventoryPage() {
   const fetchInventory = async () => {
     setLoading(true);
     try {
-      const res = await apiFetch('/api/products');
-      const data = await res.json();
-      if (data.products) {
-        setProducts(data.products);
+      const [prodRes, moveRes] = await Promise.allSettled([
+        apiFetch('/api/products').then((r) => (r.ok ? r.json() : null)),
+        apiFetch('/api/admin/inventory-movements').then((r) => (r.ok ? r.json() : null)),
+      ]);
+
+      if (prodRes.status === 'fulfilled' && prodRes.value?.products) {
+        const prods = prodRes.value.products;
+        setProducts(prods);
         const map: Record<string, number> = {};
-        data.products.forEach((p: Product) => {
+        prods.forEach((p: Product) => {
           map[p.id] = p.stock ?? 0;
         });
         setStockChanges(map);
+      }
+
+      if (moveRes.status === 'fulfilled' && moveRes.value?.movements) {
+        setMovements(moveRes.value.movements);
       }
     } catch (err) {
       console.error('Failed to load inventory', err);
@@ -323,6 +349,83 @@ export default function AdminInventoryPage() {
           </table>
         </div>
       </div>
+
+      {/* Inventory Movements Ledger */}
+      {movements.length > 0 && (
+        <div className={`rounded-lg border overflow-hidden ${cardBg} mt-6`}>
+          <div className={`p-4 border-b flex items-center justify-between ${isDark ? 'border-[#36312C]' : 'border-[#E5DFD7]'}`}>
+            <div className="flex items-center gap-2">
+              <History className="w-4 h-4 text-[#B44220]" />
+              <h2 className="text-sm font-bold tracking-tight">Recent Atelier Inventory Movements</h2>
+              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30">
+                DEMO SANDBOX
+              </span>
+            </div>
+            <span className={`text-xs ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
+              {movements.length} log entries recorded
+            </span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs font-mono">
+              <thead>
+                <tr className={`border-b font-medium uppercase tracking-wider text-[10px] ${
+                  isDark ? 'border-[#36312C] bg-[#1E1C1A] text-[#B4B4B4]' : 'border-[#E5DFD7] bg-[#EEE8DF] text-[#5A534E]'
+                }`}>
+                  <th className="py-2.5 px-4 font-semibold">Timestamp</th>
+                  <th className="py-2.5 px-4 font-semibold">Silhouette</th>
+                  <th className="py-2.5 px-4 font-semibold">Color</th>
+                  <th className="py-2.5 px-4 font-semibold">Type</th>
+                  <th className="py-2.5 px-4 font-semibold text-center">Change</th>
+                  <th className="py-2.5 px-4 font-semibold text-center">Balance</th>
+                  <th className="py-2.5 px-4 font-semibold">Reference</th>
+                  <th className="py-2.5 px-4 font-semibold">Artisan Notes</th>
+                </tr>
+              </thead>
+              <tbody className={`divide-y ${isDark ? 'divide-[#36312C]' : 'divide-[#E5DFD7]'}`}>
+                {movements.map((m) => (
+                  <tr key={m.id} className={`transition-colors ${isDark ? 'hover:bg-[#2C2825]' : 'hover:bg-[#F3EEE6]'}`}>
+                    <td className="py-2.5 px-4 text-[11px] opacity-75">
+                      {new Date(m.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </td>
+                    <td className="py-2.5 px-4 font-bold text-[#B44220] dark:text-[#E07A5F]">
+                      {m.productName}
+                    </td>
+                    <td className="py-2.5 px-4">
+                      {m.variationColor}
+                    </td>
+                    <td className="py-2.5 px-4">
+                      <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
+                        m.type === 'SALE_DEDUCTION'
+                          ? 'bg-amber-500/15 text-amber-700 dark:text-amber-400'
+                          : m.type === 'RETURN_RESTOCK'
+                          ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
+                          : m.type === 'ATELIER_INWARD'
+                          ? 'bg-blue-500/15 text-blue-700 dark:text-blue-400'
+                          : 'bg-purple-500/15 text-purple-700 dark:text-purple-400'
+                      }`}>
+                        {m.type.replace('_', ' ')}
+                      </span>
+                    </td>
+                    <td className={`py-2.5 px-4 text-center font-bold ${m.quantity > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#B44220]'}`}>
+                      {m.quantity > 0 ? `+${m.quantity}` : m.quantity}
+                    </td>
+                    <td className="py-2.5 px-4 text-center font-bold">
+                      {m.balanceAfter}
+                    </td>
+                    <td className="py-2.5 px-4 text-[11px] font-bold">
+                      {m.referenceOrder || '—'}
+                    </td>
+                    <td className="py-2.5 px-4 text-[11px] opacity-80 max-w-xs truncate">
+                      {m.note}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

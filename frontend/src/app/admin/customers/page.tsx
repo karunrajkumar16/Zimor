@@ -191,9 +191,16 @@ export default function AdminCustomersPage() {
                           >
                             {cust.name ? cust.name[0].toUpperCase() : 'P'}
                           </div>
-                          <span className="font-semibold">
-                            {cust.name}
-                          </span>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-semibold">
+                              {cust.name}
+                            </span>
+                            {(cust.isDemo || cust.name?.includes('[DEMO]') || cust.email?.includes('zimor-test.internal')) && (
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30">
+                                DEMO
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </td>
 

@@ -205,6 +205,8 @@ export default function AdminOrdersPage() {
                     ? 'bg-[#C86D48]/10 text-[#9B4D2C] dark:bg-[#C86D48]/15 dark:text-[#E28965] border border-[#C86D48]/25'
                     : ord.status === 'Processing'
                     ? 'bg-[#C07D2B]/10 text-[#9C611B] dark:bg-[#C07D2B]/15 dark:text-[#F0B265] border border-[#C07D2B]/25'
+                    : ord.status === 'Cancelled'
+                    ? 'bg-red-500/10 text-red-700 dark:text-red-400 border border-red-500/25'
                     : 'bg-[#B44220]/10 text-[#B44220] dark:bg-[#B44220]/15 dark:text-[#E8A593] border border-[#B44220]/25';
 
                 return (
@@ -214,7 +216,18 @@ export default function AdminOrdersPage() {
                     onClick={() => openOrderModal(ord)}
                   >
                     <td className="py-3.5 px-4 font-mono font-bold text-[#B44220] dark:text-[#E07A5F]">
-                      {ord.orderNumber}
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span>{ord.orderNumber}</span>
+                        {(ord.isDemo || ord.orderNumber?.startsWith('DEMO-')) ? (
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30">
+                            DEMO
+                          </span>
+                        ) : (ord.paymentMode === 'test' || ord.paymentMethod?.includes('Test')) ? (
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                            TEST
+                          </span>
+                        ) : null}
+                      </div>
                     </td>
 
                     <td className="py-3.5 px-4 text-[#8C837A] dark:text-[#8A837C]">
@@ -297,7 +310,22 @@ export default function AdminOrdersPage() {
                   <span className="text-[10px] font-mono uppercase tracking-wider text-[#8C837A] dark:text-[#8A837C]">
                     Order Details
                   </span>
-                  <h2 className="text-lg font-bold font-mono text-[#B44220] dark:text-[#E07A5F]">{selectedOrder.orderNumber}</h2>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-bold font-mono text-[#B44220] dark:text-[#E07A5F]">{selectedOrder.orderNumber}</h2>
+                    {(selectedOrder.isDemo || selectedOrder.orderNumber?.startsWith('DEMO-')) ? (
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30">
+                        DEMO SANDBOX
+                      </span>
+                    ) : (selectedOrder.paymentMode === 'test' || selectedOrder.paymentMethod?.includes('Test')) ? (
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                        TEST MODE
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+                        LIVE PRODUCTION
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-[#8C837A] dark:text-[#8A837C]">{selectedOrder.date}</p>
                 </div>
                 <button

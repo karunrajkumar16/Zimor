@@ -26,6 +26,9 @@ interface PaymentRecord {
   gateway: string;
   status: 'Captured' | 'Pending' | 'Refunded';
   date: string;
+  isDemo?: boolean;
+  isTest?: boolean;
+  paymentMode?: string;
 }
 
 export default function AdminPaymentsPage() {
@@ -198,7 +201,18 @@ export default function AdminPaymentsPage() {
                   }`}
                 >
                   <td className="py-3.5 px-4 font-mono font-bold">
-                    {tx.id}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span>{tx.id}</span>
+                      {(tx.isDemo || tx.id.startsWith('DEMO-')) ? (
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30">
+                          DEMO
+                        </span>
+                      ) : (tx.isTest || tx.id.startsWith('TEST-') || tx.paymentMode === 'test' || tx.gateway?.includes('Test')) ? (
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                          TEST
+                        </span>
+                      ) : null}
+                    </div>
                   </td>
 
                   <td className={`py-3.5 px-4 font-mono ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>

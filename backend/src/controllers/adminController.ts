@@ -46,16 +46,40 @@ export async function getStats(req: Request, res: Response) {
     const rangeQuery = (req.query.range as string) || '30d'; // 7d, 30d, 90d, 12m, all
     const periodQuery = (req.query.period as string) || 'monthly'; // daily, weekly, monthly, yearly
 
-    // Strictly verified successful orders (exclude Cancelled)
-    const activeOrders = orders.filter((o: any) => o.status !== 'Cancelled');
-    const totalRevenue = activeOrders.reduce((sum: number, o: any) => sum + (o.total || o.totalAmount || 0), 0);
-    const totalOrders = activeOrders.length;
-    const pendingOrders = activeOrders.filter((o: any) => ['Processing', 'Confirmed', 'Pending'].includes(o.status)).length;
-    const completedOrders = activeOrders.filter((o: any) => o.status === 'Delivered').length;
+    // Strictly verified production orders (exclude Demo records, Test Mode orders, Cancelled, and Failed)
+    const productionOrders = orders.filter((o: any) =>
+      !o.isDemo &&
+      o.paymentMode !== 'test' &&
+      !o.paymentMethod?.includes('Test') &&
+      o.status !== 'Cancelled' &&
+      o.status !== 'Failed' &&
+      o.paymentStatus !== 'Failed' &&
+      (o.paymentStatus === 'Paid' || (o.paymentMethod?.includes('Cash on Delivery') && o.status === 'Delivered'))
+    );
+
+    // Revenue includes only captured amounts minus processed refunds
+    const totalRevenue = productionOrders.reduce((sum: number, o: any) => {
+      const paid = Number(o.amountPaid || o.total || 0);
+      const refunded = Number(o.amountRefunded || 0);
+      return sum + Math.max(0, paid - refunded);
+    }, 0);
+
+    const totalOrders = productionOrders.length;
+    const pendingOrders = productionOrders.filter((o: any) => ['Processing', 'Confirmed', 'Pending'].includes(o.status)).length;
+    const completedOrders = productionOrders.filter((o: any) => o.status === 'Delivered').length;
     const totalProducts = products.length;
     const lowStockProducts = products.filter((p: any) => (p.stock ?? 0) <= 5).length;
     const totalCustomers = customers.length;
     const averageOrderValue = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
+
+    // Separate Test Mode metrics to keep production financial reporting strictly isolated
+    const testOrders = orders.filter((o: any) =>
+      !o.isDemo &&
+      (o.paymentMode === 'test' || o.paymentMethod?.includes('Test'))
+    );
+    const testRevenue = testOrders
+      .filter((o: any) => o.paymentStatus === 'Paid')
+      .reduce((sum: number, o: any) => sum + (o.total || 0), 0);
 
     // Conversion rate: real calculation based on actual users & orders
     const conversionRate = totalCustomers > 0 && totalOrders > 0
@@ -85,7 +109,7 @@ export async function getStats(req: Request, res: Response) {
       const dayLabel = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       const isoDate = d.toISOString().split('T')[0];
 
-      const dayOrders = activeOrders.filter((o: any) => {
+      const dayOrders = productionOrders.filter((o: any) => {
         const od = o.createdAt ? new Date(o.createdAt) : new Date(o.date);
         return !isNaN(od.getTime()) && od.toISOString().split('T')[0] === isoDate;
       });
@@ -117,7 +141,7 @@ export async function getStats(req: Request, res: Response) {
     });
 
     // Populate weekly from real orders if available
-    activeOrders.forEach((o: any) => {
+    productionOrders.forEach((o: any) => {
       const od = o.createdAt ? new Date(o.createdAt) : new Date(o.date);
       if (!isNaN(od.getTime())) {
         const diffWeeks = Math.floor((now.getTime() - od.getTime()) / (7 * 24 * 60 * 60 * 1000));
@@ -134,7 +158,7 @@ export async function getStats(req: Request, res: Response) {
     const monthLabels = ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'];
     const monthlySeries = monthLabels.map((lbl, idx) => {
       const monthNum = idx + 6; // 6 to 11
-      const mOrders = activeOrders.filter((o: any) => {
+      const mOrders = productionOrders.filter((o: any) => {
         const od = o.createdAt ? new Date(o.createdAt) : new Date(o.date);
         return !isNaN(od.getTime()) && od.getMonth() + 1 === monthNum;
       });
@@ -155,7 +179,7 @@ export async function getStats(req: Request, res: Response) {
     const yearlySeries = [
       { label: '2024', date: '2024', revenue: 0, previousRevenue: 0, orders: 0, units: 0 },
       { label: '2025', date: '2025', revenue: 0, previousRevenue: 0, orders: 0, units: 0 },
-      { label: '2026 (YTD)', date: '2026', revenue: totalRevenue, previousRevenue: 0, orders: totalOrders, units: activeOrders.reduce((s: number, o: any) => s + (o.items?.reduce((is: number, i: any) => is + (i.quantity || 1), 0) || 0), 0) },
+      { label: '2026 (YTD)', date: '2026', revenue: totalRevenue, previousRevenue: 0, orders: totalOrders, units: productionOrders.reduce((s: number, o: any) => s + (o.items?.reduce((is: number, i: any) => is + (i.quantity || 1), 0) || 0), 0) },
     ];
 
     // 2. PER-PRODUCT / SILHOUETTE ANALYTICS (from genuine catalog products & real orders)
@@ -170,7 +194,7 @@ export async function getStats(req: Request, res: Response) {
       let liveRevenue = 0;
       const colorUnitsMap: Record<string, number> = {};
 
-      activeOrders.forEach((o: any) => {
+      productionOrders.forEach((o: any) => {
         if (Array.isArray(o.items)) {
           o.items.forEach((item: any) => {
             if (item.slug === slug || item.productId === p.id || item.productId === (p as any)._id?.toString()) {
@@ -212,7 +236,7 @@ export async function getStats(req: Request, res: Response) {
         const monthNum = idx + 6;
         let mUnits = 0;
         let mRev = 0;
-        activeOrders.forEach((o: any) => {
+        productionOrders.forEach((o: any) => {
           const od = o.createdAt ? new Date(o.createdAt) : new Date(o.date);
           if (!isNaN(od.getTime()) && od.getMonth() + 1 === monthNum) {
             o.items?.forEach((it: any) => {
@@ -379,7 +403,11 @@ export async function getStats(req: Request, res: Response) {
           media: config.useMockMedia ? 'local' : 'cloudinary',
           payment: config.useMockPayment ? 'mock' : 'razorpay',
         },
-        recentOrders: activeOrders.slice(0, 8),
+        testModeMetrics: {
+          totalOrders: testOrders.length,
+          totalRevenue: testRevenue,
+        },
+        recentOrders: productionOrders.slice(0, 8),
       },
     });
   } catch (err: any) {

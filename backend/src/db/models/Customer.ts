@@ -36,6 +36,8 @@ const CustomerSchema = new Schema(
     passwordHash: { type: String, select: false },
     addresses: [AddressSchema],
     orders: [{ type: String }],
+    isDemo: { type: Boolean, default: false, index: true },
+    demoExpiresAt: { type: Date, index: { expireAfterSeconds: 0 } },
   },
   {
     timestamps: true,

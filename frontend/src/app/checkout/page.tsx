@@ -86,6 +86,22 @@ export default function CheckoutPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Helper to load Razorpay Checkout script dynamically
+  const loadRazorpayScript = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if (typeof window !== 'undefined' && (window as any).Razorpay) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsPlacingOrder(true);
@@ -93,50 +109,65 @@ export default function CheckoutPage() {
 
     const paymentLabel =
       paymentMethod === 'upi'
-        ? 'UPI (Google Pay / PhonePe)'
+        ? 'UPI (Razorpay Test Mode)'
         : paymentMethod === 'card'
-          ? 'Credit / Debit Card'
+          ? 'Credit / Debit Card (Razorpay Test Mode)'
           : paymentMethod === 'netbanking'
-            ? 'Net Banking'
+            ? 'Net Banking (Razorpay Test Mode)'
             : 'Cash on Delivery';
 
     try {
-      let paymentId = 'pay_offline';
-
-      // If online payment, initialize payment with backend provider
-      if (paymentMethod !== 'cod') {
-        const payRes = await apiFetch('/api/checkout/create-payment', {
+      // 1. CASH ON DELIVERY FLOW
+      if (paymentMethod === 'cod') {
+        const orderRes = await apiFetch('/api/orders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            amount: finalTotal,
-            currency: 'INR',
-            notes: {
-              customerEmail: formData.email,
-              customerName: formData.fullName,
+            items: items.map((i) => ({
+              productId: i.productId,
+              productName: i.product.name,
+              slug: i.product.slug,
+              image: i.product.images[0]?.url || 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp',
+              selectedColor: i.selectedColor,
+              selectedSize: i.selectedSize,
+              quantity: i.quantity,
+            })),
+            customer: {
+              name: formData.fullName,
+              email: formData.email,
+              phone: formData.phone,
+              id: user?.id,
             },
+            shippingAddress: {
+              fullName: formData.fullName,
+              line1: formData.addressLine1,
+              line2: formData.addressLine2,
+              city: formData.city,
+              state: formData.state,
+              pincode: formData.pincode,
+              phone: formData.phone,
+            },
+            shippingMethod,
+            promoCode: appliedPromo,
+            paymentMethod: paymentLabel,
+            paymentStatus: 'Pending',
           }),
         });
 
-        const payData = await payRes.json();
-        const pOrder = payData.paymentOrder || payData.order;
-        if (pOrder) {
-          paymentId = pOrder.providerOrderId || pOrder.id || `pay_${Date.now()}`;
-          // Verify payment (Mock verification in dev)
-          await apiFetch('/api/checkout/verify-payment', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              razorpayOrderId: paymentId,
-              razorpayPaymentId: `pay_${Date.now()}`,
-              razorpaySignature: 'sig_dev_verified',
-            }),
-          });
+        const orderData = await orderRes.json();
+        const createdOrder = orderData.order || (orderData.success ? orderData.order : null);
+        if (!createdOrder) {
+          throw new Error(orderData.error || 'Failed to place Cash on Delivery order');
         }
+
+        clearCart();
+        router.push(`/checkout/success?orderId=${createdOrder.orderNumber}`);
+        return;
       }
 
-      // Submit validated order to backend database
-      const orderRes = await apiFetch('/api/orders', {
+      // 2. RAZORPAY TEST MODE FLOW
+      // Request server-side calculated Razorpay order
+      const payRes = await apiFetch('/api/checkout/create-payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -144,11 +175,13 @@ export default function CheckoutPage() {
             productId: i.productId,
             productName: i.product.name,
             slug: i.product.slug,
-            image: i.product.images[0]?.url || 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp',
+            image: i.product.images[0]?.url,
             selectedColor: i.selectedColor,
             selectedSize: i.selectedSize,
             quantity: i.quantity,
           })),
+          shippingMethod,
+          promoCode: appliedPromo,
           customer: {
             name: formData.fullName,
             email: formData.email,
@@ -163,21 +196,108 @@ export default function CheckoutPage() {
             pincode: formData.pincode,
             phone: formData.phone,
           },
-          shippingMethod,
-          promoCode: appliedPromo,
-          paymentMethod: paymentLabel,
-          paymentId,
         }),
       });
 
-      const orderData = await orderRes.json();
-      const createdOrder = orderData.order || (orderData.success ? orderData.order : null);
-      if (!createdOrder) {
-        throw new Error(orderData.error || 'Failed to place order');
+      const payData = await payRes.json();
+      if (!payRes.ok || !payData.success || !payData.razorpayOrderId) {
+        throw new Error(payData.error || 'Failed to initialize Razorpay checkout session.');
       }
 
-      clearCart();
-      router.push(`/checkout/success?orderId=${createdOrder.orderNumber}`);
+      // Ensure Razorpay SDK is loaded
+      const isLoaded = await loadRazorpayScript();
+      if (!isLoaded || typeof (window as any).Razorpay === 'undefined') {
+        throw new Error('Unable to load Razorpay secure checkout script. Please check your network connection.');
+      }
+
+      const rzpOptions = {
+        key: payData.keyId,
+        amount: payData.amount, // in paise, calculated strictly by backend
+        currency: payData.currency || 'INR',
+        name: 'ZIMOR India',
+        description: 'Luxury Leather Atelier',
+        image: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp',
+        order_id: payData.razorpayOrderId,
+        prefill: {
+          name: formData.fullName,
+          email: formData.email,
+          contact: formData.phone,
+        },
+        theme: {
+          color: '#B44220', // ZIMOR's signature executive terracotta
+        },
+        modal: {
+          ondismiss: () => {
+            setIsPlacingOrder(false);
+            setOrderError('Payment checkout window was closed before completion. You can retry at your convenience.');
+          },
+        },
+        handler: async (response: any) => {
+          try {
+            // Cryptographic server-side verification and order finalization
+            const verifyRes = await apiFetch('/api/checkout/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpayOrderId: response.razorpay_order_id,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySignature: response.razorpay_signature,
+                items: items.map((i) => ({
+                  productId: i.productId,
+                  productName: i.product.name,
+                  slug: i.product.slug,
+                  image: i.product.images[0]?.url,
+                  selectedColor: i.selectedColor,
+                  selectedSize: i.selectedSize,
+                  quantity: i.quantity,
+                })),
+                customer: {
+                  name: formData.fullName,
+                  email: formData.email,
+                  phone: formData.phone,
+                  id: user?.id,
+                },
+                shippingAddress: {
+                  fullName: formData.fullName,
+                  line1: formData.addressLine1,
+                  line2: formData.addressLine2,
+                  city: formData.city,
+                  state: formData.state,
+                  pincode: formData.pincode,
+                  phone: formData.phone,
+                },
+                shippingMethod,
+                promoCode: appliedPromo,
+              }),
+            });
+
+            const verifyData = await verifyRes.json();
+            if (!verifyRes.ok || !verifyData.success || !verifyData.order) {
+              throw new Error(verifyData.error || 'Server-side payment verification failed.');
+            }
+
+            clearCart();
+            router.push(`/checkout/success?orderId=${verifyData.order.orderNumber}`);
+          } catch (verifyErr: any) {
+            console.error('Payment verification failed:', verifyErr);
+            setOrderError(
+              verifyErr.message ||
+                `Payment verification could not be finalized. Please contact concierge with reference: ${response.razorpay_payment_id}`
+            );
+            setIsPlacingOrder(false);
+          }
+        },
+      };
+
+      const rzp = new (window as any).Razorpay(rzpOptions);
+      rzp.on('payment.failed', (failResponse: any) => {
+        console.error('Razorpay payment failed:', failResponse.error);
+        setOrderError(
+          `Payment transaction failed: ${failResponse.error?.description || 'Your payment was declined by the test gateway.'}`
+        );
+        setIsPlacingOrder(false);
+      });
+      rzp.open();
     } catch (err: any) {
       console.error('Order placement failed:', err);
       setOrderError(err.message || 'Something went wrong while placing your order. Please try again.');

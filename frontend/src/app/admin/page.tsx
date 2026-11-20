@@ -1834,7 +1834,14 @@ export default function AdminDashboardPage() {
                     }`}
                   >
                     <td className="py-2.5 px-3 font-semibold text-[#B44220]">
-                      {ord.orderNumber}
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span>{ord.orderNumber}</span>
+                        {(ord.isDemo || ord.orderNumber?.startsWith('DEMO-')) && (
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-bold tracking-wider uppercase bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30">
+                            DEMO
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="py-2.5 px-3 truncate max-w-[140px]">
                       {ord.shippingAddress?.fullName || 'Valued User'}

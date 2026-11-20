@@ -113,9 +113,25 @@ export interface Order {
   discount: number;
   shippingFee: number;
   total: number;
-  status: 'Processing' | 'Confirmed' | 'Dispatched' | 'Out for Delivery' | 'Delivered';
+  status: 'Pending' | 'Paid' | 'Processing' | 'Confirmed' | 'Dispatched' | 'Shipped' | 'Out for Delivery' | 'Delivered' | 'Cancelled' | 'Failed';
+  paymentStatus?: 'Pending' | 'Paid' | 'Failed' | 'Refunded';
+  paymentMode?: 'test' | 'live';
+  amountPaid?: number;
+  amountRefunded?: number;
+  refundId?: string;
+  webhookEventsProcessed?: string[];
+  inventoryDeducted?: boolean;
+  inventoryRestored?: boolean;
+  razorpayOrderId?: string;
+  razorpayPaymentId?: string;
+  razorpaySignature?: string;
+  promoCode?: string;
   trackingNumber: string;
   courierName: string;
   estimatedDelivery: string;
+  customerId?: string;
+  customerEmail?: string;
+  isDemo?: boolean;
+  demoExpiresAt?: Date;
 }
 

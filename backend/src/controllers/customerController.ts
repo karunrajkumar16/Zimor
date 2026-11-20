@@ -27,10 +27,19 @@ export async function getCustomers(req: Request, res: Response) {
         );
       });
 
-      // Filter only confirmed/captured orders (exclude Cancelled or Failed)
-      const validPaidOrders = customerOrders.filter((o: any) => o.status !== 'Cancelled');
+      // Filter only confirmed/captured genuine production orders (strictly exclude Demo records, Test Mode orders, Cancelled, Failed, or Refunded)
+      const validPaidOrders = customerOrders.filter(
+        (o: any) =>
+          !o.isDemo &&
+          o.paymentMode !== 'test' &&
+          !o.paymentMethod?.includes('Test') &&
+          o.status !== 'Cancelled' &&
+          o.status !== 'Failed' &&
+          o.paymentStatus === 'Paid'
+      );
       const totalSpent = validPaidOrders.reduce(
-        (sum: number, o: any) => sum + Number(o.total || o.totalAmount || 0),
+        (sum: number, o: any) =>
+          sum + Math.max(0, Number(o.amountPaid || o.total || 0) - Number(o.amountRefunded || 0)),
         0
       );
 

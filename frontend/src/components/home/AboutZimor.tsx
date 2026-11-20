@@ -88,7 +88,7 @@ export const AboutZimor: React.FC = () => {
       imgRefs.current.forEach((imgEl, idx) => {
         if (!imgEl) return;
         const parentCard = imgEl.parentElement;
-        if (!parentCard) return;
+        if (!parentCard || parentCard.offsetParent === null) return;
 
         const rect = parentCard.getBoundingClientRect();
 
@@ -193,10 +193,13 @@ export const AboutZimor: React.FC = () => {
         </div>
 
         {/* 4 MASONRY PHOTOGRAPHY FRAMES WITH SONGMONT-STYLE OVERLAID TEXT & LOCKED WINDOW PARALLAX */}
+        {/* Mobile: Hide "Details That Matter" (frame-quality); keep Craftsmanship, Everyday & Made in India */}
         {MASONRY_FRAMES.map((frame, idx) => (
           <div
             key={frame.id}
-            className={`group relative overflow-hidden bg-ink rounded-none shadow-none ${frame.gridClasses}`}
+            className={`group relative overflow-hidden bg-ink rounded-none shadow-none ${
+              frame.id === 'frame-quality' ? 'hidden md:block' : ''
+            } ${frame.gridClasses}`}
           >
             {/* Inner Oversized Image Canvas: Only this scrolls inside the locked container */}
             <div

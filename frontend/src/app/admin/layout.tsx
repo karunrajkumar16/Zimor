@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { AdminThemeProvider, useAdminTheme } from '@/context/AdminThemeContext';
+import AdminDemoBanner from '@/components/admin/AdminDemoBanner';
 
 interface NavSection {
   title: string;
@@ -110,7 +111,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
             liveAlerts.push({
               id: ord._id || ord.orderNumber,
               title: `Order ${ord.orderNumber || ord._id?.slice(-6)} ${ord.status || 'Received'}`,
-              subtitle: `${ord.items?.[0]?.productTitle || ord.items?.[0]?.title || 'Atelier Item'} • ₹${(ord.totalAmount || ord.total || 0).toLocaleString('en-IN')}`,
+              subtitle: `${ord.items?.[0]?.name || ord.items?.[0]?.productTitle || ord.items?.[0]?.title || 'Atelier Item'} • ₹${(ord.totalAmount || ord.total || 0).toLocaleString('en-IN')}`,
               type: 'order',
             });
           }
@@ -528,6 +529,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
 
         {/* Page Body */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+          <AdminDemoBanner />
           {children}
         </main>
       </div>

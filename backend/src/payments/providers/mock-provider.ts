@@ -56,4 +56,14 @@ export class MockPaymentProvider implements PaymentProvider {
     console.log('[MOCK PAYMENT] Getting order:', providerOrderId);
     return null; // Mock orders are not persisted
   }
+
+  async getPayment(paymentId: string): Promise<any> {
+    console.log('[MOCK PAYMENT] Getting payment:', paymentId);
+    return {
+      id: paymentId,
+      status: 'captured',
+      amount: 10000,
+      currency: 'INR',
+    };
+  }
 }

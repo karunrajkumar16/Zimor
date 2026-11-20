@@ -1,9 +1,9 @@
 // Selects payment provider based on USE_MOCK_PAYMENT env var
 // USE_MOCK_PAYMENT=true  → mock (dev only, always succeeds)
 // USE_MOCK_PAYMENT=false → Razorpay (production)
-import { PaymentProvider } from './providers/interface';
-import { MockPaymentProvider } from './providers/mock-provider';
-import { RazorpayProvider } from './providers/razorpay-provider';
+import { PaymentProvider } from './providers/interface.js';
+import { MockPaymentProvider } from './providers/mock-provider.js';
+import { RazorpayProvider } from './providers/razorpay-provider.js';
 
 let paymentProvider: PaymentProvider | null = null;
 
