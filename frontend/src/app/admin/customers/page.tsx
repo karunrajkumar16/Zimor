@@ -73,9 +73,8 @@ export default function AdminCustomersPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${
-            isDark ? 'bg-[#1E1C1A] border-[#36312C] text-[#B4B4B4]' : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#5A534E]'
-          }`}>
+          <span className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${isDark ? 'bg-[#1E1C1A] border-[#36312C] text-[#B4B4B4]' : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#5A534E]'
+            }`}>
             Total Users: {customers.length}
           </span>
         </div>
@@ -96,7 +95,7 @@ export default function AdminCustomersPage() {
             VIP Repeat Users
           </span>
           <p className="text-2xl font-bold mt-1 text-[#B44220] dark:text-[#E07A5F]">{vipCount}</p>
-          <p className={`text-[10px] mt-1 ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>Multi-silhouette purchasers</p>
+          <p className={`text-[10px] mt-1 ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>Multi-product purchasers</p>
         </div>
 
         <div className={`p-4 rounded-lg border ${cardBg}`}>
@@ -121,11 +120,10 @@ export default function AdminCustomersPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search users by name, email, phone..."
-              className={`w-full pl-9 pr-4 py-2 border rounded text-xs focus:outline-none focus:border-[#B44220] transition-colors ${
-                isDark
-                  ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA] placeholder-[#8A837C]'
-                  : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F] placeholder-[#8C837A]'
-              }`}
+              className={`w-full pl-9 pr-4 py-2 border rounded text-xs focus:outline-none focus:border-[#B44220] transition-colors ${isDark
+                ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA] placeholder-[#8A837C]'
+                : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F] placeholder-[#8C837A]'
+                }`}
             />
           </div>
 
@@ -139,11 +137,10 @@ export default function AdminCustomersPage() {
           <table className="w-full text-left text-xs">
             <thead>
               <tr
-                className={`border-b font-medium uppercase tracking-wider text-[10px] ${
-                  isDark
-                    ? 'border-[#36312C] bg-[#1E1C1A] text-[#B4B4B4]'
-                    : 'border-[#E5DFD7] bg-[#EEE8DF] text-[#5A534E]'
-                }`}
+                className={`border-b font-medium uppercase tracking-wider text-[10px] ${isDark
+                  ? 'border-[#36312C] bg-[#1E1C1A] text-[#B4B4B4]'
+                  : 'border-[#E5DFD7] bg-[#EEE8DF] text-[#5A534E]'
+                  }`}
               >
                 <th className="py-3 px-4">User Name</th>
                 <th className="py-3 px-4">Email</th>
@@ -176,18 +173,16 @@ export default function AdminCustomersPage() {
                   return (
                     <tr
                       key={cust.id}
-                      className={`transition-colors ${
-                        isDark ? 'hover:bg-[#2C2825]' : 'hover:bg-[#F3EEE6]'
-                      }`}
+                      className={`transition-colors ${isDark ? 'hover:bg-[#2C2825]' : 'hover:bg-[#F3EEE6]'
+                        }`}
                     >
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-2.5">
                           <div
-                            className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-[10px] border ${
-                              isDark
-                                ? 'bg-[#1E1C1A] border-[#36312C] text-[#E07A5F]'
-                                : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#B44220]'
-                            }`}
+                            className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-[10px] border ${isDark
+                              ? 'bg-[#1E1C1A] border-[#36312C] text-[#E07A5F]'
+                              : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#B44220]'
+                              }`}
                           >
                             {cust.name ? cust.name[0].toUpperCase() : 'P'}
                           </div>
@@ -226,11 +221,10 @@ export default function AdminCustomersPage() {
                             VIP User
                           </span>
                         ) : (
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
-                            isDark
-                              ? 'bg-[#1E1C1A] text-[#B4B4B4] border-[#36312C]'
-                              : 'bg-[#EDE7DE] text-[#5A534E] border-[#E5DFD7]'
-                          }`}>
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${isDark
+                            ? 'bg-[#1E1C1A] text-[#B4B4B4] border-[#36312C]'
+                            : 'bg-[#EDE7DE] text-[#5A534E] border-[#E5DFD7]'
+                            }`}>
                             Standard
                           </span>
                         )}
@@ -239,11 +233,10 @@ export default function AdminCustomersPage() {
                       <td className="py-3.5 px-4 text-right">
                         <button
                           onClick={() => setSelectedCustomer(cust)}
-                          className={`px-2.5 py-1 rounded text-xs font-semibold border transition-colors ${
-                            isDark
-                              ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA] hover:border-[#B44220]'
-                              : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F] hover:border-[#B44220]'
-                          }`}
+                          className={`px-2.5 py-1 rounded text-xs font-semibold border transition-colors ${isDark
+                            ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA] hover:border-[#B44220]'
+                            : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F] hover:border-[#B44220]'
+                            }`}
                         >
                           Inspect
                         </button>
@@ -261,13 +254,11 @@ export default function AdminCustomersPage() {
       {selectedCustomer && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
           <div
-            className={`w-full max-w-md p-6 rounded-lg border shadow-2xl space-y-4 ${
-              isDark ? 'bg-[#24211F] border-[#36312C] text-[#E8E1DA]' : 'bg-[#FFFFFF] border-[#E5DFD7] text-[#24211F]'
-            }`}
+            className={`w-full max-w-md p-6 rounded-lg border shadow-2xl space-y-4 ${isDark ? 'bg-[#24211F] border-[#36312C] text-[#E8E1DA]' : 'bg-[#FFFFFF] border-[#E5DFD7] text-[#24211F]'
+              }`}
           >
-            <div className={`flex items-center justify-between border-b pb-3 ${
-              isDark ? 'border-[#36312C]' : 'border-[#E5DFD7]'
-            }`}>
+            <div className={`flex items-center justify-between border-b pb-3 ${isDark ? 'border-[#36312C]' : 'border-[#E5DFD7]'
+              }`}>
               <h3 className="text-sm font-bold">User Profile</h3>
               <button
                 onClick={() => setSelectedCustomer(null)}

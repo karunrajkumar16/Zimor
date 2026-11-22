@@ -68,7 +68,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Inter:wght@400;500;600;700&display=swap"
         />
       </head>
       <body className="font-secondary antialiased bg-canvas text-ink flex flex-col min-h-screen font-normal">

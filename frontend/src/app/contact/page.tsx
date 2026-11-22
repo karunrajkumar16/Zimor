@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Phone, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { SOCIAL_LINKS } from '@/data/social';
 import {
   InstagramIcon,
@@ -117,7 +117,7 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* 3. The 3 Direct Contact Channels (24×7, Informative & Perfectly Balanced) */}
+      {/* 3. Direct Contact Channels (WhatsApp & Email) */}
       <section className="bg-white border-b border-line py-14 sm:py-18 md:py-22">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Subhead */}
@@ -133,8 +133,8 @@ export default function ContactPage() {
             </p>
           </div>
 
-          {/* 3 Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+          {/* 2 Cards Grid: WhatsApp & Email */}
+          <div className="grid grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto gap-6 lg:gap-8">
             {/* Channel 1: WhatsApp */}
             <div className="group bg-[#FAFAFA] border border-line rounded-xs p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 hover:bg-white hover:shadow-lift hover:border-[#25D366]/40">
               <div>
@@ -177,47 +177,7 @@ export default function ContactPage() {
               </a>
             </div>
 
-            {/* Channel 2: Telephone */}
-            <div className="group bg-[#FAFAFA] border border-line rounded-xs p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 hover:bg-white hover:shadow-lift hover:border-[#16A34A]/40">
-              <div>
-                {/* Clean Top Icon Circle */}
-                <div className="w-12 h-12 rounded-full bg-black/5 border border-[#b4b4b4]/30 flex items-center justify-center text-black mb-5 transition-all duration-300 group-hover:scale-110 group-hover:bg-[#16A34A] group-hover:border-[#16A34A] group-hover:text-white group-hover:shadow-sm">
-                  <Phone className="w-5 h-5 stroke-[1.8]" />
-                </div>
-
-                {/* Title & Contact Details */}
-                <h3 className="font-primary text-[20px] sm:text-[22px] font-semibold text-black tracking-tight mb-1 group-hover:text-[#16A34A] transition-colors">
-                  By Telephone
-                </h3>
-                <p className="text-[15px] font-medium text-black mb-3">
-                  +91 86046 47888
-                </p>
-
-                {/* Informative Guidance */}
-                <div className="space-y-2 text-xs sm:text-[12.5px] text-[#555555] leading-relaxed pt-3 border-t border-line/80 mb-6">
-                  <p>
-                    <strong className="text-black font-medium">Best for:</strong> Direct voice consultations, urgent address adjustments, transit updates, corporate orders, and bespoke gifting.
-                  </p>
-                  <p className="text-[11.5px] text-[#777777]">
-                    • Direct spoken support with our specialists
-                  </p>
-                  <p className="text-[11.5px] text-[#777777]">
-                    • Toll-free assistance across all Indian states
-                  </p>
-                </div>
-              </div>
-
-              {/* Action Link Button */}
-              <a
-                href="tel:+918604647888"
-                className="w-full py-3 px-4 bg-black text-white hover:bg-[#16A34A] font-primary text-[12.5px] font-medium rounded-xs transition-all duration-200 flex items-center justify-center gap-2 text-center shadow-xs"
-              >
-                <span>Call +91 86046 47888</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </a>
-            </div>
-
-            {/* Channel 3: Email */}
+            {/* Channel 2: Email */}
             <div className="group bg-[#FAFAFA] border border-line rounded-xs p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 hover:bg-white hover:shadow-lift hover:border-[#EA4335]/40">
               <div>
                 {/* Clean Top Icon Circle */}

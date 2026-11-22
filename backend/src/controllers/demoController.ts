@@ -4,7 +4,6 @@ import { connectToDatabase } from '../db/mongodb.js';
 import { OrderModel } from '../db/models/Order.js';
 import { CustomerModel } from '../db/models/Customer.js';
 import { ProductModel } from '../db/models/Product.js';
-import { IssueModel } from '../db/models/Issue.js';
 import { InventoryMovementModel } from '../db/models/InventoryMovement.js';
 
 const DEMO_LIFESPAN_DAYS = 7;
@@ -15,10 +14,9 @@ export async function clearDemoDataHandler(req: Request, res: Response) {
 
     // STRICT ISOLATION SAFETY GUARANTEE:
     // Only delete records with isDemo: true. Never delete genuine business records.
-    const [deletedOrders, deletedCustomers, deletedIssues, deletedMovements] = await Promise.all([
+    const [deletedOrders, deletedCustomers, deletedMovements] = await Promise.all([
       OrderModel.deleteMany({ isDemo: true }),
       CustomerModel.deleteMany({ isDemo: true }),
-      IssueModel.deleteMany({ isDemo: true }),
       InventoryMovementModel.deleteMany({ isDemo: true }),
     ]);
 
@@ -28,7 +26,6 @@ export async function clearDemoDataHandler(req: Request, res: Response) {
       purged: {
         orders: deletedOrders.deletedCount,
         customers: deletedCustomers.deletedCount,
-        issues: deletedIssues.deletedCount,
         inventoryMovements: deletedMovements.deletedCount,
       },
     });
@@ -46,14 +43,12 @@ export async function getDemoStatusHandler(req: Request, res: Response) {
     await Promise.all([
       OrderModel.deleteMany({ isDemo: true, demoExpiresAt: { $lte: now } }),
       CustomerModel.deleteMany({ isDemo: true, demoExpiresAt: { $lte: now } }),
-      IssueModel.deleteMany({ isDemo: true, demoExpiresAt: { $lte: now } }),
       InventoryMovementModel.deleteMany({ isDemo: true, demoExpiresAt: { $lte: now } }),
     ]);
 
-    const [demoOrdersCount, demoCustomersCount, demoIssuesCount, demoMovementsCount, sampleOrder] = await Promise.all([
+    const [demoOrdersCount, demoCustomersCount, demoMovementsCount, sampleOrder] = await Promise.all([
       OrderModel.countDocuments({ isDemo: true }),
       CustomerModel.countDocuments({ isDemo: true }),
-      IssueModel.countDocuments({ isDemo: true }),
       InventoryMovementModel.countDocuments({ isDemo: true }),
       OrderModel.findOne({ isDemo: true }).select('demoExpiresAt createdAt').lean(),
     ]);
@@ -66,7 +61,6 @@ export async function getDemoStatusHandler(req: Request, res: Response) {
       demoCounts: {
         orders: demoOrdersCount,
         customers: demoCustomersCount,
-        issues: demoIssuesCount,
         inventoryMovements: demoMovementsCount,
       },
       expiresAt: (sampleOrder as any)?.demoExpiresAt || null,
@@ -86,7 +80,6 @@ export async function seedDemoDataHandler(req: Request, res: Response) {
     await Promise.all([
       OrderModel.deleteMany({ isDemo: true }),
       CustomerModel.deleteMany({ isDemo: true }),
-      IssueModel.deleteMany({ isDemo: true }),
       InventoryMovementModel.deleteMany({ isDemo: true }),
     ]);
 
@@ -611,78 +604,7 @@ export async function seedDemoDataHandler(req: Request, res: Response) {
       })
     );
 
-    // 5. Seed 5 Realistic Support Tickets / Atelier Alerts
-    const demoIssuesData = [
-      {
-        orderNumber: 'DEMO-ZMR-20261114-101',
-        customerName: 'Ananya Roy [DEMO]',
-        customerPhone: '+91 99999 00001',
-        customerEmail: 'demo.patron.ananya@zimor-test.internal',
-        category: 'Transit Damage',
-        description: 'Outer luxury gift sleeve sustained slight pressure crease during BlueDart transit. Bag itself pristine.',
-        date: formatDateString(getDateOffset(5, 14)),
-        status: 'Under Review',
-        resolutionNote: 'Concierge contacted client; sending complimentary monogrammed leather luggage tag as goodwill.',
-      },
-      {
-        orderNumber: 'DEMO-ZMR-20261115-103',
-        customerName: 'Meera Sen [DEMO]',
-        customerPhone: '+91 99999 00003',
-        customerEmail: 'demo.patron.meera@zimor-test.internal',
-        category: 'Hardware Defect',
-        description: 'Antique brass swivel clip on shoulder strap felt slightly stiff on initial turn.',
-        date: formatDateString(getDateOffset(4, 11)),
-        status: 'Replacement Sent',
-        resolutionNote: 'Dispatched pre-inspected replacement hardware strap via priority courier.',
-      },
-      {
-        orderNumber: 'DEMO-ZMR-20261116-105',
-        customerName: 'Dr. Sunita Rao [DEMO]',
-        customerPhone: '+91 99999 00005',
-        customerEmail: 'demo.patron.sunita@zimor-test.internal',
-        category: 'Size Exchange',
-        description: 'Client loves the Saddle Tan leather finish, requests sizing up from Classic Shoulder Bag to Delo Tote.',
-        date: formatDateString(getDateOffset(3, 16)),
-        status: 'Open',
-        resolutionNote: 'Awaiting return intake at atelier to process Delo Tote upgrade differential.',
-      },
-      {
-        orderNumber: 'DEMO-ZMR-20261116-107',
-        customerName: 'Kavita Deshmukh [DEMO]',
-        customerPhone: '+91 99999 00008',
-        customerEmail: 'demo.patron.kavita@zimor-test.internal',
-        category: 'Return Request',
-        description: 'Order cancelled by patron before atelier dispatch; refund initiated.',
-        date: formatDateString(getDateOffset(4, 19)),
-        status: 'Refund Issued',
-        resolutionNote: 'Payment reversal verified on gateway simulator. Reference #SIM-RFD-88219.',
-      },
-      {
-        orderNumber: 'DEMO-ZMR-20261114-102',
-        customerName: 'Vikramaditya Mehta [DEMO]',
-        customerPhone: '+91 99999 00002',
-        customerEmail: 'demo.patron.vikram@zimor-test.internal',
-        category: 'Missing Accessory',
-        description: 'Cotton canvas dustbag and warranty authenticity certificate card not inside main tote pocket.',
-        date: formatDateString(getDateOffset(5, 17)),
-        status: 'Resolved',
-        resolutionNote: 'Overnighted presentation folio with embossed authenticity card & spare dustbag.',
-      },
-    ];
-
-    const createdIssues = await Promise.all(
-      demoIssuesData.map((iss) =>
-        IssueModel.create({
-          ...iss,
-          category: iss.category as any,
-          status: iss.status as any,
-          isDemo: true,
-          demoExpiresAt: expiresAt,
-        } as any)
-      )
-    );
-
-    // 6. Seed 10 Realistic Inventory Movement Logs
+    // 5. Seed 10 Realistic Inventory Movement Logs
     const demoMovementsData = [
       {
         productId: prodMap['zimor-delo-tote']?._id?.toString() || 'delo-1',
@@ -813,7 +735,6 @@ export async function seedDemoDataHandler(req: Request, res: Response) {
       summary: {
         customers: createdCustomers.length,
         orders: createdOrders.length,
-        issues: createdIssues.length,
         inventoryMovements: createdMovements.length,
         lifespan: '7 Days',
         expiresAt: expiresAt.toISOString(),

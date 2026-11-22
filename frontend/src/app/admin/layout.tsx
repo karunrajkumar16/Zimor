@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -12,9 +12,7 @@ import {
   Image as ImageIcon,
   Megaphone,
   Boxes,
-  AlertOctagon,
   Star,
-  Settings,
   LogOut,
   Sun,
   Moon,
@@ -25,36 +23,38 @@ import {
   Bell,
   CheckCircle2,
   AlertTriangle,
+  Search,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { AdminThemeProvider, useAdminTheme } from '@/context/AdminThemeContext';
 import AdminDemoBanner from '@/components/admin/AdminDemoBanner';
 
+interface NavItem {
+  label: string;
+  href: string;
+  icon: React.ElementType;
+  badge?: string;
+}
+
 interface NavSection {
   title: string;
-  items: {
-    label: string;
-    href: string;
-    icon: React.ElementType;
-    badge?: string;
-  }[];
+  items: NavItem[];
 }
 
 const NAV_SECTIONS: NavSection[] = [
   {
-    title: 'INTELLIGENCE & CRM',
+    title: 'MENU',
     items: [
-      { label: 'Executive Dashboard', href: '/admin', icon: LayoutDashboard },
+      { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     ],
   },
   {
     title: 'STORE OPERATIONS',
     items: [
-      { label: 'Products Studio', href: '/admin/products', icon: Package },
+      { label: 'Products', href: '/admin/products', icon: Package },
       { label: 'Orders Pipeline', href: '/admin/orders', icon: ShoppingBag },
-      { label: 'Order Issues & Returns', href: '/admin/issues', icon: AlertOctagon },
       { label: 'Inventory Units', href: '/admin/inventory', icon: Boxes },
-      { label: 'Transactions Ledger', href: '/admin/payments', icon: CreditCard },
+      { label: 'Transactions', href: '/admin/payments', icon: CreditCard },
     ],
   },
   {
@@ -69,7 +69,6 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: 'Hero Banners', href: '/admin/banners', icon: ImageIcon },
       { label: 'Announcement Bar', href: '/admin/announcements', icon: Megaphone },
-      { label: 'System Settings', href: '/admin/settings', icon: Settings },
     ],
   },
 ];
@@ -81,6 +80,10 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [adminUser, setAdminUser] = useState<{ email: string; name: string; role?: string } | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [isExpandedMobile, setIsExpandedMobile] = useState(false);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [alerts, setAlerts] = useState<Array<{
     id: string;
@@ -88,6 +91,51 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
     subtitle: string;
     type: 'order' | 'inventory';
   }>>([]);
+
+  // Detect touch-only devices to switch from hover to tap-based expansion
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const checkTouch = () => {
+        const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        const hoverNone = window.matchMedia('(hover: none)').matches;
+        setIsTouchDevice(hasTouch && hoverNone);
+      };
+      checkTouch();
+      window.addEventListener('resize', checkTouch);
+      return () => window.removeEventListener('resize', checkTouch);
+    }
+  }, []);
+
+
+  // Anti-flicker hover handlers with 160ms debounce buffer
+  const handleMouseEnter = () => {
+    if (isTouchDevice) return;
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    if (isTouchDevice) return;
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    hoverTimeoutRef.current = setTimeout(() => {
+      setIsHovered(false);
+    }, 160);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const isExpanded = isTouchDevice ? isExpandedMobile : isHovered;
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -190,10 +238,10 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   if (isAuthenticated === null) {
     return (
       <div
-        className={`min-h-screen flex items-center justify-center p-6 ${isDark ? 'bg-[#191715] text-[#E8E1DA]' : 'bg-[#F7F5F2] text-[#24211F]'
+        className={`min-h-screen flex items-center justify-center p-6 admin-panel-theme ${isDark ? 'bg-[#121824] text-[#E2E8F0]' : 'bg-[#F1F5F9] text-[#1C2434]'
           }`}
       >
-        <div className="w-8 h-8 border-2 border-[#B44220] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#2563EB] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -201,18 +249,18 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   if (!isAuthenticated) {
     return (
       <div
-        className={`min-h-screen flex items-center justify-center p-6 ${isDark ? 'bg-[#191715] text-[#E8E1DA]' : 'bg-[#F7F5F2] text-[#24211F]'
+        className={`min-h-screen flex items-center justify-center p-6 admin-panel-theme ${isDark ? 'bg-[#121824] text-[#E2E8F0]' : 'bg-[#F1F5F9] text-[#1C2434]'
           }`}
       >
         <div className="flex flex-col items-center gap-4 text-center max-w-sm">
-          <div className="w-8 h-8 border-2 border-current border-t-transparent rounded-full animate-spin text-[#B44220]" />
+          <div className="w-8 h-8 border-2 border-current border-t-transparent rounded-full animate-spin text-[#2563EB]" />
           <div>
             <p className="text-sm font-semibold">Redirecting to Admin Login...</p>
-            <p className="text-xs opacity-60 mt-1">Please sign in to access the atelier control portal.</p>
+            <p className="text-xs opacity-60 mt-1">Please sign in to access the control portal.</p>
           </div>
           <Link
             href="/admin/login"
-            className="px-4 py-2 bg-[#B44220] hover:bg-[#9B381B] text-[#F7F5F2] font-semibold text-xs rounded transition-colors shadow-xs mt-2"
+            className="px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-medium text-xs rounded-lg transition-colors shadow-xs mt-2"
           >
             Go to Admin Login
           </Link>
@@ -221,7 +269,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
     );
   }
 
-  let activeLabel = 'Executive Analytics';
+  let activeLabel = 'Dashboard';
   for (const sec of NAV_SECTIONS) {
     for (const item of sec.items) {
       if (item.href === pathname) {
@@ -233,92 +281,145 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
 
   return (
     <div
-      className={`min-h-screen flex flex-col lg:flex-row font-sans transition-colors duration-150 ${isDark ? 'bg-[#191715] text-[#E8E1DA]' : 'bg-[#F7F5F2] text-[#24211F]'
+      className={`min-h-screen flex flex-col lg:flex-row admin-panel-theme transition-colors duration-150 ${isDark ? 'bg-[#121824] text-[#E2E8F0]' : 'bg-[#F1F5F9] text-[#1C2434]'
         }`}
     >
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 lg:hidden"
+          className="fixed inset-0 bg-black/50 backdrop-blur-xs z-40 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
-      {/* Audi CRM-Style Precision Sidebar */}
+      {/* Desktop Spacer: reserves collapsed sidebar width (72px) so dashboard content never shifts on hover */}
+      <div className="hidden lg:block w-[72px] shrink-0" />
+
+      {/* TailAdmin Clean Modern SaaS Sidebar with Hover-Based Smooth Expand & Collapse */}
       <aside
-        className={`fixed lg:sticky top-0 h-screen w-64 z-50 flex flex-col shrink-0 border-r transition-transform duration-200 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } ${isDark
-            ? 'bg-[#1E1C1A] border-[#36312C]'
-            : 'bg-[#FFFFFF] border-[#E5DFD7]'
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className={`fixed top-0 left-0 h-screen z-50 flex flex-col shrink-0 border-r transition-all duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          } ${isExpanded ? 'w-64 shadow-2xl' : 'w-64 lg:w-[72px] shadow-none'
+          } ${isDark ? 'bg-[#1E1C1A] border-[#2E3A47]' : 'bg-white border-[#E2E8F0]'
           }`}
       >
         {/* Brand Header */}
         <div
-          className={`h-16 px-5 flex items-center justify-between border-b shrink-0 ${isDark ? 'border-[#36312C]' : 'border-[#E5DFD7]'
+          className={`h-16 flex items-center justify-between border-b shrink-0 px-4 transition-all duration-300 ${isDark ? 'border-[#2E3A47]' : 'border-[#E2E8F0]'
             }`}
         >
-          <Link href="/admin" className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-md flex items-center justify-center font-bold text-xs tracking-wider bg-[#B44220] text-[#F7F5F2]">
+          <Link
+            href="/admin"
+            className="flex items-center gap-3 overflow-hidden min-w-0"
+            title="ZIMOR Admin Panel"
+          >
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm bg-[#2563EB] text-white shadow-xs shrink-0">
               Z
             </div>
-            <div>
-              <span className="font-bold text-xs tracking-widest uppercase block leading-none">
+            <div
+              className={`transition-all duration-200 overflow-hidden whitespace-nowrap ${isExpanded ? 'opacity-100 max-w-[160px]' : 'opacity-0 max-w-0 hidden lg:hidden'
+                } ${isSidebarOpen ? 'opacity-100 max-w-[160px] !block' : ''}`}
+            >
+              <span className="font-bold text-base tracking-tight block leading-none text-[#1C2434] dark:text-white">
                 ZIMOR
               </span>
-              <span
-                className={`text-[9px] font-mono tracking-wider uppercase block mt-1 ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'
-                  }`}
-              >
-                Executive CRM
+              <span className="text-xs font-normal text-[#64748B] dark:text-[#94A3B8] block mt-0.5">
+                Admin Panel
               </span>
             </div>
           </Link>
 
+          {/* Close button on mobile */}
           <button
             onClick={() => setIsSidebarOpen(false)}
-            className="lg:hidden p-1.5 rounded text-[#8C837A] hover:text-[#24211F] dark:hover:text-[#E8E1DA]"
+            className="lg:hidden p-1.5 rounded-md text-[#64748B] hover:text-[#1C2434] dark:hover:text-white"
             aria-label="Close menu"
           >
             <X className="w-5 h-5" />
           </button>
+
+          {/* Touch toggle button on touch-enabled devices at desktop widths */}
+          {isTouchDevice && (
+            <button
+              onClick={() => setIsExpandedMobile(!isExpandedMobile)}
+              className="hidden lg:flex p-1.5 rounded-md text-[#64748B] hover:text-[#1C2434] dark:hover:text-white"
+              aria-label={isExpandedMobile ? 'Collapse sidebar' : 'Expand sidebar'}
+              title={isExpandedMobile ? 'Collapse sidebar' : 'Expand sidebar'}
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
         {/* Navigation Sections */}
-        <div className="flex-1 overflow-y-auto px-3.5 py-4 space-y-6 scrollbar-thin">
+        <div className="flex-1 overflow-y-auto px-2 lg:px-2.5 py-4 space-y-4 scrollbar-thin overflow-x-hidden">
           {NAV_SECTIONS.map((section) => (
             <div key={section.title} className="space-y-1">
-              <p
-                className={`px-3 text-[9px] font-mono font-semibold tracking-widest uppercase mb-2 ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'
-                  }`}
-              >
-                {section.title}
-              </p>
+              {/* Section Header: visible when expanded; subtle divider line when collapsed */}
+              <div className="px-2">
+                <p
+                  className={`text-[11px] font-semibold text-[#8A99AD] dark:text-[#64748B] uppercase tracking-wider transition-all duration-200 whitespace-nowrap overflow-hidden ${isExpanded ? 'opacity-100 max-h-6 mb-1.5' : 'opacity-0 max-h-0 hidden'
+                    } ${isSidebarOpen ? 'opacity-100 max-h-6 mb-1.5 !block' : ''}`}
+                >
+                  {section.title}
+                </p>
+                {!isExpanded && !isSidebarOpen && (
+                  <div className="h-px my-2 mx-1 bg-[#E2E8F0] dark:bg-[#2E3A47]/60" />
+                )}
+              </div>
+
               {section.items.map((item) => {
                 const Icon = item.icon;
                 const isActive = pathname === item.href;
+
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    onClick={() => setIsSidebarOpen(false)}
-                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${isActive
-                      ? 'bg-[#B44220] text-[#FFFFFF] font-semibold'
-                      : isDark
-                        ? 'text-[#B4B4B4] hover:text-[#E8E1DA] hover:bg-[#2A2724]'
-                        : 'text-[#5A534E] hover:text-[#24211F] hover:bg-[#F2ECE4]'
-                      }`}
+                    onClick={() => {
+                      if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+                        setIsSidebarOpen(false);
+                      }
+                    }}
+                    title={!isExpanded && !isSidebarOpen ? item.label : undefined}
+                    className={`group flex items-center justify-between rounded-lg text-sm font-medium transition-all ${
+                      isActive
+                        ? 'bg-[#F1F5F9] dark:bg-[#252E3E] text-[#2563EB] dark:text-white font-semibold'
+                        : isDark
+                        ? 'text-[#94A3B8] hover:text-white hover:bg-[#252E3E]/70'
+                        : 'text-[#64748B] hover:text-[#1C2434] hover:bg-[#F1F5F9]'
+                    } ${
+                      isExpanded || isSidebarOpen
+                        ? 'px-3 py-2.5'
+                        : 'px-0 py-2.5 justify-center'
+                    }`}
                   >
-                    <div className="flex items-center gap-2.5">
-                      <Icon className={`w-4 h-4 ${isActive ? 'text-[#FFFFFF] stroke-[2.2]' : 'stroke-[1.8]'}`} />
-                      <span>{item.label}</span>
-                    </div>
-                    {item.badge && (
+                    <div
+                      className={`flex items-center gap-3 min-w-0 ${
+                        isExpanded || isSidebarOpen ? 'flex-1' : 'justify-center'
+                        }`}
+                    >
+                      <Icon
+                        className={`w-5 h-5 shrink-0 transition-colors ${
+                          isActive
+                            ? 'text-[#2563EB] dark:text-white'
+                            : 'text-[#64748B] dark:text-[#94A3B8] group-hover:text-[#1C2434] dark:group-hover:text-white'
+                        }`}
+                      />
                       <span
-                        className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${isActive
-                          ? 'bg-white/20 text-white'
-                          : 'bg-[#B44220]/15 text-[#B44220] dark:text-[#E07A5F]'
-                          }`}
+                        className={`truncate whitespace-nowrap transition-all duration-200 ${
+                          isExpanded || isSidebarOpen
+                            ? 'opacity-100 max-w-[150px]'
+                            : 'opacity-0 max-w-0 hidden'
+                        }`}
                       >
+                        {item.label}
+                      </span>
+                    </div>
+
+                    {(isExpanded || isSidebarOpen) && item.badge && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400 shrink-0">
                         {item.badge}
                       </span>
                     )}
@@ -328,149 +429,184 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
             </div>
           ))}
 
-          {/* Quick SLA & Live System Status Badge */}
-          <div
-            className={`p-3 rounded-xl border space-y-1.5 mt-4 ${isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FAF8F5] border-[#E8E2D9]'
-              }`}
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-[#B44220] dark:text-[#E07A5F]">
-                Atelier Telemetry
-              </span>
-              <span className="flex items-center gap-1.5 text-[10px] font-mono text-emerald-600 dark:text-emerald-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Live 99.9%
-              </span>
-            </div>
-            <p className={`text-[11px] leading-relaxed ${isDark ? 'text-[#8A837C]' : 'text-[#6E6760]'}`}>
-              Verified MongoDB Atlas stream & Cloudinary CDN integration active.
-            </p>
-            <a
-              href="/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-2 w-full py-1.5 px-3 bg-[#B44220]/10 hover:bg-[#B44220]/20 text-[#B44220] dark:text-[#E07A5F] rounded text-[11px] font-medium flex items-center justify-center gap-1.5 transition-colors"
-            >
-              <ExternalLink className="w-3 h-3" />
-              <span>Inspect Storefront</span>
-            </a>
+          {/* SLA & Live System Status Badge */}
+          <div className="pt-2">
+            {isExpanded || isSidebarOpen ? (
+              <div
+                className={`p-3.5 rounded-xl border space-y-1.5 transition-all duration-200 ${isDark ? 'bg-[#252E3E]/60 border-[#2E3A47]' : 'bg-[#F8FAFC] border-[#E2E8F0]'
+                  }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-[#1C2434] dark:text-white">
+                    System Status
+                  </span>
+                  <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    Live 99.9%
+                  </span>
+                </div>
+                <p className="text-xs text-[#64748B] dark:text-[#94A3B8] leading-relaxed">
+                  MongoDB Atlas stream &amp; Cloudinary CDN integration verified.
+                </p>
+                <a
+                  href="/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 w-full py-1.5 px-3 bg-white dark:bg-[#1E1C1A] border border-[#E2E8F0] dark:border-[#2E3A47] hover:border-[#2563EB] text-[#1C2434] dark:text-white rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>View Live Storefront</span>
+                </a>
+              </div>
+            ) : (
+              <div
+                className="w-10 h-10 mx-auto rounded-lg flex items-center justify-center border border-emerald-500/20 bg-emerald-500/10 cursor-pointer"
+                title="System Status: Live 99.9% • MongoDB Atlas Verified"
+              >
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              </div>
+            )}
           </div>
         </div>
 
         {/* Sidebar Footer: Admin Profile */}
         <div
-          className={`p-3.5 border-t shrink-0 ${isDark ? 'border-[#36312C] bg-[#191715]' : 'border-[#E5DFD7] bg-[#FAF8F5]'
-            }`}
+          className={`border-t shrink-0 transition-all duration-300 ${isExpanded || isSidebarOpen ? 'p-3.5' : 'p-2'
+            } ${isDark ? 'border-[#2E3A47] bg-[#1E1C1A]' : 'border-[#E2E8F0] bg-white'}`}
         >
-          <div
-            className={`flex items-center justify-between p-2 rounded-lg border ${isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
-              }`}
-          >
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-7 h-7 rounded flex items-center justify-center text-xs font-bold shrink-0 bg-[#B44220] text-white">
-                {adminUser?.email ? adminUser.email[0].toUpperCase() : 'Z'}
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-semibold truncate leading-tight">
-                  {adminUser?.name || 'Administrator'}
-                </p>
-                <p
-                  className={`text-[10px] font-mono truncate leading-tight mt-0.5 ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'
-                    }`}
-                >
-                  {adminUser?.email || 'admin@zimor.in'}
-                </p>
-              </div>
-            </div>
-
-            <button
-              onClick={handleLogout}
-              title="Sign Out"
-              className={`p-1.5 rounded transition-colors ${isDark
-                ? 'text-[#8A837C] hover:text-[#F28B82] hover:bg-[#B9382C]/15'
-                : 'text-[#8C837A] hover:text-[#9C281D] hover:bg-[#B9382C]/10'
+          {isExpanded || isSidebarOpen ? (
+            <div
+              className={`flex items-center justify-between p-2 rounded-lg border ${isDark ? 'bg-[#252E3E]/50 border-[#2E3A47]' : 'bg-[#F8FAFC] border-[#E2E8F0]'
                 }`}
             >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-[#2563EB] text-white">
+                  {adminUser?.email ? adminUser.email[0].toUpperCase() : 'Z'}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold truncate leading-tight text-[#1C2434] dark:text-white">
+                    {adminUser?.name || 'Administrator'}
+                  </p>
+                  <p className="text-xs text-[#64748B] dark:text-[#94A3B8] truncate leading-tight mt-0.5">
+                    {adminUser?.email || 'admin@zimor.in'}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={handleLogout}
+                title="Sign Out"
+                className="p-1.5 rounded-md text-[#64748B] hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer shrink-0"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <div
+              className="w-9 h-9 mx-auto rounded-full bg-[#2563EB] text-white flex items-center justify-center font-bold text-xs cursor-pointer shadow-xs"
+              title={`${adminUser?.name || 'Administrator'} (${adminUser?.email || 'admin@zimor.in'})`}
+            >
+              {adminUser?.email ? adminUser.email[0].toUpperCase() : 'Z'}
+            </div>
+          )}
         </div>
       </aside>
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 min-h-screen">
-        {/* Top Navbar */}
+        {/* TailAdmin Top Navbar */}
         <header
-          className={`h-16 px-4 sm:px-6 lg:px-8 flex items-center justify-between border-b shrink-0 sticky top-0 z-30 backdrop-blur-md ${isDark
-            ? 'bg-[#191715]/95 border-[#36312C]'
-            : 'bg-[#F7F5F2]/95 border-[#E5DFD7]'
+          className={`h-16 px-6 sm:px-8 flex items-center justify-between border-b shrink-0 sticky top-0 z-30 backdrop-blur-md ${isDark ? 'bg-[#1E1C1A]/95 border-[#2E3A47]' : 'bg-white/95 border-[#E2E8F0]'
             }`}
         >
-          {/* Left: Breadcrumb / Section Title */}
-          <div className="flex items-center gap-3">
+          {/* Left: Mobile Toggle & Quick Search */}
+          <div className="flex items-center gap-4">
             <button
               onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden p-2 rounded hover:bg-[#EFEAE2] dark:hover:bg-[#24211F] text-[#5A534E] dark:text-[#B4B4B4]"
+              className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-[#64748B]"
               aria-label="Open sidebar"
             >
               <Menu className="w-5 h-5" />
             </button>
 
-            <div className="flex items-center gap-2 text-xs">
-              <span className={`font-mono text-[11px] uppercase tracking-wider ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
-                ZIMOR Atelier
-              </span>
-              <ChevronRight className="w-3.5 h-3.5 opacity-30" />
-              <span className={`font-semibold text-xs tracking-tight ${isDark ? 'text-[#E8E1DA]' : 'text-[#24211F]'}`}>
-                {activeLabel}
+            {/* Header Search Input matching TailAdmin screenshot */}
+            <div className="hidden sm:flex items-center relative w-72">
+              <Search className="w-4 h-4 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search or type command..."
+                readOnly
+                onClick={() => {
+                  const searchInput = document.querySelector('input[type="text"]') as HTMLInputElement;
+                  if (searchInput) searchInput.focus();
+                }}
+                className={`w-full pl-9 pr-12 py-1.5 rounded-lg text-sm border focus:outline-none transition-colors cursor-pointer ${isDark
+                  ? 'bg-[#252E3E] border-[#2E3A47] text-[#E2E8F0] placeholder-[#78726C]'
+                  : 'bg-[#F1F5F9] border-transparent text-[#1C2434] placeholder-[#94A3B8]'
+                  }`}
+              />
+              <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono px-1.5 py-0.5 rounded border border-[#E2E8F0] dark:border-[#2E3A47] text-[#64748B] dark:text-[#94A3B8] bg-white dark:bg-[#1E1C1A]">
+                ⌘K
               </span>
             </div>
           </div>
 
           {/* Right: Notifications, Theme Switcher, Quick Profile */}
           <div className="flex items-center gap-3">
+            {/* Theme Toggle Button */}
+            <button
+              onClick={toggleTheme}
+              aria-label={`Switch to ${isDark ? 'Light' : 'Dark'} mode`}
+              className={`p-2 rounded-lg border text-sm transition-colors cursor-pointer ${isDark
+                ? 'bg-[#252E3E] border-[#2E3A47] text-amber-400 hover:text-white'
+                : 'bg-white border-[#E2E8F0] text-[#64748B] hover:text-[#1C2434]'
+                }`}
+            >
+              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+
             {/* Notifications Menu */}
             <div className="relative">
               <button
                 onClick={() => setNotificationsOpen(!notificationsOpen)}
-                className={`relative p-2 rounded-lg border transition-colors ${isDark
-                  ? 'bg-[#24211F] border-[#36312C] text-[#E8E1DA] hover:border-[#8A837C]'
-                  : 'bg-[#FFFFFF] border-[#E5DFD7] text-[#24211F] hover:border-[#8C837A]'
+                className={`relative p-2 rounded-lg border text-sm transition-colors cursor-pointer ${isDark
+                  ? 'bg-[#252E3E] border-[#2E3A47] text-[#E2E8F0]'
+                  : 'bg-white border-[#E2E8F0] text-[#64748B] hover:text-[#1C2434]'
                   }`}
                 title="Notifications"
                 aria-label="View notifications"
               >
                 <Bell className="w-4 h-4" />
                 {alerts.length > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#B44220]" />
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-500" />
                 )}
               </button>
 
               {notificationsOpen && (
                 <div
-                  className={`absolute right-0 mt-2 w-80 rounded-xl border p-3 z-50 shadow-lg ${isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
+                  className={`absolute right-0 mt-2 w-80 rounded-xl border p-4 z-50 shadow-xl ${isDark ? 'bg-[#1E1C1A] border-[#2E3A47]' : 'bg-white border-[#E2E8F0]'
                     }`}
                 >
                   <div className="flex items-center justify-between pb-2 mb-2 border-b border-inherit">
-                    <span className="text-xs font-semibold tracking-wider font-mono uppercase">
-                      Atelier Alerts
+                    <span className="text-sm font-semibold text-[#1C2434] dark:text-white">
+                      Notifications
                     </span>
-                    <span className="text-[10px] text-[#B44220] font-mono">
-                      {alerts.length} {alerts.length === 1 ? 'Alert' : 'Alerts'}
+                    <span className="text-xs text-[#2563EB] font-medium">
+                      {alerts.length} New
                     </span>
                   </div>
                   {alerts.length === 0 ? (
                     <div className="py-6 text-center">
                       <CheckCircle2 className="w-5 h-5 mx-auto text-emerald-600 mb-1.5 opacity-80" />
-                      <p className="text-xs font-medium">All Systems Operational</p>
-                      <p className="text-[10px] opacity-60 mt-0.5">No pending order alerts or inventory warnings</p>
+                      <p className="text-sm font-medium text-[#1C2434] dark:text-white">All Systems Operational</p>
+                      <p className="text-xs text-[#64748B] mt-0.5">No pending alerts</p>
                     </div>
                   ) : (
-                    <div className="space-y-2 text-xs">
+                    <div className="space-y-2 text-sm">
                       {alerts.map((alert) => (
                         <div
                           key={alert.id}
-                          className={`p-2 rounded flex items-start gap-2 ${alert.type === 'inventory'
+                          className={`p-2.5 rounded-lg flex items-start gap-2.5 ${alert.type === 'inventory'
                             ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400'
                             : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
                             }`}
@@ -481,8 +617,8 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
                             <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
                           )}
                           <div>
-                            <p className="font-medium">{alert.title}</p>
-                            <p className="text-[10px] opacity-80 mt-0.5">{alert.subtitle}</p>
+                            <p className="font-medium text-xs">{alert.title}</p>
+                            <p className="text-[11px] opacity-80 mt-0.5">{alert.subtitle}</p>
                           </div>
                         </div>
                       ))}
@@ -492,43 +628,22 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
               )}
             </div>
 
-            {/* Theme Toggle Button */}
-            <button
-              onClick={toggleTheme}
-              aria-label={`Switch to ${isDark ? 'Light' : 'Dark'} mode`}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${isDark
-                ? 'bg-[#24211F] border-[#36312C] text-[#E8E1DA] hover:border-[#8A837C]'
-                : 'bg-[#FFFFFF] border-[#E5DFD7] text-[#24211F] hover:border-[#8C837A]'
-                }`}
-            >
-              {isDark ? (
-                <>
-                  <Sun className="w-3.5 h-3.5 text-amber-400" />
-                  <span className="hidden sm:inline font-mono text-[11px]">LIGHT</span>
-                </>
-              ) : (
-                <>
-                  <Moon className="w-3.5 h-3.5 text-[#B44220]" />
-                  <span className="hidden sm:inline font-mono text-[11px]">DARK</span>
-                </>
-              )}
-            </button>
-
-            {/* Superadmin Role Badge */}
-            <div
-              className={`hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-mono uppercase tracking-wider border ${isDark
-                ? 'bg-[#B44220]/10 border-[#B44220]/30 text-[#E8A593]'
-                : 'bg-[#B44220]/10 border-[#B44220]/20 text-[#B44220]'
-                }`}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-[#B44220]" />
-              <span>SUPERADMIN</span>
+            {/* Profile Dropdown Badge (TailAdmin Header Match) */}
+            <div className="flex items-center gap-2 pl-2">
+              <div className="w-8 h-8 rounded-full bg-[#2563EB] text-white flex items-center justify-center font-bold text-xs">
+                {adminUser?.email ? adminUser.email[0].toUpperCase() : 'Z'}
+              </div>
+              <div className="hidden md:block text-left">
+                <p className="text-sm font-medium leading-none text-[#1C2434] dark:text-white">
+                  {adminUser?.name || 'Administrator'}
+                </p>
+              </div>
             </div>
           </div>
         </header>
 
         {/* Page Body */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-6 sm:p-8 max-w-7xl w-full mx-auto">
           <AdminDemoBanner />
           {children}
         </main>

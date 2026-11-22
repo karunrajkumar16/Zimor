@@ -1,5 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
-import { verifySessionToken, isApprovedAdminEmail, normalizeEmail, ADMIN_COOKIE_NAME } from '../auth/index.js';
+import {
+  verifySessionToken,
+  verifyCustomerSessionToken,
+  isApprovedAdminEmail,
+  normalizeEmail,
+  ADMIN_COOKIE_NAME,
+  CUSTOMER_COOKIE_NAME,
+} from '../auth/index.js';
 import { getDatabaseProvider } from '../db/index.js';
 
 export interface AuthenticatedRequest extends Request {
@@ -8,6 +15,13 @@ export interface AuthenticatedRequest extends Request {
     role: string;
     name?: string;
   };
+  customer?: {
+    id: string;
+    email: string;
+    name: string;
+    avatar?: string;
+  };
+  userType?: 'admin' | 'customer';
 }
 
 export async function requireAdminAuth(req: AuthenticatedRequest, res: Response, next: NextFunction) {
@@ -53,6 +67,59 @@ export async function requireAdminAuth(req: AuthenticatedRequest, res: Response,
     };
 
     next();
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message || 'Authentication error' });
+  }
+}
+
+/**
+ * Middleware ensuring request is made by an authenticated customer OR an authenticated administrator.
+ * Injects req.customer or req.admin and req.userType.
+ */
+export async function authenticateCustomerOrAdmin(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  try {
+    // 1. Check Admin Auth first
+    let adminToken = req.cookies?.[ADMIN_COOKIE_NAME];
+    if (!adminToken && req.headers.authorization?.startsWith('Bearer ')) {
+      adminToken = req.headers.authorization.split(' ')[1];
+    }
+    if (adminToken) {
+      const adminSession = verifySessionToken(adminToken);
+      if (adminSession && isApprovedAdminEmail(adminSession.email)) {
+        req.admin = {
+          email: adminSession.email,
+          role: adminSession.role,
+          name: adminSession.name,
+        };
+        req.userType = 'admin';
+        return next();
+      }
+    }
+
+    // 2. Check Customer Auth
+    let customerToken = req.cookies?.[CUSTOMER_COOKIE_NAME];
+    if (!customerToken && req.headers.authorization?.startsWith('Bearer ')) {
+      customerToken = req.headers.authorization.split(' ')[1];
+    }
+    if (!customerToken && req.headers['x-customer-token']) {
+      customerToken = req.headers['x-customer-token'] as string;
+    }
+
+    if (customerToken) {
+      const customerSession = verifyCustomerSessionToken(customerToken);
+      if (customerSession) {
+        req.customer = {
+          id: customerSession.id,
+          email: customerSession.email,
+          name: customerSession.name,
+          avatar: customerSession.avatar,
+        };
+        req.userType = 'customer';
+        return next();
+      }
+    }
+
+    return res.status(401).json({ error: 'Authentication required. Please sign in to access this resource.' });
   } catch (err: any) {
     return res.status(500).json({ error: err.message || 'Authentication error' });
   }

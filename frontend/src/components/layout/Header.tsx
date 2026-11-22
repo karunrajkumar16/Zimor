@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Menu, Search, Heart, ShoppingBag, User, X, ChevronDown, Mail, MessageSquare, Phone } from 'lucide-react';
+import { Menu, Search, Heart, ShoppingBag, User, X, ChevronDown, Mail, MessageSquare } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useProducts } from '@/context/ProductContext';
@@ -349,12 +349,12 @@ export const Header: React.FC = () => {
                 aria-label="Zimor India Home"
               >
                 <Image
-                  src="https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917824/zimor/brand/logo.png"
+                  src="/logo.png"
                   alt="Zimor India"
-                  width={392}
-                  height={169}
+                  width={1019}
+                  height={231}
                   priority
-                  className={`h-8 sm:h-9 md:h-10 lg:h-11 w-auto object-contain transition-all duration-300 ${isTransparent ? 'brightness-0 invert' : ''
+                  className={`h-7 sm:h-8 md:h-9 lg:h-10 w-auto object-contain transition-all duration-300 ${isTransparent ? 'brightness-0 invert' : ''
                     }`}
                 />
               </Link>
@@ -494,23 +494,6 @@ export const Header: React.FC = () => {
                             <div className="min-w-0">
                               <p className="font-primary text-[13px] font-medium text-ink group-hover:text-[#25D366] transition-colors">
                                 WhatsApp
-                              </p>
-                              <p className="text-[11px] text-ink-muted truncate">+91 86046 47888</p>
-                            </div>
-                          </a>
-
-                          {/* 3. Direct Call */}
-                          <a
-                            href="tel:+918604647888"
-                            onClick={() => setIsContactHovered(false)}
-                            className="flex items-center gap-3 p-2 rounded-xs hover:bg-[#f5f5f5] transition-colors group"
-                          >
-                            <div className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center text-black group-hover:bg-[#16A34A] group-hover:text-white transition-colors shrink-0">
-                              <Phone className="w-3.5 h-3.5" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="font-primary text-[13px] font-medium text-ink group-hover:text-[#16A34A] transition-colors">
-                                Call Us
                               </p>
                               <p className="text-[11px] text-ink-muted truncate">+91 86046 47888</p>
                             </div>

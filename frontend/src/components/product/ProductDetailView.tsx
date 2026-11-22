@@ -53,7 +53,7 @@ export function ProductDetailView({ product }: { product: Product }) {
           setReviewsList(data.reviews);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
     return () => {
       isMounted = false;
     };

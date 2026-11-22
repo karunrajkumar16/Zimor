@@ -8,6 +8,7 @@ import { ProductModel } from '../db/models/Product.js';
 import { CustomerModel } from '../db/models/Customer.js';
 import { WebhookEventModel } from '../db/models/WebhookEvent.js';
 import { config } from '../config/index.js';
+import { processOrderFulfillment, addOrderAuditLog } from '../shipping/fulfillmentEngine.js';
 
 /**
  * Public configuration endpoint for frontend Razorpay checkout.
@@ -411,6 +412,22 @@ export async function verifyPayment(req: Request, res: Response) {
       );
     }
 
+    // 9. Audit Logging & Automated Fulfillment Eligibility Trigger
+    addOrderAuditLog(
+      newOrder,
+      'SYSTEM_PAYMENT_VERIFIED',
+      'PAYMENT_CAPTURED',
+      `Payment successfully captured via Razorpay (${paymentMode === 'test' ? 'Test Mode' : 'Live'}). Amount: ₹${finalTotal.toLocaleString('en-IN')}, Order ID: ${razorpayOrderId}, Payment ID: ${razorpayPaymentId}`
+    );
+    await newOrder.save();
+
+    // Trigger fulfillment pipeline (asynchronously evaluate eligibility & Shiprocket dispatch)
+    processOrderFulfillment(newOrder._id.toString(), {
+      actor: 'SYSTEM_PAYMENT_VERIFIED',
+    }).catch((fErr) => {
+      console.error('[Automated Fulfillment Trigger Error]', fErr.message);
+    });
+
     return res.status(200).json({
       success: true,
       verified: true,
@@ -507,7 +524,21 @@ export async function handleWebhook(req: Request, res: Response) {
               order.inventoryDeducted = true;
             }
 
+            addOrderAuditLog(
+              order,
+              'RAZORPAY_WEBHOOK',
+              'PAYMENT_CAPTURED_WEBHOOK',
+              `Payment capture confirmed via Razorpay Webhook (Event: ${event}, Event ID: ${eventId}, Payment ID: ${rzpPaymentId})`
+            );
+
             await order.save();
+
+            // Trigger automated fulfillment eligibility & dispatch
+            processOrderFulfillment(order._id.toString(), {
+              actor: 'RAZORPAY_WEBHOOK',
+            }).catch((fErr) => {
+              console.error('[Webhook Fulfillment Trigger Error]', fErr.message);
+            });
           }
         }
       }
@@ -520,6 +551,13 @@ export async function handleWebhook(req: Request, res: Response) {
           if (order.paymentStatus !== 'Paid') {
             order.paymentStatus = 'Failed';
             order.status = 'Failed';
+            order.fulfillmentStatus = 'failed';
+            addOrderAuditLog(
+              order,
+              'RAZORPAY_WEBHOOK',
+              'PAYMENT_FAILED_WEBHOOK',
+              `Payment failure notification received from Razorpay (Event: ${event}, Event ID: ${eventId})`
+            );
             await order.save();
           }
         }
@@ -534,6 +572,7 @@ export async function handleWebhook(req: Request, res: Response) {
         if (order) {
           order.paymentStatus = 'Refunded';
           order.status = 'Cancelled';
+          order.fulfillmentStatus = 'cancelled';
           order.amountRefunded = refundAmountPaise ? refundAmountPaise / 100 : order.total;
           order.refundId = refundId || order.refundId;
 
@@ -546,6 +585,13 @@ export async function handleWebhook(req: Request, res: Response) {
             }
             order.inventoryRestored = true;
           }
+
+          addOrderAuditLog(
+            order,
+            'RAZORPAY_WEBHOOK',
+            'REFUND_PROCESSED_WEBHOOK',
+            `Refund of ₹${(refundAmountPaise ? refundAmountPaise / 100 : order.total).toLocaleString('en-IN')} processed via Razorpay (Refund ID: ${refundId}). Order status set to Cancelled.`
+          );
 
           await order.save();
         }
@@ -602,6 +648,10 @@ export async function getPayments(req: Request, res: Response) {
         amount: order.total || order.totalAmount || 0,
         amountPaid: order.amountPaid || (order.paymentStatus === 'Paid' ? order.total : 0),
         amountRefunded: order.amountRefunded || 0,
+        refundId: order.refundId || '',
+        refundDetails: order.amountRefunded
+          ? `₹${order.amountRefunded} refunded${order.refundId ? ` (${order.refundId})` : ''}`
+          : (status === 'Refunded' ? 'Full refund processed' : 'None'),
         currency: 'INR',
         method: order.paymentMethod || 'Online (Razorpay)',
         gateway,
@@ -609,6 +659,7 @@ export async function getPayments(req: Request, res: Response) {
         transactionId: order.razorpayPaymentId || order.trackingNumber || `tx_${(order._id ? order._id.toString() : '00000000').slice(0, 8)}`,
         status,
         date: order.date || (order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : new Date().toLocaleDateString('en-US')),
+        rawDate: order.createdAt ? new Date(order.createdAt).toISOString() : new Date().toISOString(),
         isDemo,
         isTest: isTestMode,
       };

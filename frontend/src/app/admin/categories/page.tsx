@@ -106,7 +106,7 @@ export default function AdminCategoriesPage() {
         <div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Category Architecture</h1>
           <p className={`text-xs mt-1 ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
-            Organize collections, silhouettes, and catalog hierarchies for navigation.
+            Organize collections, products, and catalog hierarchies for navigation.
           </p>
         </div>
         <button
@@ -120,11 +120,10 @@ export default function AdminCategoriesPage() {
 
       {message && (
         <div
-          className={`p-3 rounded text-xs flex items-center justify-between border ${
-            message.type === 'success'
-              ? 'bg-[#2E7D5A]/15 border-[#2E7D5A]/30 text-[#2E7D5A] dark:text-[#52B788]'
-              : 'bg-[#B9382C]/15 border-[#B9382C]/30 text-[#B9382C] dark:text-[#F28B82]'
-          }`}
+          className={`p-3 rounded text-xs flex items-center justify-between border ${message.type === 'success'
+            ? 'bg-[#2E7D5A]/15 border-[#2E7D5A]/30 text-[#2E7D5A] dark:text-[#52B788]'
+            : 'bg-[#B9382C]/15 border-[#B9382C]/30 text-[#B9382C] dark:text-[#F28B82]'
+            }`}
         >
           <span>{message.text}</span>
           <button onClick={() => setMessage(null)} className="opacity-70 hover:opacity-100">
@@ -150,25 +149,22 @@ export default function AdminCategoriesPage() {
             >
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <div className={`w-9 h-9 rounded flex items-center justify-center border ${
-                    isDark ? 'bg-[#1E1C1A] border-[#36312C] text-[#B44220]' : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#B44220]'
-                  }`}>
+                  <div className={`w-9 h-9 rounded flex items-center justify-center border ${isDark ? 'bg-[#1E1C1A] border-[#36312C] text-[#B44220]' : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#B44220]'
+                    }`}>
                     <Tag className="w-4 h-4" />
                   </div>
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => handleOpenEdit(cat)}
-                      className={`p-1.5 rounded transition-colors ${
-                        isDark ? 'hover:bg-[#1E1C1A] text-[#B4B4B4] hover:text-[#E8E1DA]' : 'hover:bg-[#FAF7F2] text-[#5A534E] hover:text-[#24211F]'
-                      }`}
+                      className={`p-1.5 rounded transition-colors ${isDark ? 'hover:bg-[#1E1C1A] text-[#B4B4B4] hover:text-[#E8E1DA]' : 'hover:bg-[#FAF7F2] text-[#5A534E] hover:text-[#24211F]'
+                        }`}
                     >
                       <Edit className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => handleDelete(cat.id, cat.name)}
-                      className={`p-1.5 rounded transition-colors ${
-                        isDark ? 'hover:bg-[#B9382C]/15 text-[#8A837C] hover:text-[#F28B82]' : 'hover:bg-[#B9382C]/10 text-[#8C837A] hover:text-[#B9382C]'
-                      }`}
+                      className={`p-1.5 rounded transition-colors ${isDark ? 'hover:bg-[#B9382C]/15 text-[#8A837C] hover:text-[#F28B82]' : 'hover:bg-[#B9382C]/10 text-[#8C837A] hover:text-[#B9382C]'
+                        }`}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -182,9 +178,8 @@ export default function AdminCategoriesPage() {
                 </p>
               </div>
 
-              <div className={`mt-5 pt-3 border-t flex items-center justify-between text-[11px] ${
-                isDark ? 'border-[#36312C] text-[#8A837C]' : 'border-[#E5DFD7] text-[#8C837A]'
-              }`}>
+              <div className={`mt-5 pt-3 border-t flex items-center justify-between text-[11px] ${isDark ? 'border-[#36312C] text-[#8A837C]' : 'border-[#E5DFD7] text-[#8C837A]'
+                }`}>
                 <span>Created {new Date(cat.createdAt).toLocaleDateString()}</span>
                 <span className="text-[#2E7D5A] dark:text-[#52B788] font-medium">Active</span>
               </div>
@@ -195,18 +190,15 @@ export default function AdminCategoriesPage() {
 
       {isModalOpen && editCategory && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className={`rounded-lg max-w-md w-full p-6 space-y-4 border shadow-2xl ${
-            isDark ? 'bg-[#24211F] border-[#36312C] text-[#E8E1DA]' : 'bg-[#FFFFFF] border-[#E5DFD7] text-[#24211F]'
-          }`}>
-            <div className={`flex items-center justify-between border-b pb-3 ${
-              isDark ? 'border-[#36312C]' : 'border-[#E5DFD7]'
+          <div className={`rounded-lg max-w-md w-full p-6 space-y-4 border shadow-2xl ${isDark ? 'bg-[#24211F] border-[#36312C] text-[#E8E1DA]' : 'bg-[#FFFFFF] border-[#E5DFD7] text-[#24211F]'
             }`}>
+            <div className={`flex items-center justify-between border-b pb-3 ${isDark ? 'border-[#36312C]' : 'border-[#E5DFD7]'
+              }`}>
               <h2 className="text-base font-semibold">
                 {editCategory.id ? 'Edit Category' : 'New Category'}
               </h2>
-              <button onClick={() => setIsModalOpen(false)} className={`transition-colors ${
-                isDark ? 'text-[#8A837C] hover:text-[#E8E1DA]' : 'text-[#8C837A] hover:text-[#24211F]'
-              }`}>
+              <button onClick={() => setIsModalOpen(false)} className={`transition-colors ${isDark ? 'text-[#8A837C] hover:text-[#E8E1DA]' : 'text-[#8C837A] hover:text-[#24211F]'
+                }`}>
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -226,11 +218,10 @@ export default function AdminCategoriesPage() {
                       slug: editCategory.slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
                     });
                   }}
-                  className={`w-full rounded px-3 py-2 border focus:outline-none focus:border-[#B44220] transition-colors ${
-                    isDark
-                      ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA]'
-                      : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F]'
-                  }`}
+                  className={`w-full rounded px-3 py-2 border focus:outline-none focus:border-[#B44220] transition-colors ${isDark
+                    ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA]'
+                    : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F]'
+                    }`}
                 />
               </div>
 
@@ -241,11 +232,10 @@ export default function AdminCategoriesPage() {
                   required
                   value={editCategory.slug || ''}
                   onChange={(e) => setEditCategory({ ...editCategory, slug: e.target.value })}
-                  className={`w-full rounded px-3 py-2 border focus:outline-none focus:border-[#B44220] transition-colors ${
-                    isDark
-                      ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA]'
-                      : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F]'
-                  }`}
+                  className={`w-full rounded px-3 py-2 border focus:outline-none focus:border-[#B44220] transition-colors ${isDark
+                    ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA]'
+                    : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F]'
+                    }`}
                 />
               </div>
 
@@ -255,25 +245,22 @@ export default function AdminCategoriesPage() {
                   rows={3}
                   value={editCategory.description || ''}
                   onChange={(e) => setEditCategory({ ...editCategory, description: e.target.value })}
-                  className={`w-full rounded px-3 py-2 border focus:outline-none focus:border-[#B44220] transition-colors ${
-                    isDark
-                      ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA]'
-                      : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F]'
-                  }`}
+                  className={`w-full rounded px-3 py-2 border focus:outline-none focus:border-[#B44220] transition-colors ${isDark
+                    ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA]'
+                    : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F]'
+                    }`}
                 />
               </div>
 
-              <div className={`flex items-center justify-end gap-3 pt-3 border-t ${
-                isDark ? 'border-[#36312C]' : 'border-[#E5DFD7]'
-              }`}>
+              <div className={`flex items-center justify-end gap-3 pt-3 border-t ${isDark ? 'border-[#36312C]' : 'border-[#E5DFD7]'
+                }`}>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className={`px-3 py-1.5 border rounded transition-colors ${
-                    isDark
-                      ? 'border-[#36312C] text-[#B4B4B4] hover:text-[#E8E1DA]'
-                      : 'border-[#E5DFD7] text-[#5A534E] hover:text-[#24211F]'
-                  }`}
+                  className={`px-3 py-1.5 border rounded transition-colors ${isDark
+                    ? 'border-[#36312C] text-[#B4B4B4] hover:text-[#E8E1DA]'
+                    : 'border-[#E5DFD7] text-[#5A534E] hover:text-[#24211F]'
+                    }`}
                 >
                   Cancel
                 </button>

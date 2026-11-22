@@ -268,3 +268,17 @@ html.lenis body {
     scroll-behavior: auto !important;
   }
 }
+
+/* =========================================================================
+   TAILADMIN MODERN SAAS DESIGN SYSTEM — ADMIN PANEL ONLY
+   Applies exclusively to /admin routes and .admin-panel-theme
+   ========================================================================= */
+.admin-panel-theme {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+  letter-spacing: -0.011em;
+}
+
+.admin-panel-theme,
+.admin-panel-theme * {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}

@@ -133,11 +133,10 @@ export default function AdminInventoryPage() {
         <button
           onClick={fetchInventory}
           disabled={loading}
-          className={`inline-flex items-center gap-1.5 px-3 py-2 rounded text-xs font-semibold border transition-all ${
-            isDark
-              ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA] hover:border-[#8A837C]'
-              : 'bg-[#FFFFFF] border-[#E5DFD7] text-[#24211F] hover:bg-[#FAF7F2]'
-          }`}
+          className={`inline-flex items-center gap-1.5 px-3 py-2 rounded text-xs font-semibold border transition-all ${isDark
+            ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA] hover:border-[#8A837C]'
+            : 'bg-[#FFFFFF] border-[#E5DFD7] text-[#24211F] hover:bg-[#FAF7F2]'
+            }`}
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           <span>Refresh Stock</span>
@@ -162,7 +161,7 @@ export default function AdminInventoryPage() {
             <CheckCircle className="w-4 h-4 text-[#2E7D5A] dark:text-[#62C697]" />
           </div>
           <p className="text-2xl font-bold mt-1 text-[#2E7D5A] dark:text-[#62C697]">
-            {inStockCount} Silhouettes
+            {inStockCount} Products
           </p>
           <p className="text-[10px] text-[#8C837A] dark:text-[#8A837C] mt-1">Stock level &gt; 5 units</p>
         </div>
@@ -175,7 +174,7 @@ export default function AdminInventoryPage() {
             <AlertTriangle className="w-4 h-4 text-[#C07D2B] dark:text-[#F0B265]" />
           </div>
           <p className="text-2xl font-bold mt-1 text-[#C07D2B] dark:text-[#F0B265]">
-            {lowStockCount} Silhouettes
+            {lowStockCount} Products
           </p>
           <p className="text-[10px] text-[#8C837A] dark:text-[#8A837C] mt-1">Threshold: 1–5 units remaining</p>
         </div>
@@ -188,7 +187,7 @@ export default function AdminInventoryPage() {
             <XCircle className="w-4 h-4 text-[#B9382C] dark:text-[#F28B82]" />
           </div>
           <p className="text-2xl font-bold mt-1 text-[#B9382C] dark:text-[#F28B82]">
-            {outOfStockCount} Silhouettes
+            {outOfStockCount} Products
           </p>
           <p className="text-[10px] text-[#8C837A] dark:text-[#8A837C] mt-1">Requires factory batch reorder</p>
         </div>
@@ -204,7 +203,7 @@ export default function AdminInventoryPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by silhouette name..."
+              placeholder="Search by product name..."
               className="w-full pl-9 pr-4 py-2 bg-[#FAF7F2] dark:bg-[#1E1C1A] border border-[#E5DFD7] dark:border-[#36312C] rounded text-xs text-[#24211F] dark:text-[#E8E1DA] focus:outline-none focus:border-[#B44220]"
             />
           </div>
@@ -215,13 +214,12 @@ export default function AdminInventoryPage() {
           <table className="w-full text-left text-xs">
             <thead>
               <tr
-                className={`border-b font-medium uppercase tracking-wider text-[10px] ${
-                  isDark
-                    ? 'border-[#36312C] bg-[#1E1C1A] text-[#B4B4B4]'
-                    : 'border-[#E5DFD7] bg-[#EEE8DF] text-[#5A534E]'
-                }`}
+                className={`border-b font-medium uppercase tracking-wider text-[10px] ${isDark
+                  ? 'border-[#36312C] bg-[#1E1C1A] text-[#B4B4B4]'
+                  : 'border-[#E5DFD7] bg-[#EEE8DF] text-[#5A534E]'
+                  }`}
               >
-                <th className="py-3 px-4">Silhouette</th>
+                <th className="py-3 px-4">Product</th>
                 <th className="py-3 px-4">Category</th>
                 <th className="py-3 px-4">Colors</th>
                 <th className="py-3 px-4 text-center">Unit Adjustment</th>
@@ -332,11 +330,10 @@ export default function AdminInventoryPage() {
                       <button
                         onClick={() => handleSaveStock(prod.id)}
                         disabled={!isDirty || savingId === prod.id}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold transition-all ${
-                          isDirty
-                            ? 'bg-[#B44220] hover:bg-[#9B381B] text-[#F7F5F2] shadow-xs'
-                            : 'bg-[#FAF7F2] dark:bg-[#1E1C1A] border border-[#E5DFD7] dark:border-[#36312C] text-[#8C837A] dark:text-[#8A837C] opacity-50 cursor-not-allowed'
-                        }`}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold transition-all ${isDirty
+                          ? 'bg-[#B44220] hover:bg-[#9B381B] text-[#F7F5F2] shadow-xs'
+                          : 'bg-[#FAF7F2] dark:bg-[#1E1C1A] border border-[#E5DFD7] dark:border-[#36312C] text-[#8C837A] dark:text-[#8A837C] opacity-50 cursor-not-allowed'
+                          }`}
                       >
                         <Save className="w-3 h-3" />
                         <span>{savingId === prod.id ? 'Updating...' : 'Save'}</span>
@@ -369,11 +366,10 @@ export default function AdminInventoryPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs font-mono">
               <thead>
-                <tr className={`border-b font-medium uppercase tracking-wider text-[10px] ${
-                  isDark ? 'border-[#36312C] bg-[#1E1C1A] text-[#B4B4B4]' : 'border-[#E5DFD7] bg-[#EEE8DF] text-[#5A534E]'
-                }`}>
+                <tr className={`border-b font-medium uppercase tracking-wider text-[10px] ${isDark ? 'border-[#36312C] bg-[#1E1C1A] text-[#B4B4B4]' : 'border-[#E5DFD7] bg-[#EEE8DF] text-[#5A534E]'
+                  }`}>
                   <th className="py-2.5 px-4 font-semibold">Timestamp</th>
-                  <th className="py-2.5 px-4 font-semibold">Silhouette</th>
+                  <th className="py-2.5 px-4 font-semibold">Product</th>
                   <th className="py-2.5 px-4 font-semibold">Color</th>
                   <th className="py-2.5 px-4 font-semibold">Type</th>
                   <th className="py-2.5 px-4 font-semibold text-center">Change</th>
@@ -395,15 +391,14 @@ export default function AdminInventoryPage() {
                       {m.variationColor}
                     </td>
                     <td className="py-2.5 px-4">
-                      <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
-                        m.type === 'SALE_DEDUCTION'
-                          ? 'bg-amber-500/15 text-amber-700 dark:text-amber-400'
-                          : m.type === 'RETURN_RESTOCK'
+                      <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${m.type === 'SALE_DEDUCTION'
+                        ? 'bg-amber-500/15 text-amber-700 dark:text-amber-400'
+                        : m.type === 'RETURN_RESTOCK'
                           ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
                           : m.type === 'ATELIER_INWARD'
-                          ? 'bg-blue-500/15 text-blue-700 dark:text-blue-400'
-                          : 'bg-purple-500/15 text-purple-700 dark:text-purple-400'
-                      }`}>
+                            ? 'bg-blue-500/15 text-blue-700 dark:text-blue-400'
+                            : 'bg-purple-500/15 text-purple-700 dark:text-purple-400'
+                        }`}>
                         {m.type.replace('_', ' ')}
                       </span>
                     </td>

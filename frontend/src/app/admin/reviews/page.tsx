@@ -94,9 +94,8 @@ export default function AdminReviewsPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${
-            isDark ? 'bg-[#1E1C1A] border-[#36312C] text-[#B4B4B4]' : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#5A534E]'
-          }`}>
+          <span className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${isDark ? 'bg-[#1E1C1A] border-[#36312C] text-[#B4B4B4]' : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#5A534E]'
+            }`}>
             Live Reviews: {approvedCount}
           </span>
         </div>
@@ -156,12 +155,11 @@ export default function AdminReviewsPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by user name, silhouette, review text..."
-              className={`w-full pl-9 pr-4 py-2 border rounded text-xs focus:outline-none focus:border-[#B44220] transition-colors ${
-                isDark
-                  ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA] placeholder-[#8A837C]'
-                  : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F] placeholder-[#8C837A]'
-              }`}
+              placeholder="Search by user name, product, review text..."
+              className={`w-full pl-9 pr-4 py-2 border rounded text-xs focus:outline-none focus:border-[#B44220] transition-colors ${isDark
+                ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA] placeholder-[#8A837C]'
+                : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F] placeholder-[#8C837A]'
+                }`}
             />
           </div>
 
@@ -169,11 +167,10 @@ export default function AdminReviewsPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className={`px-3 py-2 border rounded text-xs font-semibold focus:outline-none focus:border-[#B44220] transition-colors ${
-                isDark
-                  ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA]'
-                  : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F]'
-              }`}
+              className={`px-3 py-2 border rounded text-xs font-semibold focus:outline-none focus:border-[#B44220] transition-colors ${isDark
+                ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA]'
+                : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F]'
+                }`}
             >
               <option value="All">All Statuses</option>
               <option value="Approved">Approved</option>
@@ -184,11 +181,10 @@ export default function AdminReviewsPage() {
             <select
               value={ratingFilter}
               onChange={(e) => setRatingFilter(e.target.value)}
-              className={`px-3 py-2 border rounded text-xs font-semibold focus:outline-none focus:border-[#B44220] transition-colors ${
-                isDark
-                  ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA]'
-                  : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F]'
-              }`}
+              className={`px-3 py-2 border rounded text-xs font-semibold focus:outline-none focus:border-[#B44220] transition-colors ${isDark
+                ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA]'
+                : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F]'
+                }`}
             >
               <option value="All">All Stars</option>
               <option value="5">5 Stars</option>
@@ -206,150 +202,143 @@ export default function AdminReviewsPage() {
             </div>
           ) : (
             filtered.map((rev) => (
-            <div
-              key={rev.id}
-              className={`p-5 transition-colors space-y-3 ${
-                isDark ? 'hover:bg-[#2C2825]' : 'hover:bg-[#F3EEE6]'
-              }`}
-            >
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                <div className="flex items-start gap-3">
-                  <div className={`w-12 h-12 rounded relative overflow-hidden border shrink-0 ${
-                    isDark ? 'bg-[#1E1C1A] border-[#36312C]' : 'bg-[#FAF7F2] border-[#E5DFD7]'
-                  }`}>
-                    <Image
-                      src={rev.productImage || 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp'}
-                      alt={rev.productName}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-bold text-xs">
-                        {rev.productName}
-                      </p>
-                      <span className={`text-[10px] font-mono ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
-                        {rev.date}
-                      </span>
+              <div
+                key={rev.id}
+                className={`p-5 transition-colors space-y-3 ${isDark ? 'hover:bg-[#2C2825]' : 'hover:bg-[#F3EEE6]'
+                  }`}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <div className={`w-12 h-12 rounded relative overflow-hidden border shrink-0 ${isDark ? 'bg-[#1E1C1A] border-[#36312C]' : 'bg-[#FAF7F2] border-[#E5DFD7]'
+                      }`}>
+                      <Image
+                        src={rev.productImage || 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp'}
+                        alt={rev.productName}
+                        fill
+                        className="object-cover"
+                      />
                     </div>
 
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className="flex items-center text-[#C07D2B]">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-3.5 h-3.5 ${
-                              i < rev.rating
-                                ? 'fill-[#C07D2B] text-[#C07D2B]'
-                                : isDark
-                                ? 'text-[#36312C]'
-                                : 'text-[#E5DFD7]'
-                            }`}
-                          />
-                        ))}
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold text-xs">
+                          {rev.productName}
+                        </p>
+                        <span className={`text-[10px] font-mono ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
+                          {rev.date}
+                        </span>
                       </div>
 
-                      <span className={`font-semibold text-xs ${isDark ? 'text-[#E8E1DA]' : 'text-[#24211F]'}`}>
-                        {rev.customerName}
-                      </span>
+                      <div className="flex items-center gap-2 mt-1">
+                        <div className="flex items-center text-[#C07D2B]">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-3.5 h-3.5 ${i < rev.rating
+                                ? 'fill-[#C07D2B] text-[#C07D2B]'
+                                : isDark
+                                  ? 'text-[#36312C]'
+                                  : 'text-[#E5DFD7]'
+                                }`}
+                            />
+                          ))}
+                        </div>
 
-                      {rev.verifiedBuyer && (
-                        <span className="inline-flex items-center gap-1 text-[10px] text-[#2E7D5A] dark:text-[#52B788] font-medium">
-                          <ShieldCheck className="w-3 h-3" />
-                          <span>Verified User</span>
+                        <span className={`font-semibold text-xs ${isDark ? 'text-[#E8E1DA]' : 'text-[#24211F]'}`}>
+                          {rev.customerName}
                         </span>
-                      )}
+
+                        {rev.verifiedBuyer && (
+                          <span className="inline-flex items-center gap-1 text-[10px] text-[#2E7D5A] dark:text-[#52B788] font-medium">
+                            <ShieldCheck className="w-3 h-3" />
+                            <span>Verified User</span>
+                          </span>
+                        )}
+                      </div>
                     </div>
+                  </div>
+
+                  {/* Status Badges & Quick Action */}
+                  <div className="flex items-center gap-2 self-start">
+                    <span
+                      className={`px-2.5 py-0.5 rounded text-[10px] font-semibold border ${rev.status === 'Approved'
+                        ? 'bg-[#2E7D5A]/15 text-[#2E7D5A] dark:text-[#52B788] border-[#2E7D5A]/30'
+                        : rev.status === 'Pending'
+                          ? 'bg-[#C07D2B]/15 text-[#C07D2B] dark:text-[#E9A855] border-[#C07D2B]/30'
+                          : isDark
+                            ? 'bg-[#1E1C1A] text-[#B4B4B4] border-[#36312C]'
+                            : 'bg-[#EDE7DE] text-[#5A534E] border-[#E5DFD7]'
+                        }`}
+                    >
+                      {rev.status}
+                    </span>
+
+                    {rev.featured && (
+                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#B44220]/15 text-[#B44220] dark:text-[#E07A5F] border border-[#B44220]/30">
+                        Featured PDP
+                      </span>
+                    )}
                   </div>
                 </div>
 
-                {/* Status Badges & Quick Action */}
-                <div className="flex items-center gap-2 self-start">
-                  <span
-                    className={`px-2.5 py-0.5 rounded text-[10px] font-semibold border ${
-                      rev.status === 'Approved'
-                        ? 'bg-[#2E7D5A]/15 text-[#2E7D5A] dark:text-[#52B788] border-[#2E7D5A]/30'
-                        : rev.status === 'Pending'
-                        ? 'bg-[#C07D2B]/15 text-[#C07D2B] dark:text-[#E9A855] border-[#C07D2B]/30'
-                        : isDark
-                        ? 'bg-[#1E1C1A] text-[#B4B4B4] border-[#36312C]'
-                        : 'bg-[#EDE7DE] text-[#5A534E] border-[#E5DFD7]'
-                    }`}
-                  >
-                    {rev.status}
-                  </span>
-
-                  {rev.featured && (
-                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#B44220]/15 text-[#B44220] dark:text-[#E07A5F] border border-[#B44220]/30">
-                      Featured PDP
-                    </span>
-                  )}
+                {/* Review Content */}
+                <div className="space-y-1 text-xs">
+                  <p className="font-bold">
+                    "{rev.title}"
+                  </p>
+                  <p className={`leading-relaxed ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
+                    {rev.body}
+                  </p>
                 </div>
-              </div>
 
-              {/* Review Content */}
-              <div className="space-y-1 text-xs">
-                <p className="font-bold">
-                  "{rev.title}"
-                </p>
-                <p className={`leading-relaxed ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
-                  {rev.body}
-                </p>
-              </div>
+                {/* Action Buttons Row */}
+                <div className={`flex flex-wrap items-center justify-between gap-2 pt-2 border-t text-xs ${isDark ? 'border-[#36312C]' : 'border-[#E5DFD7]'
+                  }`}>
+                  <div className="flex items-center gap-2">
+                    {rev.status !== 'Approved' && (
+                      <button
+                        onClick={() => updateReviewStatus(rev.id, 'Approved')}
+                        className="px-2.5 py-1 rounded bg-[#2E7D5A]/15 hover:bg-[#2E7D5A]/25 border border-[#2E7D5A]/30 text-[#2E7D5A] dark:text-[#52B788] font-semibold text-[11px] flex items-center gap-1 transition-colors"
+                      >
+                        <CheckCircle className="w-3.5 h-3.5" />
+                        <span>Approve Review</span>
+                      </button>
+                    )}
 
-              {/* Action Buttons Row */}
-              <div className={`flex flex-wrap items-center justify-between gap-2 pt-2 border-t text-xs ${
-                isDark ? 'border-[#36312C]' : 'border-[#E5DFD7]'
-              }`}>
-                <div className="flex items-center gap-2">
-                  {rev.status !== 'Approved' && (
-                    <button
-                      onClick={() => updateReviewStatus(rev.id, 'Approved')}
-                      className="px-2.5 py-1 rounded bg-[#2E7D5A]/15 hover:bg-[#2E7D5A]/25 border border-[#2E7D5A]/30 text-[#2E7D5A] dark:text-[#52B788] font-semibold text-[11px] flex items-center gap-1 transition-colors"
-                    >
-                      <CheckCircle className="w-3.5 h-3.5" />
-                      <span>Approve Review</span>
-                    </button>
-                  )}
-
-                  {rev.status !== 'Hidden' && (
-                    <button
-                      onClick={() => updateReviewStatus(rev.id, 'Hidden')}
-                      className={`px-2.5 py-1 rounded font-medium text-[11px] border transition-colors ${
-                        isDark
+                    {rev.status !== 'Hidden' && (
+                      <button
+                        onClick={() => updateReviewStatus(rev.id, 'Hidden')}
+                        className={`px-2.5 py-1 rounded font-medium text-[11px] border transition-colors ${isDark
                           ? 'bg-[#1E1C1A] border-[#36312C] text-[#B4B4B4] hover:border-[#B44220]'
                           : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#5A534E] hover:border-[#B44220]'
-                      }`}
-                    >
-                      Hide
-                    </button>
-                  )}
+                          }`}
+                      >
+                        Hide
+                      </button>
+                    )}
 
-                  <button
-                    onClick={() => toggleFeatured(rev.id)}
-                    className={`px-2.5 py-1 rounded text-[11px] font-medium border transition-colors ${
-                      rev.featured
+                    <button
+                      onClick={() => toggleFeatured(rev.id)}
+                      className={`px-2.5 py-1 rounded text-[11px] font-medium border transition-colors ${rev.featured
                         ? 'border-[#B44220]/40 bg-[#B44220]/15 text-[#B44220] dark:text-[#E07A5F]'
                         : isDark
-                        ? 'border-[#36312C] bg-[#1E1C1A] text-[#B4B4B4] hover:border-[#B44220]'
-                        : 'border-[#E5DFD7] bg-[#FAF7F2] text-[#5A534E] hover:border-[#B44220]'
-                    }`}
+                          ? 'border-[#36312C] bg-[#1E1C1A] text-[#B4B4B4] hover:border-[#B44220]'
+                          : 'border-[#E5DFD7] bg-[#FAF7F2] text-[#5A534E] hover:border-[#B44220]'
+                        }`}
+                    >
+                      {rev.featured ? 'Unfeature from PDP' : 'Feature on PDP'}
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={() => deleteReview(rev.id)}
+                    title="Delete review"
+                    className={`p-1 rounded transition-colors ${isDark ? 'text-[#8A837C] hover:text-[#B9382C]' : 'text-[#8C837A] hover:text-[#B9382C]'}`}
                   >
-                    {rev.featured ? 'Unfeature from PDP' : 'Feature on PDP'}
+                    <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
-
-                <button
-                  onClick={() => deleteReview(rev.id)}
-                  title="Delete review"
-                  className={`p-1 rounded transition-colors ${isDark ? 'text-[#8A837C] hover:text-[#B9382C]' : 'text-[#8C837A] hover:text-[#B9382C]'}`}
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
               </div>
-            </div>
             ))
           )}
         </div>

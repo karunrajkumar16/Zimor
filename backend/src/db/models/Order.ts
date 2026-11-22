@@ -20,6 +20,27 @@ const OrderItemSchema = new Schema(
   { _id: false }
 );
 
+const TrackingScanSchema = new Schema(
+  {
+    date: { type: String, required: true },
+    status: { type: String, required: true },
+    activity: { type: String, required: true },
+    location: { type: String, default: '' },
+  },
+  { _id: false }
+);
+
+const AuditLogSchema = new Schema(
+  {
+    timestamp: { type: String, required: true },
+    actor: { type: String, required: true },
+    action: { type: String, required: true },
+    message: { type: String, required: true },
+    metadata: { type: Schema.Types.Mixed },
+  },
+  { _id: false }
+);
+
 const ShippingAddressSchema = new Schema(
   {
     fullName: { type: String, required: true },
@@ -29,6 +50,29 @@ const ShippingAddressSchema = new Schema(
     state: { type: String, required: true },
     pincode: { type: String, required: true },
     phone: { type: String, required: true },
+  },
+  { _id: false }
+);
+
+const ReturnRequestSchema = new Schema(
+  {
+    status: {
+      type: String,
+      enum: ['none', 'requested', 'approved', 'rejected', 'completed'],
+      default: 'none',
+      index: true,
+    },
+    type: { type: String, enum: ['return', 'exchange'], default: 'return' },
+    reason: { type: String, default: '' },
+    details: { type: String, default: '' },
+    imageUrls: [{ type: String }],
+    requestedAt: { type: Date },
+    adminNotes: { type: String, default: '' },
+    adminDecidedAt: { type: Date },
+    adminDecidedBy: { type: String, default: '' },
+    refundInitiated: { type: Boolean, default: false },
+    refundId: { type: String, default: '' },
+    refundAmount: { type: Number, default: 0 },
   },
   { _id: false }
 );
@@ -47,8 +91,14 @@ const OrderSchema = new Schema(
     total: { type: Number, required: true },
     status: {
       type: String,
-      enum: ['Pending', 'Paid', 'Processing', 'Confirmed', 'Dispatched', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Failed'],
+      enum: ['Pending', 'Paid', 'Processing', 'Confirmed', 'Dispatched', 'In Transit', 'Shipped', 'Picked Up', 'Out for Delivery', 'Delivered', 'Cancelled', 'Failed', 'Delayed', 'RTO', 'Returned'],
       default: 'Confirmed',
+      index: true,
+    },
+    fulfillmentStatus: {
+      type: String,
+      enum: ['pending_payment', 'eligible', 'processing', 'fulfilled', 'partially_fulfilled', 'failed', 'held', 'cancelled'],
+      default: 'eligible',
       index: true,
     },
     paymentStatus: {
@@ -78,8 +128,26 @@ const OrderSchema = new Schema(
     estimatedDelivery: { type: String, default: '' },
     customerId: { type: String, index: true },
     customerEmail: { type: String, index: true },
+    returnRequest: { type: ReturnRequestSchema, default: () => ({ status: 'none' }) },
     isDemo: { type: Boolean, default: false, index: true },
+    isDemoLogistics: { type: Boolean, default: false, index: true },
     demoExpiresAt: { type: Date, index: { expireAfterSeconds: 0 } },
+    // Shiprocket Logistics Integration Fields
+    shiprocketOrderId: { type: String, sparse: true, index: true },
+    shiprocketShipmentId: { type: Number, sparse: true, index: true },
+    shiprocketStatus: { type: String, default: '' },
+    shiprocketStatusCode: { type: Number },
+    awbCode: { type: String, sparse: true, index: true },
+    courierPartner: { type: String, default: '' },
+    courierCompanyId: { type: Number },
+    shippingCharges: { type: Number, default: 0 },
+    shippingLabelUrl: { type: String, default: '' },
+    pickupLocation: { type: String, default: '' },
+    trackingHistory: [TrackingScanSchema],
+    lastSyncedAt: { type: Date },
+    shiprocketError: { type: String, default: '' },
+    auditLogs: [AuditLogSchema],
+    shiprocketWebhookEventsProcessed: [{ type: String }],
   },
   {
     timestamps: true,

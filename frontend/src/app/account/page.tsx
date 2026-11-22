@@ -6,6 +6,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { AlertCircle, ShieldCheck, ArrowRight, Sparkles, LogOut, Check, Mail, Lock, User as UserIcon, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useWishlist } from '@/context/WishlistContext';
+import { downloadOrderTaxInvoice } from '@/lib/invoiceDownload';
 
 import { AccountHeader } from './components/AccountHeader';
 import { AccountNav, AccountTab } from './components/AccountNav';
@@ -115,12 +116,13 @@ function AccountContent() {
     await logout();
   };
 
-  const handleDownloadInvoice = (orderNumber: string) => {
+  const handleDownloadInvoice = async (orderNumber: string) => {
     setDownloadingNumber(orderNumber);
-    setTimeout(() => {
-      setDownloadingNumber(null);
-      alert(`Digital Tax Invoice for Order #${orderNumber} has been downloaded.`);
-    }, 1000);
+    const result = await downloadOrderTaxInvoice(orderNumber);
+    setDownloadingNumber(null);
+    if (!result.success) {
+      alert(result.error || 'Failed to download tax invoice. Please try again.');
+    }
   };
 
   // 1. Loading State

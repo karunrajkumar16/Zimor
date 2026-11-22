@@ -127,7 +127,6 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
       subItems: [
         { label: 'Contact Page & Inquiries', href: '/contact', isFeatured: true },
         { label: 'WhatsApp (+91 86046 47888)', href: 'https://wa.me/918604647888' },
-        { label: 'Call (+91 86046 47888)', href: 'tel:+918604647888' },
         { label: 'Send Email', href: 'mailto:zimorindia@gmail.com' },
         { label: 'Track Your Order', href: '/account/orders' },
         { label: 'Policy & Customer Guidelines', href: '/policy' },
@@ -153,7 +152,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
           {/* Header Bar */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-[#b4b4b4]/30">
             <Link href="/" onClick={onClose} className="relative w-28 h-7">
-              <Image src="https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917824/zimor/brand/logo.png" alt="Zimor India" fill className="object-contain" priority />
+              <Image src="/logo.png" alt="Zimor India" fill className="object-contain" priority />
             </Link>
             <button
               type="button"

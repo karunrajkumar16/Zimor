@@ -84,6 +84,36 @@ export interface CartItem {
   selectedSize: string;
 }
 
+export interface TrackingScan {
+  date: string;
+  status: string;
+  activity: string;
+  location: string;
+}
+
+export interface OrderAuditLog {
+  timestamp: string;
+  actor: string;
+  action: string;
+  message: string;
+  metadata?: any;
+}
+
+export interface OrderReturnRequest {
+  status: 'none' | 'requested' | 'approved' | 'rejected' | 'completed';
+  type?: 'return' | 'exchange';
+  reason?: string;
+  details?: string;
+  imageUrls?: string[];
+  requestedAt?: string | Date;
+  adminNotes?: string;
+  adminDecidedAt?: string | Date;
+  adminDecidedBy?: string;
+  refundInitiated?: boolean;
+  refundId?: string;
+  refundAmount?: number;
+}
+
 export interface Order {
   id: string;
   orderNumber: string;
@@ -113,9 +143,10 @@ export interface Order {
   discount: number;
   shippingFee: number;
   total: number;
-  status: 'Pending' | 'Paid' | 'Processing' | 'Confirmed' | 'Dispatched' | 'Shipped' | 'Out for Delivery' | 'Delivered' | 'Cancelled' | 'Failed';
+  status: 'Pending' | 'Paid' | 'Processing' | 'Confirmed' | 'Dispatched' | 'In Transit' | 'Shipped' | 'Picked Up' | 'Out for Delivery' | 'Delivered' | 'Cancelled' | 'Failed' | 'Delayed' | 'RTO' | 'Returned';
   paymentStatus?: 'Pending' | 'Paid' | 'Failed' | 'Refunded';
   paymentMode?: 'test' | 'live';
+  fulfillmentStatus?: 'pending_payment' | 'eligible' | 'processing' | 'fulfilled' | 'partially_fulfilled' | 'failed' | 'held' | 'cancelled';
   amountPaid?: number;
   amountRefunded?: number;
   refundId?: string;
@@ -132,6 +163,24 @@ export interface Order {
   customerId?: string;
   customerEmail?: string;
   isDemo?: boolean;
+  isDemoLogistics?: boolean;
   demoExpiresAt?: Date;
+  returnRequest?: OrderReturnRequest;
+  // Shiprocket Logistics Integration Fields
+  shiprocketOrderId?: string;
+  shiprocketShipmentId?: number;
+  shiprocketStatus?: string;
+  shiprocketStatusCode?: number;
+  awbCode?: string;
+  courierPartner?: string;
+  courierCompanyId?: number;
+  shippingCharges?: number;
+  shippingLabelUrl?: string;
+  pickupLocation?: string;
+  trackingHistory?: TrackingScan[];
+  lastSyncedAt?: Date | string;
+  shiprocketError?: string;
+  auditLogs?: OrderAuditLog[];
+  shiprocketWebhookEventsProcessed?: string[];
 }
 

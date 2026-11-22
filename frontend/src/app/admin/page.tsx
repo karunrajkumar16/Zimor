@@ -69,7 +69,7 @@ interface BagAnalyticsItem {
   };
 }
 
-interface ComparativeSilhouetteItem {
+interface ComparativeProductItem {
   id?: string;
   name: string;
   slug: string;
@@ -130,7 +130,7 @@ interface AdminStatsResponse {
     yearly: OverallTimeSeriesPoint[];
   };
   bagAnalytics: BagAnalyticsItem[];
-  comparativeAnalysis: ComparativeSilhouetteItem[];
+  comparativeAnalysis: ComparativeProductItem[];
   activeFilters?: {
     range: string;
     period: string;
@@ -161,7 +161,7 @@ export default function AdminDashboardPage() {
   const [singleBagPeriod, setSingleBagPeriod] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>('monthly');
   const [hoveredBagIdx, setHoveredBagIdx] = useState<number | null>(null);
 
-  // Graph 3: Comparative Silhouette Clustered Column Chart Controls
+  // Graph 3: Comparative Product Clustered Column Chart Controls
   const [clusteredPeriod, setClusteredPeriod] = useState<'quarterly' | 'monthly' | 'weekly' | 'yearly'>('quarterly');
   const [clusteredMetric, setClusteredMetric] = useState<'revenue' | 'units' | 'asp'>('revenue');
   const [selectedProductSlugs, setSelectedProductSlugs] = useState<string[]>([]);
@@ -352,25 +352,23 @@ export default function AdminDashboardPage() {
     <div className="space-y-8 pb-12">
       {/* 1. TOP DASHBOARD CONTROL & FILTER BAR */}
       <div
-        className={`p-5 rounded-xl border flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-colors ${
-          isDark
-            ? 'bg-[#24211F] border-[#36312C]'
-            : 'bg-[#FFFFFF] border-[#E5DFD7]'
-        }`}
+        className={`p-5 rounded-xl border flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-colors ${isDark
+          ? 'bg-[#24211F] border-[#36312C]'
+          : 'bg-[#FFFFFF] border-[#E5DFD7]'
+          }`}
       >
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-lg font-bold tracking-tight">Executive Analytics & Intelligence</h1>
             <span
-              className={`px-2 py-0.5 rounded text-[10px] font-mono tracking-wider font-semibold uppercase ${
-                isDark ? 'bg-[#B44220]/20 text-[#E8A593]' : 'bg-[#B44220]/10 text-[#B44220]'
-              }`}
+              className={`px-2 py-0.5 rounded text-[10px] font-mono tracking-wider font-semibold uppercase ${isDark ? 'bg-[#B44220]/20 text-[#E8A593]' : 'bg-[#B44220]/10 text-[#B44220]'
+                }`}
             >
               Audi CRM Framework
             </span>
           </div>
           <p className={`text-xs mt-1 ${isDark ? 'text-[#8A837C]' : 'text-[#7A7269]'}`}>
-            Live transaction telemetry, multi-silhouette sales performance & user metrics.
+            Live transaction telemetry, multi-product sales performance & user metrics.
           </p>
         </div>
 
@@ -378,9 +376,8 @@ export default function AdminDashboardPage() {
         <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
           {/* Segmented Date Range Picker */}
           <div
-            className={`flex items-center p-1 rounded-lg border text-xs font-mono ${
-              isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#F7F5F2] border-[#E5DFD7]'
-            }`}
+            className={`flex items-center p-1 rounded-lg border text-xs font-mono ${isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#F7F5F2] border-[#E5DFD7]'
+              }`}
           >
             {[
               { id: '7d', label: '7D' },
@@ -392,13 +389,12 @@ export default function AdminDashboardPage() {
               <button
                 key={tab.id}
                 onClick={() => setDateRange(tab.id as any)}
-                className={`px-2.5 py-1 rounded transition-colors text-xs font-medium ${
-                  dateRange === tab.id
-                    ? 'bg-[#B44220] text-white font-semibold'
-                    : isDark
+                className={`px-2.5 py-1 rounded transition-colors text-xs font-medium ${dateRange === tab.id
+                  ? 'bg-[#B44220] text-white font-semibold'
+                  : isDark
                     ? 'text-[#8A837C] hover:text-[#E8E1DA]'
                     : 'text-[#6E6760] hover:text-[#24211F]'
-                }`}
+                  }`}
               >
                 {tab.label}
               </button>
@@ -409,11 +405,10 @@ export default function AdminDashboardPage() {
           <button
             onClick={() => fetchStats(dateRange)}
             disabled={loading}
-            className={`p-2 rounded-lg border flex items-center justify-center transition-colors ${
-              isDark
-                ? 'bg-[#191715] border-[#36312C] text-[#E8E1DA] hover:border-[#8A837C]'
-                : 'bg-[#F7F5F2] border-[#E5DFD7] text-[#24211F] hover:border-[#8C837A]'
-            }`}
+            className={`p-2 rounded-lg border flex items-center justify-center transition-colors ${isDark
+              ? 'bg-[#191715] border-[#36312C] text-[#E8E1DA] hover:border-[#8A837C]'
+              : 'bg-[#F7F5F2] border-[#E5DFD7] text-[#24211F] hover:border-[#8C837A]'
+              }`}
             title="Refresh analytics telemetry"
             aria-label="Refresh analytics telemetry"
           >
@@ -442,9 +437,8 @@ export default function AdminDashboardPage() {
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <h2
-            className={`text-xs font-mono uppercase tracking-widest font-semibold ${
-              isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'
-            }`}
+            className={`text-xs font-mono uppercase tracking-widest font-semibold ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'
+              }`}
           >
             Executive Performance Overview
           </h2>
@@ -456,18 +450,16 @@ export default function AdminDashboardPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
           {/* Metric 1: Total Revenue */}
           <div
-            className={`p-4 rounded-xl border transition-all ${
-              isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
-            }`}
+            className={`p-4 rounded-xl border transition-all ${isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
+              }`}
           >
             <div className="flex items-center justify-between">
               <span className={`text-[10px] font-mono uppercase tracking-wider font-semibold ${isDark ? 'text-[#8A837C]' : 'text-[#7A7269]'}`}>
                 Total Revenue
               </span>
               <span
-                className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold ${
-                  isDark ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-500/10 text-emerald-700'
-                }`}
+                className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold ${isDark ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-500/10 text-emerald-700'
+                  }`}
               >
                 {data?.metrics.revenueGrowth || '0.0%'}
               </span>
@@ -484,18 +476,16 @@ export default function AdminDashboardPage() {
 
           {/* Metric 2: Total Orders */}
           <div
-            className={`p-4 rounded-xl border transition-all ${
-              isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
-            }`}
+            className={`p-4 rounded-xl border transition-all ${isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
+              }`}
           >
             <div className="flex items-center justify-between">
               <span className={`text-[10px] font-mono uppercase tracking-wider font-semibold ${isDark ? 'text-[#8A837C]' : 'text-[#7A7269]'}`}>
                 Total Orders
               </span>
               <span
-                className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold ${
-                  isDark ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-500/10 text-emerald-700'
-                }`}
+                className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold ${isDark ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-500/10 text-emerald-700'
+                  }`}
               >
                 {data?.metrics.orderGrowth || '0.0%'}
               </span>
@@ -512,18 +502,16 @@ export default function AdminDashboardPage() {
 
           {/* Metric 3: Average Order Value (AOV) */}
           <div
-            className={`p-4 rounded-xl border transition-all ${
-              isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
-            }`}
+            className={`p-4 rounded-xl border transition-all ${isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
+              }`}
           >
             <div className="flex items-center justify-between">
               <span className={`text-[10px] font-mono uppercase tracking-wider font-semibold ${isDark ? 'text-[#8A837C]' : 'text-[#7A7269]'}`}>
                 Avg. Order Value
               </span>
               <span
-                className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold ${
-                  isDark ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-500/10 text-emerald-700'
-                }`}
+                className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold ${isDark ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-500/10 text-emerald-700'
+                  }`}
               >
                 {data?.metrics.aovGrowth || '0.0%'}
               </span>
@@ -540,18 +528,16 @@ export default function AdminDashboardPage() {
 
           {/* Metric 4: Total Customers */}
           <div
-            className={`p-4 rounded-xl border transition-all ${
-              isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
-            }`}
+            className={`p-4 rounded-xl border transition-all ${isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
+              }`}
           >
             <div className="flex items-center justify-between">
               <span className={`text-[10px] font-mono uppercase tracking-wider font-semibold ${isDark ? 'text-[#8A837C]' : 'text-[#7A7269]'}`}>
                 Total Customers
               </span>
               <span
-                className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold ${
-                  isDark ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-500/10 text-emerald-700'
-                }`}
+                className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold ${isDark ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-500/10 text-emerald-700'
+                  }`}
               >
                 {data?.metrics.customerGrowth || '0.0%'}
               </span>
@@ -568,18 +554,16 @@ export default function AdminDashboardPage() {
 
           {/* Metric 5: Conversion Rate */}
           <div
-            className={`p-4 rounded-xl border transition-all ${
-              isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
-            }`}
+            className={`p-4 rounded-xl border transition-all ${isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
+              }`}
           >
             <div className="flex items-center justify-between">
               <span className={`text-[10px] font-mono uppercase tracking-wider font-semibold ${isDark ? 'text-[#8A837C]' : 'text-[#7A7269]'}`}>
                 Conversion Rate
               </span>
               <span
-                className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold ${
-                  isDark ? 'bg-[#B44220]/20 text-[#E8A593]' : 'bg-[#B44220]/10 text-[#B44220]'
-                }`}
+                className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold ${isDark ? 'bg-[#B44220]/20 text-[#E8A593]' : 'bg-[#B44220]/10 text-[#B44220]'
+                  }`}
               >
                 {data?.metrics.conversionGrowth || '0.0%'}
               </span>
@@ -600,9 +584,8 @@ export default function AdminDashboardPage() {
       <section className="space-y-6">
         {/* GRAPH 1: OVERALL SALES – AREA CHART */}
         <div
-          className={`p-5 rounded-xl border transition-all ${
-            isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
-          }`}
+          className={`p-5 rounded-xl border transition-all ${isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
+            }`}
         >
           {/* Card Header & Timeframe Switcher */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-inherit">
@@ -618,9 +601,8 @@ export default function AdminDashboardPage() {
 
             {/* Timeframe Filter Tabs */}
             <div
-              className={`flex items-center p-1 rounded-lg border text-xs font-mono ${
-                isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#F7F5F2] border-[#E5DFD7]'
-              }`}
+              className={`flex items-center p-1 rounded-lg border text-xs font-mono ${isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#F7F5F2] border-[#E5DFD7]'
+                }`}
             >
               {[
                 { id: 'daily', label: 'Daily' },
@@ -634,13 +616,12 @@ export default function AdminDashboardPage() {
                     setOverallPeriod(tab.id as any);
                     setHoveredOverallIdx(null);
                   }}
-                  className={`px-3 py-1 rounded transition-colors text-xs font-medium ${
-                    overallPeriod === tab.id
-                      ? 'bg-[#B44220] text-white font-semibold'
-                      : isDark
+                  className={`px-3 py-1 rounded transition-colors text-xs font-medium ${overallPeriod === tab.id
+                    ? 'bg-[#B44220] text-white font-semibold'
+                    : isDark
                       ? 'text-[#8A837C] hover:text-[#E8E1DA]'
                       : 'text-[#6E6760] hover:text-[#24211F]'
-                  }`}
+                    }`}
                 >
                   {tab.label}
                 </button>
@@ -713,9 +694,8 @@ export default function AdminDashboardPage() {
                   const currentLinePath = currentCoords
                     .map((c, i) => (i === 0 ? `M ${c.x} ${c.y}` : `L ${c.x} ${c.y}`))
                     .join(' ');
-                  const currentAreaPath = `${currentLinePath} L ${currentCoords[currentCoords.length - 1].x} ${
-                    chartH - paddingY
-                  } L ${currentCoords[0].x} ${chartH - paddingY} Z`;
+                  const currentAreaPath = `${currentLinePath} L ${currentCoords[currentCoords.length - 1].x} ${chartH - paddingY
+                    } L ${currentCoords[0].x} ${chartH - paddingY} Z`;
 
                   const prevLinePath = prevCoords
                     .map((c, i) => (i === 0 ? `M ${c.x} ${c.y}` : `L ${c.x} ${c.y}`))
@@ -747,9 +727,8 @@ export default function AdminDashboardPage() {
                               x={paddingX - 6}
                               y={y + 3}
                               textAnchor="end"
-                              className={`text-[9px] font-mono fill-current ${
-                                isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'
-                              }`}
+                              className={`text-[9px] font-mono fill-current ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'
+                                }`}
                             >
                               ₹{labelVal >= 100000 ? `${(labelVal / 100000).toFixed(1)}L` : `${Math.round(labelVal / 1000)}k`}
                             </text>
@@ -800,13 +779,12 @@ export default function AdminDashboardPage() {
                           x={c.x}
                           y={chartH - 4}
                           textAnchor="middle"
-                          className={`text-[10px] font-mono fill-current ${
-                            hoveredOverallIdx === i
-                              ? 'text-[#B44220] font-bold'
-                              : isDark
+                          className={`text-[10px] font-mono fill-current ${hoveredOverallIdx === i
+                            ? 'text-[#B44220] font-bold'
+                            : isDark
                               ? 'text-[#8A837C]'
                               : 'text-[#8C837A]'
-                          }`}
+                            }`}
                         >
                           {c.pt.label}
                         </text>
@@ -836,9 +814,8 @@ export default function AdminDashboardPage() {
             {/* Interactive Tooltip Card */}
             {hoveredOverallIdx !== null && overallSeries[hoveredOverallIdx] && (
               <div
-                className={`mt-3 p-3 rounded-lg border text-xs flex flex-wrap items-center justify-between gap-4 font-mono ${
-                  isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#FAF8F5] border-[#E8E2D9]'
-                }`}
+                className={`mt-3 p-3 rounded-lg border text-xs flex flex-wrap items-center justify-between gap-4 font-mono ${isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#FAF8F5] border-[#E8E2D9]'
+                  }`}
               >
                 <div>
                   <span className={`text-[10px] uppercase block ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
@@ -879,9 +856,8 @@ export default function AdminDashboardPage() {
 
         {/* GRAPH 2: SINGLE BAG DEEP-DIVE – BAR + LINE COMBINATION CHART */}
         <div
-          className={`p-5 rounded-xl border transition-all ${
-            isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
-          }`}
+          className={`p-5 rounded-xl border transition-all ${isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
+            }`}
         >
           {/* Header & Product Selector Bar */}
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b border-inherit">
@@ -898,7 +874,7 @@ export default function AdminDashboardPage() {
             {/* Product Selector for All 6 ZIMOR Bags */}
             <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
               <label htmlFor="bag-selector" className={`text-xs font-mono font-medium ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
-                Silhouette:
+                Product:
               </label>
               <select
                 id="bag-selector"
@@ -907,11 +883,10 @@ export default function AdminDashboardPage() {
                   setSelectedBagSlug(e.target.value);
                   setHoveredBagIdx(null);
                 }}
-                className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors cursor-pointer ${
-                  isDark
-                    ? 'bg-[#191715] border-[#36312C] text-[#E8E1DA] focus:border-[#B44220]'
-                    : 'bg-[#F7F5F2] border-[#E5DFD7] text-[#24211F] focus:border-[#B44220]'
-                }`}
+                className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors cursor-pointer ${isDark
+                  ? 'bg-[#191715] border-[#36312C] text-[#E8E1DA] focus:border-[#B44220]'
+                  : 'bg-[#F7F5F2] border-[#E5DFD7] text-[#24211F] focus:border-[#B44220]'
+                  }`}
               >
                 {data?.bagAnalytics?.map((bag) => (
                   <option key={bag.slug} value={bag.slug}>
@@ -922,9 +897,8 @@ export default function AdminDashboardPage() {
 
               {/* Timeframe Filter Tabs */}
               <div
-                className={`flex items-center p-1 rounded-lg border text-xs font-mono ml-0 sm:ml-2 ${
-                  isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#F7F5F2] border-[#E5DFD7]'
-                }`}
+                className={`flex items-center p-1 rounded-lg border text-xs font-mono ml-0 sm:ml-2 ${isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#F7F5F2] border-[#E5DFD7]'
+                  }`}
               >
                 {[
                   { id: 'daily', label: 'D' },
@@ -938,13 +912,12 @@ export default function AdminDashboardPage() {
                       setSingleBagPeriod(tab.id as any);
                       setHoveredBagIdx(null);
                     }}
-                    className={`px-2.5 py-1 rounded transition-colors text-xs font-medium ${
-                      singleBagPeriod === tab.id
-                        ? 'bg-[#B44220] text-white font-semibold'
-                        : isDark
+                    className={`px-2.5 py-1 rounded transition-colors text-xs font-medium ${singleBagPeriod === tab.id
+                      ? 'bg-[#B44220] text-white font-semibold'
+                      : isDark
                         ? 'text-[#8A837C] hover:text-[#E8E1DA]'
                         : 'text-[#6E6760] hover:text-[#24211F]'
-                    }`}
+                      }`}
                   >
                     {tab.label}
                   </button>
@@ -1061,9 +1034,8 @@ export default function AdminDashboardPage() {
                               x={paddingX - 6}
                               y={y + 3}
                               textAnchor="end"
-                              className={`text-[9px] font-mono fill-current ${
-                                isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'
-                              }`}
+                              className={`text-[9px] font-mono fill-current ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'
+                                }`}
                             >
                               {unitLabel}u
                             </text>
@@ -1071,9 +1043,8 @@ export default function AdminDashboardPage() {
                               x={chartW - paddingX + 6}
                               y={y + 3}
                               textAnchor="start"
-                              className={`text-[9px] font-mono fill-current ${
-                                isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'
-                              }`}
+                              className={`text-[9px] font-mono fill-current ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'
+                                }`}
                             >
                               ₹{revLabel >= 1000 ? `${Math.round(revLabel / 1000)}k` : revLabel}
                             </text>
@@ -1125,13 +1096,12 @@ export default function AdminDashboardPage() {
                           x={c.x}
                           y={chartH - 4}
                           textAnchor="middle"
-                          className={`text-[10px] font-mono fill-current ${
-                            hoveredBagIdx === i
-                              ? 'text-[#B44220] font-bold'
-                              : isDark
+                          className={`text-[10px] font-mono fill-current ${hoveredBagIdx === i
+                            ? 'text-[#B44220] font-bold'
+                            : isDark
                               ? 'text-[#8A837C]'
                               : 'text-[#8C837A]'
-                          }`}
+                            }`}
                         >
                           {c.pt.label}
                         </text>
@@ -1153,7 +1123,7 @@ export default function AdminDashboardPage() {
                 })()
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-xs opacity-50">
-                  Loading silhouette metrics...
+                  Loading product metrics...
                 </div>
               )}
             </div>
@@ -1161,9 +1131,8 @@ export default function AdminDashboardPage() {
             {/* Interactive Tooltip Card for Single Bag */}
             {hoveredBagIdx !== null && singleBagSeries[hoveredBagIdx] && (
               <div
-                className={`mt-3 p-3 rounded-lg border text-xs flex flex-wrap items-center justify-between gap-4 font-mono ${
-                  isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#FAF8F5] border-[#E8E2D9]'
-                }`}
+                className={`mt-3 p-3 rounded-lg border text-xs flex flex-wrap items-center justify-between gap-4 font-mono ${isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#FAF8F5] border-[#E8E2D9]'
+                  }`}
               >
                 <div>
                   <span className={`text-[10px] uppercase block ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
@@ -1217,9 +1186,8 @@ export default function AdminDashboardPage() {
                 {selectedBag.colors.map((color, cIdx) => (
                   <div
                     key={cIdx}
-                    className={`p-3 rounded-lg border flex items-center justify-between text-xs font-mono ${
-                      isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#FAF8F5] border-[#E8E2D9]'
-                    }`}
+                    className={`p-3 rounded-lg border flex items-center justify-between text-xs font-mono ${isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#FAF8F5] border-[#E8E2D9]'
+                      }`}
                   >
                     <div className="flex items-center gap-2.5">
                       <span
@@ -1248,29 +1216,27 @@ export default function AdminDashboardPage() {
           )}
         </div>
 
-        {/* GRAPH 3: CLUSTERED COLUMN CHART (COMPARATIVE SILHOUETTE ANALYSIS) */}
+        {/* GRAPH 3: CLUSTERED COLUMN CHART (COMPARATIVE PRODUCT ANALYSIS) */}
         {/* MATCHES ATTACHED REFERENCE: GROUPED VERTICAL COLUMNS ACROSS ALL 6 PRODUCTS */}
         <div
-          className={`p-5 rounded-xl border transition-all ${
-            isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
-          }`}
+          className={`p-5 rounded-xl border transition-all ${isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
+            }`}
         >
           {/* Card Header & Multi-Control Strip */}
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-4 border-b border-inherit">
             <div>
               <div className="flex items-center gap-2">
                 <BarChart2 className="w-4 h-4 text-[#B44220]" />
-                <h3 className="text-sm font-bold tracking-tight">Comparative Silhouette Analysis</h3>
+                <h3 className="text-sm font-bold tracking-tight">Comparative Product Analysis</h3>
                 <span
-                  className={`text-[9px] font-mono uppercase px-2 py-0.5 rounded font-semibold ${
-                    isDark ? 'bg-[#B44220]/20 text-[#E8A593]' : 'bg-[#B44220]/10 text-[#B44220]'
-                  }`}
+                  className={`text-[9px] font-mono uppercase px-2 py-0.5 rounded font-semibold ${isDark ? 'bg-[#B44220]/20 text-[#E8A593]' : 'bg-[#B44220]/10 text-[#B44220]'
+                    }`}
                 >
                   Clustered Column
                 </span>
               </div>
               <p className={`text-xs mt-0.5 ${isDark ? 'text-[#8A837C]' : 'text-[#7A7269]'}`}>
-                Grouped vertical column benchmark comparing all 6 silhouettes across selected reporting periods.
+                Grouped vertical column benchmark comparing all 6 products across selected reporting periods.
               </p>
             </div>
 
@@ -1278,9 +1244,8 @@ export default function AdminDashboardPage() {
             <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
               {/* Metric Selector Tabs */}
               <div
-                className={`flex items-center p-1 rounded-lg border text-xs font-mono ${
-                  isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#F7F5F2] border-[#E5DFD7]'
-                }`}
+                className={`flex items-center p-1 rounded-lg border text-xs font-mono ${isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#F7F5F2] border-[#E5DFD7]'
+                  }`}
               >
                 {[
                   { id: 'revenue', label: 'Revenue (₹)' },
@@ -1293,13 +1258,12 @@ export default function AdminDashboardPage() {
                       setClusteredMetric(m.id as any);
                       setHoveredBar(null);
                     }}
-                    className={`px-2.5 py-1 rounded transition-colors text-xs font-medium ${
-                      clusteredMetric === m.id
-                        ? 'bg-[#B44220] text-white font-semibold'
-                        : isDark
+                    className={`px-2.5 py-1 rounded transition-colors text-xs font-medium ${clusteredMetric === m.id
+                      ? 'bg-[#B44220] text-white font-semibold'
+                      : isDark
                         ? 'text-[#8A837C] hover:text-[#E8E1DA]'
                         : 'text-[#6E6760] hover:text-[#24211F]'
-                    }`}
+                      }`}
                   >
                     {m.label}
                   </button>
@@ -1308,9 +1272,8 @@ export default function AdminDashboardPage() {
 
               {/* Period Granularity Selector (Quarterly, Monthly, Weekly, Yearly) */}
               <div
-                className={`flex items-center p-1 rounded-lg border text-xs font-mono ${
-                  isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#F7F5F2] border-[#E5DFD7]'
-                }`}
+                className={`flex items-center p-1 rounded-lg border text-xs font-mono ${isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#F7F5F2] border-[#E5DFD7]'
+                  }`}
               >
                 {[
                   { id: 'quarterly', label: 'Quarterly' },
@@ -1324,13 +1287,12 @@ export default function AdminDashboardPage() {
                       setClusteredPeriod(p.id as any);
                       setHoveredBar(null);
                     }}
-                    className={`px-2.5 py-1 rounded transition-colors text-xs font-medium ${
-                      clusteredPeriod === p.id
-                        ? 'bg-[#B44220] text-white font-semibold'
-                        : isDark
+                    className={`px-2.5 py-1 rounded transition-colors text-xs font-medium ${clusteredPeriod === p.id
+                      ? 'bg-[#B44220] text-white font-semibold'
+                      : isDark
                         ? 'text-[#8A837C] hover:text-[#E8E1DA]'
                         : 'text-[#6E6760] hover:text-[#24211F]'
-                    }`}
+                      }`}
                   >
                     {p.label}
                   </button>
@@ -1342,11 +1304,10 @@ export default function AdminDashboardPage() {
                 value={dateRangeScope}
                 onChange={(e) => setDateRangeScope(e.target.value as any)}
                 aria-label="Filter reporting period scope"
-                className={`px-2.5 py-1.5 rounded-lg border text-xs font-mono font-medium cursor-pointer transition-colors ${
-                  isDark
-                    ? 'bg-[#191715] border-[#36312C] text-[#E8E1DA] focus:border-[#B44220]'
-                    : 'bg-[#F7F5F2] border-[#E5DFD7] text-[#24211F] focus:border-[#B44220]'
-                }`}
+                className={`px-2.5 py-1.5 rounded-lg border text-xs font-mono font-medium cursor-pointer transition-colors ${isDark
+                  ? 'bg-[#191715] border-[#36312C] text-[#E8E1DA] focus:border-[#B44220]'
+                  : 'bg-[#F7F5F2] border-[#E5DFD7] text-[#24211F] focus:border-[#B44220]'
+                  }`}
               >
                 <option value="all">Full Completed Periods</option>
                 <option value="recent">Recent Intervals (H2)</option>
@@ -1359,7 +1320,7 @@ export default function AdminDashboardPage() {
             {/* Product Multi-select Chips */}
             <div className="flex flex-wrap items-center gap-1.5">
               <span className={`text-[10px] uppercase font-semibold mr-1 ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
-                Silhouettes:
+                Products:
               </span>
               {allComparativeProducts.map((p) => {
                 const isSelected = selectedProductSlugs.includes(p.slug);
@@ -1367,15 +1328,14 @@ export default function AdminDashboardPage() {
                   <button
                     key={p.slug}
                     onClick={() => toggleProductSelection(p.slug)}
-                    className={`px-2 py-0.5 rounded text-[11px] font-medium flex items-center gap-1 border transition-all ${
-                      isSelected
-                        ? isDark
-                          ? 'bg-[#B44220]/20 border-[#B44220] text-[#E8E1DA]'
-                          : 'bg-[#B44220]/10 border-[#B44220] text-[#B44220] font-semibold'
-                        : isDark
+                    className={`px-2 py-0.5 rounded text-[11px] font-medium flex items-center gap-1 border transition-all ${isSelected
+                      ? isDark
+                        ? 'bg-[#B44220]/20 border-[#B44220] text-[#E8E1DA]'
+                        : 'bg-[#B44220]/10 border-[#B44220] text-[#B44220] font-semibold'
+                      : isDark
                         ? 'bg-[#191715] border-[#36312C] text-[#8A837C] opacity-60 hover:opacity-100'
                         : 'bg-[#FAF8F5] border-[#E5DFD7] text-[#8C837A] opacity-60 hover:opacity-100'
-                    }`}
+                      }`}
                   >
                     {isSelected && <Check className="w-3 h-3 stroke-[2.5]" />}
                     <span>{p.name.replace('ZIMOR ', '')}</span>
@@ -1393,9 +1353,8 @@ export default function AdminDashboardPage() {
 
             {/* Reference-Matching Top-Right Legend Box */}
             <div
-              className={`p-2 rounded-lg border flex items-center gap-3 self-end md:self-auto ${
-                isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#FAF8F5] border-[#E8E2D9]'
-              }`}
+              className={`p-2 rounded-lg border flex items-center gap-3 self-end md:self-auto ${isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#FAF8F5] border-[#E8E2D9]'
+                }`}
             >
               <span className={`text-[10px] uppercase font-semibold ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
                 Legend:
@@ -1454,15 +1413,14 @@ export default function AdminDashboardPage() {
                         y={chartH / 2 - 10}
                         textAnchor="middle"
                         transform={`rotate(-90, 16, ${chartH / 2 - 10})`}
-                        className={`text-[10px] font-mono tracking-wider font-semibold fill-current uppercase ${
-                          isDark ? 'text-[#8A837C]' : 'text-[#7A7269]'
-                        }`}
+                        className={`text-[10px] font-mono tracking-wider font-semibold fill-current uppercase ${isDark ? 'text-[#8A837C]' : 'text-[#7A7269]'
+                          }`}
                       >
                         {clusteredMetric === 'revenue'
                           ? 'Sales Revenue (₹ INR)'
                           : clusteredMetric === 'units'
-                          ? 'Units Sold (Vol)'
-                          : 'Average Selling Price (₹)'}
+                            ? 'Units Sold (Vol)'
+                            : 'Average Selling Price (₹)'}
                       </text>
 
                       {/* Dotted Horizontal Reference Grid Lines */}
@@ -1474,8 +1432,8 @@ export default function AdminDashboardPage() {
                           formattedTick = tickVal >= 100000
                             ? `₹${(tickVal / 100000).toFixed(1)}L`
                             : tickVal >= 1000
-                            ? `₹${Math.round(tickVal / 1000)}k`
-                            : `₹${tickVal}`;
+                              ? `₹${Math.round(tickVal / 1000)}k`
+                              : `₹${tickVal}`;
                         } else {
                           formattedTick = `${tickVal}u`;
                         }
@@ -1495,9 +1453,8 @@ export default function AdminDashboardPage() {
                               x={paddingLeft - 8}
                               y={y + 3}
                               textAnchor="end"
-                              className={`text-[9px] font-mono fill-current tabular-nums ${
-                                isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'
-                              }`}
+                              className={`text-[9px] font-mono fill-current tabular-nums ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'
+                                }`}
                             >
                               {formattedTick}
                             </text>
@@ -1594,16 +1551,15 @@ export default function AdminDashboardPage() {
                               y={chartH - paddingBottom + 16}
                               textAnchor="end"
                               transform={`rotate(-35, ${groupCenterX}, ${chartH - paddingBottom + 16})`}
-                              className={`text-[10px] font-mono font-medium fill-current cursor-pointer hover:font-bold ${
-                                hoveredBar?.productSlug === prod.slug
-                                  ? 'text-[#B44220] font-bold'
-                                  : isDark
+                              className={`text-[10px] font-mono font-medium fill-current cursor-pointer hover:font-bold ${hoveredBar?.productSlug === prod.slug
+                                ? 'text-[#B44220] font-bold'
+                                : isDark
                                   ? 'text-[#E8E1DA]'
                                   : 'text-[#24211F]'
-                              }`}
+                                }`}
                               onClick={() => deselectOtherProducts(prod.slug)}
                             >
-                              <title>Click to isolate this silhouette</title>
+                              <title>Click to isolate this product</title>
                               {prod.name.replace('ZIMOR ', '')}
                             </text>
                           </g>
@@ -1631,9 +1587,8 @@ export default function AdminDashboardPage() {
 
                 return (
                   <div
-                    className={`mt-4 p-3 rounded-lg border text-xs flex flex-wrap items-center justify-between gap-4 font-mono shadow-sm ${
-                      isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#FAF8F5] border-[#E8E2D9]'
-                    }`}
+                    className={`mt-4 p-3 rounded-lg border text-xs flex flex-wrap items-center justify-between gap-4 font-mono shadow-sm ${isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#FAF8F5] border-[#E8E2D9]'
+                      }`}
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-md overflow-hidden relative shrink-0 border border-inherit">
@@ -1715,7 +1670,7 @@ export default function AdminDashboardPage() {
               <table className="w-full text-left text-xs font-mono">
                 <thead>
                   <tr className={`border-b ${isDark ? 'border-[#36312C] text-[#8A837C]' : 'border-[#E5DFD7] text-[#8C837A]'}`}>
-                    <th className="py-2 px-3 uppercase tracking-wider font-semibold">Silhouette</th>
+                    <th className="py-2 px-3 uppercase tracking-wider font-semibold">Product</th>
                     {reportingPeriods.map((periodLabel, pIdx) => (
                       <th key={periodLabel} className="py-2 px-3 uppercase tracking-wider font-semibold text-right">
                         <span className="inline-flex items-center gap-1.5 justify-end">
@@ -1739,9 +1694,8 @@ export default function AdminDashboardPage() {
                     return (
                       <tr
                         key={prod.slug}
-                        className={`transition-colors ${
-                          isDark ? 'hover:bg-[#191715]' : 'hover:bg-[#FAF8F5]'
-                        }`}
+                        className={`transition-colors ${isDark ? 'hover:bg-[#191715]' : 'hover:bg-[#FAF8F5]'
+                          }`}
                       >
                         <td className="py-2.5 px-3 font-semibold text-xs flex items-center gap-2">
                           <span className="w-1.5 h-1.5 rounded-full bg-[#B44220]" />
@@ -1770,13 +1724,12 @@ export default function AdminDashboardPage() {
                         </td>
                         <td className="py-2.5 px-3 text-right">
                           <span
-                            className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${
-                              prod.stockHealth === 'Critical'
-                                ? 'bg-red-500/15 text-red-700 dark:text-red-400'
-                                : prod.stockHealth === 'Low'
+                            className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${prod.stockHealth === 'Critical'
+                              ? 'bg-red-500/15 text-red-700 dark:text-red-400'
+                              : prod.stockHealth === 'Low'
                                 ? 'bg-amber-500/15 text-amber-700 dark:text-amber-400'
                                 : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
-                            }`}
+                              }`}
                           >
                             {prod.stock}u
                           </span>
@@ -1793,9 +1746,8 @@ export default function AdminDashboardPage() {
 
       {/* 4. RECENT VERIFIED TRANSACTIONS LEDGER */}
       <section
-        className={`p-5 rounded-xl border transition-all ${
-          isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
-        }`}
+        className={`p-5 rounded-xl border transition-all ${isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
+          }`}
       >
         <div className="flex items-center justify-between pb-3 border-b border-inherit">
           <div>
@@ -1829,9 +1781,8 @@ export default function AdminDashboardPage() {
                 data.recentOrders.map((ord: any) => (
                   <tr
                     key={ord.id || ord.orderNumber}
-                    className={`transition-colors ${
-                      isDark ? 'hover:bg-[#191715]' : 'hover:bg-[#FAF8F5]'
-                    }`}
+                    className={`transition-colors ${isDark ? 'hover:bg-[#191715]' : 'hover:bg-[#FAF8F5]'
+                      }`}
                   >
                     <td className="py-2.5 px-3 font-semibold text-[#B44220]">
                       <div className="flex items-center gap-1.5 flex-wrap">
@@ -1851,13 +1802,12 @@ export default function AdminDashboardPage() {
                     </td>
                     <td className="py-2.5 px-3">
                       <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                          ord.status === 'Delivered'
-                            ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
-                            : ord.status === 'Cancelled'
+                        className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${ord.status === 'Delivered'
+                          ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
+                          : ord.status === 'Cancelled'
                             ? 'bg-red-500/15 text-red-700 dark:text-red-400'
                             : 'bg-[#B44220]/15 text-[#B44220] dark:text-[#E07A5F]'
-                        }`}
+                          }`}
                       >
                         {ord.status}
                       </span>

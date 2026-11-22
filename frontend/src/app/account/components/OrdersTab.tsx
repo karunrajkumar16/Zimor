@@ -3,11 +3,12 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Package, Truck, Download, Eye, ArrowRight, RotateCcw } from 'lucide-react';
+import { Package, Truck, Download, Eye, ArrowRight, RotateCcw, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Order } from '@/types';
 import { useCart } from '@/context/CartContext';
 import { useProducts } from '@/context/ProductContext';
 import { OrderDetailsModal } from './OrderDetailsModal';
+import { downloadOrderTaxInvoice } from '@/lib/invoiceDownload';
 
 interface OrdersTabProps {
   orders: Order[];
@@ -19,13 +20,26 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({ orders }) => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [downloadingNumber, setDownloadingNumber] = useState<string | null>(null);
   const [reorderMessage, setReorderMessage] = useState<string | null>(null);
+  const [invoiceToast, setInvoiceToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-  const handleDownloadInvoice = (orderNumber: string) => {
+  const handleDownloadInvoice = async (orderNumber: string) => {
     setDownloadingNumber(orderNumber);
-    setTimeout(() => {
-      setDownloadingNumber(null);
-      alert(`Digital Tax Invoice for Order #${orderNumber} has been downloaded.`);
-    }, 1000);
+    setInvoiceToast(null);
+    const result = await downloadOrderTaxInvoice(orderNumber);
+    setDownloadingNumber(null);
+    if (result.success) {
+      setInvoiceToast({
+        type: 'success',
+        message: `Tax Invoice for Order #${orderNumber} downloaded successfully.`,
+      });
+      setTimeout(() => setInvoiceToast(null), 4000);
+    } else {
+      setInvoiceToast({
+        type: 'error',
+        message: result.error || 'Failed to download tax invoice. Please try again.',
+      });
+      setTimeout(() => setInvoiceToast(null), 5000);
+    }
   };
 
   const handleReorder = (item: Order['items'][number]) => {
@@ -40,6 +54,32 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({ orders }) => {
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Toast Feedback */}
+      {invoiceToast && (
+        <div
+          className={`p-3 text-xs flex items-center justify-between rounded border ${
+            invoiceToast.type === 'success'
+              ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
+              : 'bg-rose-50 text-rose-900 border-rose-200'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            {invoiceToast.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+            )}
+            <span>{invoiceToast.message}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setInvoiceToast(null)}
+            className="text-xs font-semibold uppercase hover:underline ml-2"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {reorderMessage && (
         <div className="p-3 bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center justify-between">
           <span>{reorderMessage}</span>
@@ -127,16 +167,40 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({ orders }) => {
                     <span className="text-[10px] uppercase font-bold tracking-[0.16em] text-[#888888]">
                       Status
                     </span>
-                    <div>
+                    <div className="flex flex-col gap-1">
                       <span
                         className={`inline-block px-2.5 py-0.5 text-[10px] uppercase tracking-wider font-semibold ${
-                          isDelivered
+                          order.status === 'Delivered'
                             ? 'bg-emerald-100 text-emerald-800'
+                            : order.status === 'Returned'
+                            ? 'bg-purple-100 text-purple-800'
+                            : order.status === 'Delayed'
+                            ? 'bg-amber-100 text-amber-800'
+                            : order.status === 'RTO'
+                            ? 'bg-rose-100 text-rose-800'
                             : 'bg-neutral-200 text-[#000000]'
                         }`}
                       >
                         {order.status}
                       </span>
+                      {order.returnRequest && order.returnRequest.status !== 'none' && (
+                        <span
+                          className={`inline-block px-2 py-0.5 text-[9px] uppercase font-bold tracking-wider rounded border ${
+                            order.returnRequest.status === 'requested'
+                              ? 'bg-amber-50 text-amber-900 border-amber-300'
+                              : order.returnRequest.status === 'approved'
+                              ? 'bg-emerald-50 text-emerald-900 border-emerald-300'
+                              : order.returnRequest.status === 'completed'
+                              ? 'bg-purple-50 text-purple-900 border-purple-300'
+                              : 'bg-rose-50 text-rose-900 border-rose-300'
+                          }`}
+                        >
+                          {order.returnRequest.status === 'requested' && 'Return Pending'}
+                          {order.returnRequest.status === 'approved' && 'Return Approved'}
+                          {order.returnRequest.status === 'completed' && 'Refunded'}
+                          {order.returnRequest.status === 'rejected' && 'Return Declined'}
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -167,17 +231,23 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({ orders }) => {
                 </div>
 
                 {/* Tracking Bar */}
-                {order.trackingNumber && (
+                {(order.awbCode || order.trackingNumber) && (
                   <div className="px-4 sm:px-5 py-2.5 bg-[#F5F2EB]/50 border-b border-[#000000]/5 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs">
                     <div className="flex items-center gap-2 text-[#333333]">
                       <Truck className="w-3.5 h-3.5 text-[#B44220] shrink-0" />
                       <span>
-                        Carrier: <strong>{order.courierName || 'Courier Express'}</strong> • AWB:{' '}
-                        <strong className="underline">{order.trackingNumber}</strong>
+                        Carrier: <strong>{order.courierPartner || order.courierName || 'Shiprocket'}</strong> • AWB:{' '}
+                        <strong className="font-mono underline">{order.awbCode || order.trackingNumber}</strong>
                       </span>
                     </div>
                     <span className="text-[11px] text-[#777777]">
-                      Estimated Delivery: {order.estimatedDelivery || 'In Transit'}
+                      {order.shiprocketStatus ? (
+                        <span className="font-semibold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded">
+                          {order.shiprocketStatus}
+                        </span>
+                      ) : (
+                        `Estimated Delivery: ${order.estimatedDelivery || 'In Transit'}`
+                      )}
                     </span>
                   </div>
                 )}

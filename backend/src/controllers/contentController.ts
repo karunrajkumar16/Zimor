@@ -3,8 +3,10 @@ import { getDatabaseProvider } from '../db/index.js';
 
 export async function getContent(req: Request, res: Response) {
   try {
-    const { page } = req.params;
+    let { page } = req.params;
+    if (page === 'home') page = 'homepage';
     const { section } = req.query;
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     const db = await getDatabaseProvider();
     const items = await db.getContent(page, section as string);
     const content = items.length > 0 ? items[0] : null;
@@ -16,7 +18,8 @@ export async function getContent(req: Request, res: Response) {
 
 export async function upsertContent(req: Request, res: Response) {
   try {
-    const { page } = req.params;
+    let { page } = req.params;
+    if (page === 'home') page = 'homepage';
     const { section = 'default', data } = req.body;
 
     // IMMUTABLE LEGAL POLICIES PROTECTION:

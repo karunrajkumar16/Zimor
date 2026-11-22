@@ -125,7 +125,7 @@ export default function AdminMediaPage() {
         <div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Media Asset Vault</h1>
           <p className={`text-xs mt-1 ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
-            Centralized Cloudinary & Local development media repository for silhouettes, banners, and campaign reels.
+            Centralized Cloudinary & Local development media repository for products, banners, and campaign reels.
           </p>
         </div>
         <div>
@@ -149,11 +149,10 @@ export default function AdminMediaPage() {
 
       {message && (
         <div
-          className={`p-3 rounded text-xs flex items-center justify-between border ${
-            message.type === 'success'
-              ? 'bg-[#2E7D5A]/15 border-[#2E7D5A]/30 text-[#2E7D5A] dark:text-[#52B788]'
-              : 'bg-[#B9382C]/15 border-[#B9382C]/30 text-[#B9382C] dark:text-[#F28B82]'
-          }`}
+          className={`p-3 rounded text-xs flex items-center justify-between border ${message.type === 'success'
+            ? 'bg-[#2E7D5A]/15 border-[#2E7D5A]/30 text-[#2E7D5A] dark:text-[#52B788]'
+            : 'bg-[#B9382C]/15 border-[#B9382C]/30 text-[#B9382C] dark:text-[#F28B82]'
+            }`}
         >
           <span>{message.text}</span>
           <button onClick={() => setMessage(null)} className="opacity-70 hover:opacity-100">
@@ -164,9 +163,8 @@ export default function AdminMediaPage() {
 
       {/* Cloudinary Folder Structure Navigation */}
       <div className={`p-4 rounded-lg border ${cardBg}`}>
-        <p className={`text-[10px] uppercase tracking-wider font-semibold mb-3 flex items-center gap-1.5 ${
-          isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'
-        }`}>
+        <p className={`text-[10px] uppercase tracking-wider font-semibold mb-3 flex items-center gap-1.5 ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'
+          }`}>
           <Folder className="w-3.5 h-3.5 text-[#B44220]" />
           <span>Cloudinary Storage Hierarchy</span>
         </p>
@@ -177,13 +175,12 @@ export default function AdminMediaPage() {
               <button
                 key={folder}
                 onClick={() => setSelectedFolder(folder)}
-                className={`px-3 py-1.5 rounded text-xs font-mono transition-colors border ${
-                  isActive
-                    ? 'bg-[#B44220] text-[#F7F5F2] border-[#B44220] font-medium shadow-xs'
-                    : isDark
+                className={`px-3 py-1.5 rounded text-xs font-mono transition-colors border ${isActive
+                  ? 'bg-[#B44220] text-[#F7F5F2] border-[#B44220] font-medium shadow-xs'
+                  : isDark
                     ? 'bg-[#1E1C1A] text-[#B4B4B4] border-[#36312C] hover:border-[#B44220]'
                     : 'bg-[#FAF7F2] text-[#5A534E] border-[#E5DFD7] hover:border-[#B44220]'
-                }`}
+                  }`}
               >
                 {folder}/
               </button>
@@ -213,11 +210,10 @@ export default function AdminMediaPage() {
             {mediaList.map((item) => (
               <div
                 key={item.id}
-                className={`group rounded overflow-hidden flex flex-col justify-between border transition-all ${
-                  isDark
-                    ? 'bg-[#1E1C1A] border-[#36312C] hover:border-[#B44220]'
-                    : 'bg-[#FAF7F2] border-[#E5DFD7] hover:border-[#B44220]'
-                }`}
+                className={`group rounded overflow-hidden flex flex-col justify-between border transition-all ${isDark
+                  ? 'bg-[#1E1C1A] border-[#36312C] hover:border-[#B44220]'
+                  : 'bg-[#FAF7F2] border-[#E5DFD7] hover:border-[#B44220]'
+                  }`}
               >
                 <div className="relative aspect-square w-full overflow-hidden flex items-center justify-center bg-black/10">
                   {item.mimeType.startsWith('video') ? (
@@ -244,14 +240,12 @@ export default function AdminMediaPage() {
                     {item.mimeType} {item.width ? `• ${item.width}×${item.height}` : ''}
                   </p>
 
-                  <div className={`flex items-center justify-between pt-1 border-t ${
-                    isDark ? 'border-[#36312C]' : 'border-[#E5DFD7]'
-                  }`}>
+                  <div className={`flex items-center justify-between pt-1 border-t ${isDark ? 'border-[#36312C]' : 'border-[#E5DFD7]'
+                    }`}>
                     <button
                       onClick={() => handleCopy(item.url, item.id)}
-                      className={`p-1 inline-flex items-center gap-1 text-[10px] transition-colors ${
-                        isDark ? 'text-[#B4B4B4] hover:text-[#E8E1DA]' : 'text-[#5A534E] hover:text-[#24211F]'
-                      }`}
+                      className={`p-1 inline-flex items-center gap-1 text-[10px] transition-colors ${isDark ? 'text-[#B4B4B4] hover:text-[#E8E1DA]' : 'text-[#5A534E] hover:text-[#24211F]'
+                        }`}
                       title="Copy URL"
                     >
                       {copiedId === item.id ? (

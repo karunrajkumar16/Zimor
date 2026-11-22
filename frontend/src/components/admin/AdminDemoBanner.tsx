@@ -82,7 +82,7 @@ export default function AdminDemoBanner() {
       const res = await apiFetch('/api/admin/demo/seed', { method: 'POST' });
       const data = await res.json();
       if (res.ok) {
-        setMessage('Fresh 7-day demo dataset created across all 6 ZIMOR silhouettes.');
+        setMessage('Fresh 7-day demo dataset created across all 6 ZIMOR products.');
         await fetchStatus();
         window.location.reload();
       } else {
@@ -166,7 +166,7 @@ export default function AdminDemoBanner() {
             <strong>{status.demoCounts.customers} test patrons</strong>,{' '}
             <strong>{status.demoCounts.issues} atelier support tickets</strong>, and{' '}
             <strong>{status.demoCounts.inventoryMovements} inventory movements</strong> across all 6
-            actual ZIMOR silhouettes. Use this sandbox to test all filters, status updates, and
+            actual ZIMOR products. Use this sandbox to test all filters, status updates, and
             management controls.
           </p>
 

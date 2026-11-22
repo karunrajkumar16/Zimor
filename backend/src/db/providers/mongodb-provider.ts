@@ -368,9 +368,11 @@ export class MongoDatabaseProvider implements DatabaseProvider {
     data: Record<string, unknown>
   ): Promise<SiteContent> {
     await connectToDatabase();
+    const existing = await SiteContentModel.findOne({ page, section }).lean();
+    const mergedData = existing && existing.data ? { ...existing.data, ...data } : data;
     const doc = await SiteContentModel.findOneAndUpdate(
       { page, section },
-      { data, updatedAt: new Date().toISOString() },
+      { data: mergedData, updatedAt: new Date().toISOString() },
       { upsert: true, new: true }
     ).lean();
 

@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { MapPin, Phone, Mail, Truck, ShieldCheck, RefreshCw, Award, ChevronDown } from 'lucide-react';
+import Image from 'next/image';
+import { MapPin, Mail, MessageCircle, Truck, ShieldCheck, RefreshCw, Award, ChevronDown } from 'lucide-react';
 import { SOCIAL_LINKS } from '@/data/social';
 
 export function InstagramIcon({ className = 'w-4 h-4' }: { className?: string }) {
@@ -114,11 +115,18 @@ export const Footer: React.FC = () => {
       {/* Main 4-Column Footer */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-8">
-          {/* Column 1: Zimor Brand, Slogan & Socials */}
+          {/* Column 1: Zimor Brand Logo, Slogan & Socials */}
           <div className="lg:col-span-3 space-y-4 sm:space-y-5">
-            <h3 className="font-primary text-2xl sm:text-[26px] font-medium text-white tracking-tight">
-              Zimor
-            </h3>
+            <Link href="/" className="inline-block py-0.5" aria-label="Zimor India Home">
+              <Image
+                src="/logo-white.png"
+                alt="Zimor India"
+                width={1019}
+                height={231}
+                className="h-7 sm:h-8 w-auto object-contain"
+                priority
+              />
+            </Link>
             <p className="font-secondary text-xs sm:text-[13.5px] text-[#b4b4b4] leading-relaxed">
               Made to Move With You
             </p>
@@ -224,44 +232,10 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* Column 3: Reorganized Policy Groups (LEGAL, ORDER POLICIES, PRODUCT CARE) */}
+          {/* Column 3: Policy Groups (ORDER POLICIES, PRODUCT CARE) */}
           <div className="lg:col-span-4 flex flex-col sm:grid sm:grid-cols-2 gap-8 sm:gap-6 lg:gap-8">
-            {/* Group 1: LEGAL */}
-            <div className="order-1 space-y-3.5 sm:space-y-4 border-t sm:border-t-0 border-[#b4b4b4]/15 pt-4 sm:pt-0">
-              <button
-                type="button"
-                onClick={() => toggleSection('legal')}
-                className="w-full flex items-center justify-between sm:pointer-events-none text-left"
-              >
-                <h4 className="font-primary text-[11.5px] sm:text-[12.5px] font-semibold uppercase tracking-[0.18em] text-white">
-                  LEGAL
-                </h4>
-                <ChevronDown
-                  className={`w-4 h-4 text-[#b4b4b4] sm:hidden transition-transform duration-200 ${
-                    openSection === 'legal' ? 'rotate-180' : ''
-                  }`}
-                />
-              </button>
-              <ul
-                className={`space-y-2.5 font-secondary text-xs sm:text-[13px] text-[#b4b4b4] ${
-                  openSection === 'legal' ? 'block' : 'hidden sm:block'
-                }`}
-              >
-                <li>
-                  <Link href="/privacy-policy" className="hover:text-white transition-colors">
-                    Privacy Policy
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/terms-of-service" className="hover:text-white transition-colors">
-                    Terms of Service
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Group 2: ORDER POLICIES */}
-            <div className="order-2 sm:row-span-2 space-y-3.5 sm:space-y-4 border-t sm:border-t-0 border-[#b4b4b4]/15 pt-4 sm:pt-0">
+            {/* Group 1: ORDER POLICIES */}
+            <div className="space-y-3.5 sm:space-y-4 border-t sm:border-t-0 border-[#b4b4b4]/15 pt-4 sm:pt-0">
               <button
                 type="button"
                 onClick={() => toggleSection('order-policies')}
@@ -304,8 +278,8 @@ export const Footer: React.FC = () => {
               </ul>
             </div>
 
-            {/* Group 3: PRODUCT CARE */}
-            <div className="order-3 space-y-3.5 sm:space-y-4 border-t sm:border-t-0 border-[#b4b4b4]/15 pt-4 sm:pt-0">
+            {/* Group 2: PRODUCT CARE */}
+            <div className="space-y-3.5 sm:space-y-4 border-t sm:border-t-0 border-[#b4b4b4]/15 pt-4 sm:pt-0">
               <button
                 type="button"
                 onClick={() => toggleSection('product-care')}
@@ -350,12 +324,14 @@ export const Footer: React.FC = () => {
                 <span>Shivdaspur, manduadih, varanasi, uttar pradesh- 221103</span>
               </div>
               <div className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-[#b4b4b4] shrink-0" />
+                <MessageCircle className="w-4 h-4 text-[#b4b4b4] shrink-0" />
                 <a
-                  href="tel:+918953696928"
+                  href="https://wa.me/918604647888"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="hover:text-white transition-colors"
                 >
-                  +91 89536 96928
+                  WhatsApp: +91 86046 47888
                 </a>
               </div>
               <div className="flex items-center gap-2.5">
@@ -383,7 +359,7 @@ export const Footer: React.FC = () => {
               Terms of Service
             </Link>
             <span>•</span>
-            <span>100% Encrypted Payments</span>
+            <span>Marketed by VS Creation</span>
             <span>•</span>
             <span>UPI / Cards / NetBanking / COD</span>
           </div>
