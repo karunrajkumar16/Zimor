@@ -26,10 +26,63 @@ interface LifestyleCard {
   href: string;
 }
 
+interface ReelItem {
+  id: string;
+  title: string;
+  videoUrl: string;
+  posterUrl: string;
+  instagramUrl?: string;
+  productSlug?: string;
+}
+
+export const DEFAULT_REELS: ReelItem[] = [
+  {
+    id: 'video-1',
+    title: 'Workday Essentials Pack',
+    videoUrl: 'https://res.cloudinary.com/kbeyfu3d/video/upload/v1795527022/zimor/reels/reel-1.mp4',
+    posterUrl: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1795527024/zimor/reels/poster-1.webp',
+    instagramUrl: 'https://www.instagram.com/reel/Db7t3Ikx1C1/',
+    productSlug: 'zimor-delo-tote',
+  },
+  {
+    id: 'video-2',
+    title: 'Café Days & Slow Afternoons',
+    videoUrl: 'https://res.cloudinary.com/kbeyfu3d/video/upload/v1795527163/zimor/reels/reel-2.mp4',
+    posterUrl: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1795527165/zimor/reels/poster-2.webp',
+    instagramUrl: 'https://www.instagram.com/reel/DdWRTNIPvIt/',
+    productSlug: 'zimor-classic-shoulder-bag',
+  },
+  {
+    id: 'video-3',
+    title: 'Effortless Workday Carry',
+    videoUrl: 'https://res.cloudinary.com/kbeyfu3d/video/upload/v1795527171/zimor/reels/reel-3.mp4',
+    posterUrl: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1795527173/zimor/reels/poster-3.webp',
+    instagramUrl: 'https://www.instagram.com/reel/DdeBTWksCJM/',
+    productSlug: 'zimor-rabota-tote',
+  },
+  {
+    id: 'video-4',
+    title: 'The Entire Day Packed',
+    videoUrl: 'https://res.cloudinary.com/kbeyfu3d/video/upload/v1795527175/zimor/reels/reel-4.mp4',
+    posterUrl: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1795527176/zimor/reels/poster-4.webp',
+    instagramUrl: 'https://www.instagram.com/reel/DehSFkxvmew/',
+    productSlug: 'zimor-delo-tote-noir',
+  },
+  {
+    id: 'video-5',
+    title: 'Structured Daily Essentials',
+    videoUrl: 'https://res.cloudinary.com/kbeyfu3d/video/upload/v1795527178/zimor/reels/reel-5.mp4',
+    posterUrl: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1795527180/zimor/reels/poster-5.webp',
+    instagramUrl: 'https://www.instagram.com/reel/Dfw0jsbN4oi/',
+    productSlug: 'zimor-rabota-tote-espresso',
+  },
+];
+
 export default function AdminContentHomePage() {
   const { isDark } = useAdminTheme();
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
   const [lifestyleCards, setLifestyleCards] = useState<LifestyleCard[]>([]);
+  const [reels, setReels] = useState<ReelItem[]>(DEFAULT_REELS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -40,7 +93,7 @@ export default function AdminContentHomePage() {
   const innerCardBg = isDark
     ? 'bg-[#1E1C1A] border-[#36312C]'
     : 'bg-[#FAF7F2] border-[#E5DFD7]';
-  const inputClass = `w-full rounded px-3 py-1.5 border transition-colors focus:outline-none focus:border-[#B44220] ${
+  const inputClass = `w-full rounded px-3 py-1.5 border transition-colors focus:outline-none focus:border-[#5146E5] ${
     isDark
       ? 'bg-[#24211F] border-[#36312C] text-[#E8E1DA]'
       : 'bg-[#FFFFFF] border-[#E5DFD7] text-[#24211F]'
@@ -58,6 +111,9 @@ export default function AdminContentHomePage() {
       if (data.content && data.content.data) {
         setHeroSlides(data.content.data.heroSlides || []);
         setLifestyleCards(data.content.data.lifestyleCards || []);
+        if (Array.isArray(data.content.data.reels) && data.content.data.reels.length > 0) {
+          setReels(data.content.data.reels);
+        }
       }
     } catch (err) {
       console.error('Failed to load homepage content:', err);
@@ -79,6 +135,7 @@ export default function AdminContentHomePage() {
           data: {
             heroSlides,
             lifestyleCards,
+            reels,
           },
         }),
       });
@@ -107,7 +164,7 @@ export default function AdminContentHomePage() {
         <button
           onClick={handleSave}
           disabled={saving || loading}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-[#B44220] hover:bg-[#9B381B] text-[#F7F5F2] text-xs font-semibold uppercase tracking-wider rounded shadow-xs transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-[#5146E5] hover:bg-[#4338CA] text-[#F7F5F2] text-xs font-semibold uppercase tracking-wider rounded shadow-xs transition-colors"
         >
           <Save className="w-4 h-4" />
           <span>{saving ? 'Saving Changes...' : 'Save All Changes'}</span>
@@ -147,7 +204,7 @@ export default function AdminContentHomePage() {
                   className={`rounded p-4 space-y-4 border ${innerCardBg}`}
                 >
                   <div className={`flex items-center justify-between border-b pb-2 ${isDark ? 'border-[#36312C]' : 'border-[#E5DFD7]'}`}>
-                    <span className="text-xs font-semibold uppercase tracking-wider text-[#B44220] dark:text-[#E07A5F]">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-[#5146E5] dark:text-[#818CF8]">
                       Slide {idx + 1}: {slide.badge}
                     </span>
                     <span className={`text-[10px] font-mono ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>ID: {slide.id}</span>
@@ -254,7 +311,7 @@ export default function AdminContentHomePage() {
                   key={card.id || idx}
                   className={`rounded p-4 space-y-3 text-xs border ${innerCardBg}`}
                 >
-                  <p className="text-xs font-semibold uppercase tracking-wider text-[#B44220] dark:text-[#E07A5F]">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-[#5146E5] dark:text-[#818CF8]">
                     {card.category} Card
                   </p>
                   <div>
@@ -308,6 +365,145 @@ export default function AdminContentHomePage() {
                       }}
                       className={`${inputClass} font-mono text-[11px]`}
                     />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Section 3: Shoppable Video Reels (Shop by Video) */}
+          <div className={`rounded-lg p-5 space-y-4 border ${cardBg}`}>
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-base font-semibold">Instagram Video Reels (Shop by Video)</h2>
+                <p className={`text-xs ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
+                  5 High-performance Instagram Reels hosted on Cloudinary, complete with video stream, poster image, title, and assigned shoppable product.
+                </p>
+              </div>
+              <span className="text-xs px-2.5 py-1 rounded bg-[#EEF0FF] dark:bg-[#5146E5]/20 text-[#5146E5] font-semibold">
+                {reels.length} Active Reels
+              </span>
+            </div>
+
+            <div className="space-y-4">
+              {reels.map((reel, idx) => (
+                <div key={reel.id} className={`p-4 rounded-lg border space-y-3 ${innerCardBg}`}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-[#5146E5] dark:text-[#818CF8]">
+                      Reel 0{idx + 1}: {reel.title}
+                    </span>
+                    {reel.instagramUrl && (
+                      <a
+                        href={reel.instagramUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[11px] font-mono text-[#5146E5] hover:underline flex items-center gap-1"
+                      >
+                        Original Instagram Reel ↗
+                      </a>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 text-xs items-center">
+                    {/* Video Player Preview */}
+                    <div className="md:col-span-3">
+                      <div className="relative w-full aspect-[9/16] max-w-[130px] mx-auto rounded-lg overflow-hidden bg-black border border-inherit">
+                        <video
+                          src={reel.videoUrl}
+                          poster={reel.posterUrl}
+                          muted
+                          loop
+                          playsInline
+                          controls
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Metadata Inputs */}
+                    <div className="md:col-span-9 space-y-3">
+                      <div>
+                        <label className={`block mb-1 font-medium ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
+                          Reel Caption / Title
+                        </label>
+                        <input
+                          type="text"
+                          value={reel.title}
+                          onChange={(e) => {
+                            const updated = [...reels];
+                            updated[idx].title = e.target.value;
+                            setReels(updated);
+                          }}
+                          className={inputClass}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className={`block mb-1 font-medium ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
+                            Cloudinary Video Stream URL (.mp4)
+                          </label>
+                          <input
+                            type="text"
+                            value={reel.videoUrl}
+                            onChange={(e) => {
+                              const updated = [...reels];
+                              updated[idx].videoUrl = e.target.value;
+                              setReels(updated);
+                            }}
+                            className={`${inputClass} font-mono text-[11px]`}
+                          />
+                        </div>
+                        <div>
+                          <label className={`block mb-1 font-medium ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
+                            Cloudinary Poster Image URL (.webp)
+                          </label>
+                          <input
+                            type="text"
+                            value={reel.posterUrl}
+                            onChange={(e) => {
+                              const updated = [...reels];
+                              updated[idx].posterUrl = e.target.value;
+                              setReels(updated);
+                            }}
+                            className={`${inputClass} font-mono text-[11px]`}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className={`block mb-1 font-medium ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
+                            Instagram Reference URL
+                          </label>
+                          <input
+                            type="text"
+                            value={reel.instagramUrl || ''}
+                            onChange={(e) => {
+                              const updated = [...reels];
+                              updated[idx].instagramUrl = e.target.value;
+                              setReels(updated);
+                            }}
+                            className={`${inputClass} font-mono text-[11px]`}
+                          />
+                        </div>
+                        <div>
+                          <label className={`block mb-1 font-medium ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
+                            Associated Product Slug
+                          </label>
+                          <input
+                            type="text"
+                            value={reel.productSlug || ''}
+                            onChange={(e) => {
+                              const updated = [...reels];
+                              updated[idx].productSlug = e.target.value;
+                              setReels(updated);
+                            }}
+                            className={`${inputClass} font-mono text-[11px]`}
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}

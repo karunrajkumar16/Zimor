@@ -17,6 +17,7 @@ import {
   Clock,
   PackageCheck,
 } from 'lucide-react';
+import { getWhatsAppUrl, SUPPORT_WHATSAPP_PHONE } from '@/lib/whatsapp';
 
 interface PolicySection {
   id: string;
@@ -165,7 +166,10 @@ function ShippingPolicyContent() {
           <p>
             <strong>WhatsApp:</strong>{' '}
             <a
-              href="https://wa.me/918953696928"
+              href={getWhatsAppUrl({
+                phone: SUPPORT_WHATSAPP_PHONE,
+                message: 'Hello ZIMOR Team, I have an enquiry regarding shipping for my order. Could you please assist me?',
+              })}
               target="_blank"
               rel="noopener noreferrer"
               className="text-black font-medium underline underline-offset-4 hover:text-black transition-colors"
@@ -264,7 +268,10 @@ function CancellationPolicyContent() {
           <li>
             <strong>WhatsApp:</strong>{' '}
             <a
-              href="https://wa.me/918953696928"
+              href={getWhatsAppUrl({
+                phone: SUPPORT_WHATSAPP_PHONE,
+                message: 'Hello ZIMOR Team, I would like to request an order cancellation. Could you please assist me?',
+              })}
               target="_blank"
               rel="noopener noreferrer"
               className="text-black font-medium underline underline-offset-4 hover:text-black transition-colors"

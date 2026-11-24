@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import { SOCIAL_LINKS } from '@/data/social';
+import { useWhatsAppUrl } from '@/lib/whatsapp';
 import {
   InstagramIcon,
   PinterestIcon,
@@ -73,6 +74,7 @@ const SOCIAL_CHANNELS = [
 ];
 
 export default function ContactPage() {
+  const whatsappUrl = useWhatsAppUrl();
   return (
     <div className="bg-white min-h-screen">
       {/* 1. Breadcrumb Strip */}
@@ -167,7 +169,7 @@ export default function ContactPage() {
 
               {/* Action Link Button */}
               <a
-                href="https://wa.me/918604647888"
+                href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full py-3 px-4 bg-black text-white hover:bg-[#25D366] font-primary text-[12.5px] font-medium rounded-xs transition-all duration-200 flex items-center justify-center gap-2 text-center shadow-xs"

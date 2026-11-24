@@ -98,17 +98,14 @@ export const AnnouncementBar: React.FC = () => {
       className="bg-[#000000] text-white py-2.5 px-4 border-b border-[#b4b4b4]/20 select-none overflow-hidden"
     >
       <div className="max-w-7xl mx-auto">
-        {/* DESKTOP & TABLET (md+): All points displayed simultaneously with elegant bullets */}
+        {/* DESKTOP & TABLET (md+): All points displayed simultaneously */}
         <div className="hidden md:flex items-center justify-center gap-6 lg:gap-10 xl:gap-12 text-[11px] lg:text-[12px] font-medium tracking-wide">
           {items.map((item, idx) => (
             <Link
               key={(item.text || '') + idx}
               href={item.href || item.link || '/shop'}
-              className="group inline-flex items-center gap-2 text-white/90 hover:text-white transition-colors"
+              className="group inline-flex items-center text-white/90 hover:text-white transition-colors"
             >
-              <span className="text-[#b4b4b4] text-[9px] group-hover:text-white transition-colors">
-                ●
-              </span>
               <span className="font-primary tracking-wide">
                 {item.text}
               </span>
@@ -120,11 +117,10 @@ export const AnnouncementBar: React.FC = () => {
         <div className="flex md:hidden items-center justify-center min-h-[18px]">
           <Link
             href={currentAnnouncement.href || currentAnnouncement.link || '/shop'}
-            className={`inline-flex items-center gap-2 text-[11px] font-medium tracking-wide text-white/90 hover:text-white transition-opacity duration-250 ${
+            className={`inline-flex items-center text-[11px] font-medium tracking-wide text-white/90 hover:text-white transition-opacity duration-250 ${
               isFading ? 'opacity-0' : 'opacity-100'
             }`}
           >
-            <span className="text-[#b4b4b4] text-[8px]">●</span>
             <span className="font-primary tracking-wide">
               {currentAnnouncement.text}
             </span>

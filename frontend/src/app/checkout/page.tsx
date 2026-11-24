@@ -128,7 +128,6 @@ export default function CheckoutPage() {
               productName: i.product.name,
               slug: i.product.slug,
               image: i.product.images[0]?.url || 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp',
-              selectedColor: i.selectedColor,
               selectedSize: i.selectedSize,
               quantity: i.quantity,
             })),
@@ -176,7 +175,6 @@ export default function CheckoutPage() {
             productName: i.product.name,
             slug: i.product.slug,
             image: i.product.images[0]?.url,
-            selectedColor: i.selectedColor,
             selectedSize: i.selectedSize,
             quantity: i.quantity,
           })),
@@ -247,7 +245,6 @@ export default function CheckoutPage() {
                   productName: i.product.name,
                   slug: i.product.slug,
                   image: i.product.images[0]?.url,
-                  selectedColor: i.selectedColor,
                   selectedSize: i.selectedSize,
                   quantity: i.quantity,
                 })),
@@ -791,7 +788,7 @@ export default function CheckoutPage() {
                   <div className="flex-1 text-xs">
                     <p className="font-semibold text-ink line-clamp-1">{item.product.name}</p>
                     <p className="text-ink-muted text-[11px]">
-                      {item.selectedColor} • Qty: {item.quantity}
+                      Qty: {item.quantity}
                     </p>
                   </div>
                   <span className="text-xs font-bold text-ink">

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import {
   Search,
@@ -53,6 +54,11 @@ export default function AdminOrdersPage() {
   const [returnRejectReason, setReturnRejectReason] = useState('');
   const [showRejectPrompt, setShowRejectPrompt] = useState(false);
   const [downloadingInvoiceNum, setDownloadingInvoiceNum] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -191,6 +197,82 @@ export default function AdminOrdersPage() {
       });
     } catch (err: any) {
       setShippingFeedback({ type: 'error', message: err.message || 'Refund execution failed.' });
+    } finally {
+      setHandlingReturnAction(false);
+    }
+  };
+
+  const handleInspectReturn = async (inspectionPassed: boolean) => {
+    if (!selectedOrder) return;
+    const confirmMsg = inspectionPassed
+      ? `Confirm Physical Return Inspection PASSED for Order #${selectedOrder.orderNumber}?\n\nThis will verify that the returned merchandise has physically arrived at the ZIMOR atelier in pristine sellable condition and RESTOCK the items to available inventory.`
+      : `Confirm Physical Return Inspection FAILED for Order #${selectedOrder.orderNumber}?\n\nThis will record that the merchandise was received damaged or worn. Sellable inventory will NOT be restored.`;
+    if (!window.confirm(confirmMsg)) return;
+
+    setHandlingReturnAction(true);
+    setShippingFeedback(null);
+    try {
+      const res = await apiFetch(`/api/orders/${selectedOrder.orderNumber}/return-inspection`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          itemReceived: true,
+          inspectionPassed,
+          notes: inspectionPassed
+            ? 'Merchandise verified in pristine sellable condition by atelier staff.'
+            : 'Merchandise damaged/worn upon physical return inspection. Quarantined without restock.',
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Return inspection failed.');
+
+      setSelectedOrder(data.order);
+      setOrders((prev) => prev.map((o) => (o.orderNumber === data.order.orderNumber ? data.order : o)));
+      setShippingFeedback({
+        type: 'success',
+        message: data.message,
+      });
+    } catch (err: any) {
+      setShippingFeedback({ type: 'error', message: err.message || 'Inspection failed.' });
+    } finally {
+      setHandlingReturnAction(false);
+    }
+  };
+
+  const handleReleaseQuarantine = async (productId: string, action: 'restock' | 'write_off') => {
+    if (!selectedOrder) return;
+    const defaultReason = action === 'restock'
+      ? 'Merchandise refurbished in atelier and verified pristine for resale'
+      : 'Merchandise damaged beyond repair; scrapped per atelier write-off protocol';
+    const reason = window.prompt(
+      `Enter authorized justification for quarantine ${action === 'restock' ? 'restock' : 'write-off'}:`,
+      defaultReason
+    );
+    if (!reason || !reason.trim()) return;
+
+    setHandlingReturnAction(true);
+    setShippingFeedback(null);
+    try {
+      const res = await apiFetch(`/api/orders/${selectedOrder.orderNumber}/quarantine-release`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId,
+          action,
+          reason: reason.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Quarantine release failed.');
+
+      setSelectedOrder(data.order);
+      setOrders((prev) => prev.map((o) => (o.orderNumber === data.order.orderNumber ? data.order : o)));
+      setShippingFeedback({
+        type: 'success',
+        message: data.message,
+      });
+    } catch (err: any) {
+      setShippingFeedback({ type: 'error', message: err.message || 'Quarantine action failed.' });
     } finally {
       setHandlingReturnAction(false);
     }
@@ -428,7 +510,7 @@ export default function AdminOrdersPage() {
                     }}
                     className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
                       isActive
-                        ? 'bg-[#B44220] text-[#F7F5F2] shadow-xs'
+                        ? 'bg-[#5146E5] text-[#F7F5F2] shadow-xs'
                         : isDark
                         ? 'text-[#B4B4B4] hover:text-[#E8E1DA] hover:bg-[#2A2724]'
                         : 'text-[#5A534E] hover:text-[#24211F] hover:bg-[#EFEAE2]'
@@ -465,7 +547,7 @@ export default function AdminOrdersPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by order #, customer, phone..."
-              className="w-full pl-9 pr-4 py-1.5 bg-[#FAF7F2] dark:bg-[#1E1C1A] border border-[#E5DFD7] dark:border-[#36312C] rounded-md text-xs text-[#24211F] dark:text-[#E8E1DA] focus:outline-none focus:border-[#B44220]"
+              className="w-full pl-9 pr-4 py-1.5 bg-[#FAF7F2] dark:bg-[#1E1C1A] border border-[#E5DFD7] dark:border-[#36312C] rounded-md text-xs text-[#24211F] dark:text-[#E8E1DA] focus:outline-none focus:border-[#5146E5]"
             />
           </div>
         </div>
@@ -521,7 +603,7 @@ export default function AdminOrdersPage() {
                       }}
                     >
                       {/* 1. Order ID */}
-                      <td className="py-3.5 px-4 font-mono font-bold text-[#B44220] dark:text-[#E07A5F]">
+                      <td className="py-3.5 px-4 font-mono font-bold text-[#5146E5] dark:text-[#818CF8]">
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <span>{ord.orderNumber}</span>
                           {(ord.paymentMode === 'test' ||
@@ -632,72 +714,89 @@ export default function AdminOrdersPage() {
       </div>
 
       {/* Inspect Slide-Over Panel: Flowchart Timeline, Customer, Delivery Address, Product Details, Razorpay Details, Chronological Timeline */}
-      {selectedOrder && (() => {
+      {mounted && selectedOrder && typeof document !== 'undefined' && createPortal((() => {
         const progress = getTimelineProgress(selectedOrder);
 
         return (
-          <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-fadeIn">
+          <div
+            className="fixed inset-0 z-[9999] flex justify-end bg-black/60 backdrop-blur-xs animate-fadeIn admin-panel-theme"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setSelectedOrder(null);
+              }
+            }}
+          >
             <div
               className={`w-full max-w-xl h-full overflow-y-auto p-6 flex flex-col justify-between border-l shadow-2xl ${
                 isDark ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA]' : 'bg-[#FFFFFF] border-[#E5DFD7] text-[#24211F]'
               }`}
             >
               <div className="space-y-6">
-                {/* 1. Header: Order ID, Order Date, and Sync Action */}
-                <div className="flex items-center justify-between border-b pb-4 border-[#E5DFD7] dark:border-[#36312C]">
-                  <div>
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-[#8C837A] dark:text-[#8A837C] block">
-                      Order Inspection
-                    </span>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <h2 className="text-lg font-bold font-mono text-[#B44220] dark:text-[#E07A5F]">
+                {/* 1. Header: Order ID, Status Badge, Order Date, and Action Buttons */}
+                <div className="border-b pb-4 border-[#E5DFD7] dark:border-[#36312C]">
+                  {/* Top Eyebrow Label */}
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#8C837A] dark:text-[#8A837C] block mb-1">
+                    Order Inspection
+                  </span>
+
+                  {/* Main Row: Order ID & Badge on Left, Action Buttons on Right */}
+                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+                    {/* Left: Order Identifier & Status Badge Group */}
+                    <div className="flex items-center flex-wrap gap-2.5 min-w-0">
+                      <h2 className="text-lg sm:text-xl font-bold font-mono text-[#5146E5] dark:text-[#818CF8] tracking-tight whitespace-nowrap">
                         {selectedOrder.orderNumber}
                       </h2>
                       {(selectedOrder.paymentMode === 'test' ||
                         selectedOrder.paymentMethod?.includes('Test') ||
                         selectedOrder.orderNumber?.startsWith('DEMO-')) ? (
-                        <span className="px-2 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                        <span className="px-2 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 shrink-0 whitespace-nowrap">
                           TEST ORDER
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+                        <span className="px-2 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 shrink-0 whitespace-nowrap">
                           VERIFIED
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-[#8C837A] dark:text-[#8A837C] mt-0.5 flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5" />
-                      <span>Placed on: {selectedOrder.date}</span>
-                    </p>
+
+                    {/* Right: Actions (Invoice, Refresh, Close) */}
+                    <div className="flex items-center gap-2 shrink-0 ml-auto">
+                      <button
+                        type="button"
+                        onClick={() => handleDownloadInvoice(selectedOrder.orderNumber)}
+                        disabled={downloadingInvoiceNum === selectedOrder.orderNumber}
+                        title="Download Tax Invoice PDF"
+                        className="h-8 px-2.5 rounded-md border border-[#E5DFD7] dark:border-[#36312C] bg-[#FAF7F2] dark:bg-[#24211F] text-[#5A534E] dark:text-[#B4B4B4] hover:text-[#5146E5] transition-colors cursor-pointer text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50"
+                      >
+                        <Download className={`w-3.5 h-3.5 shrink-0 ${downloadingInvoiceNum === selectedOrder.orderNumber ? 'animate-bounce' : ''}`} />
+                        <span>{downloadingInvoiceNum === selectedOrder.orderNumber ? '...' : 'Invoice'}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleLiveTrackSync(selectedOrder.id || selectedOrder.orderNumber)}
+                        disabled={syncingTracking}
+                        title="Sync latest live tracking events"
+                        className="h-8 w-8 rounded-md border border-[#E5DFD7] dark:border-[#36312C] bg-[#FAF7F2] dark:bg-[#24211F] text-[#5A534E] dark:text-[#B4B4B4] hover:text-[#5146E5] transition-colors cursor-pointer flex items-center justify-center disabled:opacity-50"
+                      >
+                        <RefreshCw className={`w-3.5 h-3.5 shrink-0 ${syncingTracking ? 'animate-spin text-[#5146E5]' : ''}`} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedOrder(null)}
+                        title="Close inspection"
+                        aria-label="Close inspection"
+                        className="h-8 w-8 rounded-md hover:bg-[#FAF7F2] dark:hover:bg-[#24211F] text-[#8C837A] dark:text-[#8A837C] hover:text-[#24211F] dark:hover:text-[#E8E1DA] transition-colors cursor-pointer flex items-center justify-center"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleDownloadInvoice(selectedOrder.orderNumber)}
-                      disabled={downloadingInvoiceNum === selectedOrder.orderNumber}
-                      title="Download Tax Invoice PDF"
-                      className="px-2.5 py-1.5 rounded-md border border-[#E5DFD7] dark:border-[#36312C] bg-[#FAF7F2] dark:bg-[#24211F] text-[#5A534E] dark:text-[#B4B4B4] hover:text-[#B44220] transition-colors cursor-pointer text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50"
-                    >
-                      <Download className={`w-3.5 h-3.5 ${downloadingInvoiceNum === selectedOrder.orderNumber ? 'animate-bounce' : ''}`} />
-                      <span>{downloadingInvoiceNum === selectedOrder.orderNumber ? '...' : 'Invoice'}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleLiveTrackSync(selectedOrder.id || selectedOrder.orderNumber)}
-                      disabled={syncingTracking}
-                      title="Sync latest live tracking events"
-                      className="p-2 rounded-md border border-[#E5DFD7] dark:border-[#36312C] bg-[#FAF7F2] dark:bg-[#24211F] text-[#5A534E] dark:text-[#B4B4B4] hover:text-[#B44220] transition-colors cursor-pointer disabled:opacity-50"
-                    >
-                      <RefreshCw className={`w-3.5 h-3.5 ${syncingTracking ? 'animate-spin text-[#B44220]' : ''}`} />
-                    </button>
-                    <button
-                      onClick={() => setSelectedOrder(null)}
-                      className="p-1.5 rounded-full hover:bg-[#FAF7F2] dark:hover:bg-[#24211F] text-[#8C837A] dark:text-[#8A837C] transition-colors cursor-pointer"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
+                  {/* Order Timestamp */}
+                  <p className="text-xs text-[#8C837A] dark:text-[#8A837C] mt-1.5 flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 shrink-0" />
+                    <span>Placed on: {selectedOrder.date}</span>
+                  </p>
                 </div>
 
                 {/* Feedback Alert if Syncing */}
@@ -717,7 +816,7 @@ export default function AdminOrdersPage() {
                 <div className="p-4 rounded-lg bg-[#FAF7F2] dark:bg-[#24211F] border border-[#E5DFD7] dark:border-[#36312C] space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-bold uppercase tracking-wider text-[#8C837A] dark:text-[#8A837C] flex items-center gap-1.5">
-                      <GitBranch className="w-3.5 h-3.5 text-[#B44220]" />
+                      <GitBranch className="w-3.5 h-3.5 text-[#5146E5]" />
                       <span>Fulfillment Flowchart Timeline</span>
                     </span>
 
@@ -735,7 +834,7 @@ export default function AdminOrdersPage() {
                         <div
                           className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all shadow-xs ${
                             progress.currentStage === 'Confirmed'
-                              ? 'bg-[#B44220] text-white ring-4 ring-[#B44220]/25 scale-105'
+                              ? 'bg-[#5146E5] text-white ring-4 ring-[#5146E5]/25 scale-105'
                               : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/40'
                           }`}
                         >
@@ -757,7 +856,7 @@ export default function AdminOrdersPage() {
                         <div
                           className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all shadow-xs ${
                             progress.currentStage === 'Dispatched'
-                              ? 'bg-[#B44220] text-white ring-4 ring-[#B44220]/25 scale-105'
+                              ? 'bg-[#5146E5] text-white ring-4 ring-[#5146E5]/25 scale-105'
                               : progress.dispatchedPassed
                               ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/40'
                               : 'bg-[#FAF7F2] dark:bg-[#1E1C1A] text-[#8C837A] dark:text-[#8A837C] border border-[#E5DFD7] dark:border-[#36312C]'
@@ -900,7 +999,7 @@ export default function AdminOrdersPage() {
                         <span
                           className={`absolute -left-[31px] top-0.5 w-6 h-6 rounded-full flex items-center justify-center text-[10px] ${
                             progress.currentStage === 'Dispatched'
-                              ? 'bg-[#B44220] text-white ring-2 ring-[#B44220]/30'
+                              ? 'bg-[#5146E5] text-white ring-2 ring-[#5146E5]/30'
                               : progress.dispatchedPassed
                               ? 'bg-emerald-500 text-white'
                               : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-500'
@@ -984,7 +1083,7 @@ export default function AdminOrdersPage() {
                 {/* 2. Customer Details & Contact Information */}
                 <div className="space-y-2 text-xs">
                   <h3 className="font-bold uppercase tracking-wider text-[#8C837A] dark:text-[#8A837C] text-[10px] flex items-center gap-1.5">
-                    <User className="w-3.5 h-3.5 text-[#B44220]" />
+                    <User className="w-3.5 h-3.5 text-[#5146E5]" />
                     <span>Customer Details & Contact Information</span>
                   </h3>
                   <div className="p-3.5 rounded-md bg-[#FAF7F2] dark:bg-[#24211F] border border-[#E5DFD7] dark:border-[#36312C] grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1014,7 +1113,7 @@ export default function AdminOrdersPage() {
                 {/* 3. Complete Delivery Address */}
                 <div className="space-y-2 text-xs">
                   <h3 className="font-bold uppercase tracking-wider text-[#8C837A] dark:text-[#8A837C] text-[10px] flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-[#B44220]" />
+                    <MapPin className="w-3.5 h-3.5 text-[#5146E5]" />
                     <span>Complete Delivery Address</span>
                   </h3>
                   <div className="p-3.5 rounded-md bg-[#FAF7F2] dark:bg-[#24211F] border border-[#E5DFD7] dark:border-[#36312C] space-y-1">
@@ -1028,7 +1127,7 @@ export default function AdminOrdersPage() {
                     )}
                     <p className="text-xs text-[#5A534E] dark:text-[#B4B4B4] font-medium">
                       {selectedOrder.shippingAddress?.city}, {selectedOrder.shippingAddress?.state} —{' '}
-                      <span className="font-mono font-bold text-[#B44220] dark:text-[#E07A5F]">
+                      <span className="font-mono font-bold text-[#5146E5] dark:text-[#818CF8]">
                         {selectedOrder.shippingAddress?.pincode}
                       </span>
                     </p>
@@ -1038,7 +1137,7 @@ export default function AdminOrdersPage() {
                 {/* 4. Product Details, Quantity and Order Amount */}
                 <div className="space-y-2 text-xs">
                   <h3 className="font-bold uppercase tracking-wider text-[#8C837A] dark:text-[#8A837C] text-[10px] flex items-center gap-1.5">
-                    <Package className="w-3.5 h-3.5 text-[#B44220]" />
+                    <Package className="w-3.5 h-3.5 text-[#5146E5]" />
                     <span>Product Details & Quantities ({selectedOrder.items?.length || 0})</span>
                   </h3>
                   <div className="space-y-2">
@@ -1061,7 +1160,12 @@ export default function AdminOrdersPage() {
                         <div className="flex-1 min-w-0">
                           <p className="font-bold truncate text-[#24211F] dark:text-[#E8E1DA]">{it.name}</p>
                           <p className="text-[11px] text-[#8C837A] dark:text-[#8A837C]">
-                            Color: <span className="font-medium text-[#24211F] dark:text-[#E8E1DA]">{it.color}</span> • Size:{' '}
+                            {it.color ? (
+                              <>
+                                Color: <span className="font-medium text-[#24211F] dark:text-[#E8E1DA]">{it.color}</span> •{' '}
+                              </>
+                            ) : null}
+                            Size:{' '}
                             <span className="font-medium text-[#24211F] dark:text-[#E8E1DA]">{it.size || 'Standard'}</span>
                           </p>
                           <p className="text-[11px] text-[#8C837A] dark:text-[#8A837C]">
@@ -1081,7 +1185,7 @@ export default function AdminOrdersPage() {
                 {/* 5. Razorpay Transaction Details */}
                 <div className="space-y-2 text-xs">
                   <h3 className="font-bold uppercase tracking-wider text-[#8C837A] dark:text-[#8A837C] text-[10px] flex items-center gap-1.5">
-                    <CreditCard className="w-3.5 h-3.5 text-[#B44220]" />
+                    <CreditCard className="w-3.5 h-3.5 text-[#5146E5]" />
                     <span>Razorpay Transaction Details</span>
                   </h3>
                   <div className="p-3.5 rounded-md bg-[#FAF7F2] dark:bg-[#24211F] border border-[#E5DFD7] dark:border-[#36312C] space-y-2">
@@ -1140,7 +1244,7 @@ export default function AdminOrdersPage() {
                       </div>
                       <div className="flex justify-between text-sm font-bold pt-1 border-t border-[#E5DFD7]/60 dark:border-[#36312C]/60">
                         <span>Total Amount:</span>
-                        <span className="text-[#B44220] dark:text-[#E07A5F]">
+                        <span className="text-[#5146E5] dark:text-[#818CF8]">
                           ₹{selectedOrder.total?.toLocaleString('en-IN')}
                         </span>
                       </div>
@@ -1151,7 +1255,7 @@ export default function AdminOrdersPage() {
                 {/* 6. Chronological Shipment Timeline */}
                 <div className="space-y-2 text-xs">
                   <h3 className="font-bold uppercase tracking-wider text-[#8C837A] dark:text-[#8A837C] text-[10px] flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-[#B44220]" />
+                    <Clock className="w-3.5 h-3.5 text-[#5146E5]" />
                     <span>
                       Chronological Shipment Timeline (
                       {selectedOrder.trackingHistory?.length || 0} Events)
@@ -1166,7 +1270,7 @@ export default function AdminOrdersPage() {
                           className="text-[11px] pb-2 border-b border-[#E5DFD7]/60 dark:border-[#36312C]/60 last:border-b-0 last:pb-0"
                         >
                           <div className="flex justify-between items-center">
-                            <span className="font-bold text-[#B44220] dark:text-[#E07A5F]">{s.status}</span>
+                            <span className="font-bold text-[#5146E5] dark:text-[#818CF8]">{s.status}</span>
                             <span className="text-[10px] text-[#8C837A] dark:text-[#8A837C] font-mono">{s.date}</span>
                           </div>
                           <p className="text-[#24211F] dark:text-[#E8E1DA] mt-0.5">{s.activity}</p>
@@ -1190,7 +1294,7 @@ export default function AdminOrdersPage() {
                   <div className="space-y-2 text-xs">
                     <div className="flex items-center justify-between">
                       <h3 className="font-bold uppercase tracking-wider text-[#8C837A] dark:text-[#8A837C] text-[10px] flex items-center gap-1.5">
-                        <RotateCcw className="w-3.5 h-3.5 text-[#B44220]" />
+                        <RotateCcw className="w-3.5 h-3.5 text-[#5146E5]" />
                         <span>Return & Exchange Request Review</span>
                       </h3>
                       <span
@@ -1341,7 +1445,7 @@ export default function AdminOrdersPage() {
                               type="button"
                               onClick={handleExecuteRefund}
                               disabled={handlingReturnAction}
-                              className="px-4 py-1.5 rounded bg-[#B44220] hover:bg-[#933518] text-white font-bold text-xs transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                              className="px-4 py-1.5 rounded bg-[#5146E5] hover:bg-[#4338CA] text-white font-bold text-xs transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
                             >
                               <CreditCard className="w-3.5 h-3.5" />
                               <span>
@@ -1352,6 +1456,142 @@ export default function AdminOrdersPage() {
                             </button>
                           )}
                       </div>
+
+                      {/* Physical Return & Atelier Quality Inspection / Restocking */}
+                      {(selectedOrder.returnRequest.status === 'approved' ||
+                        selectedOrder.returnRequest.status === 'completed' ||
+                        selectedOrder.status === 'Returned') && (
+                        <div className="pt-3 border-t border-[#E5DFD7]/60 dark:border-[#36312C]/60 space-y-2.5">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] text-[#8C837A] dark:text-[#8A837C] uppercase font-semibold block">
+                              Atelier Physical Return & Inventory Restocking
+                            </span>
+                            {selectedOrder.returnRequest.totalRestockedQuantity !== undefined && (
+                              <span className="text-[10px] text-neutral-500 font-mono">
+                                Restocked: {selectedOrder.returnRequest.totalRestockedQuantity} • Quarantined: {selectedOrder.returnRequest.totalQuarantinedQuantity || 0}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Item-Level Partial Return & Quarantine Inspection Records */}
+                          {selectedOrder.returnRequest.items && selectedOrder.returnRequest.items.length > 0 && (
+                            <div className="space-y-2">
+                              {selectedOrder.returnRequest.items.map((item, itIdx) => (
+                                <div
+                                  key={item.productId || itIdx}
+                                  className="p-2.5 rounded border border-[#E5DFD7] dark:border-[#36312C] bg-[#FAF7F2]/60 dark:bg-[#1E1C1A]/60 text-xs space-y-1.5"
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <span className="font-bold text-[#24211F] dark:text-[#E8E1DA]">
+                                      {item.name} {item.color ? `• ${item.color}` : ''}
+                                    </span>
+                                    <span className="text-[11px] text-[#8C837A] dark:text-[#8A837C]">
+                                      Requested: <strong>{item.quantityRequested}</strong> of {item.quantityOrdered}
+                                    </span>
+                                  </div>
+
+                                  <div className="flex flex-wrap items-center gap-2 text-[11px]">
+                                    {item.restockedQuantity > 0 && (
+                                      <span className="text-emerald-700 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-900/40">
+                                        ✓ Restocked: {item.restockedQuantity} unit(s)
+                                      </span>
+                                    )}
+                                    {item.quarantinedQuantity > 0 && (
+                                      <span className="text-rose-700 dark:text-rose-400 font-semibold bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-900/40">
+                                        ⚠ Quarantined: {item.quarantinedQuantity} unit(s)
+                                      </span>
+                                    )}
+                                    {item.inspectionStatus === 'pending' && (
+                                      <span className="text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-900/40">
+                                        Awaiting Physical Receipt
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  {/* Quarantine Resolution Controls */}
+                                  {item.quarantined && item.quarantinedQuantity > 0 && (
+                                    <div className="p-2 rounded bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 flex flex-wrap items-center justify-between gap-2 mt-1">
+                                      <div>
+                                        <span className="font-semibold text-rose-900 dark:text-rose-200 text-[11px] block">
+                                          Quarantine Hold: {item.quarantineReason || 'Failed physical inspection'}
+                                        </span>
+                                        <span className="text-[10px] text-rose-700 dark:text-rose-400">
+                                          Stock is NOT in sellable inventory. Explicit authorized release required.
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center gap-1.5">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleReleaseQuarantine(item.productId, 'restock')}
+                                          disabled={handlingReturnAction}
+                                          className="px-2 py-1 rounded bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-[10px] transition-colors cursor-pointer"
+                                        >
+                                          Release to Sellable Stock
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleReleaseQuarantine(item.productId, 'write_off')}
+                                          disabled={handlingReturnAction}
+                                          className="px-2 py-1 rounded bg-neutral-600 hover:bg-neutral-700 text-white font-semibold text-[10px] transition-colors cursor-pointer"
+                                        >
+                                          Write Off (Scrap)
+                                        </button>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {selectedOrder.returnRequest.inventoryRestocked ? (
+                            <div className="p-2.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-900 dark:text-emerald-300 text-xs flex items-center justify-between">
+                              <div>
+                                <span className="font-bold block">✓ Physical Inspection Completed & Approved Items Restocked</span>
+                                <span className="text-[11px] text-emerald-700 dark:text-emerald-400">
+                                  Restocked: {selectedOrder.returnRequest.totalRestockedQuantity} unit(s) • Inspected by {selectedOrder.returnRequest.inspectedBy || 'Atelier'}
+                                </span>
+                              </div>
+                            </div>
+                          ) : selectedOrder.returnRequest.inspectionStatus === 'failed' ? (
+                            <div className="p-2.5 rounded bg-rose-500/10 border border-rose-500/30 text-rose-900 dark:text-rose-300 text-xs flex items-center justify-between">
+                              <div>
+                                <span className="font-bold block">⚠ Physical Inspection Failed — Stock Placed in Quarantine</span>
+                                <span className="text-[11px] text-rose-700 dark:text-rose-400">
+                                  Merchandise non-sellable • Quarantined ({selectedOrder.returnRequest.inspectedBy || 'Atelier'})
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="p-2.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-300 text-xs space-y-2">
+                              <div>
+                                <span className="font-bold block">Awaiting Atelier Physical Arrival & Inspection</span>
+                                <span className="text-[11px] text-amber-700 dark:text-amber-400 block mt-0.5">
+                                  Financial refund does not affect stock. Inventory is restocked strictly after physical item verification.
+                                </span>
+                              </div>
+                              <div className="flex flex-wrap items-center gap-2 pt-1">
+                                <button
+                                  type="button"
+                                  onClick={() => handleInspectReturn(true)}
+                                  disabled={handlingReturnAction}
+                                  className="px-3 py-1.5 rounded bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors cursor-pointer disabled:opacity-50"
+                                >
+                                  Accept & Restock Approved Items
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleInspectReturn(false)}
+                                  disabled={handlingReturnAction}
+                                  className="px-3 py-1.5 rounded bg-neutral-600 hover:bg-neutral-700 text-white font-semibold text-xs transition-colors cursor-pointer disabled:opacity-50"
+                                >
+                                  Mark Damaged (Quarantine All)
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -1370,7 +1610,7 @@ export default function AdminOrdersPage() {
             </div>
           </div>
         );
-      })()}
+      })(), document.body)}
     </div>
   );
 }

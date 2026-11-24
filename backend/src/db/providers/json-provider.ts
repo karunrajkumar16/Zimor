@@ -78,7 +78,8 @@ export class JsonDatabaseProvider implements DatabaseProvider {
           p.name.toLowerCase().includes(q) ||
           p.description.toLowerCase().includes(q) ||
           p.tagline.toLowerCase().includes(q) ||
-          p.slug.toLowerCase().includes(q)
+          p.slug.toLowerCase().includes(q) ||
+          (p.sku && p.sku.toLowerCase().includes(q))
       );
     }
 
@@ -97,6 +98,14 @@ export class JsonDatabaseProvider implements DatabaseProvider {
 
   async createProduct(data: Omit<Product, 'id'>): Promise<Product> {
     const products = await this.getProducts();
+    if (data.sku) {
+      const sanitizedSku = data.sku.trim().toUpperCase();
+      data.sku = sanitizedSku;
+      const existing = products.find((p) => p.sku && p.sku.toUpperCase() === sanitizedSku);
+      if (existing) {
+        throw new Error(`Product Code (SKU) "${sanitizedSku}" is already assigned to another product.`);
+      }
+    }
     const newProduct: Product = {
       ...data,
       id: `zimor-${data.slug || crypto.randomUUID()}`,
@@ -110,6 +119,17 @@ export class JsonDatabaseProvider implements DatabaseProvider {
     const products = await this.getProducts();
     const idx = products.findIndex((p) => p.id === id || p.slug === id);
     if (idx === -1) return null;
+
+    if (data.sku) {
+      const sanitizedSku = data.sku.trim().toUpperCase();
+      data.sku = sanitizedSku;
+      const existing = products.find(
+        (p) => (p.id !== id && p.slug !== id) && p.sku && p.sku.toUpperCase() === sanitizedSku
+      );
+      if (existing) {
+        throw new Error(`Product Code (SKU) "${sanitizedSku}" is already assigned to another product.`);
+      }
+    }
 
     products[idx] = { ...products[idx], ...data };
     writeJsonFile('products.json', products);
@@ -161,7 +181,6 @@ export class JsonDatabaseProvider implements DatabaseProvider {
         name: item.productName,
         slug: item.slug,
         image: item.image || '/products/delo-1.webp',
-        color: item.selectedColor,
         size: 'Standard',
         price: item.price,
         quantity: item.quantity,

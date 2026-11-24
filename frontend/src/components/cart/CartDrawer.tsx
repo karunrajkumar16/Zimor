@@ -125,9 +125,6 @@ export const CartDrawer: React.FC = () => {
                           </button>
                         </div>
                         <p className="text-[11px] text-ink-muted">
-                          Color: <span className="font-medium text-ink">{item.selectedColor}</span>
-                        </p>
-                        <p className="text-[11px] text-ink-muted">
                           Size: {item.selectedSize}
                         </p>
                       </div>

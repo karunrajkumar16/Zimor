@@ -21,38 +21,38 @@ export interface ShoppableVideoItem {
 export const SHOPPABLE_VIDEOS: ShoppableVideoItem[] = [
   {
     id: 'video-1',
-    videoUrl: 'https://res.cloudinary.com/kbeyfu3d/video/upload/v1794917875/zimor/videos/reel-00001-preview.mp4',
-    posterUrl: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917851/zimor/reels/poster-1.webp',
+    videoUrl: 'https://res.cloudinary.com/kbeyfu3d/video/upload/v1795527022/zimor/reels/reel-1.mp4',
+    posterUrl: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1795527024/zimor/reels/poster-1.webp',
     title: 'Workday Essentials Pack',
-    product: PRODUCTS.find((p) => p.id === 'zimor-delo-tote-rust') || PRODUCTS[0],
+    product: PRODUCTS.find((p) => p.slug === 'zimor-delo-tote' || p.id === 'zimor-delo-tote-rust') || PRODUCTS[0],
   },
   {
     id: 'video-2',
-    videoUrl: 'https://res.cloudinary.com/kbeyfu3d/video/upload/v1794917882/zimor/videos/reel-00002-preview.mp4',
-    posterUrl: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917852/zimor/reels/poster-2.webp',
-    title: 'Dual-Carry Commute Agility',
-    product: PRODUCTS.find((p) => p.id === 'zimor-rabota-tote-cognac') || PRODUCTS[2],
+    videoUrl: 'https://res.cloudinary.com/kbeyfu3d/video/upload/v1795527163/zimor/reels/reel-2.mp4',
+    posterUrl: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1795527165/zimor/reels/poster-2.webp',
+    title: 'Café Days & Slow Afternoons',
+    product: PRODUCTS.find((p) => p.slug === 'zimor-classic-shoulder-bag' || p.id === 'zimor-classic-shoulder-bag-cream') || PRODUCTS[4],
   },
   {
     id: 'video-3',
-    videoUrl: 'https://res.cloudinary.com/kbeyfu3d/video/upload/v1794917886/zimor/videos/reel-00003-preview.mp4',
-    posterUrl: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917852/zimor/reels/poster-3.webp',
-    title: 'Sculptural Crescent Fit',
-    product: PRODUCTS.find((p) => p.id === 'zimor-classic-shoulder-bag-cream') || PRODUCTS[4],
+    videoUrl: 'https://res.cloudinary.com/kbeyfu3d/video/upload/v1795527171/zimor/reels/reel-3.mp4',
+    posterUrl: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1795527173/zimor/reels/poster-3.webp',
+    title: 'Effortless Workday Carry',
+    product: PRODUCTS.find((p) => p.slug === 'zimor-rabota-tote' || p.id === 'zimor-rabota-tote-cognac') || PRODUCTS[2],
   },
   {
     id: 'video-4',
-    videoUrl: 'https://res.cloudinary.com/kbeyfu3d/video/upload/v1794917893/zimor/videos/reel-00004-preview.mp4',
-    posterUrl: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917853/zimor/reels/poster-4.webp',
-    title: 'The Executive Boardroom Stance',
-    product: PRODUCTS.find((p) => p.id === 'zimor-delo-tote-noir') || PRODUCTS[1],
+    videoUrl: 'https://res.cloudinary.com/kbeyfu3d/video/upload/v1795527175/zimor/reels/reel-4.mp4',
+    posterUrl: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1795527176/zimor/reels/poster-4.webp',
+    title: 'The Entire Day Packed',
+    product: PRODUCTS.find((p) => p.slug === 'zimor-delo-tote-noir') || PRODUCTS[1],
   },
   {
     id: 'video-5',
-    videoUrl: 'https://res.cloudinary.com/kbeyfu3d/video/upload/v1794917901/zimor/videos/reel-00005-preview.mp4',
-    posterUrl: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917854/zimor/reels/poster-5.webp',
-    title: 'Artisanal Unboxing & Handcraft',
-    product: PRODUCTS.find((p) => p.id === 'zimor-rabota-tote-espresso') || PRODUCTS[3],
+    videoUrl: 'https://res.cloudinary.com/kbeyfu3d/video/upload/v1795527178/zimor/reels/reel-5.mp4',
+    posterUrl: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1795527180/zimor/reels/poster-5.webp',
+    title: 'Structured Daily Essentials',
+    product: PRODUCTS.find((p) => p.slug === 'zimor-rabota-tote-espresso') || PRODUCTS[3],
   },
 ];
 
@@ -228,7 +228,7 @@ export const ShopByVideo: React.FC = () => {
   const handleAddToCartFromVideo = (product: Product, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    addItem(product, 1, product.defaultColor, product.sizes[0]);
+    addItem(product, 1, product.sizes[0]);
     setAddedProductId(product.id);
     setTimeout(() => {
       setAddedProductId((current) => (current === product.id ? null : current));

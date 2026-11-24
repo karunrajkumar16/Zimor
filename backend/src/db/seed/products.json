@@ -9,17 +9,6 @@
     "compareAtPrice": 5199,
     "category": "tote-bags",
     "categoryLabel": "Tote Bags",
-    "colors": [
-      {
-        "name": "Rust",
-        "hex": "#C73030"
-      },
-      {
-        "name": "Noir Black",
-        "hex": "#1C1917"
-      }
-    ],
-    "defaultColor": "Rust",
     "sizes": [
       "Medium"
     ],
@@ -79,7 +68,8 @@
       "consultant",
       "legal-finance"
     ],
-    "laptopCompatibility": "Up to 15.6 inch (MacBook Pro 16\", ThinkPad, Dell XPS)"
+    "laptopCompatibility": "Up to 15.6 inch (MacBook Pro 16\", ThinkPad, Dell XPS)",
+    "sku": "ZIM-DELO-RUST"
   },
   {
     "id": "zimor-delo-tote-noir",
@@ -92,17 +82,6 @@
     "compareAtPrice": 5199,
     "category": "tote-bags",
     "categoryLabel": "Tote Bags",
-    "colors": [
-      {
-        "name": "Noir Black",
-        "hex": "#1C1917"
-      },
-      {
-        "name": "Rust",
-        "hex": "#C73030"
-      }
-    ],
-    "defaultColor": "Noir Black",
     "sizes": [
       "Medium"
     ],
@@ -167,7 +146,8 @@
       "corporate-executive",
       "tech-founder"
     ],
-    "laptopCompatibility": "Fits 14 Inch Laptop effortlessly"
+    "laptopCompatibility": "Fits 14 Inch Laptop effortlessly",
+    "sku": "ZIM-DELO-NOIR"
   },
   {
     "id": "zimor-rabota-tote-cognac",
@@ -179,17 +159,6 @@
     "compareAtPrice": 5199,
     "category": "laptop-bags",
     "categoryLabel": "Laptop Bags",
-    "colors": [
-      {
-        "name": "Cognac Brown",
-        "hex": "#9C2C2C"
-      },
-      {
-        "name": "Espresso Roast",
-        "hex": "#3D2B1F"
-      }
-    ],
-    "defaultColor": "Cognac Brown",
     "sizes": [
       "Medium"
     ],
@@ -254,7 +223,8 @@
       "consultant",
       "creative-director"
     ],
-    "laptopCompatibility": "Up to 15 inch (MacBook Air 15\", MacBook Pro 14\", ThinkPad)"
+    "laptopCompatibility": "Up to 15 inch (MacBook Air 15\", MacBook Pro 14\", ThinkPad)",
+    "sku": "ZIM-RABOTA-01"
   },
   {
     "id": "zimor-rabota-tote-espresso",
@@ -266,17 +236,6 @@
     "compareAtPrice": 5199,
     "category": "laptop-bags",
     "categoryLabel": "Laptop Bags",
-    "colors": [
-      {
-        "name": "Espresso Roast",
-        "hex": "#3D2B1F"
-      },
-      {
-        "name": "Cognac Brown",
-        "hex": "#9C2C2C"
-      }
-    ],
-    "defaultColor": "Espresso Roast",
     "sizes": [
       "Medium"
     ],
@@ -325,7 +284,8 @@
       "creative-director",
       "academic-doctor"
     ],
-    "laptopCompatibility": "Up to 15 inch (MacBook Pro 14\", Dell XPS 13/15)"
+    "laptopCompatibility": "Up to 15 inch (MacBook Pro 14\", Dell XPS 13/15)",
+    "sku": "ZIM-RABOTA-ESPR"
   },
   {
     "id": "zimor-classic-shoulder-bag-cream",
@@ -337,17 +297,6 @@
     "compareAtPrice": 2999,
     "category": "shoulder-bags",
     "categoryLabel": "Shoulder Bags",
-    "colors": [
-      {
-        "name": "Cream",
-        "hex": "#FFF6F0"
-      },
-      {
-        "name": "Saddle Tan",
-        "hex": "#8C5835"
-      }
-    ],
-    "defaultColor": "Cream",
     "sizes": [
       "Small"
     ],
@@ -405,7 +354,8 @@
       "academic-doctor",
       "consultant"
     ],
-    "laptopCompatibility": "Fits iPad mini / Kindle, wallet, smartphone & daily beauty essentials"
+    "laptopCompatibility": "Fits iPad mini / Kindle, wallet, smartphone & daily beauty essentials",
+    "sku": "ZIM-CLASSIC-01"
   },
   {
     "id": "zimor-classic-shoulder-bag-tan",
@@ -417,17 +367,6 @@
     "compareAtPrice": 2999,
     "category": "shoulder-bags",
     "categoryLabel": "Shoulder Bags",
-    "colors": [
-      {
-        "name": "Saddle Tan",
-        "hex": "#8C5835"
-      },
-      {
-        "name": "Cream",
-        "hex": "#FFF6F0"
-      }
-    ],
-    "defaultColor": "Saddle Tan",
     "sizes": [
       "Small"
     ],
@@ -476,6 +415,7 @@
       "legal-finance",
       "academic-doctor"
     ],
-    "laptopCompatibility": "Fits Kindle, sunglasses case, phone, power bank & cardholder"
+    "laptopCompatibility": "Fits Kindle, sunglasses case, phone, power bank & cardholder",
+    "sku": "ZIM-CLASSIC-TAN"
   }
 ]

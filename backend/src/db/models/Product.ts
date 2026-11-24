@@ -6,15 +6,6 @@ export interface ProductDocument extends Omit<Product, 'id'>, Document {
   id: string;
 }
 
-const ProductColorSchema = new Schema(
-  {
-    name: { type: String, required: true },
-    hex: { type: String, required: true },
-    imageUrl: { type: String },
-  },
-  { _id: false }
-);
-
 const ProductImageSchema = new Schema(
   {
     url: { type: String, required: true },
@@ -28,6 +19,7 @@ const ProductSchema = new Schema(
   {
     name: { type: String, required: true, index: true },
     slug: { type: String, required: true, unique: true, index: true },
+    sku: { type: String, trim: true, uppercase: true },
     tagline: { type: String, default: '' },
     description: { type: String, required: true },
     price: { type: Number, required: true },
@@ -39,8 +31,6 @@ const ProductSchema = new Schema(
       index: true,
     },
     categoryLabel: { type: String, required: true },
-    colors: [ProductColorSchema],
-    defaultColor: { type: String, required: true },
     sizes: [{ type: String }],
     stock: { type: Number, default: 0 },
     isPublished: { type: Boolean, default: true, index: true },
@@ -83,6 +73,16 @@ const ProductSchema = new Schema(
         return ret;
       },
     },
+  }
+);
+
+ProductSchema.index(
+  { sku: 1 },
+  {
+    unique: true,
+    sparse: true,
+    collation: { locale: 'en', strength: 2 },
+    name: 'sku_unique_case_insensitive',
   }
 );
 

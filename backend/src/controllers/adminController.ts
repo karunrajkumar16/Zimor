@@ -2,14 +2,6 @@ import { Request, Response } from 'express';
 import { getDatabaseProvider } from '../db/index.js';
 import { config } from '../config/index.js';
 
-interface BagColorStat {
-  name: string;
-  hex: string;
-  units: number;
-  revenue: number;
-  percentage: number;
-}
-
 interface BagAnalyticsItem {
   id: string;
   name: string;
@@ -24,8 +16,6 @@ interface BagAnalyticsItem {
   marketShare: number;
   rating: number;
   stockHealth: 'Optimal' | 'Low' | 'Critical';
-  colors: BagColorStat[];
-  colorBreakdown: string;
   timeSeries: {
     daily: { label: string; date: string; units: number; revenue: number }[];
     weekly: { label: string; date: string; units: number; revenue: number }[];
@@ -192,7 +182,6 @@ export async function getStats(req: Request, res: Response) {
       // Extract real units & revenue from genuine orders
       let liveUnits = 0;
       let liveRevenue = 0;
-      const colorUnitsMap: Record<string, number> = {};
 
       productionOrders.forEach((o: any) => {
         if (Array.isArray(o.items)) {
@@ -201,32 +190,12 @@ export async function getStats(req: Request, res: Response) {
               const qty = item.quantity || 1;
               liveUnits += qty;
               liveRevenue += (item.price || price) * qty;
-              const colorName = item.color || 'Standard';
-              colorUnitsMap[colorName] = (colorUnitsMap[colorName] || 0) + qty;
             }
           });
         }
       });
 
       const asp = liveUnits > 0 ? Math.round(liveRevenue / liveUnits) : price;
-
-      // Color variations stats
-      const colors: BagColorStat[] = (p.colors || []).map((c: any) => {
-        const cUnits = colorUnitsMap[c.name] || 0;
-        const cRev = cUnits * price;
-        const cShare = liveUnits > 0 ? Math.round((cUnits / liveUnits) * 100) : 0;
-        return {
-          name: c.name,
-          hex: c.hex || '#B44220',
-          units: cUnits,
-          revenue: cRev,
-          percentage: cShare,
-        };
-      });
-
-      const colorBreakdown = colors.length > 0
-        ? colors.map((c) => `${c.name} (${c.percentage}%)`).join(', ')
-        : 'Standard (100%)';
 
       const stockHealth: 'Optimal' | 'Low' | 'Critical' =
         stock <= 3 ? 'Critical' : stock <= 7 ? 'Low' : 'Optimal';
@@ -289,8 +258,6 @@ export async function getStats(req: Request, res: Response) {
         marketShare: 0,
         rating: p.averageRating || 5.0,
         stockHealth,
-        colors,
-        colorBreakdown,
         timeSeries: {
           daily: pDaily,
           weekly: pWeekly,

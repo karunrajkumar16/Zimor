@@ -503,7 +503,7 @@ export async function customerMe(req: Request, res: Response) {
         email: customer.email,
         phone: customer.phone || '',
         designation: (customer as any).designation || 'Atelier User',
-        avatar: customer.avatar || session.avatar || '',
+        avatar: (customer.avatar !== undefined ? customer.avatar : session.avatar) || '',
         addresses: customer.addresses || [],
         orders: customer.orders || [],
       },

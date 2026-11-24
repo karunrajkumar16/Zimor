@@ -16,7 +16,7 @@ export default function AdminContentPolicyPage() {
   const cardBg = isDark
     ? 'bg-[#24211F] border-[#36312C]'
     : 'bg-[#FFFFFF] border-[#E5DFD7] shadow-xs';
-  const inputClass = `w-full rounded px-3 py-2 border transition-colors focus:outline-none focus:border-[#B44220] ${
+  const inputClass = `w-full rounded px-3 py-2 border transition-colors focus:outline-none focus:border-[#5146E5] ${
     isDark
       ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA]'
       : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F]'
@@ -77,7 +77,7 @@ export default function AdminContentPolicyPage() {
         <button
           onClick={handleSave}
           disabled={saving || loading}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-[#B44220] hover:bg-[#9B381B] text-[#F7F5F2] text-xs font-semibold uppercase tracking-wider rounded shadow-xs transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-[#5146E5] hover:bg-[#4338CA] text-[#F7F5F2] text-xs font-semibold uppercase tracking-wider rounded shadow-xs transition-colors"
         >
           <Save className="w-4 h-4" />
           <span>{saving ? 'Saving...' : 'Save All Changes'}</span>
@@ -90,12 +90,12 @@ export default function AdminContentPolicyPage() {
       }`}>
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-full bg-[#B44220]/15 text-[#B44220] flex items-center justify-center shrink-0 mt-0.5">
+            <div className="w-8 h-8 rounded-full bg-[#EEF0FF] dark:bg-[#5146E5]/20 text-[#5146E5] flex items-center justify-center shrink-0 mt-0.5">
               <Lock className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#B44220]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#5146E5]">
                   Protected Legal Documents (Editing Disabled)
                 </h3>
                 <span className="text-[10px] px-2 py-0.5 rounded font-mono bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-medium">
@@ -111,7 +111,7 @@ export default function AdminContentPolicyPage() {
             <Link
               href="/privacy-policy"
               target="_blank"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-[#E5DFD7] dark:border-[#36312C] hover:border-[#B44220] transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-[#E5DFD7] dark:border-[#36312C] hover:border-[#5146E5] transition-colors"
             >
               <FileText className="w-3.5 h-3.5" />
               <span>View Privacy Policy</span>
@@ -120,7 +120,7 @@ export default function AdminContentPolicyPage() {
             <Link
               href="/terms-of-service"
               target="_blank"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-[#E5DFD7] dark:border-[#36312C] hover:border-[#B44220] transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-[#E5DFD7] dark:border-[#36312C] hover:border-[#5146E5] transition-colors"
             >
               <FileText className="w-3.5 h-3.5" />
               <span>View Terms of Service</span>

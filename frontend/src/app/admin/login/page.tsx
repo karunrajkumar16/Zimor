@@ -65,7 +65,7 @@ function AdminLoginForm() {
       <div className="w-full max-w-md bg-[#24211F] border border-[#36312C] rounded-lg p-6 sm:p-8 shadow-2xl space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded-full bg-[#B44220]/15 border border-[#B44220]/35 flex items-center justify-center mx-auto text-[#E07A5F]">
+          <div className="w-12 h-12 rounded-full bg-[#EEF0FF] dark:bg-[#5146E5]/20 border border-[#5146E5]/35 flex items-center justify-center mx-auto text-[#5146E5] dark:text-[#818CF8]">
             <ShieldCheck className="w-6 h-6 stroke-[1.8]" />
           </div>
           <h1 className="font-primary text-2xl font-bold tracking-widest text-[#E8E1DA]">ZIMOR</h1>
@@ -132,7 +132,7 @@ function AdminLoginForm() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
-                className="w-full pl-10 pr-4 py-2 bg-[#1E1C1A] border border-[#36312C] rounded text-xs text-[#E8E1DA] placeholder-[#78726C] focus:outline-none focus:border-[#B44220] transition-colors"
+                className="w-full pl-10 pr-4 py-2 bg-[#1E1C1A] border border-[#36312C] rounded text-xs text-[#E8E1DA] placeholder-[#78726C] focus:outline-none focus:border-[#5146E5] transition-colors"
                 placeholder="admin@zimor.com"
               />
             </div>
@@ -148,7 +148,7 @@ function AdminLoginForm() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 autoComplete="current-password"
-                className="w-full pl-10 pr-4 py-2 bg-[#1E1C1A] border border-[#36312C] rounded text-xs text-[#E8E1DA] placeholder-[#78726C] focus:outline-none focus:border-[#B44220] transition-colors"
+                className="w-full pl-10 pr-4 py-2 bg-[#1E1C1A] border border-[#36312C] rounded text-xs text-[#E8E1DA] placeholder-[#78726C] focus:outline-none focus:border-[#5146E5] transition-colors"
                 placeholder="••••••••••••"
               />
             </div>
@@ -157,7 +157,7 @@ function AdminLoginForm() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-2.5 px-4 bg-[#B44220] hover:bg-[#9B381B] text-[#F7F5F2] font-semibold text-xs rounded flex items-center justify-center gap-2 transition-colors disabled:opacity-50 shadow-md cursor-pointer"
+            className="w-full py-2.5 px-4 bg-[#5146E5] hover:bg-[#4338CA] text-[#F7F5F2] font-semibold text-xs rounded flex items-center justify-center gap-2 transition-colors disabled:opacity-50 shadow-md cursor-pointer"
           >
             {isLoading ? (
               <span>Authenticating...</span>
@@ -179,7 +179,7 @@ export default function AdminLoginPage() {
     <Suspense
       fallback={
         <div className="min-h-screen bg-[#191715] flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-[#B44220] border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-[#5146E5] border-t-transparent rounded-full animate-spin" />
         </div>
       }
     >

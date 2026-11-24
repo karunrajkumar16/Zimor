@@ -18,7 +18,7 @@ export default function AdminContentAboutPage() {
   const innerCardBg = isDark
     ? 'bg-[#1E1C1A] border-[#36312C]'
     : 'bg-[#FAF7F2] border-[#E5DFD7]';
-  const inputClass = `w-full rounded px-3 py-2 border transition-colors focus:outline-none focus:border-[#B44220] ${
+  const inputClass = `w-full rounded px-3 py-2 border transition-colors focus:outline-none focus:border-[#5146E5] ${
     isDark
       ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA]'
       : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F]'
@@ -79,7 +79,7 @@ export default function AdminContentAboutPage() {
         <button
           onClick={handleSave}
           disabled={saving || loading}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-[#B44220] hover:bg-[#9B381B] text-[#F7F5F2] text-xs font-semibold uppercase tracking-wider rounded shadow-xs transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-[#5146E5] hover:bg-[#4338CA] text-[#F7F5F2] text-xs font-semibold uppercase tracking-wider rounded shadow-xs transition-colors"
         >
           <Save className="w-4 h-4" />
           <span>{saving ? 'Saving...' : 'Save All Changes'}</span>
@@ -193,7 +193,7 @@ export default function AdminContentAboutPage() {
               {content.values?.map((val: any, idx: number) => (
                 <div key={idx} className={`rounded p-3 space-y-2 border ${innerCardBg}`}>
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-[#B44220] dark:text-[#E07A5F]">Value {val.number}: {val.title}</span>
+                    <span className="font-semibold text-[#5146E5] dark:text-[#818CF8]">Value {val.number}: {val.title}</span>
                   </div>
                   <input
                     type="text"

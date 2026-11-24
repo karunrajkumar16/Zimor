@@ -1,9 +1,70 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
+import { apiFetch } from '@/lib/api';
+import type { AboutMediaMapping } from '@/types';
+
+// Verified default Cloudinary WebP assets for immediate rendering without layout shift
+const DEFAULT_ABOUT_MEDIA: AboutMediaMapping = {
+  brandOverview: {
+    id: 'brandOverview',
+    title: 'Brand Overview Canvas',
+    subtitle: 'Panoramic Editorial Banner',
+    description: 'Main wide-canvas visual displayed under Section 01 – Brand Overview.',
+    recommendedAspect: '21:9 or 24:9 Panoramic',
+    recommendedResolution: '2400 x 900 px (min 1920 x 720)',
+    url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917844/zimor/lifestyle/corporate-workspace-horizontal.webp',
+    publicId: 'zimor/lifestyle/corporate-workspace-horizontal',
+    alt: 'ZIMOR Premium fashion and accessories collection overview',
+  },
+  brandStory: {
+    id: 'brandStory',
+    title: 'Brand Story Portrait',
+    subtitle: 'Atelier & Craftsmanship',
+    description: 'Vertical editorial portrait displayed next to the Section 03 – Brand Story narrative.',
+    recommendedAspect: '3:4 or 4:5 Portrait',
+    recommendedResolution: '1200 x 1500 px (min 800 x 1000)',
+    url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917849/zimor/about/craftsmanship-atelier.webp',
+    publicId: 'zimor/about/craftsmanship-atelier',
+    alt: 'Precision, care and attention to detail in craftsmanship',
+  },
+  brandVision: {
+    id: 'brandVision',
+    title: 'Brand Vision Spread',
+    subtitle: 'Editorial Spread Card',
+    description: 'Atmospheric background image for Section 04 – Brand Vision card.',
+    recommendedAspect: '4:3 or 1:1 Card',
+    recommendedResolution: '1200 x 1200 px (min 800 x 800)',
+    url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917848/zimor/about/brand-vision-duo-colleagues.webp',
+    publicId: 'zimor/about/brand-vision-duo-colleagues',
+    alt: 'ZIMOR Brand Vision – Inspiring women through distinctive design and accessible premium fashion',
+  },
+  brandMission: {
+    id: 'brandMission',
+    title: 'Brand Mission Spread',
+    subtitle: 'Editorial Spread Card',
+    description: 'Atmospheric background image for Section 05 – Brand Mission card.',
+    recommendedAspect: '4:3 or 1:1 Card',
+    recommendedResolution: '1200 x 1200 px (min 800 x 800)',
+    url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917847/zimor/about/brand-mission-leather.webp',
+    publicId: 'zimor/about/brand-mission-leather',
+    alt: 'ZIMOR Brand Mission – Fashion-forward handbags and meticulous craftsmanship',
+  },
+  brandValues: {
+    id: 'brandValues',
+    title: 'Brand Values Visual',
+    subtitle: 'Quiet Luxury Atelier',
+    description: 'Editorial craftsmanship photography displayed alongside the 7 Brand Values in Section 06.',
+    recommendedAspect: '4:5 Portrait',
+    recommendedResolution: '1200 x 1500 px (min 800 x 1000)',
+    url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917850/zimor/about/brand-values-craft.webp',
+    publicId: 'zimor/about/brand-values-craft',
+    alt: 'Artisanal leathercraft and precision stitching at the Zimor atelier',
+  },
+};
 
 // 7 Verbatim Brand Values from ZIMOR VISUAL IDENTITY & GUIDELINES (Section 06)
 const BRAND_VALUES = [
@@ -45,6 +106,25 @@ const BRAND_VALUES = [
 ];
 
 export default function AboutPage() {
+  const [aboutMedia, setAboutMedia] = useState<AboutMediaMapping>(DEFAULT_ABOUT_MEDIA);
+
+  // Fetch dynamic About Page media from MongoDB
+  useEffect(() => {
+    let isMounted = true;
+    apiFetch('/api/about-media')
+      .then((res) => res.json())
+      .then((data) => {
+        if (isMounted && data.media) {
+          setAboutMedia((prev) => ({ ...prev, ...data.media }));
+        }
+      })
+      .catch((err) => console.error('Failed to load dynamic about media:', err));
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const scrollToHash = () => {
@@ -109,8 +189,8 @@ export default function AboutPage() {
           {/* Editorial Visual Canvas */}
           <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] lg:aspect-[24/9] min-h-[280px] sm:min-h-[400px] overflow-hidden bg-black">
             <Image
-              src="https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917844/zimor/lifestyle/corporate-workspace-horizontal.webp"
-              alt="ZIMOR Premium fashion and accessories collection overview"
+              src={aboutMedia.brandOverview?.url || DEFAULT_ABOUT_MEDIA.brandOverview.url}
+              alt={aboutMedia.brandOverview?.alt || DEFAULT_ABOUT_MEDIA.brandOverview.alt}
               fill
               priority
               sizes="100vw"
@@ -175,8 +255,8 @@ export default function AboutPage() {
             <div className="lg:col-span-5">
               <div className="relative w-full aspect-[4/5] sm:aspect-[3/4] overflow-hidden bg-canvas">
                 <Image
-                  src="https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917849/zimor/about/craftsmanship-atelier.webp"
-                  alt="Precision, care and attention to detail in craftsmanship"
+                  src={aboutMedia.brandStory?.url || DEFAULT_ABOUT_MEDIA.brandStory.url}
+                  alt={aboutMedia.brandStory?.alt || DEFAULT_ABOUT_MEDIA.brandStory.alt}
                   fill
                   loading="lazy"
                   decoding="async"
@@ -208,17 +288,14 @@ export default function AboutPage() {
               className="scroll-mt-28 group relative w-full aspect-[4/5] sm:aspect-[1/1] lg:aspect-[4/3] min-h-[420px] sm:min-h-[460px] overflow-hidden bg-black flex flex-col justify-end p-6 sm:p-8 lg:p-10"
             >
               <Image
-                src="https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917848/zimor/about/brand-vision-duo-colleagues.webp"
-                alt="ZIMOR Brand Vision – Inspiring women through distinctive design and accessible premium fashion"
+                src={aboutMedia.brandVision?.url || DEFAULT_ABOUT_MEDIA.brandVision.url}
+                alt={aboutMedia.brandVision?.alt || DEFAULT_ABOUT_MEDIA.brandVision.alt}
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
                 className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.02]"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/10 pointer-events-none" />
               <div className="relative z-10 text-white max-w-xl">
-                <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-white/80 font-bold mb-2 font-primary">
-                  BRAND VISION
-                </p>
                 <h2 className="font-primary text-[26px] sm:text-[32px] lg:text-[36px] font-normal text-white tracking-tight mb-3 leading-[1.15]">
                   Brand Vision
                 </h2>
@@ -234,17 +311,14 @@ export default function AboutPage() {
               className="scroll-mt-28 group relative w-full aspect-[4/5] sm:aspect-[1/1] lg:aspect-[4/3] min-h-[420px] sm:min-h-[460px] overflow-hidden bg-black flex flex-col justify-end p-6 sm:p-8 lg:p-10"
             >
               <Image
-                src="https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917847/zimor/about/brand-mission-leather.webp"
-                alt="ZIMOR Brand Mission – Fashion-forward handbags and meticulous craftsmanship"
+                src={aboutMedia.brandMission?.url || DEFAULT_ABOUT_MEDIA.brandMission.url}
+                alt={aboutMedia.brandMission?.alt || DEFAULT_ABOUT_MEDIA.brandMission.alt}
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
                 className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.02]"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/10 pointer-events-none" />
               <div className="relative z-10 text-white max-w-xl">
-                <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-white/80 font-bold mb-2 font-primary">
-                  BRAND MISSION
-                </p>
                 <h2 className="font-primary text-[26px] sm:text-[32px] lg:text-[36px] font-normal text-white tracking-tight mb-3 leading-[1.15]">
                   Brand Mission
                 </h2>
@@ -295,8 +369,8 @@ export default function AboutPage() {
               <div className="hidden md:block">
                 <div className="relative w-full aspect-[4/5] overflow-hidden bg-white border border-line/40">
                   <Image
-                    src="https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917850/zimor/about/brand-values-craft.webp"
-                    alt="Artisanal leathercraft and precision stitching at the Zimor atelier"
+                    src={aboutMedia.brandValues?.url || DEFAULT_ABOUT_MEDIA.brandValues.url}
+                    alt={aboutMedia.brandValues?.alt || DEFAULT_ABOUT_MEDIA.brandValues.alt}
                     fill
                     unoptimized
                     sizes="(max-width: 1024px) 45vw, 35vw"

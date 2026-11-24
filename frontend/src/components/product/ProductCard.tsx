@@ -103,7 +103,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           {title}
         </Link>
 
-        {/* Line 3: Price (left) and Color Swatches (right on desktop) */}
+        {/* Line 3: Price */}
         <div className="flex items-center justify-between pt-0.5">
           <div className="flex items-baseline gap-1.5 font-secondary">
             <span className="text-xs sm:text-[13px] font-bold text-ink">
@@ -112,28 +112,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             <span className="text-[10.5px] sm:text-xs text-ink-muted line-through font-normal">
               ₹{product.compareAtPrice.toLocaleString('en-IN')}
             </span>
-          </div>
-
-          {/* Desktop Subtle Color Swatches (LV Reference Style) */}
-          <div className="hidden sm:flex items-center gap-1">
-            {product.colors.map((color, idx) => (
-              <button
-                key={color.name}
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setSelectedImageIndex(idx % product.images.length);
-                }}
-                className={`w-2 h-2 rounded-full border transition-transform ${selectedImageIndex === idx % product.images.length
-                  ? 'ring-1 ring-offset-1 ring-ink border-white scale-110'
-                  : 'border-black/20 hover:scale-125'
-                  }`}
-                style={{ backgroundColor: color.hex }}
-                title={color.name}
-                aria-label={`Select color ${color.name}`}
-              />
-            ))}
           </div>
         </div>
       </div>

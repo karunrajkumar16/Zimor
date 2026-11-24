@@ -22,13 +22,13 @@ import { ProductGallery } from '@/components/product/ProductGallery';
 import { ProductCard } from '@/components/product/ProductCard';
 import { FAQAccordion } from '@/components/faq/FAQAccordion';
 import ReviewModal from '@/components/product/ReviewModal';
+import { getWhatsAppUrl, WhatsAppIcon } from '@/lib/whatsapp';
 
 export function ProductDetailView({ product }: { product: Product }) {
   const router = useRouter();
   const { addItem } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
 
-  const [selectedColor, setSelectedColor] = useState<string>(product.defaultColor);
   const selectedSize = product.sizes[0];
   const quantity = 1;
   const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({
@@ -76,6 +76,20 @@ export function ProductDetailView({ product }: { product: Product }) {
     [products, product]
   );
 
+  const whatsappEnquiryUrl = useMemo(() => {
+    const productUrl =
+      typeof window !== 'undefined' && window.location?.href
+        ? window.location.href
+        : `https://www.zimorindia.com/product/${product.slug}`;
+    return getWhatsAppUrl({
+      product: {
+        name: product.name,
+        slug: product.slug,
+        url: productUrl,
+      },
+    });
+  }, [product.name, product.slug]);
+
   const discountPercent = Math.round(
     ((product.compareAtPrice - product.price) / product.compareAtPrice) * 100
   );
@@ -97,11 +111,11 @@ export function ProductDetailView({ product }: { product: Product }) {
   }, []);
 
   const handleAddToCart = () => {
-    addItem(product, quantity, selectedColor, selectedSize);
+    addItem(product, quantity, selectedSize);
   };
 
   const handleBuyNow = () => {
-    addItem(product, quantity, selectedColor, selectedSize);
+    addItem(product, quantity, selectedSize);
     router.push('/checkout');
   };
 
@@ -155,14 +169,6 @@ export function ProductDetailView({ product }: { product: Product }) {
     } catch (err) {
       console.warn('Failed to submit review to backend:', err);
     }
-  };
-
-  // Helper to find representative image for a color swatch
-  const getColorSwatchImage = (colorIndex: number) => {
-    if (product.images[colorIndex]) {
-      return product.images[colorIndex].url;
-    }
-    return product.images[0]?.url || 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp';
   };
 
   return (
@@ -252,41 +258,6 @@ export function ProductDetailView({ product }: { product: Product }) {
               <span>{product.laptopCompatibility}</span>
             </div>
 
-            {/* Color Swatch Selector (Benchmark Screenshot 1 Style: Image Tiles) */}
-            <div className="space-y-2 pt-1">
-              <div className="text-xs sm:text-[13px] text-ink">
-                <span className="text-ink-muted">Color: </span>
-                <span className="font-semibold text-ink">{selectedColor}</span>
-              </div>
-
-              {/* Mini Photo Thumbnail Swatches */}
-              <div className="flex items-center gap-2.5">
-                {product.colors.map((color, idx) => (
-                  <button
-                    key={color.name}
-                    type="button"
-                    onClick={() => setSelectedColor(color.name)}
-                    className={`relative w-12 h-14 sm:w-14 sm:h-16 overflow-hidden bg-white transition-all ${selectedColor === color.name
-                      ? 'border-2 border-black ring-offset-1'
-                      : 'border border-transparent hover:border-line'
-                      }`}
-                    title={color.name}
-                    aria-label={`Select color ${color.name}`}
-                  >
-                    <Image
-                      src={getColorSwatchImage(idx)}
-                      alt={color.name}
-                      fill
-                      loading="lazy"
-                      decoding="async"
-                      sizes="56px"
-                      className="object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
-
             {/* Primary Action Row: Wishlist Heart + ADD TO CART / COMING SOON Button */}
             <div ref={buyBoxRef} className="pt-2 space-y-2.5">
               {product.isComingSoon ? (
@@ -323,6 +294,17 @@ export function ProductDetailView({ product }: { product: Product }) {
                   >
                     {inWishlist ? 'Saved to Wishlist' : 'Notify Me When Available'}
                   </button>
+
+                  <a
+                    href={whatsappEnquiryUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full h-11 border border-line hover:border-black bg-white hover:bg-[#25D366]/5 text-ink hover:text-[#25D366] font-medium text-xs sm:text-sm tracking-wider uppercase flex items-center justify-center gap-2 transition-all duration-200"
+                    aria-label={`Enquire about ${product.name} on WhatsApp`}
+                  >
+                    <WhatsAppIcon className="w-4 h-4 text-[#25D366]" />
+                    <span>Enquire on WhatsApp</span>
+                  </a>
 
                   <div className="flex items-center justify-between text-xs text-ink-muted pt-1">
                     <span>Exclusive Silhouette</span>
@@ -363,6 +345,18 @@ export function ProductDetailView({ product }: { product: Product }) {
                   >
                     Instant Buy Now
                   </button>
+
+                  {/* WhatsApp Enquiry Button */}
+                  <a
+                    href={whatsappEnquiryUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full h-11 border border-line hover:border-black bg-white hover:bg-[#25D366]/5 text-ink hover:text-[#25D366] font-medium text-xs sm:text-sm tracking-wider uppercase flex items-center justify-center gap-2 transition-all duration-200"
+                    aria-label={`Enquire about ${product.name} on WhatsApp`}
+                  >
+                    <WhatsAppIcon className="w-4 h-4 text-[#25D366]" />
+                    <span>Enquire on WhatsApp</span>
+                  </a>
 
                   <div className="flex items-center justify-between text-xs text-ink-muted pt-1">
                     <span>Quantity: {quantity}</span>

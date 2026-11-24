@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
 import {
   User,
   Mail,
@@ -13,6 +12,7 @@ import {
   Calendar,
 } from 'lucide-react';
 import { UserProfile } from '@/context/AuthContext';
+import { CustomerAvatar } from './CustomerAvatar';
 
 interface ProfileTabProps {
   user: UserProfile;
@@ -28,14 +28,6 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ user, onUpdateProfile })
   const [successToast, setSuccessToast] = useState(false);
   const [errorToast, setErrorToast] = useState<string | null>(null);
 
-  const initials = user.name
-    ? user.name
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2)
-    : 'ZP';
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,22 +106,12 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ user, onUpdateProfile })
       <div className="bg-white border border-[#B4B4B4]/30 p-6 sm:p-8 space-y-6">
         {/* Profile Avatar & Header */}
         <div className="flex items-center gap-5 border-b border-[#000000]/10 pb-6">
-          <div className="relative w-18 h-18 sm:w-20 sm:h-20 rounded-full overflow-hidden bg-[#FAF8F5] border border-[#B4B4B4]/40 shrink-0 flex items-center justify-center shadow-xs">
-            {user.avatar ? (
-              <Image
-                src={user.avatar}
-                alt={user.name}
-                fill
-                sizes="80px"
-                className="object-cover"
-                unoptimized
-              />
-            ) : (
-              <span className="font-primary text-xl sm:text-2xl font-medium text-[#000000]">
-                {initials}
-              </span>
-            )}
-          </div>
+          <CustomerAvatar
+            src={user.avatar}
+            name={user.name}
+            email={user.email}
+            size="xl"
+          />
 
           <div className="space-y-1">
             <h3 className="font-primary text-xl sm:text-2xl font-normal text-[#000000]">

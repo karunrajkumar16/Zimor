@@ -148,16 +148,16 @@ export const AboutZimor: React.FC = () => {
       aria-label="About Zimor - Editorial Campaign Collage"
     >
       {/* Seamless Edge-to-Edge Pinterest-Style Asymmetric Editorial Masonry Collage */}
-      {/* 2-Row Grid: Fourth Image & Fifth Image share Row 2 for identical ending surface */}
-      <div className="w-full grid grid-cols-2 md:grid-cols-12 md:grid-rows-[360px_390px] gap-1 sm:gap-1.5 md:gap-2 md:h-[750px] p-0 bg-white">
-        {/* TILE 1 (Cols 1-5, Row 1): Prominent Heading & Editorial Story Panel — Creed Boutique Editorial Styling */}
-        <div className="col-span-2 md:col-start-1 md:col-end-6 md:row-start-1 md:row-end-2 min-h-[320px] md:min-h-0 bg-white p-6 sm:p-8 lg:p-9 xl:p-10 flex flex-col justify-between">
+      {/* 2-Row Grid on Desktop; Mobile shows only the clean, full-width text story panel */}
+      <div className="w-full grid grid-cols-1 md:grid-cols-12 md:grid-rows-[360px_390px] gap-0 md:gap-2 md:h-[750px] p-0 bg-white">
+        {/* TILE 1 (Cols 1-5, Row 1 on Desktop): Full-Width Editorial Story Panel on Mobile */}
+        <div className="col-span-1 md:col-start-1 md:col-end-6 md:row-start-1 md:row-end-2 w-full bg-white px-5 py-7 sm:px-8 sm:py-9 md:p-6 lg:p-9 xl:p-10 flex flex-col justify-between">
           <div className="space-y-4 sm:space-y-4.5">
             <div>
               <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.28em] text-[#000000] font-semibold mb-2 font-primary">
                 About Zimor
               </p>
-              <h2 className="font-primary text-[34px] sm:text-[42px] lg:text-[48px] font-normal text-ink tracking-tight leading-[1.15]">
+              <h2 className="font-primary text-[30px] sm:text-[38px] md:text-[42px] lg:text-[48px] font-normal text-ink tracking-tight leading-[1.15]">
                 In the Spotlight
               </h2>
             </div>
@@ -167,11 +167,11 @@ export const AboutZimor: React.FC = () => {
             </p>
 
             <div className="space-y-3 pt-0.5">
-              <p className="font-secondary text-xs sm:text-[13.5px] text-ink-secondary font-normal leading-[1.75]">
+              <p className="font-secondary text-xs sm:text-[13.5px] text-ink-secondary font-normal leading-[1.75] max-w-xl">
                 Sculpted for ambitious professional women across Mumbai, Delhi, and Bengaluru—built to carry modern tech without compromising architectural form.
               </p>
 
-              <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10.5px] sm:text-[11px] font-secondary uppercase tracking-[0.2em] text-ink-muted/80 font-normal">
+              <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-[10.5px] sm:text-[11px] font-secondary uppercase tracking-[0.2em] text-ink-muted/80 font-normal">
                 <span>Cruelty-Free Craft</span>
                 <span className="text-ink-muted/80">•</span>
                 <span>15.6&quot; Tech Protection</span>
@@ -181,7 +181,7 @@ export const AboutZimor: React.FC = () => {
             </div>
           </div>
 
-          <div className="pt-4 sm:pt-5">
+          <div className="pt-6 sm:pt-6 md:pt-4 lg:pt-5">
             <Link
               href="/about"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-ink text-white font-primary text-xs sm:text-[13px] font-medium tracking-normal shadow-xs hover:bg-ink-secondary transition-colors"
@@ -193,13 +193,11 @@ export const AboutZimor: React.FC = () => {
         </div>
 
         {/* 4 MASONRY PHOTOGRAPHY FRAMES WITH SONGMONT-STYLE OVERLAID TEXT & LOCKED WINDOW PARALLAX */}
-        {/* Mobile: Hide "Details That Matter" (frame-quality); keep Craftsmanship, Everyday & Made in India */}
+        {/* Mobile: Completely hidden (display: none); Desktop: Exact existing grid layout, overlays & positioning */}
         {MASONRY_FRAMES.map((frame, idx) => (
           <div
             key={frame.id}
-            className={`group relative overflow-hidden bg-ink rounded-none shadow-none ${
-              frame.id === 'frame-quality' ? 'hidden md:block' : ''
-            } ${frame.gridClasses}`}
+            className={`hidden md:block group relative overflow-hidden bg-ink rounded-none shadow-none ${frame.gridClasses}`}
           >
             {/* Inner Oversized Image Canvas: Only this scrolls inside the locked container */}
             <div

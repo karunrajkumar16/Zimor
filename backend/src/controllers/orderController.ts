@@ -1,10 +1,14 @@
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import { getDatabaseProvider } from '../db/index.js';
 import { OrderModel } from '../db/models/Order.js';
 import { ProductModel } from '../db/models/Product.js';
+import { InventoryMovementModel } from '../db/models/InventoryMovement.js';
 import { generateInvoicePdf } from '../services/invoiceService.js';
 import { getPaymentProvider } from '../payments/index.js';
 import { AuthenticatedRequest } from '../middleware/auth.js';
+import { createNotification } from '../services/notificationService.js';
+import { OrderReturnItem } from '../types/index.js';
 
 export async function getOrders(req: Request, res: Response) {
   try {
@@ -110,9 +114,58 @@ export async function createOrder(req: Request, res: Response) {
     for (const item of validatedItems) {
       const prod = await db.getProductById(item.productId);
       if (prod) {
+        const remainingStock = Math.max(0, prod.stock - item.quantity);
         await db.updateProduct(prod.id, {
-          stock: Math.max(0, prod.stock - item.quantity),
+          stock: remainingStock,
         });
+
+        // Trigger inventory alert if low or depleted
+        if (remainingStock <= 5) {
+          createNotification({
+            type: 'inventory_alert',
+            title: remainingStock === 0 ? `Out of Stock: ${prod.name}` : `Low Stock Alert: ${prod.name}`,
+            message: remainingStock === 0 ? `Inventory depleted (0 units remaining)` : `Only ${remainingStock} units remaining`,
+            entityId: prod.id,
+            entityType: 'product',
+            metadata: { productId: prod.id, stock: remainingStock, slug: prod.slug },
+            dedupKey: `inventory_${prod.id}_stock_${remainingStock}`,
+          }).catch((err) => console.error('[Notification Trigger Error]', err));
+        }
+      }
+    }
+
+    // Trigger Admin Notification strictly for legitimate confirmed orders (COD or verified Paid)
+    // Prevents unpaid online checkout attempts from generating spurious order_created notifications
+    const isCod =
+      orderData.paymentMethod?.toLowerCase().includes('cash on delivery') ||
+      orderData.paymentMethod?.toLowerCase().includes('cod') ||
+      order.paymentMethod?.toLowerCase().includes('cod');
+
+    const isLegitimateOrder = isCod || order.paymentStatus === 'Paid';
+
+    if (isLegitimateOrder) {
+      createNotification({
+        type: 'order_created',
+        title: `New Order Received #${order.orderNumber}`,
+        message: `${order.items?.[0]?.name || 'Atelier Item'} • ₹${order.total.toLocaleString('en-IN')}`,
+        entityId: order.id || order.orderNumber,
+        entityType: 'order',
+        metadata: { orderNumber: order.orderNumber, total: order.total, customer: order.customerEmail || order.customerId },
+        dedupKey: `order_${order.orderNumber}_created`,
+        isDemo: Boolean((order as any).isDemo),
+      }).catch((err) => console.error('[Notification Trigger Error]', err));
+
+      if (order.paymentStatus === 'Paid') {
+        createNotification({
+          type: 'payment_success',
+          title: `Payment Received #${order.orderNumber}`,
+          message: `Payment of ₹${order.total.toLocaleString('en-IN')} confirmed for order #${order.orderNumber}`,
+          entityId: order.id || order.orderNumber,
+          entityType: 'payment',
+          metadata: { orderNumber: order.orderNumber, total: order.total },
+          dedupKey: `payment_${order.orderNumber}_success`,
+          isDemo: Boolean((order as any).isDemo),
+        }).catch((err) => console.error('[Notification Trigger Error]', err));
       }
     }
 
@@ -258,6 +311,68 @@ export async function requestOrderReturn(req: AuthenticatedRequest, res: Respons
       return res.status(400).json({ error: 'Please provide a brief description of the issue (at least 5 characters).' });
     }
 
+    // Initialize item-level return items from request or order (supports partial returns)
+    const requestedItemsPayload = Array.isArray(req.body.items) && req.body.items.length > 0 ? req.body.items : null;
+    let returnItems: OrderReturnItem[] = [];
+
+    if (requestedItemsPayload) {
+      for (const reqItem of requestedItemsPayload) {
+        const orderItem = order.items.find(
+          (oi) => oi.productId === reqItem.productId || (oi.slug && oi.slug === reqItem.slug)
+        );
+        if (!orderItem) continue;
+        const qty = Math.min(Math.max(1, Number(reqItem.quantity) || 1), orderItem.quantity);
+        returnItems.push({
+          productId: orderItem.productId,
+          name: orderItem.name,
+          slug: orderItem.slug,
+          color: orderItem.color,
+          size: orderItem.size,
+          quantityOrdered: orderItem.quantity,
+          quantityRequested: qty,
+          quantityReceived: 0,
+          quantityApproved: 0,
+          quantityRejected: 0,
+          inspectionStatus: 'pending',
+          inspectionNotes: '',
+          rejectionReason: '',
+          inventoryRestocked: false,
+          restockedQuantity: 0,
+          quarantined: false,
+          quarantinedQuantity: 0,
+          quarantineReason: '',
+          quarantineReleasedQuantity: 0,
+        });
+      }
+    }
+
+    if (returnItems.length === 0) {
+      // Default to all order items if no specific subset was provided
+      returnItems = order.items.map((oi) => ({
+        productId: oi.productId,
+        name: oi.name,
+        slug: oi.slug,
+        color: oi.color,
+        size: oi.size,
+        quantityOrdered: oi.quantity,
+        quantityRequested: oi.quantity,
+        quantityReceived: 0,
+        quantityApproved: 0,
+        quantityRejected: 0,
+        inspectionStatus: 'pending',
+        inspectionNotes: '',
+        rejectionReason: '',
+        inventoryRestocked: false,
+        restockedQuantity: 0,
+        quarantined: false,
+        quarantinedQuantity: 0,
+        quarantineReason: '',
+        quarantineReleasedQuantity: 0,
+      }));
+    }
+
+    const totalRequestedQuantity = returnItems.reduce((acc, it) => acc + it.quantityRequested, 0);
+
     // Save Return Request
     order.returnRequest = {
       status: 'requested',
@@ -266,6 +381,10 @@ export async function requestOrderReturn(req: AuthenticatedRequest, res: Respons
       details: details.trim(),
       imageUrls: Array.isArray(imageUrls) ? imageUrls : [],
       requestedAt: new Date(),
+      items: returnItems,
+      totalRequestedQuantity,
+      totalRestockedQuantity: 0,
+      totalQuarantinedQuantity: 0,
     } as any;
 
     const actor = req.customer?.email || req.admin?.email || 'Customer';
@@ -279,6 +398,18 @@ export async function requestOrderReturn(req: AuthenticatedRequest, res: Respons
     });
 
     await order.save();
+
+    // Trigger Admin Notification for Return Request
+    createNotification({
+      type: 'refund_requested',
+      title: `Return Requested #${order.orderNumber}`,
+      message: `Customer initiated ${type} request: "${reason.trim()}"`,
+      entityId: order._id.toString(),
+      entityType: 'order',
+      metadata: { orderNumber: order.orderNumber, reason, type, details },
+      dedupKey: `return_req_${order.orderNumber}`,
+      isDemo: Boolean(order.isDemo),
+    }).catch((err) => console.error('[Notification Trigger Error]', err));
 
     return res.json({
       success: true,
@@ -338,9 +469,32 @@ export async function reviewReturnRequest(req: AuthenticatedRequest, res: Respon
 
     await order.save();
 
+    // Trigger Admin Notification for Return Request Review (Distinct Stage: refund_approved)
+    if (newStatus === 'approved') {
+      createNotification({
+        type: 'refund_approved',
+        title: `Return Request Approved #${order.orderNumber}`,
+        message: `Return request approved by ${adminEmail}. Inspection & pickup eligible.`,
+        entityId: order._id.toString(),
+        entityType: 'order',
+        metadata: { orderNumber: order.orderNumber, decision: 'approved', recordedReason },
+        dedupKey: `return_decision_${order.orderNumber}_approved`,
+        isDemo: Boolean(order.isDemo),
+      }).catch((err) => console.error('[Notification Trigger Error]', err));
+    } else {
+      createNotification({
+        type: 'return_rejected',
+        title: `Return Request Rejected #${order.orderNumber}`,
+        message: `Return request rejected by ${adminEmail}. Reason: ${recordedReason || 'Policy exclusion'}`,
+        entityId: order._id.toString(),
+        entityType: 'order',
+        metadata: { orderNumber: order.orderNumber, decision: 'rejected', recordedReason },
+        dedupKey: `return_decision_${order.orderNumber}_rejected`,
+        isDemo: Boolean(order.isDemo),
+      }).catch((err) => console.error('[Notification Trigger Error]', err));
+    }
+
     return res.json({
-      success: true,
-      message: `Return request has been ${newStatus}.`,
       returnRequest: order.returnRequest,
       order,
     });
@@ -397,7 +551,7 @@ export async function processOrderRefund(req: AuthenticatedRequest, res: Respons
       });
     }
 
-    // Update Order state in MongoDB
+    // Update Order state in MongoDB - Financial refund status only
     order.paymentStatus = 'Refunded';
     order.amountRefunded = refundAmount;
     order.refundId = refundResult.refundId;
@@ -409,27 +563,34 @@ export async function processOrderRefund(req: AuthenticatedRequest, res: Respons
     (order.returnRequest as any).refundId = refundResult.refundId;
     (order.returnRequest as any).refundAmount = refundAmount;
 
-    // Restore inventory if not already restored
-    if (!order.inventoryRestored && order.inventoryDeducted) {
-      for (const item of order.items) {
-        await ProductModel.findOneAndUpdate(
-          { $or: [{ _id: item.productId }, { slug: item.slug }] },
-          { $inc: { stock: item.quantity } }
-        );
-      }
-      order.inventoryRestored = true;
-    }
+    // ARCHITECTURAL GUARANTEE: Razorpay refund processing updates only the financial refund status.
+    // It does not automatically restore sellable inventory. Physical inventory is restored
+    // only after the returned product has physically reached ZIMOR and passed inspection
+    // via inspectAndRestockReturnedOrder. Cancelled orders without return, rejected returns,
+    // and courtesy refunds never alter stock.
 
     order.auditLogs = order.auditLogs || [];
     order.auditLogs.push({
       timestamp: new Date().toISOString(),
       actor: adminEmail,
       action: 'REFUND_PROCESSED',
-      message: `Refund of ₹${refundAmount.toLocaleString('en-IN')} issued via Razorpay (Refund ID: ${refundResult.refundId}) by ${adminEmail}. Order status transitioned to Returned.`,
+      message: `Refund of ₹${refundAmount.toLocaleString('en-IN')} issued via Razorpay (Refund ID: ${refundResult.refundId}) by ${adminEmail}. Order status transitioned to Returned. Inventory untouched pending physical inspection.`,
       metadata: { refundId: refundResult.refundId, refundAmount, reason },
     });
 
     await order.save();
+
+    // Trigger Admin Notification for Processed Refund
+    createNotification({
+      type: 'refund_processed',
+      title: `Refund Processed ₹${refundAmount.toLocaleString('en-IN')}`,
+      message: `Order #${order.orderNumber} refunded via Razorpay (ID: ${refundResult.refundId})`,
+      entityId: order._id.toString(),
+      entityType: 'payment',
+      metadata: { orderNumber: order.orderNumber, refundId: refundResult.refundId, refundAmount },
+      dedupKey: `refund_${refundResult.refundId}_processed`,
+      isDemo: Boolean(order.isDemo),
+    }).catch((err) => console.error('[Notification Trigger Error]', err));
 
     return res.json({
       success: true,
@@ -440,5 +601,556 @@ export async function processOrderRefund(req: AuthenticatedRequest, res: Respons
   } catch (err: any) {
     console.error('[Refund Error]', err);
     return res.status(500).json({ error: err.message || 'Refund processing failed' });
+  }
+}
+
+/**
+ * Admin action: Performs physical inspection of returned merchandise and conditionally
+ * restores sellable product inventory with transaction/rollback guarantees and item-level
+ * partial return tracking.
+ *
+ * Strict Guarantees:
+ * 1. Atomic Restocking:
+ *    - Uses a MongoDB transaction session where replica set is available.
+ *    - If any DB operation fails (Product update, Movement creation, Order save), ALL operations roll back.
+ *    - Optimistic concurrency guard: Checks if the target return items have already been restocked.
+ *    - In standalone mode without replica sets, executes compensating rollback if any step fails.
+ * 2. Partial Returns:
+ *    - Tracks inspection and restocking at individual item level (returnRequest.items).
+ *    - Restores ONLY the exact quantity physically received and approved as sellable.
+ *    - Never restores the full original order quantity when only part of the order is returned.
+ * 3. Quarantine Protection:
+ *    - Products failing inspection are marked quarantined: true, quarantinedQuantity, with reason and timestamp.
+ *    - Recorded as QUALITY_HOLD in InventoryMovementModel.
+ *    - Sellable inventory in ProductModel is NEVER touched for quarantined units.
+ */
+export async function inspectAndRestockReturnedOrder(req: AuthenticatedRequest, res: Response) {
+  let session: mongoose.ClientSession | null = null;
+  let useTransaction = false;
+
+  try {
+    session = await mongoose.startSession();
+    session.startTransaction();
+    useTransaction = true;
+  } catch (sessErr: any) {
+    session = null;
+    useTransaction = false;
+  }
+
+  // Tracking array for non-transactional compensating rollback fallback
+  const appliedIncrements: { productId: string; quantity: number }[] = [];
+
+  try {
+    const { orderNumber } = req.params;
+    const { itemReceived, inspectionPassed, notes, items: inspectionItemsPayload } = req.body;
+    const adminEmail = req.admin?.email || 'admin@zimorworld.com';
+
+    const orderQuery = OrderModel.findOne({ orderNumber });
+    if (useTransaction && session) {
+      orderQuery.session(session);
+    }
+    const order = await orderQuery;
+
+    if (!order) {
+      if (useTransaction && session) await session.abortTransaction();
+      return res.status(404).json({ error: 'Order not found.' });
+    }
+
+    if (!order.returnRequest || order.returnRequest.status === 'none') {
+      if (useTransaction && session) await session.abortTransaction();
+      return res.status(400).json({ error: 'No active return request exists for this order.' });
+    }
+
+    if (order.returnRequest.status === 'rejected') {
+      if (useTransaction && session) await session.abortTransaction();
+      return res.status(400).json({
+        error: 'Cannot inspect or restock: The return request for this order was rejected. Physical return is disallowed.',
+      });
+    }
+
+    const isReceived = Boolean(itemReceived);
+    if (!isReceived) {
+      if (useTransaction && session) await session.abortTransaction();
+      return res.status(400).json({
+        error: 'Cannot restock inventory: Physical merchandise has not been confirmed received at ZIMOR atelier.',
+      });
+    }
+
+    // Ensure returnRequest.items is initialized
+    const returnItems: OrderReturnItem[] = (order.returnRequest.items && order.returnRequest.items.length > 0)
+      ? (order.returnRequest.items as OrderReturnItem[])
+      : (order.items || []).map((oi) => ({
+          productId: oi.productId,
+          name: oi.name,
+          slug: oi.slug,
+          color: oi.color,
+          size: oi.size,
+          quantityOrdered: oi.quantity,
+          quantityRequested: oi.quantity,
+          quantityReceived: 0,
+          quantityApproved: 0,
+          quantityRejected: 0,
+          inspectionStatus: 'pending' as const,
+          inspectionNotes: '',
+          rejectionReason: '',
+          inventoryRestocked: false,
+          restockedQuantity: 0,
+          quarantined: false,
+          quarantinedQuantity: 0,
+          quarantineReason: '',
+          quarantineReleasedQuantity: 0,
+        }));
+    order.returnRequest.items = returnItems as any;
+    order.returnRequest.totalRequestedQuantity = returnItems.reduce((acc: number, it: any) => acc + (it.quantityRequested || 0), 0);
+
+    order.returnRequest.physicalItemReceived = true;
+    order.returnRequest.physicalItemReceivedAt = new Date();
+    order.returnRequest.inspectedBy = adminEmail;
+    order.returnRequest.inspectedAt = new Date();
+    order.returnRequest.inspectionNotes = notes || '';
+
+    // Process each return item
+    let totalNewlyRestocked = 0;
+    let totalNewlyQuarantined = 0;
+    const itemAuditDetails: string[] = [];
+
+    for (const returnItem of returnItems) {
+      // Find matching item payload if provided
+      const itemPayload = Array.isArray(inspectionItemsPayload)
+        ? inspectionItemsPayload.find(
+            (ip: any) => ip.productId === returnItem.productId || (ip.slug && ip.slug === returnItem.slug)
+          )
+        : null;
+
+      let itemReceivedQty = 0;
+      let itemApprovedQty = 0;
+      let itemRejectedQty = 0;
+      let itemNotes = '';
+      let itemRejectReason = '';
+
+      if (itemPayload) {
+        // Explicit item-level partial inspection payload provided
+        itemReceivedQty = Math.min(
+          Math.max(0, Number(itemPayload.quantityReceived) || 0),
+          returnItem.quantityRequested
+        );
+        itemApprovedQty = Math.min(
+          Math.max(0, Number(itemPayload.quantityApproved) || 0),
+          itemReceivedQty
+        );
+        itemRejectedQty = Math.max(0, Number(itemPayload.quantityRejected) || (itemReceivedQty - itemApprovedQty));
+        itemNotes = itemPayload.inspectionNotes || '';
+        itemRejectReason = itemPayload.rejectionReason || '';
+      } else {
+        // Fallback for top-level single decision across requested items
+        const isPassed = Boolean(inspectionPassed);
+        itemReceivedQty = returnItem.quantityRequested;
+        itemApprovedQty = isPassed ? returnItem.quantityRequested : 0;
+        itemRejectedQty = isPassed ? 0 : returnItem.quantityRequested;
+        itemNotes = notes || '';
+        itemRejectReason = isPassed ? '' : (notes || 'Physical quality inspection failed');
+      }
+
+      returnItem.quantityReceived = itemReceivedQty;
+      returnItem.quantityApproved = itemApprovedQty;
+      returnItem.quantityRejected = itemRejectedQty;
+      returnItem.inspectionNotes = itemNotes || returnItem.inspectionNotes || '';
+      returnItem.rejectionReason = itemRejectReason || returnItem.rejectionReason || '';
+
+      // Determine inspection status for this item
+      if (itemApprovedQty === itemReceivedQty && itemReceivedQty > 0) {
+        returnItem.inspectionStatus = 'passed';
+      } else if (itemApprovedQty > 0) {
+        returnItem.inspectionStatus = 'partially_passed';
+      } else {
+        returnItem.inspectionStatus = 'failed';
+      }
+
+      // Concurrency check & exact partial restock calculation
+      const currentRestocked = returnItem.restockedQuantity || 0;
+      const quantityToRestock = Math.max(0, itemApprovedQty - currentRestocked);
+
+      // 1. ATOMIC RESTOCKING FOR APPROVED SELLABLE QUANTITY
+      if (quantityToRestock > 0 && order.inventoryDeducted) {
+        const prodQuery = ProductModel.findOneAndUpdate(
+          { $or: [{ _id: returnItem.productId }, { slug: returnItem.slug }] },
+          { $inc: { stock: quantityToRestock } },
+          { new: true }
+        );
+        if (useTransaction && session) {
+          prodQuery.session(session);
+        }
+        const updatedProduct = await prodQuery;
+
+        if (!updatedProduct) {
+          throw new Error(`Product not found for restocking: ${returnItem.name} (${returnItem.productId})`);
+        }
+
+        appliedIncrements.push({ productId: returnItem.productId, quantity: quantityToRestock });
+
+        returnItem.restockedQuantity = currentRestocked + quantityToRestock;
+        returnItem.inventoryRestocked = returnItem.restockedQuantity >= returnItem.quantityApproved;
+        returnItem.restockedAt = new Date();
+        totalNewlyRestocked += quantityToRestock;
+
+        // Record RETURN_RESTOCK movement
+        const movement = new InventoryMovementModel({
+          productId: returnItem.productId,
+          productName: returnItem.name,
+          variationColor: returnItem.color,
+          type: 'RETURN_RESTOCK' as const,
+          quantity: quantityToRestock,
+          balanceAfter: updatedProduct.stock,
+          referenceOrder: order.orderNumber,
+          note: `Physical return inspection passed. Restocked ${quantityToRestock} unit(s) to sellable inventory.`,
+          timestamp: new Date().toISOString(),
+          isDemo: Boolean(order.isDemo),
+        });
+
+        if (useTransaction && session) {
+          await movement.save({ session });
+        } else {
+          await movement.save();
+        }
+
+        itemAuditDetails.push(
+          `${returnItem.name}: ${quantityToRestock} unit(s) verified sellable & restocked`
+        );
+      }
+
+      // 2. QUARANTINE PROTECTION FOR DAMAGED/REJECTED QUANTITY
+      if (itemRejectedQty > 0) {
+        const currentQuarantined = returnItem.quarantinedQuantity || 0;
+        const newQuarantineQty = Math.max(0, itemRejectedQty - currentQuarantined);
+
+        if (newQuarantineQty > 0) {
+          returnItem.quarantined = true;
+          returnItem.quarantinedQuantity = currentQuarantined + newQuarantineQty;
+          returnItem.quarantinedAt = new Date();
+          returnItem.quarantineReason = itemRejectReason || notes || 'Failed quality verification';
+          totalNewlyQuarantined += newQuarantineQty;
+
+          // Record QUALITY_HOLD movement (sellable stock NOT incremented!)
+          const existingProduct = await ProductModel.findOne({
+            $or: [{ _id: returnItem.productId }, { slug: returnItem.slug }],
+          });
+
+          const holdMovement = new InventoryMovementModel({
+            productId: returnItem.productId,
+            productName: returnItem.name,
+            variationColor: returnItem.color,
+            type: 'QUALITY_HOLD' as const,
+            quantity: newQuarantineQty,
+            balanceAfter: existingProduct?.stock ?? 0,
+            referenceOrder: order.orderNumber,
+            note: `Physical return inspection failed - quarantined ${newQuarantineQty} unit(s). Reason: ${returnItem.quarantineReason}`,
+            timestamp: new Date().toISOString(),
+            isDemo: Boolean(order.isDemo),
+          });
+
+          if (useTransaction && session) {
+            await holdMovement.save({ session });
+          } else {
+            await holdMovement.save();
+          }
+
+          itemAuditDetails.push(
+            `${returnItem.name}: ${newQuarantineQty} unit(s) QUARANTINED (Reason: "${returnItem.quarantineReason}")`
+          );
+        }
+      }
+    }
+
+    // Update order-level aggregates
+    const totalRestocked = returnItems.reduce((acc: number, it: any) => acc + (it.restockedQuantity || 0), 0);
+    const totalQuarantined = returnItems.reduce((acc: number, it: any) => acc + (it.quarantinedQuantity || 0), 0);
+    const totalRequested = order.returnRequest.totalRequestedQuantity || returnItems.reduce((acc: number, it: any) => acc + (it.quantityRequested || 0), 0);
+
+    order.returnRequest.totalRestockedQuantity = totalRestocked;
+    order.returnRequest.totalQuarantinedQuantity = totalQuarantined;
+
+    const allItemsPassed = returnItems.every((it: any) => it.inspectionStatus === 'passed');
+    const allItemsFailed = returnItems.every((it: any) => it.inspectionStatus === 'failed');
+
+    order.returnRequest.inspectionStatus = allItemsPassed
+      ? 'passed'
+      : (allItemsFailed ? 'failed' : 'partially_passed');
+
+    const allApprovedRestocked = returnItems.every(
+      (it: any) => it.quantityApproved === 0 || (it.restockedQuantity || 0) >= it.quantityApproved
+    );
+    order.inventoryRestored = allApprovedRestocked && totalRestocked > 0;
+    order.returnRequest.inventoryRestocked = order.inventoryRestored;
+    if (order.inventoryRestored) {
+      order.returnRequest.inventoryRestockedAt = new Date();
+    }
+
+    // Audit Log
+    order.auditLogs = order.auditLogs || [];
+    order.auditLogs.push({
+      timestamp: new Date().toISOString(),
+      actor: adminEmail,
+      action: totalNewlyRestocked > 0 ? 'RETURN_INSPECTION_RESTOCKED' : 'RETURN_INSPECTION_RECORDED',
+      message: `Atelier inspection by ${adminEmail}. Summary: ${totalNewlyRestocked} restocked, ${totalNewlyQuarantined} quarantined. Details: [${itemAuditDetails.join('; ')}]. Notes: "${notes || 'N/A'}"`,
+      metadata: {
+        totalNewlyRestocked,
+        totalNewlyQuarantined,
+        totalRestocked,
+        totalQuarantined,
+        totalRequested,
+        itemAuditDetails,
+      },
+    });
+
+    if (useTransaction && session) {
+      await order.save({ session });
+      await session.commitTransaction();
+    } else {
+      await order.save();
+    }
+
+    return res.json({
+      success: true,
+      message: `Return inspection completed: ${totalNewlyRestocked} unit(s) restocked to sellable inventory, ${totalNewlyQuarantined} unit(s) placed in quarantine.`,
+      order,
+    });
+  } catch (err: any) {
+    console.error('[Return Inspection Error]', err);
+
+    // Rollback handling
+    if (useTransaction && session) {
+      try {
+        await session.abortTransaction();
+      } catch (abortErr) {
+        console.error('[Session Abort Error]', abortErr);
+      }
+    } else if (appliedIncrements.length > 0) {
+      // Standalone compensating rollback: reverse any applied stock increments
+      console.warn('[Rollback] Reversing applied stock increments due to failure...');
+      for (const inc of appliedIncrements) {
+        try {
+          await ProductModel.findOneAndUpdate(
+            { _id: inc.productId },
+            { $inc: { stock: -inc.quantity } }
+          );
+        } catch (revErr) {
+          console.error('[Compensating Rollback Error]', revErr);
+        }
+      }
+    }
+
+    return res.status(500).json({ error: err.message || 'Failed to process return inspection' });
+  } finally {
+    if (session) {
+      await session.endSession();
+    }
+  }
+}
+
+/**
+ * Admin action: Explicitly authorized release or write-off of quarantined merchandise.
+ *
+ * Requirements:
+ * - Requires admin authorization.
+ * - Quarantined stock can NEVER be added to sellable inventory automatically.
+ * - If action === 'restock': requires authorized justification (e.g. refurbished, cleaned, verified).
+ *   Atomically increments sellable stock and decrements quarantinedQuantity.
+ * - If action === 'write_off': permanently scraps the item from quarantine without increasing stock.
+ * - Transactional rollback guarantees: any database failure aborts and rolls back completely.
+ */
+export async function releaseQuarantinedItem(req: AuthenticatedRequest, res: Response) {
+  let session: mongoose.ClientSession | null = null;
+  let useTransaction = false;
+
+  try {
+    session = await mongoose.startSession();
+    session.startTransaction();
+    useTransaction = true;
+  } catch (sessErr) {
+    session = null;
+    useTransaction = false;
+  }
+
+  let appliedIncrement: { productId: string; quantity: number } | null = null;
+
+  try {
+    const { orderNumber } = req.params;
+    const { productId, quantity, action, reason, notes } = req.body;
+    const adminEmail = req.admin?.email || 'admin@zimorworld.com';
+
+    if (!productId) {
+      if (useTransaction && session) await session.abortTransaction();
+      return res.status(400).json({ error: 'productId is required.' });
+    }
+
+    if (action !== 'restock' && action !== 'write_off') {
+      if (useTransaction && session) await session.abortTransaction();
+      return res.status(400).json({ error: 'Invalid action: must be "restock" or "write_off".' });
+    }
+
+    if (!reason || !reason.trim()) {
+      if (useTransaction && session) await session.abortTransaction();
+      return res.status(400).json({ error: 'A documented authorized reason is mandatory to release quarantined stock.' });
+    }
+
+    const orderQuery = OrderModel.findOne({ orderNumber });
+    if (useTransaction && session) orderQuery.session(session);
+    const order = await orderQuery;
+
+    if (!order || !order.returnRequest || !order.returnRequest.items) {
+      if (useTransaction && session) await session.abortTransaction();
+      return res.status(404).json({ error: 'Order or return request items not found.' });
+    }
+
+    const returnItem = order.returnRequest.items.find(
+      (it) => it.productId === productId || (it.slug && it.slug === productId)
+    );
+
+    if (!returnItem) {
+      if (useTransaction && session) await session.abortTransaction();
+      return res.status(404).json({ error: 'Quarantined item not found on this order return request.' });
+    }
+
+    const currentQuarantined = returnItem.quarantinedQuantity || 0;
+    if (currentQuarantined <= 0) {
+      if (useTransaction && session) await session.abortTransaction();
+      return res.status(400).json({ error: 'No quarantined units exist for this product.' });
+    }
+
+    const releaseQty = Number(quantity) > 0 ? Math.min(Number(quantity), currentQuarantined) : currentQuarantined;
+
+    if (action === 'restock') {
+      // Atomically increment sellable stock
+      const prodQuery = ProductModel.findOneAndUpdate(
+        { $or: [{ _id: returnItem.productId }, { slug: returnItem.slug }] },
+        { $inc: { stock: releaseQty } },
+        { new: true }
+      );
+      if (useTransaction && session) prodQuery.session(session);
+      const updatedProduct = await prodQuery;
+
+      if (!updatedProduct) {
+        throw new Error(`Product not found for restocking: ${returnItem.name}`);
+      }
+
+      appliedIncrement = { productId: returnItem.productId, quantity: releaseQty };
+
+      returnItem.quarantinedQuantity = currentQuarantined - releaseQty;
+      returnItem.quarantined = returnItem.quarantinedQuantity > 0;
+      returnItem.quarantineReleasedQuantity = (returnItem.quarantineReleasedQuantity || 0) + releaseQty;
+      returnItem.restockedQuantity = (returnItem.restockedQuantity || 0) + releaseQty;
+      returnItem.inventoryRestocked = true;
+
+      // Record ATELIER_INWARD movement
+      const inwardMovement = new InventoryMovementModel({
+        productId: returnItem.productId,
+        productName: returnItem.name,
+        variationColor: returnItem.color,
+        type: 'ATELIER_INWARD' as const,
+        quantity: releaseQty,
+        balanceAfter: updatedProduct.stock,
+        referenceOrder: order.orderNumber,
+        note: `Authorized quarantine release by ${adminEmail}: Restocked ${releaseQty} unit(s). Reason: "${reason.trim()}". Notes: "${notes || 'N/A'}"`,
+        timestamp: new Date().toISOString(),
+        isDemo: Boolean(order.isDemo),
+      });
+
+      if (useTransaction && session) {
+        await inwardMovement.save({ session });
+      } else {
+        await inwardMovement.save();
+      }
+
+      order.auditLogs = order.auditLogs || [];
+      order.auditLogs.push({
+        timestamp: new Date().toISOString(),
+        actor: adminEmail,
+        action: 'QUARANTINE_RELEASED_RESTOCKED',
+        message: `Authorized quarantine release by ${adminEmail} for ${returnItem.name}: ${releaseQty} unit(s) restocked to sellable inventory. Reason: "${reason.trim()}". Notes: "${notes || 'N/A'}"`,
+        metadata: { productId: returnItem.productId, quantity: releaseQty, reason, notes },
+      });
+    } else {
+      // write_off: Scrapped / written off, NOT added to sellable stock
+      returnItem.quarantinedQuantity = currentQuarantined - releaseQty;
+      returnItem.quarantined = returnItem.quarantinedQuantity > 0;
+      returnItem.quarantineReleasedQuantity = (returnItem.quarantineReleasedQuantity || 0) + releaseQty;
+
+      const existingProduct = await ProductModel.findOne({
+        $or: [{ _id: returnItem.productId }, { slug: returnItem.slug }],
+      });
+
+      const scrapMovement = new InventoryMovementModel({
+        productId: returnItem.productId,
+        productName: returnItem.name,
+        variationColor: returnItem.color,
+        type: 'QUALITY_HOLD' as const,
+        quantity: -releaseQty,
+        balanceAfter: existingProduct?.stock ?? 0,
+        referenceOrder: order.orderNumber,
+        note: `Authorized quarantine write-off by ${adminEmail}: Disposed ${releaseQty} unit(s). Reason: "${reason.trim()}".`,
+        timestamp: new Date().toISOString(),
+        isDemo: Boolean(order.isDemo),
+      });
+
+      if (useTransaction && session) {
+        await scrapMovement.save({ session });
+      } else {
+        await scrapMovement.save();
+      }
+
+      order.auditLogs = order.auditLogs || [];
+      order.auditLogs.push({
+        timestamp: new Date().toISOString(),
+        actor: adminEmail,
+        action: 'QUARANTINE_WRITTEN_OFF',
+        message: `Authorized quarantine write-off by ${adminEmail} for ${returnItem.name}: ${releaseQty} unit(s) written off / disposed. Reason: "${reason.trim()}". Stock NOT increased.`,
+        metadata: { productId: returnItem.productId, quantity: releaseQty, reason, notes },
+      });
+    }
+
+    // Recalculate totals
+    const returnItemsList = order.returnRequest.items || [];
+    order.returnRequest.totalRestockedQuantity = returnItemsList.reduce((acc: number, it: any) => acc + (it.restockedQuantity || 0), 0);
+    order.returnRequest.totalQuarantinedQuantity = returnItemsList.reduce((acc: number, it: any) => acc + (it.quarantinedQuantity || 0), 0);
+
+    if (useTransaction && session) {
+      await order.save({ session });
+      await session.commitTransaction();
+    } else {
+      await order.save();
+    }
+
+    return res.json({
+      success: true,
+      message: action === 'restock'
+        ? `Quarantine released: ${releaseQty} unit(s) of ${returnItem.name} restocked to sellable inventory.`
+        : `Quarantine write-off recorded: ${releaseQty} unit(s) written off. Sellable inventory untouched.`,
+      order,
+    });
+  } catch (err: any) {
+    console.error('[Quarantine Release Error]', err);
+
+    if (useTransaction && session) {
+      try {
+        await session.abortTransaction();
+      } catch (abortErr) {
+        console.error('[Session Abort Error]', abortErr);
+      }
+    } else if (appliedIncrement) {
+      try {
+        await ProductModel.findOneAndUpdate(
+          { _id: appliedIncrement.productId },
+          { $inc: { stock: -appliedIncrement.quantity } }
+        );
+      } catch (revErr) {
+        console.error('[Compensating Rollback Error]', revErr);
+      }
+    }
+
+    return res.status(500).json({ error: err.message || 'Failed to release quarantined item' });
+  } finally {
+    if (session) {
+      await session.endSession();
+    }
   }
 }

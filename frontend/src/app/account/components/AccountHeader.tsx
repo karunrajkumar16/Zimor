@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
 import { Package, LogOut, Sparkles } from 'lucide-react';
 import { UserProfile } from '@/context/AuthContext';
+import { CustomerAvatar } from './CustomerAvatar';
 
 interface AccountHeaderProps {
   user: UserProfile;
@@ -18,36 +18,17 @@ export const AccountHeader: React.FC<AccountHeaderProps> = ({
   onNavigateToOrders,
   onSignOut,
 }) => {
-  const initials = user.name
-    ? user.name
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2)
-    : 'ZP';
-
   return (
     <header className="border-b border-[#000000]/10 pb-6 mb-6 sm:mb-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
         {/* User Identity & Avatar */}
         <div className="flex items-center gap-4">
-          <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden bg-[#FAF8F5] border border-[#B4B4B4]/40 shrink-0 flex items-center justify-center shadow-xs">
-            {user.avatar ? (
-              <Image
-                src={user.avatar}
-                alt={user.name}
-                fill
-                sizes="64px"
-                className="object-cover"
-                unoptimized
-              />
-            ) : (
-              <span className="font-primary text-base sm:text-lg font-medium text-[#000000] tracking-wider">
-                {initials}
-              </span>
-            )}
-          </div>
+          <CustomerAvatar
+            src={user.avatar}
+            name={user.name}
+            email={user.email}
+            size="lg"
+          />
 
           <div className="space-y-0.5">
             <div className="flex items-center gap-2">

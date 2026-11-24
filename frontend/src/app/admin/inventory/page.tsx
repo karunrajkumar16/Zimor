@@ -25,7 +25,7 @@ interface InventoryMovement {
   id: string;
   productId: string;
   productName: string;
-  variationColor: string;
+  variationColor?: string;
   type: 'SALE_DEDUCTION' | 'RETURN_RESTOCK' | 'QUALITY_HOLD' | 'ATELIER_INWARD';
   quantity: number;
   balanceAfter: number;
@@ -107,8 +107,12 @@ export default function AdminInventoryPage() {
   };
 
   const filtered = products.filter((p) => {
-    const q = search.toLowerCase();
-    return p.name?.toLowerCase().includes(q) || p.slug?.toLowerCase().includes(q);
+    const q = search.toLowerCase().trim();
+    return (
+      p.name?.toLowerCase().includes(q) ||
+      p.slug?.toLowerCase().includes(q) ||
+      p.sku?.toLowerCase().includes(q)
+    );
   });
 
   const lowStockCount = products.filter((p) => (stockChanges[p.id] ?? p.stock ?? 0) <= 5 && (stockChanges[p.id] ?? p.stock ?? 0) > 0).length;
@@ -203,8 +207,8 @@ export default function AdminInventoryPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by product name..."
-              className="w-full pl-9 pr-4 py-2 bg-[#FAF7F2] dark:bg-[#1E1C1A] border border-[#E5DFD7] dark:border-[#36312C] rounded text-xs text-[#24211F] dark:text-[#E8E1DA] focus:outline-none focus:border-[#B44220]"
+              placeholder="Search by product name, SKU, or slug..."
+              className="w-full pl-9 pr-4 py-2 bg-[#FAF7F2] dark:bg-[#1E1C1A] border border-[#E5DFD7] dark:border-[#36312C] rounded text-xs text-[#24211F] dark:text-[#E8E1DA] focus:outline-none focus:border-[#5146E5]"
             />
           </div>
         </div>
@@ -221,7 +225,7 @@ export default function AdminInventoryPage() {
               >
                 <th className="py-3 px-4">Product</th>
                 <th className="py-3 px-4">Category</th>
-                <th className="py-3 px-4">Colors</th>
+                <th className="py-3 px-4">Product Code (SKU)</th>
                 <th className="py-3 px-4 text-center">Unit Adjustment</th>
                 <th className="py-3 px-4">Health Status</th>
                 <th className="py-3 px-4 text-right">Commit Changes</th>
@@ -253,8 +257,8 @@ export default function AdminInventoryPage() {
                           <p className="font-bold text-slate-900 dark:text-white">
                             {prod.name}
                           </p>
-                          <p className="text-[10px] text-slate-400 font-mono">
-                            SKU: {prod.slug}
+                          <p className="text-[10px] text-slate-400">
+                            /{prod.slug}
                           </p>
                         </div>
                       </div>
@@ -264,17 +268,8 @@ export default function AdminInventoryPage() {
                       {prod.categoryLabel || prod.category}
                     </td>
 
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-1.5">
-                        {prod.colors?.map((col, i) => (
-                          <span
-                            key={i}
-                            title={col.name}
-                            className="w-3.5 h-3.5 rounded-full border border-black/20 shrink-0"
-                            style={{ backgroundColor: col.hex }}
-                          />
-                        ))}
-                      </div>
+                    <td className="py-3.5 px-4 text-slate-600 dark:text-neutral-300 font-medium">
+                      {prod.sku || '—'}
                     </td>
 
                     <td className="py-3.5 px-4">
@@ -283,7 +278,7 @@ export default function AdminInventoryPage() {
                           type="button"
                           onClick={() => adjustStock(prod.id, -1)}
                           disabled={currentVal <= 0}
-                          className="w-7 h-7 rounded border flex items-center justify-center hover:border-[#B44220] hover:text-[#B44220] hover:bg-[#B44220]/5 disabled:opacity-30 border-slate-300 dark:border-neutral-700 transition-colors"
+                          className="w-7 h-7 rounded border flex items-center justify-center hover:border-[#5146E5] hover:text-[#5146E5] hover:bg-[#EEF0FF] dark:hover:bg-[#5146E5]/20 disabled:opacity-30 border-slate-300 dark:border-neutral-700 transition-colors"
                         >
                           <Minus className="w-3 h-3" />
                         </button>
@@ -297,13 +292,13 @@ export default function AdminInventoryPage() {
                               [prod.id]: Math.max(0, parseInt(e.target.value) || 0),
                             })
                           }
-                          className="w-14 text-center py-1 font-bold font-mono rounded border border-[#E5DFD7] dark:border-[#36312C] bg-[#FAF7F2] dark:bg-[#1E1C1A] text-xs text-[#24211F] dark:text-[#E8E1DA] focus:outline-none focus:border-[#B44220]"
+                          className="w-14 text-center py-1 font-bold font-mono rounded border border-[#E5DFD7] dark:border-[#36312C] bg-[#FAF7F2] dark:bg-[#1E1C1A] text-xs text-[#24211F] dark:text-[#E8E1DA] focus:outline-none focus:border-[#5146E5]"
                         />
 
                         <button
                           type="button"
                           onClick={() => adjustStock(prod.id, 1)}
-                          className="w-7 h-7 rounded border flex items-center justify-center hover:border-[#B44220] hover:text-[#B44220] hover:bg-[#B44220]/5 border-[#E5DFD7] dark:border-[#36312C] text-[#24211F] dark:text-[#E8E1DA] transition-colors"
+                          className="w-7 h-7 rounded border flex items-center justify-center hover:border-[#5146E5] hover:text-[#5146E5] hover:bg-[#EEF0FF] dark:hover:bg-[#5146E5]/20 border-[#E5DFD7] dark:border-[#36312C] text-[#24211F] dark:text-[#E8E1DA] transition-colors"
                         >
                           <Plus className="w-3 h-3" />
                         </button>
@@ -331,7 +326,7 @@ export default function AdminInventoryPage() {
                         onClick={() => handleSaveStock(prod.id)}
                         disabled={!isDirty || savingId === prod.id}
                         className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold transition-all ${isDirty
-                          ? 'bg-[#B44220] hover:bg-[#9B381B] text-[#F7F5F2] shadow-xs'
+                          ? 'bg-[#5146E5] hover:bg-[#4338CA] text-[#F7F5F2] shadow-xs'
                           : 'bg-[#FAF7F2] dark:bg-[#1E1C1A] border border-[#E5DFD7] dark:border-[#36312C] text-[#8C837A] dark:text-[#8A837C] opacity-50 cursor-not-allowed'
                           }`}
                       >
@@ -352,7 +347,7 @@ export default function AdminInventoryPage() {
         <div className={`rounded-lg border overflow-hidden ${cardBg} mt-6`}>
           <div className={`p-4 border-b flex items-center justify-between ${isDark ? 'border-[#36312C]' : 'border-[#E5DFD7]'}`}>
             <div className="flex items-center gap-2">
-              <History className="w-4 h-4 text-[#B44220]" />
+              <History className="w-4 h-4 text-[#5146E5]" />
               <h2 className="text-sm font-bold tracking-tight">Recent Atelier Inventory Movements</h2>
               <span className="px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30">
                 DEMO SANDBOX
@@ -370,7 +365,6 @@ export default function AdminInventoryPage() {
                   }`}>
                   <th className="py-2.5 px-4 font-semibold">Timestamp</th>
                   <th className="py-2.5 px-4 font-semibold">Product</th>
-                  <th className="py-2.5 px-4 font-semibold">Color</th>
                   <th className="py-2.5 px-4 font-semibold">Type</th>
                   <th className="py-2.5 px-4 font-semibold text-center">Change</th>
                   <th className="py-2.5 px-4 font-semibold text-center">Balance</th>
@@ -384,11 +378,8 @@ export default function AdminInventoryPage() {
                     <td className="py-2.5 px-4 text-[11px] opacity-75">
                       {new Date(m.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </td>
-                    <td className="py-2.5 px-4 font-bold text-[#B44220] dark:text-[#E07A5F]">
+                    <td className="py-2.5 px-4 font-bold text-[#5146E5] dark:text-[#818CF8]">
                       {m.productName}
-                    </td>
-                    <td className="py-2.5 px-4">
-                      {m.variationColor}
                     </td>
                     <td className="py-2.5 px-4">
                       <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${m.type === 'SALE_DEDUCTION'
@@ -402,7 +393,7 @@ export default function AdminInventoryPage() {
                         {m.type.replace('_', ' ')}
                       </span>
                     </td>
-                    <td className={`py-2.5 px-4 text-center font-bold ${m.quantity > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#B44220]'}`}>
+                    <td className={`py-2.5 px-4 text-center font-bold ${m.quantity > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#5146E5]'}`}>
                       {m.quantity > 0 ? `+${m.quantity}` : m.quantity}
                     </td>
                     <td className="py-2.5 px-4 text-center font-bold">

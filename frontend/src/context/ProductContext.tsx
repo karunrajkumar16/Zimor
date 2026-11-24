@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { Product } from '@/types';
+import { PRODUCTS } from '@/data/products';
 import { apiFetch } from '@/lib/api';
 
 interface ProductContextType {
@@ -17,8 +18,8 @@ interface ProductContextType {
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
 
 export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [allProducts, setAllProducts] = useState<Product[]>(PRODUCTS);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchProducts = useCallback(async () => {
@@ -27,12 +28,11 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data.products)) {
-          // Normalize IDs, booleans, and fallback colors if missing
+          // Normalize IDs, booleans, and image fallbacks if missing
           const normalized: Product[] = data.products.map((p: any) => ({
             ...p,
             id: p.id || p._id?.toString() || p.slug,
             categoryLabel: p.categoryLabel || (p.category === 'tote-bags' ? 'Tote Bags' : p.category === 'laptop-bags' ? 'Laptop Bags' : 'Shoulder Bags'),
-            colors: p.colors && p.colors.length > 0 ? p.colors : [{ name: p.defaultColor || 'Standard', hex: '#1C1917' }],
             images: p.images && p.images.length > 0 ? p.images : [{ url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp', alt: p.name }],
             suitableProfessions: p.suitableProfessions || [],
             isPublished: p.isPublished !== false,

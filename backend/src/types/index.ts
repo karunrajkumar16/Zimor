@@ -1,9 +1,3 @@
-export interface ProductColor {
-  name: string;
-  hex: string;
-  imageUrl?: string;
-}
-
 export interface ProductImage {
   url: string;
   publicId?: string;
@@ -41,8 +35,7 @@ export interface Product {
   compareAtPrice: number;
   category: 'tote-bags' | 'laptop-bags' | 'shoulder-bags';
   categoryLabel: string;
-  colors: ProductColor[];
-  defaultColor: string;
+  sku?: string;
   sizes: string[];
   stock: number;
   isPublished?: boolean;
@@ -99,6 +92,30 @@ export interface OrderAuditLog {
   metadata?: any;
 }
 
+export interface OrderReturnItem {
+  productId: string;
+  name: string;
+  slug?: string;
+  color?: string;
+  size?: string;
+  quantityOrdered: number;
+  quantityRequested: number;
+  quantityReceived: number;
+  quantityApproved: number;
+  quantityRejected: number;
+  inspectionStatus: 'pending' | 'passed' | 'failed' | 'partially_passed';
+  inspectionNotes?: string;
+  rejectionReason?: string;
+  inventoryRestocked: boolean;
+  restockedQuantity: number;
+  restockedAt?: string | Date;
+  quarantined: boolean;
+  quarantinedQuantity: number;
+  quarantinedAt?: string | Date;
+  quarantineReason?: string;
+  quarantineReleasedQuantity?: number;
+}
+
 export interface OrderReturnRequest {
   status: 'none' | 'requested' | 'approved' | 'rejected' | 'completed';
   type?: 'return' | 'exchange';
@@ -112,6 +129,18 @@ export interface OrderReturnRequest {
   refundInitiated?: boolean;
   refundId?: string;
   refundAmount?: number;
+  physicalItemReceived?: boolean;
+  physicalItemReceivedAt?: string | Date;
+  inspectionStatus?: 'pending' | 'passed' | 'failed' | 'partially_passed' | 'not_applicable';
+  inspectedAt?: string | Date;
+  inspectedBy?: string;
+  inspectionNotes?: string;
+  inventoryRestocked?: boolean;
+  inventoryRestockedAt?: string | Date;
+  items?: OrderReturnItem[];
+  totalRequestedQuantity?: number;
+  totalRestockedQuantity?: number;
+  totalQuarantinedQuantity?: number;
 }
 
 export interface Order {
@@ -123,7 +152,7 @@ export interface Order {
     name: string;
     slug: string;
     image: string;
-    color: string;
+    color?: string;
     size: string;
     price: number;
     quantity: number;
@@ -183,4 +212,22 @@ export interface Order {
   auditLogs?: OrderAuditLog[];
   shiprocketWebhookEventsProcessed?: string[];
 }
+
+export interface AboutMediaSection {
+  id: string; // 'brandOverview' | 'brandStory' | 'brandVision' | 'brandMission' | 'brandValues'
+  title: string;
+  subtitle: string;
+  description: string;
+  recommendedAspect: string;
+  recommendedResolution: string;
+  url: string;
+  publicId?: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  updatedAt?: string;
+  updatedBy?: string;
+}
+
+export type AboutMediaMapping = Record<string, AboutMediaSection>;
 

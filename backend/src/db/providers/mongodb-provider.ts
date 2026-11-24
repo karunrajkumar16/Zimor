@@ -53,7 +53,7 @@ export class MongoDatabaseProvider implements DatabaseProvider {
     }
     if (filters?.search) {
       const regex = new RegExp(filters.search, 'i');
-      query.$or = [{ name: regex }, { description: regex }, { tagline: regex }, { slug: regex }];
+      query.$or = [{ name: regex }, { description: regex }, { tagline: regex }, { slug: regex }, { sku: regex }];
     }
 
     const docs = await ProductModel.find(query).sort({ createdAt: -1 }).lean();
@@ -158,7 +158,6 @@ export class MongoDatabaseProvider implements DatabaseProvider {
         name: i.productName,
         slug: i.slug,
         image: i.image || '/products/delo-1.webp',
-        color: i.selectedColor,
         size: 'Standard',
         price: i.price,
         quantity: i.quantity,
@@ -245,7 +244,7 @@ export class MongoDatabaseProvider implements DatabaseProvider {
       if (data.phone !== undefined) existing.phone = data.phone;
       if ((data as any).designation !== undefined) (existing as any).designation = (data as any).designation;
       if (data.googleId) existing.googleId = data.googleId;
-      if (data.avatar) existing.avatar = data.avatar;
+      if (data.avatar !== undefined) existing.avatar = data.avatar;
       if (data.authProvider) existing.authProvider = data.authProvider;
       if (data.addresses !== undefined) (existing as any).addresses = data.addresses;
       if (data.orders) {

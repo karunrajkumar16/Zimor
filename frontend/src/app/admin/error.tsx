@@ -17,7 +17,7 @@ export default function AdminErrorPage({
 
   return (
     <div className="min-h-[50vh] flex flex-col items-center justify-center p-6 text-center">
-      <div className="w-12 h-12 rounded-2xl bg-[#B44220]/15 text-[#B44220] flex items-center justify-center mb-4">
+      <div className="w-12 h-12 rounded-2xl bg-[#EEF0FF] dark:bg-[#5146E5]/20 text-[#5146E5] flex items-center justify-center mb-4">
         <AlertTriangle className="w-6 h-6 stroke-[2.2]" />
       </div>
       <h2 className="text-lg font-bold text-[#24211F] dark:text-[#E8E1DA] mb-1.5">
@@ -30,7 +30,7 @@ export default function AdminErrorPage({
         <button
           type="button"
           onClick={() => reset()}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#B44220] hover:bg-[#9B381B] text-[#FFFFFF] text-xs font-semibold shadow-xs transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#5146E5] hover:bg-[#4338CA] text-[#FFFFFF] text-xs font-semibold shadow-xs transition-colors"
         >
           <RefreshCw className="w-3.5 h-3.5" />
           <span>Reload Dashboard</span>

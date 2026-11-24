@@ -17,16 +17,14 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
   const { addItem } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedColor, setSelectedColor] = useState<string>('');
   const quantity = 1;
 
   if (!product) return null;
 
   const inWishlist = isInWishlist(product.id);
-  const currentColor = selectedColor || product.defaultColor;
 
   const handleAddToCart = () => {
-    addItem(product, quantity, currentColor);
+    addItem(product, quantity);
     onClose();
   };
 
@@ -117,32 +115,6 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
               <div className="mt-4 p-2.5 bg-canvas rounded border border-line text-xs text-ink-secondary flex items-center gap-2">
                 <Check className="w-4 h-4 text-ink shrink-0" />
                 <span>{product.laptopCompatibility}</span>
-              </div>
-
-              {/* Color Selection */}
-              <div className="mt-4 space-y-2">
-                <label className="block text-xs font-semibold text-ink">
-                  Color: <span className="font-normal text-ink-muted">{currentColor}</span>
-                </label>
-                <div className="flex items-center gap-2">
-                  {product.colors.map((color) => (
-                    <button
-                      key={color.name}
-                      type="button"
-                      onClick={() => setSelectedColor(color.name)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border transition-all ${currentColor === color.name
-                        ? 'border-black bg-black text-white font-semibold'
-                        : 'border-line text-ink hover:border-ink/40'
-                        }`}
-                    >
-                      <span
-                        className="w-3 h-3 rounded-full border border-black/20"
-                        style={{ backgroundColor: color.hex }}
-                      />
-                      <span>{color.name}</span>
-                    </button>
-                  ))}
-                </div>
               </div>
             </div>
 

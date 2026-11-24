@@ -233,8 +233,8 @@ export default function AdminAnnouncementsPage() {
     : 'bg-[#FFFFFF] border-[#E5DFD7] shadow-xs';
 
   const inputClass = isDark
-    ? 'w-full px-3 py-2 bg-[#1E1C1A] border border-[#36312C] rounded text-xs text-[#E8E1DA] placeholder-[#78726C] focus:outline-none focus:border-[#B44220]'
-    : 'w-full px-3 py-2 bg-[#FAF7F2] border border-[#E5DFD7] rounded text-xs text-[#24211F] placeholder-[#8C837A] focus:outline-none focus:border-[#B44220] focus:bg-[#FFFFFF]';
+    ? 'w-full px-3 py-2 bg-[#1E1C1A] border border-[#36312C] rounded text-xs text-[#E8E1DA] placeholder-[#78726C] focus:outline-none focus:border-[#5146E5]'
+    : 'w-full px-3 py-2 bg-[#FAF7F2] border border-[#E5DFD7] rounded text-xs text-[#24211F] placeholder-[#8C837A] focus:outline-none focus:border-[#5146E5] focus:bg-[#FFFFFF]';
 
   return (
     <div className="space-y-6">
@@ -252,7 +252,7 @@ export default function AdminAnnouncementsPage() {
         <button
           onClick={() => handleSave()}
           disabled={saving}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-xs font-semibold bg-[#B44220] hover:bg-[#9B381B] text-[#F7F5F2] shadow-xs disabled:opacity-50 transition-colors cursor-pointer"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-xs font-semibold bg-[#5146E5] hover:bg-[#4338CA] text-[#F7F5F2] shadow-xs disabled:opacity-50 transition-colors cursor-pointer"
         >
           <Save className="w-3.5 h-3.5" />
           <span>{saving ? 'Publishing to MongoDB...' : 'Save & Publish to Storefront'}</span>
@@ -286,7 +286,7 @@ export default function AdminAnnouncementsPage() {
       <div className={`p-5 rounded-lg border ${cardBg} space-y-3`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Eye className="w-4 h-4 text-[#B44220]" />
+            <Eye className="w-4 h-4 text-[#5146E5]" />
             <h2 className="text-sm font-bold text-[#24211F] dark:text-[#E8E1DA]">
               Live Storefront Preview
             </h2>
@@ -305,8 +305,7 @@ export default function AdminAnnouncementsPage() {
           {enabled && activeEnabledItems.length > 0 ? (
             <div className="flex items-center justify-center gap-6 lg:gap-10 overflow-x-auto whitespace-nowrap scrollbar-none text-[11px] lg:text-[12px] font-medium tracking-wide">
               {activeEnabledItems.map((it, idx) => (
-                <span key={it.id || idx} className="inline-flex items-center gap-2 text-white/90">
-                  <span className="text-[#b4b4b4] text-[9px]">●</span>
+                <span key={it.id || idx} className="inline-flex items-center text-white/90">
                   <span className="font-primary tracking-wide">{it.text}</span>
                 </span>
               ))}
@@ -331,7 +330,7 @@ export default function AdminAnnouncementsPage() {
                 Announcements ({items.length})
               </h2>
               <p className={`text-[11px] ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
-                Grab the handle <GripVertical className="w-3 h-3 inline text-[#B44220]" /> to drag and reorder.
+                Grab the handle <GripVertical className="w-3 h-3 inline text-[#5146E5]" /> to drag and reorder.
               </p>
             </div>
 
@@ -341,7 +340,7 @@ export default function AdminAnnouncementsPage() {
                 type="checkbox"
                 checked={enabled}
                 onChange={(e) => setEnabled(e.target.checked)}
-                className="w-4 h-4 rounded text-[#B44220] focus:ring-0 cursor-pointer"
+                className="w-4 h-4 rounded text-[#5146E5] focus:ring-0 cursor-pointer"
               />
               <span className="text-[#24211F] dark:text-[#E8E1DA]">Enable Top Bar</span>
             </label>
@@ -369,9 +368,9 @@ export default function AdminAnnouncementsPage() {
                     onDragEnd={handleDragEnd}
                     className={`flex items-center justify-between gap-3 p-3.5 rounded-lg border transition-all select-none ${
                       isDragging
-                        ? 'opacity-40 border-dashed border-[#B44220] bg-[#B44220]/5 scale-[0.99]'
+                        ? 'opacity-40 border-dashed border-[#5146E5] bg-[#5146E5]/5 scale-[0.99]'
                         : isDragOver
-                        ? 'border-[#B44220] ring-2 ring-[#B44220]/30 bg-[#B44220]/10 scale-[1.01]'
+                        ? 'border-[#5146E5] ring-2 ring-[#5146E5]/30 bg-[#5146E5]/10 scale-[1.01]'
                         : isItemEnabled
                         ? 'border-[#E5DFD7] dark:border-[#36312C] bg-[#FAF7F2] dark:bg-[#1E1C1A]'
                         : 'border-[#E5DFD7]/50 dark:border-[#36312C]/50 bg-neutral-100/50 dark:bg-neutral-900/40 opacity-60'
@@ -379,7 +378,7 @@ export default function AdminAnnouncementsPage() {
                   >
                     {/* Drag Handle */}
                     <div
-                      className="cursor-grab active:cursor-grabbing p-1.5 -ml-1 text-[#8C837A] hover:text-[#B44220] dark:text-[#8A837C] dark:hover:text-[#E8E1DA] rounded transition-colors"
+                      className="cursor-grab active:cursor-grabbing p-1.5 -ml-1 text-[#8C837A] hover:text-[#5146E5] dark:text-[#8A837C] dark:hover:text-[#E8E1DA] rounded transition-colors"
                       title="Grab and drag to reorder"
                     >
                       <GripVertical className="w-4 h-4" />
@@ -430,7 +429,7 @@ export default function AdminAnnouncementsPage() {
                         type="button"
                         onClick={() => setEditingItem({ ...it })}
                         title="Edit announcement"
-                        className="p-1.5 rounded hover:bg-[#E5DFD7] dark:hover:bg-[#36312C] text-[#8C837A] hover:text-[#B44220] transition-colors cursor-pointer"
+                        className="p-1.5 rounded hover:bg-[#E5DFD7] dark:hover:bg-[#36312C] text-[#8C837A] hover:text-[#5146E5] transition-colors cursor-pointer"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
@@ -496,7 +495,7 @@ export default function AdminAnnouncementsPage() {
                 id="newItemActive"
                 checked={newItemEnabled}
                 onChange={(e) => setNewItemEnabled(e.target.checked)}
-                className="w-4 h-4 rounded text-[#B44220] focus:ring-0 cursor-pointer"
+                className="w-4 h-4 rounded text-[#5146E5] focus:ring-0 cursor-pointer"
               />
               <label
                 htmlFor="newItemActive"
@@ -510,7 +509,7 @@ export default function AdminAnnouncementsPage() {
               type="button"
               onClick={addItem}
               disabled={!newItemText.trim()}
-              className="w-full py-2.5 rounded text-xs font-semibold bg-[#B44220] hover:bg-[#963518] text-white shadow-xs transition-colors mt-2 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-40"
+              className="w-full py-2.5 rounded text-xs font-semibold bg-[#5146E5] hover:bg-[#4338CA] text-white shadow-xs transition-colors mt-2 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-40"
             >
               <Plus className="w-4 h-4" />
               <span>Add Announcement to List</span>
@@ -564,7 +563,7 @@ export default function AdminAnnouncementsPage() {
                   id="editItemActive"
                   checked={editingItem.enabled !== false}
                   onChange={(e) => setEditingItem({ ...editingItem, enabled: e.target.checked })}
-                  className="w-4 h-4 rounded text-[#B44220] focus:ring-0 cursor-pointer"
+                  className="w-4 h-4 rounded text-[#5146E5] focus:ring-0 cursor-pointer"
                 />
                 <label htmlFor="editItemActive" className="font-medium text-xs cursor-pointer">
                   Enabled
@@ -583,7 +582,7 @@ export default function AdminAnnouncementsPage() {
                   type="button"
                   onClick={saveEditedItem}
                   disabled={!editingItem.text.trim()}
-                  className="flex-1 py-2 rounded bg-[#B44220] hover:bg-[#963518] text-white text-xs font-semibold transition-colors disabled:opacity-50"
+                  className="flex-1 py-2 rounded bg-[#5146E5] hover:bg-[#4338CA] text-white text-xs font-semibold transition-colors disabled:opacity-50"
                 >
                   Apply Edits
                 </button>

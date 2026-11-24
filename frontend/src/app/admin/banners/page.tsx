@@ -326,8 +326,8 @@ export default function AdminHeroBannersPage() {
     : 'bg-[#FFFFFF] border-[#E5DFD7] shadow-xs';
 
   const inputClass = isDark
-    ? 'w-full px-3 py-2 bg-[#1E1C1A] border border-[#36312C] rounded text-xs text-[#E8E1DA] placeholder-[#78726C] focus:outline-none focus:border-[#B44220]'
-    : 'w-full px-3 py-2 bg-[#FAF7F2] border border-[#E5DFD7] rounded text-xs text-[#24211F] placeholder-[#8C837A] focus:outline-none focus:border-[#B44220] focus:bg-[#FFFFFF]';
+    ? 'w-full px-3 py-2 bg-[#1E1C1A] border border-[#36312C] rounded text-xs text-[#E8E1DA] placeholder-[#78726C] focus:outline-none focus:border-[#5146E5]'
+    : 'w-full px-3 py-2 bg-[#FAF7F2] border border-[#E5DFD7] rounded text-xs text-[#24211F] placeholder-[#8C837A] focus:outline-none focus:border-[#5146E5] focus:bg-[#FFFFFF]';
 
   const filteredPresets = CURATED_BANNER_PRESETS.filter(
     (p) =>
@@ -363,14 +363,14 @@ export default function AdminHeroBannersPage() {
               : 'bg-[#FFFFFF] border-[#E5DFD7] text-[#24211F] hover:bg-[#FAF7F2]'
               }`}
           >
-            <Plus className="w-3.5 h-3.5 text-[#B44220]" />
+            <Plus className="w-3.5 h-3.5 text-[#5146E5]" />
             <span>Add Blank Slide</span>
           </button>
 
           <button
             onClick={() => handleSave()}
             disabled={saving}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-xs font-semibold bg-[#B44220] hover:bg-[#9B381B] text-[#F7F5F2] shadow-xs disabled:opacity-50 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-xs font-semibold bg-[#5146E5] hover:bg-[#4338CA] text-[#F7F5F2] shadow-xs disabled:opacity-50 transition-colors cursor-pointer"
           >
             <Save className="w-3.5 h-3.5" />
             <span>{saving ? 'Publishing...' : 'Publish to Storefront'}</span>
@@ -404,7 +404,7 @@ export default function AdminHeroBannersPage() {
                 key={s.id || idx}
                 onClick={() => setActiveSlideIdx(idx)}
                 className={`px-3.5 py-2 rounded-md text-xs font-semibold shrink-0 transition-all border flex items-center gap-2 cursor-pointer ${activeSlideIdx === idx
-                  ? 'bg-[#B44220] text-[#F7F5F2] border-transparent shadow-xs'
+                  ? 'bg-[#5146E5] text-[#F7F5F2] border-transparent shadow-xs'
                   : isDark
                     ? 'bg-[#1E1C1A] border-[#36312C] text-[#B4B4B4] hover:text-[#E8E1DA]'
                     : 'bg-[#FFFFFF] border-[#E5DFD7] text-[#5A534E] hover:bg-[#FAF7F2]'
@@ -495,7 +495,7 @@ export default function AdminHeroBannersPage() {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="px-3.5 py-1.5 rounded-full bg-[#B44220] hover:bg-[#9B381B] text-white text-xs font-semibold shadow transition-colors flex items-center gap-1.5 cursor-pointer"
+                    className="px-3.5 py-1.5 rounded-full bg-[#5146E5] hover:bg-[#4338CA] text-white text-xs font-semibold shadow transition-colors flex items-center gap-1.5 cursor-pointer"
                   >
                     <Upload className="w-3.5 h-3.5" />
                     <span>Upload Image</span>
@@ -581,7 +581,7 @@ export default function AdminHeroBannersPage() {
                   onChange={(e) => updateActiveSlide('isActive', e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#B44220]"></div>
+                <div className="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#5146E5]"></div>
               </label>
             </div>
 
@@ -635,7 +635,7 @@ export default function AdminHeroBannersPage() {
                       <button
                         type="button"
                         onClick={openMediaModal}
-                        className="px-2.5 py-1.5 rounded bg-[#B44220] hover:bg-[#9B381B] text-white text-[11px] font-semibold transition-colors cursor-pointer"
+                        className="px-2.5 py-1.5 rounded bg-[#5146E5] hover:bg-[#4338CA] text-white text-[11px] font-semibold transition-colors cursor-pointer"
                       >
                         Browse
                       </button>
@@ -644,7 +644,7 @@ export default function AdminHeroBannersPage() {
                 </div>
               ) : (
                 <div className="p-4 border-2 border-dashed border-slate-200 dark:border-white/15 rounded-lg text-center space-y-2.5 bg-black/[0.02] dark:bg-white/[0.02]">
-                  <div className="w-9 h-9 mx-auto rounded-full bg-[#B44220]/10 flex items-center justify-center text-[#B44220]">
+                  <div className="w-9 h-9 mx-auto rounded-full bg-[#EEF0FF] dark:bg-[#5146E5]/20 flex items-center justify-center text-[#5146E5]">
                     <ImageIcon className="w-5 h-5" />
                   </div>
                   <div>
@@ -660,7 +660,7 @@ export default function AdminHeroBannersPage() {
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={uploadingImage}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#B44220] hover:bg-[#9B381B] text-white text-xs font-semibold transition-colors cursor-pointer shadow-xs"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#5146E5] hover:bg-[#4338CA] text-white text-xs font-semibold transition-colors cursor-pointer shadow-xs"
                     >
                       <Upload className="w-3.5 h-3.5" />
                       <span>{uploadingImage ? 'Uploading...' : 'Upload from Device'}</span>
@@ -670,7 +670,7 @@ export default function AdminHeroBannersPage() {
                       onClick={openMediaModal}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-slate-200 dark:border-white/15 hover:bg-black/5 dark:hover:bg-white/5 text-xs font-semibold transition-colors cursor-pointer text-[#24211F] dark:text-[#E8E1DA]"
                     >
-                      <Sparkles className="w-3.5 h-3.5 text-[#B44220]" />
+                      <Sparkles className="w-3.5 h-3.5 text-[#5146E5]" />
                       <span>Choose from Library</span>
                     </button>
                   </div>
@@ -750,7 +750,7 @@ export default function AdminHeroBannersPage() {
                 type="button"
                 onClick={() => handleSave()}
                 disabled={saving}
-                className="w-full py-2.5 rounded-md text-xs font-semibold bg-[#B44220] hover:bg-[#9B381B] text-[#F7F5F2] shadow-xs disabled:opacity-50 transition-colors cursor-pointer"
+                className="w-full py-2.5 rounded-md text-xs font-semibold bg-[#5146E5] hover:bg-[#4338CA] text-[#F7F5F2] shadow-xs disabled:opacity-50 transition-colors cursor-pointer"
               >
                 {saving ? 'Saving...' : 'Apply & Publish Slide'}
               </button>
@@ -766,7 +766,7 @@ export default function AdminHeroBannersPage() {
             {/* Modal Header */}
             <div className="p-4 border-b flex items-center justify-between border-slate-100 dark:border-[#36312C]">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#B44220]" />
+                <Sparkles className="w-4 h-4 text-[#5146E5]" />
                 <h3 className="text-sm font-bold text-[#24211F] dark:text-[#E8E1DA]">
                   Choose Billboard Artwork for Slide {activeSlideIdx + 1}
                 </h3>
@@ -788,7 +788,7 @@ export default function AdminHeroBannersPage() {
                   value={mediaSearch}
                   onChange={(e) => setMediaSearch(e.target.value)}
                   placeholder="Search campaign presets..."
-                  className={`w-full pl-9 pr-3 py-1.5 rounded text-xs border focus:outline-none focus:border-[#B44220] ${isDark
+                  className={`w-full pl-9 pr-3 py-1.5 rounded text-xs border focus:outline-none focus:border-[#5146E5] ${isDark
                     ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA]'
                     : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F]'
                     }`}
@@ -802,7 +802,7 @@ export default function AdminHeroBannersPage() {
                     fileInputRef.current?.click();
                     setIsMediaModalOpen(false);
                   }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#B44220] hover:bg-[#9B381B] text-white text-xs font-semibold cursor-pointer shadow-xs"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#5146E5] hover:bg-[#4338CA] text-white text-xs font-semibold cursor-pointer shadow-xs"
                 >
                   <Upload className="w-3.5 h-3.5" />
                   <span>Upload from Computer</span>
@@ -819,7 +819,7 @@ export default function AdminHeroBannersPage() {
                     key={idx}
                     onClick={() => selectImageFromPreset(preset.url)}
                     className={`group relative rounded-lg overflow-hidden border cursor-pointer transition-all hover:shadow-md ${isSelected
-                      ? 'border-[#B44220] ring-2 ring-[#B44220]/30'
+                      ? 'border-[#5146E5] ring-2 ring-[#5146E5]/30'
                       : 'border-slate-200 dark:border-white/10 hover:border-slate-400 dark:hover:border-white/30'
                       }`}
                   >
@@ -836,13 +836,13 @@ export default function AdminHeroBannersPage() {
                         </span>
                       </div>
                       {isSelected && (
-                        <div className="absolute top-2 right-2 px-2 py-0.5 rounded bg-[#B44220] text-white text-[10px] font-bold shadow">
+                        <div className="absolute top-2 right-2 px-2 py-0.5 rounded bg-[#5146E5] text-white text-[10px] font-bold shadow">
                           Current
                         </div>
                       )}
                     </div>
                     <div className="p-2.5">
-                      <span className="text-[10px] uppercase font-mono text-[#B44220] font-semibold block">
+                      <span className="text-[10px] uppercase font-mono text-[#5146E5] font-semibold block">
                         {preset.category}
                       </span>
                       <p className="text-xs font-semibold text-[#24211F] dark:text-[#E8E1DA] truncate mt-0.5">
@@ -859,7 +859,7 @@ export default function AdminHeroBannersPage() {
                   key={item.id}
                   onClick={() => selectImageFromPreset(item.url)}
                   className={`group relative rounded-lg overflow-hidden border cursor-pointer transition-all hover:shadow-md ${activeSlide.image === item.url
-                    ? 'border-[#B44220] ring-2 ring-[#B44220]/30'
+                    ? 'border-[#5146E5] ring-2 ring-[#5146E5]/30'
                     : 'border-slate-200 dark:border-white/10 hover:border-slate-400 dark:hover:border-white/30'
                     }`}
                 >

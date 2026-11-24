@@ -9,6 +9,7 @@ import { CustomerModel } from '../db/models/Customer.js';
 import { WebhookEventModel } from '../db/models/WebhookEvent.js';
 import { config } from '../config/index.js';
 import { processOrderFulfillment, addOrderAuditLog } from '../shipping/fulfillmentEngine.js';
+import { createNotification } from '../services/notificationService.js';
 
 /**
  * Public configuration endpoint for frontend Razorpay checkout.
@@ -83,7 +84,6 @@ export async function createPaymentOrder(req: Request, res: Response) {
           name: prod.name,
           slug: prod.slug,
           image: imgUrl,
-          color: item.selectedColor || prod.defaultColor || 'Standard',
           size: item.selectedSize || 'Standard',
           price: prod.price,
           quantity: item.quantity,
@@ -254,7 +254,6 @@ export async function verifyPayment(req: Request, res: Response) {
             name: prod.name,
             slug: prod.slug,
             image: imgUrl,
-            color: item.selectedColor || prod.defaultColor || 'Standard',
             size: item.selectedSize || 'Standard',
             price: prod.price,
             quantity: item.quantity,
@@ -324,8 +323,12 @@ export async function verifyPayment(req: Request, res: Response) {
 
     // 5. Atomic Inventory Decrement in MongoDB Atlas (Prevents race conditions & negative stock)
     let inventoryDeducted = false;
+    const thresholdCrossedItems: Array<{ prod: any; prevStock: number; newStock: number }> = [];
     if (isCaptured && validatedItems.length > 0) {
       for (const item of validatedItems) {
+        const prevDoc = await ProductModel.findById(item.productId).lean();
+        const prevStock = typeof prevDoc?.stock === 'number' ? prevDoc.stock : 0;
+
         const updateResult = await ProductModel.findOneAndUpdate(
           {
             _id: item.productId,
@@ -337,10 +340,24 @@ export async function verifyPayment(req: Request, res: Response) {
           { new: true }
         );
 
+        let finalStock = updateResult ? updateResult.stock : 0;
         if (!updateResult) {
           // If stock was less than requested quantity, decrement safely to 0
-          await ProductModel.findByIdAndUpdate(item.productId, {
-            $max: { stock: 0 },
+          const zeroDoc = await ProductModel.findByIdAndUpdate(
+            item.productId,
+            { $max: { stock: 0 } },
+            { new: true }
+          );
+          finalStock = zeroDoc?.stock ?? 0;
+        }
+
+        const crossedZero = prevStock > 0 && finalStock === 0;
+        const crossedLow = prevStock > 5 && finalStock > 0 && finalStock <= 5;
+        if (crossedZero || crossedLow) {
+          thresholdCrossedItems.push({
+            prod: updateResult || prevDoc,
+            prevStock,
+            newStock: finalStock,
           });
         }
       }
@@ -421,6 +438,61 @@ export async function verifyPayment(req: Request, res: Response) {
     );
     await newOrder.save();
 
+    // Notify Admin: Genuine Order Created & Verified Payment Received
+    createNotification({
+      type: 'order_created',
+      title: 'New Order Placed',
+      message: `Order ${orderNumber} placed by ${newOrder.shippingAddress?.fullName || 'Customer'} for ₹${finalTotal.toLocaleString('en-IN')}`,
+      entityId: newOrder._id.toString(),
+      entityType: 'order',
+      metadata: {
+        orderNumber,
+        total: finalTotal,
+        paymentMode,
+        customerName: newOrder.shippingAddress?.fullName,
+      },
+      dedupKey: `order_${orderNumber}_created`,
+      isDemo: Boolean(newOrder.isDemo),
+    }).catch((notifErr) => console.error('[Notification Trigger Error]', notifErr.message));
+
+    createNotification({
+      type: 'payment_success',
+      title: 'Payment Received',
+      message: `Payment of ₹${finalTotal.toLocaleString('en-IN')} verified for order ${orderNumber} (${paymentMode === 'test' ? 'Test Mode' : 'Live'})`,
+      entityId: razorpayPaymentId,
+      entityType: 'payment',
+      metadata: {
+        orderId: newOrder._id.toString(),
+        orderNumber,
+        amount: finalTotal,
+        paymentMode,
+      },
+      dedupKey: `payment_${razorpayPaymentId}_success`,
+      isDemo: Boolean(newOrder.isDemo),
+    }).catch((notifErr) => console.error('[Notification Trigger Error]', notifErr.message));
+
+    // Inventory threshold alerts ONLY for items that actually crossed threshold (never repeated spam)
+    if (thresholdCrossedItems.length > 0) {
+      for (const entry of thresholdCrossedItems) {
+        const isOutOfStock = entry.newStock === 0;
+        createNotification({
+          type: 'inventory_alert',
+          title: isOutOfStock ? 'Out of Stock Alert' : 'Low Stock Alert',
+          message: `${entry.prod.name} stock level dropped from ${entry.prevStock} to ${entry.newStock} unit${entry.newStock === 1 ? '' : 's'}`,
+          entityId: entry.prod._id.toString(),
+          entityType: 'product',
+          metadata: {
+            productId: entry.prod._id.toString(),
+            sku: entry.prod.sku,
+            prevStock: entry.prevStock,
+            stock: entry.newStock,
+          },
+          dedupKey: `inv_${entry.prod._id}_${isOutOfStock ? 'zero' : 'low'}_${entry.newStock}`,
+          isDemo: Boolean(newOrder.isDemo),
+        }).catch((err) => console.error('[Inventory Notification Error]', err.message));
+      }
+    }
+
     // Trigger fulfillment pipeline (asynchronously evaluate eligibility & Shiprocket dispatch)
     processOrderFulfillment(newOrder._id.toString(), {
       actor: 'SYSTEM_PAYMENT_VERIFIED',
@@ -460,7 +532,10 @@ export async function handleWebhook(req: Request, res: Response) {
     const rawBody = rawBodyBuffer ? rawBodyBuffer.toString('utf8') : (typeof req.body === 'string' ? req.body : JSON.stringify(req.body));
 
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET || config.razorpay.webhookSecret;
-    if (webhookSecret && signature) {
+    if (webhookSecret) {
+      if (!signature) {
+        return res.status(400).json({ error: 'Missing x-razorpay-signature header' });
+      }
       const expectedSignature = crypto
         .createHmac('sha256', webhookSecret)
         .update(rawBody)
@@ -513,13 +588,28 @@ export async function handleWebhook(req: Request, res: Response) {
             }
 
             // Atomic inventory deduction if not already deducted
+            const webhookThresholdCrossed: Array<{ prod: any; prevStock: number; newStock: number }> = [];
             if (!order.inventoryDeducted && order.items?.length) {
               for (const item of order.items) {
-                await ProductModel.findOneAndUpdate(
+                const prevDoc = await ProductModel.findById(item.productId).lean();
+                const prevStock = typeof prevDoc?.stock === 'number' ? prevDoc.stock : 0;
+
+                const updateResult = await ProductModel.findOneAndUpdate(
                   { _id: item.productId, stock: { $gte: item.quantity } },
                   { $inc: { stock: -item.quantity } },
                   { new: true }
                 );
+
+                const finalStock = updateResult ? updateResult.stock : 0;
+                const crossedZero = prevStock > 0 && finalStock === 0;
+                const crossedLow = prevStock > 5 && finalStock > 0 && finalStock <= 5;
+                if (crossedZero || crossedLow) {
+                  webhookThresholdCrossed.push({
+                    prod: updateResult || prevDoc,
+                    prevStock,
+                    newStock: finalStock,
+                  });
+                }
               }
               order.inventoryDeducted = true;
             }
@@ -532,6 +622,35 @@ export async function handleWebhook(req: Request, res: Response) {
             );
 
             await order.save();
+
+            // Notify Admin: Webhook Payment Captured (Standardized dedupKey matching verifyPayment)
+            createNotification({
+              type: 'payment_success',
+              title: 'Payment Captured',
+              message: `Payment of ₹${(amountPaise ? amountPaise / 100 : order.total).toLocaleString('en-IN')} confirmed captured for order ${order.orderNumber}`,
+              entityId: rzpPaymentId || eventId,
+              entityType: 'payment',
+              metadata: { orderId: order._id.toString(), orderNumber: order.orderNumber, paymentId: rzpPaymentId, eventId },
+              dedupKey: `payment_${rzpPaymentId || eventId}_success`,
+              isDemo: Boolean(order.isDemo),
+            }).catch((notifErr) => console.error('[Notification Trigger Error]', notifErr.message));
+
+            // Check inventory thresholds: alert ONLY for threshold crossings
+            if (webhookThresholdCrossed.length > 0) {
+              for (const entry of webhookThresholdCrossed) {
+                const isOutOfStock = entry.newStock === 0;
+                createNotification({
+                  type: 'inventory_alert',
+                  title: isOutOfStock ? 'Out of Stock Alert' : 'Low Stock Alert',
+                  message: `${entry.prod.name} stock level dropped from ${entry.prevStock} to ${entry.newStock} unit${entry.newStock === 1 ? '' : 's'}`,
+                  entityId: entry.prod._id.toString(),
+                  entityType: 'product',
+                  metadata: { productId: entry.prod._id.toString(), sku: entry.prod.sku, prevStock: entry.prevStock, stock: entry.newStock },
+                  dedupKey: `inv_${entry.prod._id}_${isOutOfStock ? 'zero' : 'low'}_${entry.newStock}`,
+                  isDemo: Boolean(order.isDemo),
+                }).catch((err) => console.error('[Inventory Notification Error]', err.message));
+              }
+            }
 
             // Trigger automated fulfillment eligibility & dispatch
             processOrderFulfillment(order._id.toString(), {
@@ -559,10 +678,22 @@ export async function handleWebhook(req: Request, res: Response) {
               `Payment failure notification received from Razorpay (Event: ${event}, Event ID: ${eventId})`
             );
             await order.save();
+
+            // Notify Admin: Payment Failed
+            createNotification({
+              type: 'payment_failed',
+              title: 'Payment Failed',
+              message: `Payment failed for order ${order.orderNumber}. Reason: ${payload?.payment?.entity?.error_description || 'Payment rejected at gateway'}`,
+              entityId: rzpOrderId || eventId,
+              entityType: 'payment',
+              metadata: { orderId: order._id.toString(), orderNumber: order.orderNumber, eventId },
+              dedupKey: `payment_${rzpOrderId || eventId}_failed`,
+              isDemo: Boolean(order.isDemo),
+            }).catch((notifErr) => console.error('[Notification Trigger Error]', notifErr.message));
           }
         }
       }
-    } else if (event === 'refund.processed' || event === 'refund.created') {
+    } else if (event === 'refund.created') {
       const rzpPaymentId = payload?.refund?.entity?.payment_id;
       const refundId = payload?.refund?.entity?.id;
       const refundAmountPaise = payload?.refund?.entity?.amount;
@@ -570,30 +701,74 @@ export async function handleWebhook(req: Request, res: Response) {
       if (rzpPaymentId) {
         const order = await OrderModel.findOne({ razorpayPaymentId: rzpPaymentId });
         if (order) {
+          order.refundId = refundId || order.refundId;
+
+          addOrderAuditLog(
+            order,
+            'RAZORPAY_WEBHOOK',
+            'REFUND_INITIATED_WEBHOOK',
+            `Refund of ₹${(refundAmountPaise ? refundAmountPaise / 100 : order.total).toLocaleString('en-IN')} initiated via Razorpay (Refund ID: ${refundId}).`
+          );
+
+          await order.save();
+
+          // Notify Admin: Refund Initiated (Stage 1 of refund payout)
+          createNotification({
+            type: 'refund_initiated',
+            title: 'Refund Initiated',
+            message: `Refund of ₹${(refundAmountPaise ? refundAmountPaise / 100 : order.total).toLocaleString('en-IN')} initiated for order ${order.orderNumber} (Refund ID: ${refundId || 'N/A'})`,
+            entityId: refundId || rzpPaymentId || eventId,
+            entityType: 'refund',
+            metadata: { orderId: order._id.toString(), orderNumber: order.orderNumber, refundId, status: 'initiated' },
+            dedupKey: `refund_${refundId || eventId}_initiated`,
+            isDemo: Boolean(order.isDemo),
+          }).catch((notifErr) => console.error('[Notification Trigger Error]', notifErr.message));
+        }
+      }
+    } else if (event === 'refund.processed') {
+      const rzpPaymentId = payload?.refund?.entity?.payment_id;
+      const refundId = payload?.refund?.entity?.id;
+      const refundAmountPaise = payload?.refund?.entity?.amount;
+
+      if (rzpPaymentId) {
+        const order = await OrderModel.findOne({ razorpayPaymentId: rzpPaymentId });
+        if (order) {
+          // Strictly update financial refund status - preserve existing order status if in return lifecycle
           order.paymentStatus = 'Refunded';
-          order.status = 'Cancelled';
-          order.fulfillmentStatus = 'cancelled';
+          if (order.status !== 'Returned') {
+            order.status = 'Cancelled';
+            order.fulfillmentStatus = 'cancelled';
+          }
           order.amountRefunded = refundAmountPaise ? refundAmountPaise / 100 : order.total;
           order.refundId = refundId || order.refundId;
 
-          // Safe inventory restoration: restore stock exactly once
-          if (order.inventoryDeducted && !order.inventoryRestored && order.items?.length) {
-            for (const item of order.items) {
-              await ProductModel.findByIdAndUpdate(item.productId, {
-                $inc: { stock: item.quantity },
-              });
-            }
-            order.inventoryRestored = true;
-          }
+          // ARCHITECTURAL GUARANTEE: In luxury retail, financial refund settlement
+          // via Razorpay webhook updates solely financial status (paymentStatus: 'Refunded', amountRefunded, refundId).
+          // It MUST NOT automatically increment sellable inventory. Physical inventory
+          // is restored strictly after the merchandise has physically arrived at the ZIMOR atelier,
+          // undergone quality inspection, and been verified and accepted via the inspection workflow.
+          // Cancelled orders without physical return, rejected returns, and courtesy refunds never alter stock.
 
           addOrderAuditLog(
             order,
             'RAZORPAY_WEBHOOK',
             'REFUND_PROCESSED_WEBHOOK',
-            `Refund of ₹${(refundAmountPaise ? refundAmountPaise / 100 : order.total).toLocaleString('en-IN')} processed via Razorpay (Refund ID: ${refundId}). Order status set to Cancelled.`
+            `Refund of ₹${(refundAmountPaise ? refundAmountPaise / 100 : order.total).toLocaleString('en-IN')} confirmed via Razorpay (Refund ID: ${refundId}). Financial status updated to Refunded. Sellable inventory remains unchanged pending atelier physical inspection.`
           );
 
           await order.save();
+
+          // Notify Admin: Webhook Refund Processed (Stage 2: Bank settled)
+          createNotification({
+            type: 'refund_processed',
+            title: 'Refund Processed',
+            message: `Refund of ₹${(refundAmountPaise ? refundAmountPaise / 100 : order.total).toLocaleString('en-IN')} processed for order ${order.orderNumber} (Refund ID: ${refundId || 'N/A'})`,
+            entityId: refundId || rzpPaymentId || eventId,
+            entityType: 'refund',
+            metadata: { orderId: order._id.toString(), orderNumber: order.orderNumber, refundId, status: 'processed' },
+            dedupKey: `refund_${refundId || eventId}_processed`,
+            isDemo: Boolean(order.isDemo),
+          }).catch((notifErr) => console.error('[Notification Trigger Error]', notifErr.message));
         }
       }
     }

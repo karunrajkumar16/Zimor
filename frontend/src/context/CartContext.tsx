@@ -5,7 +5,7 @@ import { CartItem, Product } from '@/types';
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (product: Product, quantity?: number, color?: string, size?: string) => void;
+  addItem: (product: Product, quantity?: number, size?: string) => void;
   removeItem: (itemId: string) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
   clearCart: () => void;
@@ -72,15 +72,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [items, appliedPromo, isLoaded]);
 
-  const addItem = useCallback((product: Product, quantity = 1, color?: string, size?: string) => {
-    const selectedColor = color || product.defaultColor || product.colors[0]?.name || 'Standard';
-    const selectedSize = size || product.sizes[0] || 'Standard';
+  const addItem = useCallback((product: Product, quantity = 1, size?: string) => {
+    const selectedSize = size || product.sizes?.[0] || 'Standard';
 
     setItems((prev) => {
       const idx = prev.findIndex(
         (item) =>
           item.productId === product.id &&
-          item.selectedColor === selectedColor &&
           item.selectedSize === selectedSize
       );
       if (idx > -1) {
@@ -91,11 +89,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return [
         ...prev,
         {
-          id: `${product.id}-${selectedColor}-${Date.now()}`,
+          id: `${product.id}-${selectedSize}-${Date.now()}`,
           productId: product.id,
           product,
           quantity,
-          selectedColor,
           selectedSize,
         },
       ];

@@ -12,7 +12,7 @@ const OrderItemSchema = new Schema(
     name: { type: String, required: true },
     slug: { type: String, required: true },
     image: { type: String, default: '' },
-    color: { type: String, required: true },
+    color: { type: String, required: false },
     size: { type: String, default: 'Standard' },
     price: { type: Number, required: true },
     quantity: { type: Number, required: true, default: 1 },
@@ -54,6 +54,37 @@ const ShippingAddressSchema = new Schema(
   { _id: false }
 );
 
+const ReturnItemSchema = new Schema(
+  {
+    productId: { type: String, required: true },
+    name: { type: String, required: true },
+    slug: { type: String, default: '' },
+    color: { type: String },
+    size: { type: String, default: 'Standard' },
+    quantityOrdered: { type: Number, required: true, default: 1 },
+    quantityRequested: { type: Number, required: true, default: 1 },
+    quantityReceived: { type: Number, default: 0 },
+    quantityApproved: { type: Number, default: 0 },
+    quantityRejected: { type: Number, default: 0 },
+    inspectionStatus: {
+      type: String,
+      enum: ['pending', 'passed', 'failed', 'partially_passed'],
+      default: 'pending',
+    },
+    inspectionNotes: { type: String, default: '' },
+    rejectionReason: { type: String, default: '' },
+    inventoryRestocked: { type: Boolean, default: false },
+    restockedQuantity: { type: Number, default: 0 },
+    restockedAt: { type: Date },
+    quarantined: { type: Boolean, default: false },
+    quarantinedQuantity: { type: Number, default: 0 },
+    quarantinedAt: { type: Date },
+    quarantineReason: { type: String, default: '' },
+    quarantineReleasedQuantity: { type: Number, default: 0 },
+  },
+  { _id: false }
+);
+
 const ReturnRequestSchema = new Schema(
   {
     status: {
@@ -73,6 +104,22 @@ const ReturnRequestSchema = new Schema(
     refundInitiated: { type: Boolean, default: false },
     refundId: { type: String, default: '' },
     refundAmount: { type: Number, default: 0 },
+    physicalItemReceived: { type: Boolean, default: false },
+    physicalItemReceivedAt: { type: Date },
+    inspectionStatus: {
+      type: String,
+      enum: ['pending', 'passed', 'failed', 'partially_passed', 'not_applicable'],
+      default: 'pending',
+    },
+    inspectedAt: { type: Date },
+    inspectedBy: { type: String, default: '' },
+    inspectionNotes: { type: String, default: '' },
+    inventoryRestocked: { type: Boolean, default: false },
+    inventoryRestockedAt: { type: Date },
+    items: [ReturnItemSchema],
+    totalRequestedQuantity: { type: Number, default: 0 },
+    totalRestockedQuantity: { type: Number, default: 0 },
+    totalQuarantinedQuantity: { type: Number, default: 0 },
   },
   { _id: false }
 );

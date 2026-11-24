@@ -111,7 +111,7 @@ function SuccessContent() {
                       <div className="text-xs">
                         <p className="font-bold text-ink">{item.name}</p>
                         <p className="text-ink-muted text-[11px]">
-                          Color: {item.color} • Qty: {item.quantity}
+                          Qty: {item.quantity}
                         </p>
                       </div>
                     </div>

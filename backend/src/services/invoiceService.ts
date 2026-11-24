@@ -228,14 +228,14 @@ export async function generateInvoicePdf(order: Order): Promise<Buffer> {
           .font('Helvetica')
           .fontSize(7.5)
           .fillColor(mutedColor)
-          .text(`HSN/SAC: 4202 • SKU: ${item.slug}`, colPos.item, currentY + 16, { width: 220 });
+          .text('HSN/SAC: 4202', colPos.item, currentY + 16, { width: 220 });
 
         // Variant
         doc
           .font('Helvetica')
           .fontSize(8.5)
           .fillColor(primaryColor)
-          .text(`${item.color || 'Standard'} • ${item.size || 'Standard'}`, colPos.variant, currentY + 8, { width: 90 });
+          .text(item.size || 'Standard', colPos.variant, currentY + 8, { width: 90 });
 
         // Qty
         doc

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { MapPin, Mail, MessageCircle, Truck, ShieldCheck, RefreshCw, Award, ChevronDown } from 'lucide-react';
 import { SOCIAL_LINKS } from '@/data/social';
+import { useWhatsAppUrl } from '@/lib/whatsapp';
 
 export function InstagramIcon({ className = 'w-4 h-4' }: { className?: string }) {
   return (
@@ -50,6 +51,7 @@ export function ThreadsIcon({ className = 'w-4 h-4' }: { className?: string }) {
 }
 
 export const Footer: React.FC = () => {
+  const whatsappUrl = useWhatsAppUrl();
   // Mobile accordion state for clean Miraggio-style progressive disclosure
   const [openSection, setOpenSection] = useState<string | null>(null);
 
@@ -58,55 +60,55 @@ export const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="bg-[#000000] text-[#ffffff] border-t border-[#b4b4b4]/20 content-auto">
+    <footer className="bg-[#000000] text-[#ffffff] content-auto">
       {/* Value Badges Banner */}
-      <div className="border-b border-[#b4b4b4]/20 py-7 px-4 sm:px-6 lg:px-8">
+      <div className="bg-[#f5f5f5] text-black py-7 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 text-center sm:text-left">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3">
-            <div className="w-9 h-9 rounded-full bg-white/5 border border-[#b4b4b4]/30 flex items-center justify-center shrink-0 text-[#b4b4b4]">
+            <div className="w-9 h-9 rounded-full bg-white border border-[#b4b4b4]/40 flex items-center justify-center shrink-0 text-black shadow-xs">
               <Truck className="w-4 h-4" />
             </div>
             <div>
-              <h4 className="text-[12px] sm:text-[13px] font-medium uppercase tracking-wider text-white font-primary">
+              <h4 className="text-[12px] sm:text-[13px] font-medium uppercase tracking-wider text-black font-primary">
                 Free Express Shipping
               </h4>
-              <p className="text-[11px] text-[#b4b4b4] font-secondary mt-0.5">Across all states in India</p>
+              <p className="text-[11px] text-[#555555] font-secondary mt-0.5">Across all states in India</p>
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3">
-            <div className="w-9 h-9 rounded-full bg-white/5 border border-[#b4b4b4]/30 flex items-center justify-center shrink-0 text-[#b4b4b4]">
+            <div className="w-9 h-9 rounded-full bg-white border border-[#b4b4b4]/40 flex items-center justify-center shrink-0 text-black shadow-xs">
               <RefreshCw className="w-4 h-4" />
             </div>
             <div>
-              <h4 className="text-[12px] sm:text-[13px] font-medium uppercase tracking-wider text-white font-primary">
+              <h4 className="text-[12px] sm:text-[13px] font-medium uppercase tracking-wider text-black font-primary">
                 7-Day Easy Returns
               </h4>
-              <p className="text-[11px] text-[#b4b4b4] font-secondary mt-0.5">Verified defect &amp; exchange support</p>
+              <p className="text-[11px] text-[#555555] font-secondary mt-0.5">Verified defect &amp; exchange support</p>
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3">
-            <div className="w-9 h-9 rounded-full bg-white/5 border border-[#b4b4b4]/30 flex items-center justify-center shrink-0 text-[#b4b4b4]">
+            <div className="w-9 h-9 rounded-full bg-white border border-[#b4b4b4]/40 flex items-center justify-center shrink-0 text-black shadow-xs">
               <ShieldCheck className="w-4 h-4" />
             </div>
             <div>
-              <h4 className="text-[12px] sm:text-[13px] font-medium uppercase tracking-wider text-white font-primary">
+              <h4 className="text-[12px] sm:text-[13px] font-medium uppercase tracking-wider text-black font-primary">
                 6-Month Warranty
               </h4>
-              <p className="text-[11px] text-[#b4b4b4] font-secondary mt-0.5">Hardware elements protected</p>
+              <p className="text-[11px] text-[#555555] font-secondary mt-0.5">Hardware elements protected</p>
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3">
-            <div className="w-9 h-9 rounded-full bg-white/5 border border-[#b4b4b4]/30 flex items-center justify-center shrink-0 text-[#b4b4b4]">
+            <div className="w-9 h-9 rounded-full bg-white border border-[#b4b4b4]/40 flex items-center justify-center shrink-0 text-black shadow-xs">
               <Award className="w-4 h-4" />
             </div>
             <div>
-              <h4 className="text-[12px] sm:text-[13px] font-medium uppercase tracking-wider text-white font-primary">
+              <h4 className="text-[12px] sm:text-[13px] font-medium uppercase tracking-wider text-black font-primary">
                 100% Superior Faux Leather
               </h4>
-              <p className="text-[11px] text-[#b4b4b4] font-secondary mt-0.5">Cruelty-free &amp; water-resistant</p>
+              <p className="text-[11px] text-[#555555] font-secondary mt-0.5">Cruelty-free &amp; water-resistant</p>
             </div>
           </div>
         </div>
@@ -326,7 +328,7 @@ export const Footer: React.FC = () => {
               <div className="flex items-center gap-2.5">
                 <MessageCircle className="w-4 h-4 text-[#b4b4b4] shrink-0" />
                 <a
-                  href="https://wa.me/918604647888"
+                  href={whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-white transition-colors"

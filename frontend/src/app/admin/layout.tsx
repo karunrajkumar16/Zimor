@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -10,6 +11,7 @@ import {
   Users,
   CreditCard,
   Image as ImageIcon,
+  ImagePlus,
   Megaphone,
   Boxes,
   Star,
@@ -24,8 +26,12 @@ import {
   CheckCircle2,
   AlertTriangle,
   Search,
+  Truck,
+  RotateCcw,
+  Check,
+  CheckCheck,
 } from 'lucide-react';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, apiUrl } from '@/lib/api';
 import { AdminThemeProvider, useAdminTheme } from '@/context/AdminThemeContext';
 import AdminDemoBanner from '@/components/admin/AdminDemoBanner';
 
@@ -69,6 +75,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: 'Hero Banners', href: '/admin/banners', icon: ImageIcon },
       { label: 'Announcement Bar', href: '/admin/announcements', icon: Megaphone },
+      { label: 'About Page Media', href: '/admin/about-media', icon: ImagePlus },
     ],
   },
 ];
@@ -85,12 +92,21 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   const [isExpandedMobile, setIsExpandedMobile] = useState(false);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [alerts, setAlerts] = useState<Array<{
-    id: string;
+  const [notifications, setNotifications] = useState<Array<{
+    _id: string;
+    type: string;
     title: string;
-    subtitle: string;
-    type: 'order' | 'inventory';
+    message: string;
+    entityId?: string;
+    entityType?: string;
+    metadata?: Record<string, any>;
+    read: boolean;
+    readAt?: string;
+    createdAt: string;
+    isDemo?: boolean;
   }>>([]);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   // Detect touch-only devices to switch from hover to tap-based expansion
   useEffect(() => {
@@ -137,55 +153,186 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
 
   const isExpanded = isTouchDevice ? isExpandedMobile : isHovered;
 
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setNotificationsOpen(false);
+      }
+    }
+    if (notificationsOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [notificationsOpen]);
+
+  // Real-Time Notification Stream (SSE) & Initial Load with Fallback Polling
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    Promise.allSettled([
-      apiFetch('/api/orders').then((r) => (r.ok ? r.json() : null)),
-      apiFetch('/api/products').then((r) => (r.ok ? r.json() : null)),
-    ])
-      .then(([ordersRes, productsRes]) => {
-        const liveAlerts: Array<{
-          id: string;
-          title: string;
-          subtitle: string;
-          type: 'order' | 'inventory';
-        }> = [];
+    let eventSource: EventSource | null = null;
+    let pollInterval: NodeJS.Timeout | null = null;
 
-        if (ordersRes.status === 'fulfilled' && ordersRes.value?.orders) {
-          const orders = ordersRes.value.orders;
-          const recentOrders = orders.slice(0, 3);
-          for (const ord of recentOrders) {
-            liveAlerts.push({
-              id: ord._id || ord.orderNumber,
-              title: `Order ${ord.orderNumber || ord._id?.slice(-6)} ${ord.status || 'Received'}`,
-              subtitle: `${ord.items?.[0]?.name || ord.items?.[0]?.productTitle || ord.items?.[0]?.title || 'Atelier Item'} • ₹${(ord.totalAmount || ord.total || 0).toLocaleString('en-IN')}`,
-              type: 'order',
-            });
+    const fetchNotifications = async () => {
+      try {
+        const res = await apiFetch('/api/admin/notifications?limit=25');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success) {
+            setNotifications(data.notifications || []);
+            setUnreadCount(typeof data.unreadCount === 'number' ? data.unreadCount : 0);
           }
         }
+      } catch (err) {
+        // quiet fallback
+      }
+    };
 
-        if (productsRes.status === 'fulfilled' && productsRes.value?.products) {
-          const products = productsRes.value.products;
-          const lowStock = products.filter(
-            (p: any) => typeof p.inventory === 'number' && p.inventory > 0 && p.inventory <= 5
-          );
-          for (const p of lowStock.slice(0, 2)) {
-            liveAlerts.push({
-              id: p._id || p.slug,
-              title: 'Inventory Threshold Alert',
-              subtitle: `${p.title} remaining stock: ${p.inventory} units`,
-              type: 'inventory',
-            });
+    fetchNotifications();
+
+    // 30-second continuous background polling fallback (guarantees state reconciliation even during transient SSE disruptions)
+    pollInterval = setInterval(fetchNotifications, 30000);
+
+    try {
+      // Connect to real-time SSE stream using secure HttpOnly cookie credentials (no query param tokens)
+      const streamUrl = apiUrl('/api/admin/notifications/stream');
+      eventSource = new EventSource(streamUrl, { withCredentials: true });
+
+      eventSource.addEventListener('init', (e: MessageEvent) => {
+        try {
+          const payload = JSON.parse(e.data);
+          if (Array.isArray(payload.notifications)) {
+            setNotifications(payload.notifications);
           }
-        }
-
-        setAlerts(liveAlerts);
-      })
-      .catch(() => {
-        setAlerts([]);
+          if (typeof payload.unreadCount === 'number') {
+            setUnreadCount(payload.unreadCount);
+          }
+        } catch {}
       });
+
+      eventSource.addEventListener('notification', (e: MessageEvent) => {
+        try {
+          const newNotif = JSON.parse(e.data);
+          setNotifications((prev) => {
+            const notifId = newNotif._id || newNotif.id;
+            if (prev.some((n) => (n._id || (n as any).id) === notifId)) return prev;
+            return [newNotif, ...prev.slice(0, 24)];
+          });
+          setUnreadCount((c) => c + 1);
+        } catch {}
+      });
+
+      eventSource.addEventListener('unread_count', (e: MessageEvent) => {
+        try {
+          const payload = JSON.parse(e.data);
+          const count = typeof payload.count === 'number' ? payload.count : payload.unreadCount;
+          if (typeof count === 'number') {
+            setUnreadCount(count);
+          }
+        } catch {}
+      });
+
+      eventSource.onerror = () => {
+        // SSE disconnected: immediate fetch to refresh pending state
+        fetchNotifications();
+      };
+    } catch {
+      // Fallback polling is already running
+    }
+
+    return () => {
+      if (eventSource) {
+        eventSource.close();
+      }
+      if (pollInterval) {
+        clearInterval(pollInterval);
+      }
+    };
   }, [isAuthenticated]);
+
+  const handleMarkAsRead = async (notifId: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    try {
+      setNotifications((prev) =>
+        prev.map((n) => (n._id === notifId ? { ...n, read: true } : n))
+      );
+      setUnreadCount((c) => Math.max(0, c - 1));
+      await apiFetch(`/api/admin/notifications/${notifId}/read`, { method: 'PATCH' });
+    } catch {}
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      setUnreadCount(0);
+      await apiFetch('/api/admin/notifications/mark-all-read', { method: 'POST' });
+    } catch {}
+  };
+
+  const handleNotificationClick = (notif: any) => {
+    if (!notif.read) {
+      handleMarkAsRead(notif._id);
+    }
+    setNotificationsOpen(false);
+
+    if (notif.type?.startsWith('order') || notif.type?.startsWith('shipping') || notif.type?.startsWith('return')) {
+      router.push('/admin/orders');
+    } else if (notif.type?.startsWith('payment') || notif.type?.startsWith('refund')) {
+      router.push('/admin/payments');
+    } else if (notif.type === 'inventory_alert') {
+      router.push('/admin/inventory');
+    }
+  };
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'order_created':
+        return <ShoppingBag className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />;
+      case 'payment_success':
+        return <CreditCard className="w-4 h-4 text-[#5146E5] dark:text-[#818CF8] shrink-0" />;
+      case 'payment_failed':
+        return <AlertTriangle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />;
+      case 'refund_requested':
+        return <RotateCcw className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />;
+      case 'refund_approved':
+        return <CheckCircle2 className="w-4 h-4 text-[#5146E5] dark:text-[#818CF8] shrink-0" />;
+      case 'refund_initiated':
+        return <RotateCcw className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />;
+      case 'refund_processed':
+        return <RotateCcw className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />;
+      case 'return_rejected':
+        return <X className="w-4 h-4 text-rose-500 shrink-0" />;
+      case 'shipping_dispatched':
+      case 'shipping_delivered':
+        return <Truck className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />;
+      case 'order_cancelled':
+      case 'order_returned':
+        return <X className="w-4 h-4 text-rose-500 shrink-0" />;
+      case 'inventory_alert':
+        return <Boxes className="w-4 h-4 text-amber-500 shrink-0" />;
+      default:
+        return <Bell className="w-4 h-4 text-[#5146E5] shrink-0" />;
+    }
+  };
+
+  const formatTimeAgo = (dateStr: string) => {
+    try {
+      const date = new Date(dateStr);
+      const now = new Date();
+      const diffMs = now.getTime() - date.getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      if (diffMins < 1) return 'Just now';
+      if (diffMins < 60) return `${diffMins}m ago`;
+      const diffHours = Math.floor(diffMins / 60);
+      if (diffHours < 24) return `${diffHours}h ago`;
+      const diffDays = Math.floor(diffHours / 24);
+      return `${diffDays}d ago`;
+    } catch {
+      return '';
+    }
+  };
 
   const isLoginPage = pathname === '/admin/login' || pathname?.startsWith('/admin/login');
 
@@ -241,7 +388,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
         className={`min-h-screen flex items-center justify-center p-6 admin-panel-theme ${isDark ? 'bg-[#121824] text-[#E2E8F0]' : 'bg-[#F1F5F9] text-[#1C2434]'
           }`}
       >
-        <div className="w-8 h-8 border-2 border-[#2563EB] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#5146E5] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -253,14 +400,14 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
           }`}
       >
         <div className="flex flex-col items-center gap-4 text-center max-w-sm">
-          <div className="w-8 h-8 border-2 border-current border-t-transparent rounded-full animate-spin text-[#2563EB]" />
+          <div className="w-8 h-8 border-2 border-current border-t-transparent rounded-full animate-spin text-[#5146E5]" />
           <div>
             <p className="text-sm font-semibold">Redirecting to Admin Login...</p>
             <p className="text-xs opacity-60 mt-1">Please sign in to access the control portal.</p>
           </div>
           <Link
             href="/admin/login"
-            className="px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-medium text-xs rounded-lg transition-colors shadow-xs mt-2"
+            className="px-4 py-2 bg-[#5146E5] hover:bg-[#4338CA] text-white font-medium text-xs rounded-lg transition-colors shadow-xs mt-2"
           >
             Go to Admin Login
           </Link>
@@ -306,34 +453,60 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
       >
         {/* Brand Header */}
         <div
-          className={`h-16 flex items-center justify-between border-b shrink-0 px-4 transition-all duration-300 ${isDark ? 'border-[#2E3A47]' : 'border-[#E2E8F0]'
-            }`}
+          className={`h-16 flex items-center border-b shrink-0 relative transition-all duration-300 ${
+            isExpanded ? 'px-4 justify-center' : 'px-0 justify-center'
+          } ${isDark ? 'border-[#2E3A47]' : 'border-[#E2E8F0]'}`}
         >
           <Link
             href="/admin"
-            className="flex items-center gap-3 overflow-hidden min-w-0"
-            title="ZIMOR Admin Panel"
+            className="relative flex items-center justify-center w-full h-full min-w-0 overflow-hidden"
+            title="ZIMOR"
           >
-            <div className="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm bg-[#2563EB] text-white shadow-xs shrink-0">
-              Z
-            </div>
+            {/* Collapsed Sidebar State: Compact ZIMOR "Z" symbol inside its existing black square */}
             <div
-              className={`transition-all duration-200 overflow-hidden whitespace-nowrap ${isExpanded ? 'opacity-100 max-w-[160px]' : 'opacity-0 max-w-0 hidden lg:hidden'
-                } ${isSidebarOpen ? 'opacity-100 max-w-[160px] !block' : ''}`}
+              className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-in-out ${
+                isExpanded || isSidebarOpen
+                  ? 'opacity-0 scale-90 pointer-events-none'
+                  : 'opacity-100 scale-100 pointer-events-auto'
+              }`}
             >
-              <span className="font-bold text-base tracking-tight block leading-none text-[#1C2434] dark:text-white">
-                ZIMOR
-              </span>
-              <span className="text-xs font-normal text-[#64748B] dark:text-[#94A3B8] block mt-0.5">
-                Admin Panel
-              </span>
+              <div className="w-9 h-9 flex items-center justify-center shrink-0">
+                <Image
+                  src="/favicon.svg"
+                  alt="ZIMOR"
+                  width={36}
+                  height={36}
+                  className="w-9 h-9 object-contain rounded-lg shadow-xs"
+                  priority
+                />
+              </div>
+            </div>
+
+            {/* Expanded Sidebar State: Full ZIMOR wordmark, centered without subtitle */}
+            <div
+              className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-in-out ${
+                isExpanded || isSidebarOpen
+                  ? 'opacity-100 scale-100 pointer-events-auto'
+                  : 'opacity-0 scale-90 pointer-events-none'
+              }`}
+            >
+              <div className="relative flex items-center justify-center h-7 max-w-[170px] w-auto">
+                <Image
+                  src={isDark ? '/logo-white.png' : '/logo.png'}
+                  alt="ZIMOR"
+                  width={1019}
+                  height={231}
+                  className="h-7 w-auto max-w-full object-contain"
+                  priority
+                />
+              </div>
             </div>
           </Link>
 
           {/* Close button on mobile */}
           <button
             onClick={() => setIsSidebarOpen(false)}
-            className="lg:hidden p-1.5 rounded-md text-[#64748B] hover:text-[#1C2434] dark:hover:text-white"
+            className="lg:hidden absolute right-3 p-1.5 rounded-md text-[#64748B] hover:text-[#1C2434] dark:hover:text-white z-10"
             aria-label="Close menu"
           >
             <X className="w-5 h-5" />
@@ -343,7 +516,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
           {isTouchDevice && (
             <button
               onClick={() => setIsExpandedMobile(!isExpandedMobile)}
-              className="hidden lg:flex p-1.5 rounded-md text-[#64748B] hover:text-[#1C2434] dark:hover:text-white"
+              className="hidden lg:flex absolute right-3 p-1.5 rounded-md text-[#64748B] hover:text-[#1C2434] dark:hover:text-white z-10"
               aria-label={isExpandedMobile ? 'Collapse sidebar' : 'Expand sidebar'}
               title={isExpandedMobile ? 'Collapse sidebar' : 'Expand sidebar'}
             >
@@ -383,36 +556,31 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
                       }
                     }}
                     title={!isExpanded && !isSidebarOpen ? item.label : undefined}
-                    className={`group flex items-center justify-between rounded-lg text-sm font-medium transition-all ${
-                      isActive
-                        ? 'bg-[#F1F5F9] dark:bg-[#252E3E] text-[#2563EB] dark:text-white font-semibold'
-                        : isDark
+                    className={`group flex items-center justify-between rounded-lg text-sm font-medium transition-all ${isActive
+                      ? 'bg-[#EEF0FF] dark:bg-[#5146E5]/20 text-[#5146E5] dark:text-[#818CF8] font-semibold'
+                      : isDark
                         ? 'text-[#94A3B8] hover:text-white hover:bg-[#252E3E]/70'
                         : 'text-[#64748B] hover:text-[#1C2434] hover:bg-[#F1F5F9]'
-                    } ${
-                      isExpanded || isSidebarOpen
+                      } ${isExpanded || isSidebarOpen
                         ? 'px-3 py-2.5'
                         : 'px-0 py-2.5 justify-center'
-                    }`}
+                      }`}
                   >
                     <div
-                      className={`flex items-center gap-3 min-w-0 ${
-                        isExpanded || isSidebarOpen ? 'flex-1' : 'justify-center'
+                      className={`flex items-center gap-3 min-w-0 ${isExpanded || isSidebarOpen ? 'flex-1' : 'justify-center'
                         }`}
                     >
                       <Icon
-                        className={`w-5 h-5 shrink-0 transition-colors ${
-                          isActive
-                            ? 'text-[#2563EB] dark:text-white'
-                            : 'text-[#64748B] dark:text-[#94A3B8] group-hover:text-[#1C2434] dark:group-hover:text-white'
-                        }`}
+                        className={`w-5 h-5 shrink-0 transition-colors ${isActive
+                          ? 'text-[#5146E5] dark:text-[#818CF8]'
+                          : 'text-[#64748B] dark:text-[#94A3B8] group-hover:text-[#1C2434] dark:group-hover:text-white'
+                          }`}
                       />
                       <span
-                        className={`truncate whitespace-nowrap transition-all duration-200 ${
-                          isExpanded || isSidebarOpen
-                            ? 'opacity-100 max-w-[150px]'
-                            : 'opacity-0 max-w-0 hidden'
-                        }`}
+                        className={`truncate whitespace-nowrap transition-all duration-200 ${isExpanded || isSidebarOpen
+                          ? 'opacity-100 max-w-[150px]'
+                          : 'opacity-0 max-w-0 hidden'
+                          }`}
                       >
                         {item.label}
                       </span>
@@ -452,7 +620,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
                   href="/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-2 w-full py-1.5 px-3 bg-white dark:bg-[#1E1C1A] border border-[#E2E8F0] dark:border-[#2E3A47] hover:border-[#2563EB] text-[#1C2434] dark:text-white rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
+                  className="mt-2 w-full py-1.5 px-3 bg-white dark:bg-[#1E1C1A] border border-[#E2E8F0] dark:border-[#2E3A47] hover:border-[#5146E5] text-[#1C2434] dark:text-white rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                   <span>View Live Storefront</span>
@@ -480,7 +648,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
                 }`}
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-[#2563EB] text-white">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-[#5146E5] text-white">
                   {adminUser?.email ? adminUser.email[0].toUpperCase() : 'Z'}
                 </div>
                 <div className="min-w-0">
@@ -503,7 +671,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
             </div>
           ) : (
             <div
-              className="w-9 h-9 mx-auto rounded-full bg-[#2563EB] text-white flex items-center justify-center font-bold text-xs cursor-pointer shadow-xs"
+              className="w-9 h-9 mx-auto rounded-full bg-[#5146E5] text-white flex items-center justify-center font-bold text-xs cursor-pointer shadow-xs"
               title={`${adminUser?.name || 'Administrator'} (${adminUser?.email || 'admin@zimor.in'})`}
             >
               {adminUser?.email ? adminUser.email[0].toUpperCase() : 'Z'}
@@ -566,7 +734,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
             </button>
 
             {/* Notifications Menu */}
-            <div className="relative">
+            <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setNotificationsOpen(!notificationsOpen)}
                 className={`relative p-2 rounded-lg border text-sm transition-colors cursor-pointer ${isDark
@@ -577,49 +745,93 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
                 aria-label="View notifications"
               >
                 <Bell className="w-4 h-4" />
-                {alerts.length > 0 && (
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-500" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#5146E5] text-white text-[10px] font-bold flex items-center justify-center leading-none shadow-xs">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
                 )}
               </button>
 
               {notificationsOpen && (
                 <div
-                  className={`absolute right-0 mt-2 w-80 rounded-xl border p-4 z-50 shadow-xl ${isDark ? 'bg-[#1E1C1A] border-[#2E3A47]' : 'bg-white border-[#E2E8F0]'
+                  className={`absolute right-0 mt-2 w-80 sm:w-96 rounded-xl border p-4 z-50 shadow-2xl ${isDark ? 'bg-[#1E1C1A] border-[#2E3A47]' : 'bg-white border-[#E2E8F0]'
                     }`}
                 >
-                  <div className="flex items-center justify-between pb-2 mb-2 border-b border-inherit">
-                    <span className="text-sm font-semibold text-[#1C2434] dark:text-white">
-                      Notifications
-                    </span>
-                    <span className="text-xs text-[#2563EB] font-medium">
-                      {alerts.length} New
-                    </span>
+                  <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-inherit">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-[#1C2434] dark:text-white">
+                        Notifications
+                      </span>
+                      {unreadCount > 0 && (
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#EEF0FF] dark:bg-[#5146E5]/20 text-[#5146E5] dark:text-[#818CF8]">
+                          {unreadCount} New
+                        </span>
+                      )}
+                    </div>
+                    {unreadCount > 0 && (
+                      <button
+                        onClick={handleMarkAllAsRead}
+                        className="text-[11px] font-medium text-[#5146E5] dark:text-[#818CF8] hover:underline flex items-center gap-1 cursor-pointer"
+                        title="Mark all notifications as read"
+                      >
+                        <CheckCheck className="w-3.5 h-3.5" />
+                        <span>Mark all read</span>
+                      </button>
+                    )}
                   </div>
-                  {alerts.length === 0 ? (
-                    <div className="py-6 text-center">
-                      <CheckCircle2 className="w-5 h-5 mx-auto text-emerald-600 mb-1.5 opacity-80" />
-                      <p className="text-sm font-medium text-[#1C2434] dark:text-white">All Systems Operational</p>
-                      <p className="text-xs text-[#64748B] mt-0.5">No pending alerts</p>
+
+                  {notifications.length === 0 ? (
+                    <div className="py-7 text-center">
+                      <CheckCircle2 className="w-6 h-6 mx-auto text-emerald-600 mb-2 opacity-80" />
+                      <p className="text-sm font-medium text-[#1C2434] dark:text-white">All Caught Up</p>
+                      <p className="text-xs text-[#64748B] mt-0.5">No pending notifications or business alerts</p>
                     </div>
                   ) : (
-                    <div className="space-y-2 text-sm">
-                      {alerts.map((alert) => (
+                    <div className="max-h-80 overflow-y-auto space-y-2 pr-1 scrollbar-thin text-left">
+                      {notifications.map((notif) => (
                         <div
-                          key={alert.id}
-                          className={`p-2.5 rounded-lg flex items-start gap-2.5 ${alert.type === 'inventory'
-                            ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400'
-                            : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+                          key={notif._id}
+                          onClick={() => handleNotificationClick(notif)}
+                          className={`p-2.5 rounded-lg flex items-start gap-3 cursor-pointer transition-colors text-left relative group ${!notif.read
+                            ? isDark
+                              ? 'bg-[#5146E5]/15 border border-[#5146E5]/30'
+                              : 'bg-[#EEF0FF] border border-[#5146E5]/20'
+                            : isDark
+                              ? 'bg-[#252E3E]/40 hover:bg-[#252E3E]/80 border border-transparent'
+                              : 'bg-[#F8FAFC] hover:bg-gray-100 border border-transparent'
                             }`}
                         >
-                          {alert.type === 'inventory' ? (
-                            <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-                          ) : (
-                            <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-                          )}
-                          <div>
-                            <p className="font-medium text-xs">{alert.title}</p>
-                            <p className="text-[11px] opacity-80 mt-0.5">{alert.subtitle}</p>
+                          <div className="mt-0.5 shrink-0">
+                            {getNotificationIcon(notif.type)}
                           </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-1">
+                              <p className={`text-xs font-semibold truncate ${!notif.read ? 'text-[#1C2434] dark:text-white font-bold' : 'text-[#64748B] dark:text-[#94A3B8]'}`}>
+                                {notif.title}
+                              </p>
+                              <span className="text-[10px] text-[#94A3B8] shrink-0">
+                                {formatTimeAgo(notif.createdAt)}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-[#64748B] dark:text-[#94A3B8] line-clamp-2 mt-0.5 leading-relaxed">
+                              {notif.message}
+                            </p>
+                            {notif.isDemo && (
+                              <span className="inline-block mt-1 px-1.5 py-0.2 rounded text-[9px] font-mono bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                                Demo Mode
+                              </span>
+                            )}
+                          </div>
+
+                          {!notif.read && (
+                            <button
+                              onClick={(e) => handleMarkAsRead(notif._id, e)}
+                              className="opacity-0 group-hover:opacity-100 p-1 text-[#64748B] hover:text-[#5146E5] transition-opacity shrink-0"
+                              title="Mark as read"
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -630,7 +842,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
 
             {/* Profile Dropdown Badge (TailAdmin Header Match) */}
             <div className="flex items-center gap-2 pl-2">
-              <div className="w-8 h-8 rounded-full bg-[#2563EB] text-white flex items-center justify-center font-bold text-xs">
+              <div className="w-8 h-8 rounded-full bg-[#5146E5] text-white flex items-center justify-center font-bold text-xs">
                 {adminUser?.email ? adminUser.email[0].toUpperCase() : 'Z'}
               </div>
               <div className="hidden md:block text-left">

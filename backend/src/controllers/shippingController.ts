@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import crypto from 'crypto';
 import mongoose from 'mongoose';
 import { connectToDatabase } from '../db/mongodb.js';
 import { OrderModel } from '../db/models/Order.js';
@@ -6,6 +7,7 @@ import { ProductModel } from '../db/models/Product.js';
 import { shiprocket } from '../shipping/shiprocketService.js';
 import { mockShiprocket } from '../shipping/mockShiprocketProvider.js';
 import { addOrderAuditLog, processOrderFulfillment } from '../shipping/fulfillmentEngine.js';
+import { createNotification } from '../services/notificationService.js';
 
 function getOrderQuery(orderId: string) {
   return mongoose.Types.ObjectId.isValid(orderId)
@@ -214,9 +216,11 @@ export async function createShipmentForOrder(req: Request, res: Response) {
       const itemWeight = (item as any).weight || dims.weight;
       totalWeight += itemWeight * item.quantity;
 
+      const resolvedSku = prod?.sku || item.slug || 'ITEM';
+
       shipmentItems.push({
         name: item.name,
-        sku: `${item.slug}-${(item.color || 'STD').replace(/\s+/g, '')}`,
+        sku: resolvedSku,
         units: item.quantity,
         sellingPrice: item.price,
         discount: 0,
@@ -365,6 +369,17 @@ export async function assignAwbForOrder(req: Request, res: Response) {
       );
       await order.save();
 
+      createNotification({
+        type: 'shipping_dispatched',
+        title: 'Order Dispatched (Demo)',
+        message: `Order ${order.orderNumber} assigned AWB ${mockAwb.awbCode} via ${mockAwb.courierName}`,
+        entityId: order._id.toString(),
+        entityType: 'order',
+        metadata: { orderNumber: order.orderNumber, awb: mockAwb.awbCode, courier: mockAwb.courierName },
+        dedupKey: `ship_dispatched_${order.orderNumber}_${mockAwb.awbCode}`,
+        isDemo: true,
+      }).catch((err) => console.error('[Notification Trigger Error]', err.message));
+
       // Trigger background timeline simulation
       mockShiprocket.startAutomatedTimelineSimulation(order.orderNumber);
 
@@ -431,6 +446,17 @@ export async function assignAwbForOrder(req: Request, res: Response) {
     );
 
     await order.save();
+
+    createNotification({
+      type: 'shipping_dispatched',
+      title: 'Order Dispatched',
+      message: `Order ${order.orderNumber} dispatched via ${awbResult.courierName} (AWB: ${awbResult.awbCode})`,
+      entityId: order._id.toString(),
+      entityType: 'order',
+      metadata: { orderNumber: order.orderNumber, awb: awbResult.awbCode, courier: awbResult.courierName },
+      dedupKey: `ship_dispatched_${order.orderNumber}_${awbResult.awbCode}`,
+      isDemo: Boolean(order.isDemo || order.isDemoLogistics),
+    }).catch((err) => console.error('[Notification Trigger Error]', err.message));
 
     return res.json({
       success: true,
@@ -617,6 +643,42 @@ export async function trackOrderShipment(req: Request, res: Response) {
       );
 
       await order.save();
+
+      // Notify Admin on status milestone updates
+      if (order.status === 'Delivered') {
+        createNotification({
+          type: 'shipping_delivered',
+          title: 'Order Delivered',
+          message: `Order ${order.orderNumber} confirmed delivered by ${order.courierPartner || 'Courier'}`,
+          entityId: order._id.toString(),
+          entityType: 'order',
+          metadata: { orderNumber: order.orderNumber, status: order.status },
+          dedupKey: `ship_delivered_${order.orderNumber}`,
+          isDemo: Boolean(order.isDemo || order.isDemoLogistics),
+        }).catch((err) => console.error('[Notification Trigger Error]', err.message));
+      } else if (order.status === 'Returned') {
+        createNotification({
+          type: 'order_returned',
+          title: 'Order Returned / RTO',
+          message: `Order ${order.orderNumber} has been returned / marked RTO by courier`,
+          entityId: order._id.toString(),
+          entityType: 'order',
+          metadata: { orderNumber: order.orderNumber, status: order.status },
+          dedupKey: `ship_returned_${order.orderNumber}`,
+          isDemo: Boolean(order.isDemo || order.isDemoLogistics),
+        }).catch((err) => console.error('[Notification Trigger Error]', err.message));
+      } else if (order.status === 'Dispatched') {
+        createNotification({
+          type: 'shipping_dispatched',
+          title: 'Order Dispatched',
+          message: `Order ${order.orderNumber} dispatched via ${order.courierPartner || 'Courier'} (AWB: ${order.awbCode || order.trackingNumber || 'N/A'})`,
+          entityId: order._id.toString(),
+          entityType: 'order',
+          metadata: { orderNumber: order.orderNumber, status: order.status },
+          dedupKey: `ship_dispatched_${order.orderNumber}_${order.awbCode || 'assigned'}`,
+          isDemo: Boolean(order.isDemo || order.isDemoLogistics),
+        }).catch((err) => console.error('[Notification Trigger Error]', err.message));
+      }
     }
 
     return res.json({
@@ -661,6 +723,17 @@ export async function cancelShipmentForOrder(req: Request, res: Response) {
       );
       await order.save();
 
+      createNotification({
+        type: 'order_cancelled',
+        title: 'Shipment Cancelled (Demo)',
+        message: `Simulated shipment for order ${order.orderNumber} cancelled`,
+        entityId: order._id.toString(),
+        entityType: 'order',
+        metadata: { orderNumber: order.orderNumber },
+        dedupKey: `ship_cancel_${order.orderNumber}`,
+        isDemo: true,
+      }).catch((err) => console.error('[Notification Trigger Error]', err.message));
+
       return res.json({
         success: true,
         isSimulated: true,
@@ -695,6 +768,17 @@ export async function cancelShipmentForOrder(req: Request, res: Response) {
     );
 
     await order.save();
+
+    createNotification({
+      type: 'order_cancelled',
+      title: 'Shipment Cancelled',
+      message: `Shipment for order ${order.orderNumber} has been cancelled in Shiprocket`,
+      entityId: order._id.toString(),
+      entityType: 'order',
+      metadata: { orderNumber: order.orderNumber },
+      dedupKey: `ship_cancel_${order.orderNumber}`,
+      isDemo: Boolean(order.isDemo || order.isDemoLogistics),
+    }).catch((err) => console.error('[Notification Trigger Error]', err.message));
 
     return res.json({
       success: true,
@@ -860,8 +944,22 @@ export async function handleShiprocketWebhook(req: Request, res: Response) {
     return res.status(500).json({ error: 'Server webhook authentication unconfigured' });
   }
 
-  if (!incomingKey || incomingKey !== webhookToken) {
+  if (!incomingKey || typeof incomingKey !== 'string') {
     console.warn('[Shiprocket Webhook] Rejected: Missing or invalid x-api-key header');
+    return res.status(401).json({ error: 'Unauthorized: Invalid or missing x-api-key header' });
+  }
+
+  const tokenBuf = Buffer.from(webhookToken, 'utf8');
+  const keyBuf = Buffer.from(incomingKey, 'utf8');
+
+  // Strict buffer length check before timingSafeEqual to avoid RangeError exception
+  if (tokenBuf.length === 0 || keyBuf.length === 0 || tokenBuf.length !== keyBuf.length) {
+    console.warn('[Shiprocket Webhook] Rejected: Key length mismatch');
+    return res.status(401).json({ error: 'Unauthorized: Invalid or missing x-api-key header' });
+  }
+
+  if (!crypto.timingSafeEqual(tokenBuf, keyBuf)) {
+    console.warn('[Shiprocket Webhook] Rejected: Key content mismatch');
     return res.status(401).json({ error: 'Unauthorized: Invalid or missing x-api-key header' });
   }
 
@@ -997,6 +1095,54 @@ export async function handleShiprocketWebhook(req: Request, res: Response) {
     );
 
     await order.save();
+
+    // Trigger Admin Notification based on verified status transition
+    if (order.status === 'Delivered' && previousStatus !== 'Delivered') {
+      createNotification({
+        type: 'shipping_delivered',
+        title: 'Order Delivered',
+        message: `Order ${order.orderNumber} confirmed delivered via Shiprocket`,
+        entityId: order._id.toString(),
+        entityType: 'order',
+        metadata: { orderNumber: order.orderNumber, awb, courier: order.courierPartner },
+        dedupKey: `ship_delivered_${order.orderNumber}`,
+        isDemo: Boolean(order.isDemo || order.isDemoLogistics),
+      }).catch((err) => console.error('[Notification Trigger Error]', err.message));
+    } else if (order.status === 'Returned' && previousStatus !== 'Returned') {
+      createNotification({
+        type: 'order_returned',
+        title: 'Return / RTO Alert',
+        message: `Order ${order.orderNumber} marked as Returned/RTO by courier`,
+        entityId: order._id.toString(),
+        entityType: 'order',
+        metadata: { orderNumber: order.orderNumber, awb, courier: order.courierPartner },
+        dedupKey: `ship_returned_${order.orderNumber}`,
+        isDemo: Boolean(order.isDemo || order.isDemoLogistics),
+      }).catch((err) => console.error('[Notification Trigger Error]', err.message));
+    } else if ((order.status === 'Dispatched' || order.status === 'In Transit') && previousStatus === 'Confirmed') {
+      createNotification({
+        type: 'shipping_dispatched',
+        title: 'Order Dispatched',
+        message: `Order ${order.orderNumber} picked up/dispatched (${currentStatus})`,
+        entityId: order._id.toString(),
+        entityType: 'order',
+        metadata: { orderNumber: order.orderNumber, awb, courier: order.courierPartner },
+        dedupKey: `ship_dispatched_${order.orderNumber}_${awb || 'assigned'}`,
+        isDemo: Boolean(order.isDemo || order.isDemoLogistics),
+      }).catch((err) => console.error('[Notification Trigger Error]', err.message));
+    } else if (order.status === 'Cancelled' && previousStatus !== 'Cancelled') {
+      createNotification({
+        type: 'order_cancelled',
+        title: 'Order Cancelled',
+        message: `Shipment for order ${order.orderNumber} cancelled in Shiprocket`,
+        entityId: order._id.toString(),
+        entityType: 'order',
+        metadata: { orderNumber: order.orderNumber, awb },
+        dedupKey: `ship_cancelled_${order.orderNumber}`,
+        isDemo: Boolean(order.isDemo || order.isDemoLogistics),
+      }).catch((err) => console.error('[Notification Trigger Error]', err.message));
+    }
+
     console.log(`[Shiprocket Webhook] Order ${order.orderNumber} successfully updated to status: ${order.status} (${order.shiprocketStatus})`);
   } catch (err: any) {
     console.error('[Shiprocket Webhook Processing Error]:', err.message);

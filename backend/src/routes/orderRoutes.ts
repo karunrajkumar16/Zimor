@@ -9,6 +9,8 @@ import {
   requestOrderReturn,
   reviewReturnRequest,
   processOrderRefund,
+  inspectAndRestockReturnedOrder,
+  releaseQuarantinedItem,
 } from '../controllers/orderController.js';
 import { requireAdminAuth, authenticateCustomerOrAdmin } from '../middleware/auth.js';
 
@@ -19,6 +21,8 @@ router.get('/', requireAdminAuth, getOrders);
 router.get('/:orderNumber/invoice', authenticateCustomerOrAdmin, downloadOrderInvoice);
 router.post('/:orderNumber/return-request', authenticateCustomerOrAdmin, requestOrderReturn);
 router.post('/:orderNumber/return-decision', requireAdminAuth, reviewReturnRequest);
+router.post('/:orderNumber/return-inspection', requireAdminAuth, inspectAndRestockReturnedOrder);
+router.post('/:orderNumber/quarantine-release', requireAdminAuth, releaseQuarantinedItem);
 router.post('/:orderNumber/refund', requireAdminAuth, processOrderRefund);
 router.get('/:id', getOrderById);
 router.post('/', createOrder);

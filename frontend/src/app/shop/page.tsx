@@ -38,17 +38,17 @@ const LIFESTYLE_BASE_CONFIG = [
     title: "Everyday",
     archetype: "EVERYDAY",
     tagline: "For the everyday.",
-    description: "Architectural structure, upright base studs, and dedicated 15.6\" laptop protection engineered for daily rhythm and effortless day-to-day carrying.",
+    description: "Sleek crescent contours, refined underarm proportions, and luminous hardware engineered for effortless daily carrying and modern essentials.",
     specs: [
-      "Padded cradle for up to 15.6\" laptops",
-      "5 solid brass protective bottom studs",
-      "Matching detachable wristlet pouch included",
+      "Fits iPad mini, phone & daily essentials",
+      "Superior faux leather with refined trim",
+      "Secure top zip & magnetic flap closure",
     ],
     horizontalImage: "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917844/zimor/lifestyle/corporate-workspace-horizontal.webp",
     editorialImage: "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917843/zimor/lifestyle/corporate-executive-editorial.webp",
-    subtitleFilterText: "Everyday Carry · 15.6\" Laptop Fit",
-    icon: Briefcase,
-    slugs: ["zimor-delo-tote-rust", "zimor-delo-tote-noir"],
+    subtitleFilterText: "Everyday Carry · Classic Silhouette",
+    icon: Sparkles,
+    slugs: ["zimor-classic-shoulder-bag"],
   },
   {
     id: "work",
@@ -56,17 +56,17 @@ const LIFESTYLE_BASE_CONFIG = [
     title: "Work",
     archetype: "WORK",
     tagline: "For what lies ahead.",
-    description: "Dual-carry versatility with detachable 110cm crossbody sling, padded 15\" laptop sleeve, and 6 internal organizer pockets designed for focus and productivity.",
+    description: "Dual-carry versatility with detachable sling, dedicated padded laptop protection up to 15.6\", and multi-compartment organization designed for focus and productivity.",
     specs: [
-      "Dedicated 15\" cushioned laptop cradle",
-      "Dual grab handles + 110cm detachable sling",
-      "Full-zip top closure + cosmetic pouch",
+      "Dedicated 15.6\" cushioned laptop protection",
+      "Dual grab handles + detachable crossbody sling",
+      "Structured silhouette with protective base studs",
     ],
     horizontalImage: "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917844/zimor/lifestyle/tech-commute-workspace-horizontal.webp",
     editorialImage: "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917842/zimor/lifestyle/tech-commute-editorial.webp",
-    subtitleFilterText: "Work & Focus · 15\" Dual-Carry",
+    subtitleFilterText: "Work & Focus · 15.6\" Laptop Totes",
     icon: Laptop,
-    slugs: ["zimor-rabota-tote-cognac", "zimor-rabota-tote-espresso"],
+    slugs: ["zimor-rabota-tote", "zimor-delo-tote"],
   },
   {
     id: "travel",
@@ -74,17 +74,17 @@ const LIFESTYLE_BASE_CONFIG = [
     title: "Travel",
     archetype: "TRAVEL",
     tagline: "For places beyond.",
-    description: "Sculptural curves, heavyweight French canvas, and luminous gold clasps designed for journeys near and far, weekend escapes, and evening destinations.",
+    description: "Spacious capacity, secure top closures, and durable structured craftsmanship designed for weekend escapes, transit convenience, and journeys near and far.",
     specs: [
-      "Fits iPad mini, Kindle & daily essentials",
-      "Heavyweight French canvas with vegan leather trim",
-      "Luminous gold-tone clasp & underarm contour",
+      "Spacious multi-compartment travel capacity",
+      "Fits up to 15.6\" laptops & travel essentials",
+      "Upright stability with solid protective bottom studs",
     ],
     horizontalImage: "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917847/zimor/about/artisan-heritage-landscape.webp",
     editorialImage: "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917845/zimor/lifestyle/brandgirl2.webp",
-    subtitleFilterText: "Travel & Escapes · Underarm Fit",
-    icon: Sparkles,
-    slugs: ["zimor-classic-shoulder-bag-cream", "zimor-classic-shoulder-bag-tan"],
+    subtitleFilterText: "Travel & Transit · Structured Totes",
+    icon: Briefcase,
+    slugs: ["zimor-rabota-tote", "zimor-delo-tote"],
   },
 ];
 
@@ -96,7 +96,6 @@ function ShopContent() {
 
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
   const [selectedProfession, setSelectedProfession] = useState<string>(initialProfession);
-  const [selectedColor, setSelectedColor] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'featured' | 'price-asc' | 'price-desc' | 'rating'>('featured');
   const [columns, setColumns] = useState<2 | 3>(3);
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
@@ -104,18 +103,26 @@ function ShopContent() {
   const clearAllFilters = () => {
     setSelectedCategory('all');
     setSelectedProfession('all');
-    setSelectedColor('all');
   };
 
   // Lifestyle Subsections resolved dynamically against current products
   const lifestyleSubsections = useMemo(() => {
     return LIFESTYLE_BASE_CONFIG.map((cfg) => {
       const matched = cfg.slugs
-        .map((slug) => products.find((p) => p.slug === slug || p.id === slug))
+        .map((slug) =>
+          products.find(
+            (p) =>
+              p.slug === slug ||
+              p.id === slug ||
+              (slug === 'zimor-classic-shoulder-bag' && (p.slug === 'zimor-classic-shoulder-bag' || p.id === 'zimor-classic-shoulder-bag-cream')) ||
+              (slug === 'zimor-rabota-tote' && (p.slug === 'zimor-rabota-tote' || p.id === 'zimor-rabota-tote-cognac')) ||
+              (slug === 'zimor-delo-tote' && (p.slug === 'zimor-delo-tote' || p.id === 'zimor-delo-tote-rust'))
+          )
+        )
         .filter((p): p is Product => Boolean(p));
 
       // Fallback to first available products if exact slugs aren't matched
-      const fallbackProducts = matched.length > 0 ? matched : products.slice(0, 2);
+      const fallbackProducts = matched.length > 0 ? matched : products.slice(0, cfg.slugs.length);
 
       return {
         ...cfg,
@@ -185,21 +192,32 @@ function ShopContent() {
     // Profession / Lifestyle filter logic
     if (selectedProfession !== 'all') {
       if (selectedProfession === 'everyday' || selectedProfession === 'corporate-executive') {
-        result = result.filter((p) => (p.id && p.id.startsWith('zimor-delo')) || p.category === 'tote-bags' || (p.suitableProfessions && p.suitableProfessions.includes(selectedProfession)));
-      } else if (selectedProfession === 'work' || selectedProfession === 'tech-transit' || selectedProfession === 'tech-founder') {
-        result = result.filter((p) => (p.id && p.id.startsWith('zimor-rabota')) || p.category === 'laptop-bags' || (p.suitableProfessions && p.suitableProfessions.includes(selectedProfession)));
-      } else if (selectedProfession === 'travel' || selectedProfession === 'creative-studio' || selectedProfession === 'creative-director') {
-        result = result.filter((p) => (p.id && p.id.startsWith('zimor-classic')) || p.category === 'shoulder-bags' || (p.suitableProfessions && p.suitableProfessions.includes(selectedProfession)));
+        result = result.filter(
+          (p) =>
+            (p.slug && p.slug.startsWith('zimor-classic')) ||
+            (p.id && p.id.startsWith('zimor-classic')) ||
+            p.category === 'shoulder-bags' ||
+            (p.suitableProfessions && p.suitableProfessions.includes(selectedProfession))
+        );
+      } else if (
+        selectedProfession === 'work' ||
+        selectedProfession === 'tech-transit' ||
+        selectedProfession === 'tech-founder' ||
+        selectedProfession === 'travel' ||
+        selectedProfession === 'creative-studio' ||
+        selectedProfession === 'creative-director'
+      ) {
+        result = result.filter(
+          (p) =>
+            (p.slug && (p.slug.startsWith('zimor-rabota') || p.slug.startsWith('zimor-delo'))) ||
+            (p.id && (p.id.startsWith('zimor-rabota') || p.id.startsWith('zimor-delo'))) ||
+            p.category === 'laptop-bags' ||
+            p.category === 'tote-bags' ||
+            (p.suitableProfessions && p.suitableProfessions.includes(selectedProfession))
+        );
       } else {
         result = result.filter((p) => p.suitableProfessions && p.suitableProfessions.includes(selectedProfession));
       }
-    }
-
-    // Color filter logic
-    if (selectedColor !== 'all') {
-      result = result.filter((p) =>
-        Array.isArray(p.colors) && p.colors.some((c) => c.name.toLowerCase().includes(selectedColor.toLowerCase()))
-      );
     }
 
     // Sort logic
@@ -224,10 +242,10 @@ function ShopContent() {
     }
 
     return result;
-  }, [products, selectedCategory, selectedProfession, selectedColor, sortBy]);
+  }, [products, selectedCategory, selectedProfession, sortBy]);
 
   const hasActiveFilters =
-    selectedCategory !== 'all' || selectedProfession !== 'all' || selectedColor !== 'all';
+    selectedCategory !== 'all' || selectedProfession !== 'all';
 
   // Human-readable active filter name
   const activeFilterTitle = useMemo(() => {
@@ -238,11 +256,8 @@ function ShopContent() {
       const match = lifestyleSubsections.find((p) => p.id === selectedProfession);
       return match ? match.archetype : selectedProfession;
     }
-    if (selectedColor !== 'all') {
-      return `Color: ${selectedColor}`;
-    }
     return '';
-  }, [selectedCategory, selectedProfession, selectedColor]);
+  }, [selectedCategory, selectedProfession, lifestyleSubsections]);
 
   // Smooth scroll to targeted lifestyle section (#everyday, #work, #travel, #lifestyle) on mount and hashchange
   React.useEffect(() => {
@@ -376,25 +391,6 @@ function ShopContent() {
                 Shoulder Bags ({categoryCounts.shoulder})
               </button>
 
-              {/* Color Dropdown on Desktop */}
-              <div className="hidden sm:inline-flex relative items-center">
-                <select
-                  value={selectedColor}
-                  onChange={(e) => setSelectedColor(e.target.value)}
-                  className="appearance-none bg-white border border-line px-3.5 pr-8 py-1.5 rounded-full text-ink text-xs font-medium focus:outline-none focus:border-ink transition-colors cursor-pointer shadow-2xs"
-                  aria-label="Filter by color variation"
-                >
-                  <option value="all">All Colors</option>
-                  <option value="Rust">Rust Caramel</option>
-                  <option value="Noir">Noir Black</option>
-                  <option value="Cognac">Cognac Brown</option>
-                  <option value="Espresso">Espresso Roast</option>
-                  <option value="Cream">Cream Canvas</option>
-                  <option value="Saddle">Saddle Tan</option>
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 text-ink-muted absolute right-2.5 pointer-events-none" />
-              </div>
-
               {/* Reset active filters on Desktop */}
               {hasActiveFilters && (
                 <button
@@ -408,29 +404,10 @@ function ShopContent() {
               )}
             </div>
 
-            {/* Mobile Secondary Row: Color + Sort combined in a single clean hairline strip */}
+            {/* Mobile Secondary Row: Reset + Sort combined in a single clean hairline strip */}
             <div className="flex items-center justify-between gap-3 pt-2.5 sm:pt-0 border-t border-line/60 sm:border-0 text-xs">
-              {/* Left Controls on Mobile: Color Selector + Inline Reset */}
+              {/* Left Controls on Mobile: Inline Reset */}
               <div className="flex items-center gap-2">
-                <div className="sm:hidden relative inline-flex items-center">
-                  <select
-                    value={selectedColor}
-                    onChange={(e) => setSelectedColor(e.target.value)}
-                    className="appearance-none bg-white border border-line text-xs py-1.5 pl-3 pr-7 rounded-full text-ink font-medium focus:outline-none focus:border-ink transition-colors cursor-pointer shadow-2xs"
-                    aria-label="Filter by color variation"
-                  >
-                    <option value="all">All Colors</option>
-                    <option value="Rust">Rust Caramel</option>
-                    <option value="Noir">Noir Black</option>
-                    <option value="Cognac">Cognac Brown</option>
-                    <option value="Espresso">Espresso Roast</option>
-                    <option value="Cream">Cream Canvas</option>
-                    <option value="Saddle">Saddle Tan</option>
-                  </select>
-                  <ChevronDown className="w-3 h-3 text-ink-muted absolute right-2 pointer-events-none" />
-                </div>
-
-                {/* Inline Reset Button on Mobile when filters active */}
                 {hasActiveFilters && (
                   <button
                     type="button"
@@ -662,7 +639,7 @@ function ShopContent() {
                             Matching Silhouettes
                           </p>
                           <p className="text-[11px] text-ink-muted font-secondary">
-                            Showing {subsection.products.length} models · {subsection.subtitleFilterText}
+                            Showing {subsection.products.length} {subsection.products.length === 1 ? 'model' : 'models'} · {subsection.subtitleFilterText}
                           </p>
                         </div>
                         <div className="grid grid-cols-2 gap-3.5 sm:gap-5">

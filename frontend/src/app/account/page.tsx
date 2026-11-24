@@ -247,7 +247,7 @@ function AccountContent() {
                       value={nameInput}
                       onChange={(e) => setNameInput(e.target.value)}
                       required
-                      placeholder="e.g. Karun Singh"
+                      placeholder="e.g. John Doe"
                       className="w-full pl-10 pr-3 py-2.5 bg-white border border-[#000000]/20 text-xs text-[#000000] placeholder-[#999999] focus:outline-none focus:border-[#000000] transition-colors rounded-none"
                     />
                   </div>

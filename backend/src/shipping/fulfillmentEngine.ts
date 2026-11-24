@@ -204,9 +204,11 @@ export async function processOrderFulfillment(
       maxBreadth = Math.max(maxBreadth, (item as any).dimensions?.breadth || dims.breadth);
       maxHeight = Math.max(maxHeight, (item as any).dimensions?.height || dims.height);
 
+      const resolvedSku = prod?.sku || item.slug || 'ITEM';
+
       shipmentItems.push({
         name: item.name,
-        sku: `${item.slug || 'ITEM'}-${(item.color || 'STD').replace(/\s+/g, '')}`,
+        sku: resolvedSku,
         units: item.quantity,
         sellingPrice: item.price,
         discount: 0,

@@ -45,7 +45,7 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({ orders }) => {
   const handleReorder = (item: Order['items'][number]) => {
     const p = getProductBySlug(item.slug);
     if (p) {
-      addItem(p, item.quantity, item.color, item.size);
+      addItem(p, item.quantity, item.size);
       setReorderMessage(`Added "${item.name}" to your shopping bag.`);
       setTimeout(() => setReorderMessage(null), 3000);
     }
@@ -269,7 +269,7 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({ orders }) => {
                         <div className="space-y-0.5 text-xs">
                           <p className="font-semibold text-sm text-[#000000]">{item.name}</p>
                           <p className="text-[11px] text-[#777777]">
-                            {item.color ? `Color: ${item.color} • ` : ''}Qty: {item.quantity}
+                            Qty: {item.quantity}
                           </p>
                           <p className="font-medium text-[#000000]">
                             ₹{item.price.toLocaleString('en-IN')}

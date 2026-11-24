@@ -10,9 +10,11 @@ import { useWishlist } from '@/context/WishlistContext';
 import { useProducts } from '@/context/ProductContext';
 import { MobileNav } from './MobileNav';
 import { useLenisScroll } from './SmoothScroll';
+import { useWhatsAppUrl } from '@/lib/whatsapp';
 
 export const Header: React.FC = () => {
   const pathname = usePathname();
+  const whatsappUrl = useWhatsAppUrl();
   const { itemCount, openCartDrawer } = useCart();
   const { wishlistCount } = useWishlist();
   const { products } = useProducts();
@@ -482,7 +484,7 @@ export const Header: React.FC = () => {
 
                           {/* 2. Direct WhatsApp */}
                           <a
-                            href="https://wa.me/918604647888"
+                            href={whatsappUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={() => setIsContactHovered(false)}

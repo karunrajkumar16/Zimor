@@ -604,7 +604,7 @@ export default function AdminPaymentsPage() {
                   setCurrentPage(1);
                 }}
                 placeholder="Search..."
-                className={`w-full pl-9 pr-4 py-2 rounded-lg text-sm border focus:outline-none focus:border-[#B44220] transition-colors ${
+                className={`w-full pl-9 pr-4 py-2 rounded-lg text-sm border focus:outline-none focus:border-[#5146E5] transition-colors ${
                   isDark
                     ? 'bg-[#25221F] border-[#36312C] text-[#E2E8F0] placeholder-[#78726C]'
                     : 'bg-white border-[#E2E8F0] text-[#1C2434] placeholder-[#94A3B8]'
@@ -628,7 +628,7 @@ export default function AdminPaymentsPage() {
                 <SlidersHorizontal className="w-4 h-4 text-[#64748B] dark:text-[#94A3B8]" />
                 <span>Filter</span>
                 {(dateFilter !== 'all' || modeFilter !== 'all') && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#B44220]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#5146E5]" />
                 )}
               </button>
 
@@ -650,7 +650,7 @@ export default function AdminPaymentsPage() {
                         setCustomStartDate('');
                         setCustomEndDate('');
                       }}
-                      className="text-xs text-[#B44220] hover:underline cursor-pointer"
+                      className="text-xs text-[#5146E5] hover:underline cursor-pointer"
                     >
                       Reset
                     </button>
@@ -667,7 +667,7 @@ export default function AdminPaymentsPage() {
                         setModeFilter(e.target.value as ModeFilterType);
                         setCurrentPage(1);
                       }}
-                      className={`w-full px-2.5 py-1.5 border rounded-lg text-xs font-medium focus:outline-none focus:border-[#B44220] ${
+                      className={`w-full px-2.5 py-1.5 border rounded-lg text-xs font-medium focus:outline-none focus:border-[#5146E5] ${
                         isDark
                           ? 'bg-[#25221F] border-[#36312C] text-[#E2E8F0]'
                           : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#1C2434]'
@@ -937,7 +937,7 @@ export default function AdminPaymentsPage() {
                             Paid
                           </span>
                         ) : tx.status === 'Refunded' ? (
-                          <span className="text-[#8B5CF6] font-medium text-sm">
+                          <span className="text-[#10B981] font-medium text-sm">
                             Refunded
                           </span>
                         ) : (
@@ -981,7 +981,7 @@ export default function AdminPaymentsPage() {
                                 onClick={() => handleDownloadSingleInvoice(tx.orderId)}
                                 className="w-full px-3.5 py-2 text-left text-sm flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-[#25221F] text-[#1C2434] dark:text-[#E2E8F0] cursor-pointer"
                               >
-                                <FileText className="w-4 h-4 text-[#B44220]" />
+                                <FileText className="w-4 h-4 text-[#5146E5]" />
                                 <span>Download PDF</span>
                               </button>
 

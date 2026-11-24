@@ -1,9 +1,3 @@
-export interface ProductColor {
-  name: string;
-  hex: string;
-  imageUrl?: string;
-}
-
 export interface ProductImage {
   url: string;
   publicId?: string;
@@ -41,8 +35,7 @@ export interface Product {
   compareAtPrice: number;
   category: 'tote-bags' | 'laptop-bags' | 'shoulder-bags' | string;
   categoryLabel: string;
-  colors: ProductColor[];
-  defaultColor: string;
+  sku?: string;
   sizes: string[];
   stock: number;
   isPublished?: boolean;
@@ -80,8 +73,31 @@ export interface CartItem {
   productId: string;
   product: Product;
   quantity: number;
-  selectedColor: string;
   selectedSize: string;
+}
+
+export interface OrderReturnItem {
+  productId: string;
+  name: string;
+  slug?: string;
+  color?: string;
+  size?: string;
+  quantityOrdered: number;
+  quantityRequested: number;
+  quantityReceived: number;
+  quantityApproved: number;
+  quantityRejected: number;
+  inspectionStatus: 'pending' | 'passed' | 'failed' | 'partially_passed';
+  inspectionNotes?: string;
+  rejectionReason?: string;
+  inventoryRestocked: boolean;
+  restockedQuantity: number;
+  restockedAt?: string;
+  quarantined: boolean;
+  quarantinedQuantity: number;
+  quarantinedAt?: string;
+  quarantineReason?: string;
+  quarantineReleasedQuantity?: number;
 }
 
 export interface OrderReturnRequest {
@@ -97,6 +113,18 @@ export interface OrderReturnRequest {
   refundInitiated?: boolean;
   refundId?: string;
   refundAmount?: number;
+  physicalItemReceived?: boolean;
+  physicalItemReceivedAt?: string;
+  inspectionStatus?: 'pending' | 'passed' | 'failed' | 'partially_passed' | 'not_applicable';
+  inspectedAt?: string;
+  inspectedBy?: string;
+  inspectionNotes?: string;
+  inventoryRestocked?: boolean;
+  inventoryRestockedAt?: string;
+  items?: OrderReturnItem[];
+  totalRequestedQuantity?: number;
+  totalRestockedQuantity?: number;
+  totalQuarantinedQuantity?: number;
 }
 
 export interface Order {
@@ -108,7 +136,7 @@ export interface Order {
     name: string;
     slug: string;
     image: string;
-    color: string;
+    color?: string;
     size: string;
     price: number;
     quantity: number;
@@ -202,6 +230,11 @@ export interface Customer {
   avatar?: string;
   authProvider?: 'google' | 'local';
   totalSpent?: number;
+  liveSpent?: number;
+  testSpent?: number;
+  orderCount?: number;
+  liveOrderCount?: number;
+  testOrderCount?: number;
   addresses: Address[];
   orders: string[];
   createdAt: string;
@@ -242,5 +275,23 @@ export interface SiteContent {
   data: Record<string, unknown>;
   updatedAt: string;
 }
+
+export interface AboutMediaSection {
+  id: string; // 'brandOverview' | 'brandStory' | 'brandVision' | 'brandMission' | 'brandValues'
+  title: string;
+  subtitle: string;
+  description: string;
+  recommendedAspect: string;
+  recommendedResolution: string;
+  url: string;
+  publicId?: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  updatedAt?: string;
+  updatedBy?: string;
+}
+
+export type AboutMediaMapping = Record<string, AboutMediaSection>;
 
 

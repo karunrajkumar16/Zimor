@@ -109,7 +109,7 @@ const CATALOG_IMAGE_PRESETS = [
   },
 ];
 
-type SortField = 'name' | 'category' | 'brand' | 'price' | 'stock' | 'created';
+type SortField = 'name' | 'category' | 'sku' | 'price' | 'stock' | 'created';
 type SortDirection = 'asc' | 'desc';
 
 export default function AdminProductsPage() {
@@ -144,6 +144,7 @@ export default function AdminProductsPage() {
   // Studio Form Fields
   const [formName, setFormName] = useState('');
   const [formSlug, setFormSlug] = useState('');
+  const [formSku, setFormSku] = useState('');
   const [formTagline, setFormTagline] = useState('');
   const [formCategory, setFormCategory] = useState('tote-bags');
   const [formPrice, setFormPrice] = useState<number>(2999);
@@ -153,7 +154,6 @@ export default function AdminProductsPage() {
   const [formWhyLoveIt, setFormWhyLoveIt] = useState('');
   const [formLaptopCompatibility, setFormLaptopCompatibility] = useState('Up to 15.6 inch');
   const [formImages, setFormImages] = useState<{ url: string; alt?: string }[]>([]);
-  const [formColors, setFormColors] = useState<{ name: string; hex: string }[]>([]);
   const [formFeatures, setFormFeatures] = useState<string[]>([]);
   const [formLength, setFormLength] = useState('40 cm');
   const [formHeight, setFormHeight] = useState('30 cm');
@@ -166,9 +166,6 @@ export default function AdminProductsPage() {
 
   // New Image input temporary state
   const [newImageUrl, setNewImageUrl] = useState('');
-  // New Color input temporary state
-  const [newColorName, setNewColorName] = useState('');
-  const [newColorHex, setNewColorHex] = useState('#000000');
   // New Feature bullet temporary state
   const [newFeatureText, setNewFeatureText] = useState('');
 
@@ -281,6 +278,7 @@ export default function AdminProductsPage() {
     setActionMenuOpenId(null);
     setFormName(prod.name || '');
     setFormSlug(prod.slug || '');
+    setFormSku(prod.sku || '');
     setFormTagline(prod.tagline || '');
     setFormCategory(prod.category || 'tote-bags');
     setFormPrice(prod.price || 2999);
@@ -290,7 +288,6 @@ export default function AdminProductsPage() {
     setFormWhyLoveIt((prod as any).whyYoullLoveIt || '');
     setFormLaptopCompatibility((prod as any).laptopCompatibility || 'Up to 15.6 inch');
     setFormImages(prod.images || []);
-    setFormColors(prod.colors || []);
     setFormFeatures(prod.features || []);
     setFormLength(prod.dimensions?.length || '40 cm');
     setFormHeight(prod.dimensions?.height || '30 cm');
@@ -310,6 +307,7 @@ export default function AdminProductsPage() {
     setActionMenuOpenId(null);
     setFormName('');
     setFormSlug('');
+    setFormSku('');
     setFormTagline('');
     setFormCategory('tote-bags');
     setFormPrice(2999);
@@ -319,10 +317,6 @@ export default function AdminProductsPage() {
     setFormWhyLoveIt('');
     setFormLaptopCompatibility('Up to 15.6 inch');
     setFormImages([]); // Start with clean empty array so admin can upload their own images
-    setFormColors([
-      { name: 'Noir Black', hex: '#1C1917' },
-      { name: 'Rust', hex: '#C73030' },
-    ]);
     setFormFeatures([
       'Spacious main compartment with dedicated padded laptop section',
       'Superior Faux leather with high-grade metal hardware',
@@ -351,6 +345,25 @@ export default function AdminProductsPage() {
     setSaving(true);
     setMessage(null);
 
+    const trimmedSku = formSku.trim().toUpperCase();
+    if (!trimmedSku) {
+      setMessage({ type: 'error', text: 'Product Code (SKU) is required.' });
+      setSaving(false);
+      return;
+    }
+
+    const duplicate = products.some(
+      (p) => (p.id !== editingProduct?.id && p.slug !== editingProduct?.slug) && p.sku?.toUpperCase() === trimmedSku
+    );
+    if (duplicate) {
+      setMessage({
+        type: 'error',
+        text: `Product Code (SKU) "${trimmedSku}" is already assigned to another product.`,
+      });
+      setSaving(false);
+      return;
+    }
+
     const generatedSlug = (editingProduct?.slug && !isCreatingNew)
       ? editingProduct.slug
       : formName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -359,6 +372,7 @@ export default function AdminProductsPage() {
     const payload: Partial<Product> = {
       name: formName,
       slug: generatedSlug,
+      sku: trimmedSku,
       tagline: formTagline,
       category: formCategory,
       categoryLabel: categoryObj?.label || 'Tote Bags',
@@ -369,8 +383,6 @@ export default function AdminProductsPage() {
       whyYoullLoveIt: formWhyLoveIt,
       laptopCompatibility: formLaptopCompatibility,
       images: formImages.map((img) => ({ url: img.url, alt: img.alt || formName })),
-      colors: formColors,
-      defaultColor: formColors[0]?.name || 'Noir Black',
       sizes: ['Standard'],
       features: formFeatures,
       dimensions: {
@@ -511,6 +523,7 @@ export default function AdminProductsPage() {
         !q ||
         p.name?.toLowerCase().includes(q) ||
         p.slug?.toLowerCase().includes(q) ||
+        p.sku?.toLowerCase().includes(q) ||
         p.category?.toLowerCase().includes(q);
 
       const matchesCat = selectedCategory === 'all' || p.category === selectedCategory;
@@ -532,8 +545,8 @@ export default function AdminProductsPage() {
         const catA = a.categoryLabel || a.category || '';
         const catB = b.categoryLabel || b.category || '';
         comparison = catA.localeCompare(catB);
-      } else if (sortField === 'brand') {
-        comparison = 'ZIMOR'.localeCompare('ZIMOR');
+      } else if (sortField === 'sku') {
+        comparison = (a.sku || '').localeCompare(b.sku || '');
       } else if (sortField === 'price') {
         comparison = (a.price || 0) - (b.price || 0);
       } else if (sortField === 'stock') {
@@ -588,8 +601,8 @@ export default function AdminProductsPage() {
     : 'bg-[#FFFFFF] border-[#E2E8F0] shadow-xs';
 
   const inputClass = isDark
-    ? 'w-full px-3 py-2 bg-[#25221F] border border-[#36312C] rounded-md text-xs text-[#E8E1DA] placeholder-[#78726C] focus:outline-none focus:border-[#B44220]'
-    : 'w-full px-3 py-2 bg-[#FAF7F2] border border-[#E5DFD7] rounded-md text-xs text-[#24211F] placeholder-[#8C837A] focus:outline-none focus:border-[#B44220] focus:bg-[#FFFFFF]';
+    ? 'w-full px-3 py-2 bg-[#25221F] border border-[#36312C] rounded-md text-xs text-[#E8E1DA] placeholder-[#78726C] focus:outline-none focus:border-[#5146E5]'
+    : 'w-full px-3 py-2 bg-[#FAF7F2] border border-[#E5DFD7] rounded-md text-xs text-[#24211F] placeholder-[#8C837A] focus:outline-none focus:border-[#5146E5] focus:bg-[#FFFFFF]';
 
   return (
     <div className="space-y-6">
@@ -606,7 +619,7 @@ export default function AdminProductsPage() {
                 onClick={closeEditor}
                 className="p-1.5 rounded-md hover:bg-[#EFEAE2] dark:hover:bg-[#2A2724] text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
               >
-                <ArrowLeft className="w-4 h-4 text-[#B44220]" />
+                <ArrowLeft className="w-4 h-4 text-[#5146E5]" />
                 <span>Back to Products</span>
               </button>
               <span className="opacity-30">|</span>
@@ -626,7 +639,7 @@ export default function AdminProductsPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-xs font-semibold bg-[#B44220] hover:bg-[#9B381B] text-[#F7F5F2] shadow-xs transition-colors disabled:opacity-50 cursor-pointer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-xs font-semibold bg-[#5146E5] hover:bg-[#4338CA] text-[#F7F5F2] shadow-xs transition-colors disabled:opacity-50 cursor-pointer"
               >
                 <Save className="w-3.5 h-3.5" />
                 <span>{saving ? 'Saving...' : 'Save Product Changes'}</span>
@@ -637,12 +650,12 @@ export default function AdminProductsPage() {
           {/* Section 1: Identity & Category */}
           <div className={`p-6 rounded-xl border ${cardBg} space-y-4`}>
             <div className="border-b pb-3 flex items-center gap-2 border-[#E5DFD7] dark:border-[#36312C]">
-              <FileText className="w-4 h-4 text-[#B44220]" />
+              <FileText className="w-4 h-4 text-[#5146E5]" />
               <h2 className="text-sm font-bold text-[#24211F] dark:text-[#E8E1DA]">1. Product Identity & Category</h2>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
-              <div className="sm:col-span-2 lg:col-span-3">
+              <div className="sm:col-span-2 lg:col-span-2">
                 <label className="block font-semibold mb-1">Product Title / Name *</label>
                 <input
                   type="text"
@@ -654,7 +667,19 @@ export default function AdminProductsPage() {
                 />
               </div>
 
-              <div className="sm:col-span-2 lg:col-span-1">
+              <div className="sm:col-span-1 lg:col-span-1">
+                <label className="block font-semibold mb-1">Product Code (SKU) *</label>
+                <input
+                  type="text"
+                  value={formSku}
+                  onChange={(e) => setFormSku(e.target.value.toUpperCase())}
+                  required
+                  placeholder="e.g. ZIM-DELO-RUST"
+                  className={inputClass}
+                />
+              </div>
+
+              <div className="sm:col-span-1 lg:col-span-1">
                 <label className="block font-semibold mb-1">Category / Type *</label>
                 <select
                   value={formCategory}
@@ -798,7 +823,7 @@ export default function AdminProductsPage() {
                 type="button"
                 onClick={() => productImageInputRef.current?.click()}
                 disabled={uploadingProductImages}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[#B44220] hover:bg-[#9B381B] text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[#5146E5] hover:bg-[#4338CA] text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
               >
                 <Upload className="w-3.5 h-3.5" />
                 <span>{uploadingProductImages ? 'Uploading Images...' : 'Upload Images from Computer'}</span>
@@ -809,7 +834,7 @@ export default function AdminProductsPage() {
                 onClick={() => setIsProductMediaModalOpen(true)}
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md border border-[#E5DFD7] dark:border-[#36312C] hover:bg-[#FAF7F2] dark:hover:bg-[#25221F] text-[#24211F] dark:text-[#E8E1DA] text-xs font-semibold transition-colors cursor-pointer"
               >
-                <Sparkles className="w-3.5 h-3.5 text-[#B44220]" />
+                <Sparkles className="w-3.5 h-3.5 text-[#5146E5]" />
                 <span>Browse Catalog / Library</span>
               </button>
             </div>
@@ -831,7 +856,7 @@ export default function AdminProductsPage() {
                     setNewImageUrl('');
                   }
                 }}
-                className="px-4 py-2 bg-[#FAF7F2] dark:bg-[#25221F] border border-[#E5DFD7] dark:border-[#36312C] rounded-md text-xs font-semibold hover:border-[#B44220] transition-colors shrink-0 cursor-pointer"
+                className="px-4 py-2 bg-[#FAF7F2] dark:bg-[#25221F] border border-[#E5DFD7] dark:border-[#36312C] rounded-md text-xs font-semibold hover:border-[#5146E5] transition-colors shrink-0 cursor-pointer"
               >
                 Add URL
               </button>
@@ -844,7 +869,7 @@ export default function AdminProductsPage() {
                   <div
                     key={idx}
                     className={`relative group aspect-square rounded-lg overflow-hidden border bg-[#FAF7F2] dark:bg-[#25221F] ${
-                      idx === 0 ? 'ring-2 ring-[#B44220] border-transparent' : 'border-[#E5DFD7] dark:border-[#36312C]'
+                      idx === 0 ? 'ring-2 ring-[#5146E5] border-transparent' : 'border-[#E5DFD7] dark:border-[#36312C]'
                     }`}
                   >
                     <Image src={img.url} alt={img.alt || formName} fill className="object-cover" />
@@ -868,7 +893,7 @@ export default function AdminProductsPage() {
                       </button>
                     </div>
                     {idx === 0 && (
-                      <span className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#B44220] text-white uppercase tracking-wider shadow-xs">
+                      <span className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#5146E5] text-white uppercase tracking-wider shadow-xs">
                         Primary Cover
                       </span>
                     )}
@@ -878,9 +903,9 @@ export default function AdminProductsPage() {
             ) : (
               <div
                 onClick={() => productImageInputRef.current?.click()}
-                className="p-6 border-2 border-dashed border-[#E5DFD7] dark:border-[#36312C] rounded-lg text-center space-y-2 bg-[#FAF7F2]/50 dark:bg-[#1E1C1A]/50 cursor-pointer hover:border-[#B44220] transition-colors"
+                className="p-6 border-2 border-dashed border-[#E5DFD7] dark:border-[#36312C] rounded-lg text-center space-y-2 bg-[#FAF7F2]/50 dark:bg-[#1E1C1A]/50 cursor-pointer hover:border-[#5146E5] transition-colors"
               >
-                <div className="w-10 h-10 mx-auto rounded-full bg-[#B44220]/10 flex items-center justify-center text-[#B44220]">
+                <div className="w-10 h-10 mx-auto rounded-full bg-[#EEF0FF] dark:bg-[#5146E5]/20 flex items-center justify-center text-[#5146E5]">
                   <Upload className="w-5 h-5" />
                 </div>
                 <p className="text-xs font-semibold text-[#24211F] dark:text-[#E8E1DA]">
@@ -906,7 +931,7 @@ export default function AdminProductsPage() {
                   type="checkbox"
                   checked={formIsPublished}
                   onChange={(e) => setFormIsPublished(e.target.checked)}
-                  className="w-4 h-4 rounded text-[#B44220] focus:ring-0"
+                  className="w-4 h-4 rounded text-[#5146E5] focus:ring-0"
                 />
                 <div>
                   <p className="font-semibold text-[#24211F] dark:text-[#E8E1DA]">Published on Storefront</p>
@@ -919,7 +944,7 @@ export default function AdminProductsPage() {
                   type="checkbox"
                   checked={formIsFeatured}
                   onChange={(e) => setFormIsFeatured(e.target.checked)}
-                  className="w-4 h-4 rounded text-[#B44220] focus:ring-0"
+                  className="w-4 h-4 rounded text-[#5146E5] focus:ring-0"
                 />
                 <div>
                   <p className="font-semibold text-[#24211F] dark:text-[#E8E1DA]">Featured on Homepage</p>
@@ -932,7 +957,7 @@ export default function AdminProductsPage() {
                   type="checkbox"
                   checked={formIsComingSoon}
                   onChange={(e) => setFormIsComingSoon(e.target.checked)}
-                  className="w-4 h-4 rounded text-[#B44220] focus:ring-0"
+                  className="w-4 h-4 rounded text-[#5146E5] focus:ring-0"
                 />
                 <div>
                   <p className="font-semibold text-[#24211F] dark:text-[#E8E1DA]">Coming Soon Flag</p>
@@ -957,7 +982,7 @@ export default function AdminProductsPage() {
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-md text-xs font-bold bg-[#B44220] hover:bg-[#9B381B] text-white shadow-xs transition-colors disabled:opacity-50 cursor-pointer"
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-md text-xs font-bold bg-[#5146E5] hover:bg-[#4338CA] text-white shadow-xs transition-colors disabled:opacity-50 cursor-pointer"
             >
               <Save className="w-4 h-4" />
               <span>{saving ? 'Saving Changes...' : 'Save Product Changes'}</span>
@@ -984,14 +1009,14 @@ export default function AdminProductsPage() {
               <button
                 onClick={fetchProducts}
                 title="Refresh products list"
-                className="p-2 rounded-lg border border-[#E5DFD7] dark:border-[#36312C] bg-[#FFFFFF] dark:bg-[#1E1C1A] text-[#5A534E] dark:text-[#B4B4B4] hover:text-[#B44220] transition-colors cursor-pointer"
+                className="p-2 rounded-lg border border-[#E5DFD7] dark:border-[#36312C] bg-[#FFFFFF] dark:bg-[#1E1C1A] text-[#5A534E] dark:text-[#B4B4B4] hover:text-[#5146E5] transition-colors cursor-pointer"
               >
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
               </button>
 
               <button
                 onClick={openNewProductForm}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold bg-[#B44220] hover:bg-[#963518] text-white shadow-xs transition-colors cursor-pointer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold bg-[#5146E5] hover:bg-[#4338CA] text-white shadow-xs transition-colors cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add Product</span>
@@ -1032,7 +1057,7 @@ export default function AdminProductsPage() {
                     setCurrentPage(1);
                   }}
                   placeholder="Search or type command..."
-                  className={`w-full pl-9 pr-14 py-2 rounded-lg text-xs focus:outline-none focus:border-[#B44220] transition-colors border ${isDark
+                  className={`w-full pl-9 pr-14 py-2 rounded-lg text-xs focus:outline-none focus:border-[#5146E5] transition-colors border ${isDark
                     ? 'bg-[#25221F] border-[#36312C] text-[#E8E1DA] placeholder-[#78726C]'
                     : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F] placeholder-[#8C837A]'
                     }`}
@@ -1051,7 +1076,7 @@ export default function AdminProductsPage() {
                     setSelectedCategory(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className={`px-3 py-2 border rounded-lg text-xs font-medium focus:outline-none focus:border-[#B44220] transition-colors cursor-pointer ${isDark
+                  className={`px-3 py-2 border rounded-lg text-xs font-medium focus:outline-none focus:border-[#5146E5] transition-colors cursor-pointer ${isDark
                     ? 'bg-[#25221F] border-[#36312C] text-[#E8E1DA]'
                     : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F]'
                     }`}
@@ -1071,7 +1096,7 @@ export default function AdminProductsPage() {
                     setStockFilter(e.target.value as any);
                     setCurrentPage(1);
                   }}
-                  className={`px-3 py-2 border rounded-lg text-xs font-medium focus:outline-none focus:border-[#B44220] transition-colors cursor-pointer ${isDark
+                  className={`px-3 py-2 border rounded-lg text-xs font-medium focus:outline-none focus:border-[#5146E5] transition-colors cursor-pointer ${isDark
                     ? 'bg-[#25221F] border-[#36312C] text-[#E8E1DA]'
                     : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F]'
                     }`}
@@ -1090,7 +1115,7 @@ export default function AdminProductsPage() {
                 className={`px-4 py-2.5 border-b flex items-center justify-between text-xs ${isDark ? 'bg-[#25221F] border-[#36312C]' : 'bg-[#FAF7F2] border-[#E5DFD7]'
                   }`}
               >
-                <span className="font-semibold text-[#B44220]">
+                <span className="font-semibold text-[#5146E5]">
                   {selectedIds.size} product(s) selected
                 </span>
                 <div className="flex items-center gap-2">
@@ -1164,13 +1189,13 @@ export default function AdminProductsPage() {
                       </div>
                     </th>
 
-                    {/* Brand Column */}
+                    {/* Product Code (SKU) Column */}
                     <th
-                      onClick={() => handleSort('brand')}
+                      onClick={() => handleSort('sku')}
                       className="py-4 px-4 cursor-pointer hover:text-[#1C2434] dark:hover:text-white transition-colors select-none font-medium"
                     >
                       <div className="flex items-center gap-1.5">
-                        <span>Brand</span>
+                        <span>Product Code (SKU)</span>
                         <ArrowUpDown className="w-3.5 h-3.5 opacity-60" />
                       </div>
                     </th>
@@ -1314,9 +1339,9 @@ export default function AdminProductsPage() {
                             {p.categoryLabel || p.category}
                           </td>
 
-                          {/* Brand (TailAdmin Column) */}
+                          {/* Product Code (SKU) Column */}
                           <td className="py-4 px-4 font-normal text-[#1C2434] dark:text-[#E2E8F0] text-sm">
-                            ZIMOR
+                            {p.sku || '—'}
                           </td>
 
                           {/* Price */}
@@ -1377,7 +1402,7 @@ export default function AdminProductsPage() {
                                     onClick={() => openEditor(p)}
                                     className="w-full px-3 py-1.5 text-left text-xs flex items-center gap-2 hover:bg-[#FAF7F2] dark:hover:bg-[#25221F] text-[#24211F] dark:text-[#E8E1DA] cursor-pointer"
                                   >
-                                    <Edit className="w-3.5 h-3.5 text-[#B44220]" />
+                                    <Edit className="w-3.5 h-3.5 text-[#5146E5]" />
                                     <span>Edit Product</span>
                                   </button>
 
@@ -1476,7 +1501,7 @@ export default function AdminProductsPage() {
                         key={pageNum}
                         onClick={() => setCurrentPage(pageNum)}
                         className={`w-8 h-8 rounded-md text-xs font-semibold transition-all cursor-pointer ${isActive
-                          ? 'bg-[#B44220] text-white shadow-xs'
+                          ? 'bg-[#5146E5] text-white shadow-xs'
                           : 'border border-[#E5DFD7] dark:border-[#36312C] hover:bg-[#FAF7F2] dark:hover:bg-[#25221F] text-[#5A534E] dark:text-[#B4B4B4]'
                           }`}
                       >
@@ -1508,7 +1533,7 @@ export default function AdminProductsPage() {
             {/* Modal Header */}
             <div className="p-4 border-b flex items-center justify-between border-[#E5DFD7] dark:border-[#36312C]">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#B44220]" />
+                <Sparkles className="w-4 h-4 text-[#5146E5]" />
                 <h3 className="text-sm font-bold text-[#24211F] dark:text-[#E8E1DA]">
                   Choose Product Imagery from Catalog
                 </h3>
@@ -1540,7 +1565,7 @@ export default function AdminProductsPage() {
                   productImageInputRef.current?.click();
                   setIsProductMediaModalOpen(false);
                 }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#B44220] hover:bg-[#9B381B] text-white text-xs font-semibold cursor-pointer shadow-xs"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#5146E5] hover:bg-[#4338CA] text-white text-xs font-semibold cursor-pointer shadow-xs"
               >
                 <Upload className="w-3.5 h-3.5" />
                 <span>Upload from Device</span>
@@ -1566,8 +1591,8 @@ export default function AdminProductsPage() {
                     }}
                     className={`group relative rounded-lg overflow-hidden border transition-all cursor-pointer ${
                       isAlreadyAdded
-                        ? 'border-[#B44220] ring-2 ring-[#B44220]/20 opacity-80'
-                        : 'border-[#E5DFD7] dark:border-[#36312C] hover:border-[#B44220]'
+                        ? 'border-[#5146E5] ring-2 ring-[#5146E5]/20 opacity-80'
+                        : 'border-[#E5DFD7] dark:border-[#36312C] hover:border-[#5146E5]'
                     }`}
                   >
                     <div className="relative aspect-square w-full bg-[#FAF7F2] dark:bg-[#1E1C1A]">
@@ -1578,13 +1603,13 @@ export default function AdminProductsPage() {
                         </span>
                       </div>
                       {isAlreadyAdded && (
-                        <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded bg-[#B44220] text-white text-[9px] font-bold shadow-xs">
+                        <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded bg-[#5146E5] text-white text-[9px] font-bold shadow-xs">
                           Added
                         </div>
                       )}
                     </div>
                     <div className="p-2">
-                      <span className="text-[9px] uppercase font-mono text-[#B44220] font-semibold block">
+                      <span className="text-[9px] uppercase font-mono text-[#5146E5] font-semibold block">
                         {preset.category}
                       </span>
                       <p className="text-[11px] font-medium text-[#24211F] dark:text-[#E8E1DA] truncate mt-0.5">

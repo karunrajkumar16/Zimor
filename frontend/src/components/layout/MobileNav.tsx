@@ -17,6 +17,7 @@ import { useWishlist } from '@/context/WishlistContext';
 import { useCart } from '@/context/CartContext';
 import { SOCIAL_LINKS } from '@/data/social';
 import { InstagramIcon, FacebookIcon, PinterestIcon, YoutubeIcon, ThreadsIcon } from './Footer';
+import { useWhatsAppUrl } from '@/lib/whatsapp';
 
 interface MobileNavProps {
   isOpen: boolean;
@@ -36,6 +37,7 @@ interface NavSection {
 }
 
 export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
+  const whatsappUrl = useWhatsAppUrl();
   const { wishlistCount } = useWishlist();
   const { itemCount } = useCart();
 
@@ -126,7 +128,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
       label: 'Contact Us',
       subItems: [
         { label: 'Contact Page & Inquiries', href: '/contact', isFeatured: true },
-        { label: 'WhatsApp (+91 86046 47888)', href: 'https://wa.me/918604647888' },
+        { label: 'WhatsApp (+91 86046 47888)', href: whatsappUrl },
         { label: 'Send Email', href: 'mailto:zimorindia@gmail.com' },
         { label: 'Track Your Order', href: '/account/orders' },
         { label: 'Policy & Customer Guidelines', href: '/policy' },

@@ -28,6 +28,7 @@ const FOLDERS = [
   'zimor/about',
   'zimor/banners',
   'zimor/videos',
+  'zimor/reels',
 ];
 
 export default function AdminMediaPage() {
@@ -139,7 +140,7 @@ export default function AdminMediaPage() {
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#B44220] hover:bg-[#9B381B] text-[#F7F5F2] text-xs font-semibold uppercase tracking-wider rounded shadow-xs transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#5146E5] hover:bg-[#4338CA] text-[#F7F5F2] text-xs font-semibold uppercase tracking-wider rounded shadow-xs transition-colors"
           >
             <Upload className="w-4 h-4" />
             <span>{uploading ? 'Uploading...' : 'Upload Asset'}</span>
@@ -165,7 +166,7 @@ export default function AdminMediaPage() {
       <div className={`p-4 rounded-lg border ${cardBg}`}>
         <p className={`text-[10px] uppercase tracking-wider font-semibold mb-3 flex items-center gap-1.5 ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'
           }`}>
-          <Folder className="w-3.5 h-3.5 text-[#B44220]" />
+          <Folder className="w-3.5 h-3.5 text-[#5146E5]" />
           <span>Cloudinary Storage Hierarchy</span>
         </p>
         <div className="flex flex-wrap gap-2">
@@ -176,10 +177,10 @@ export default function AdminMediaPage() {
                 key={folder}
                 onClick={() => setSelectedFolder(folder)}
                 className={`px-3 py-1.5 rounded text-xs font-mono transition-colors border ${isActive
-                  ? 'bg-[#B44220] text-[#F7F5F2] border-[#B44220] font-medium shadow-xs'
+                  ? 'bg-[#5146E5] text-[#F7F5F2] border-[#5146E5] font-medium shadow-xs'
                   : isDark
-                    ? 'bg-[#1E1C1A] text-[#B4B4B4] border-[#36312C] hover:border-[#B44220]'
-                    : 'bg-[#FAF7F2] text-[#5A534E] border-[#E5DFD7] hover:border-[#B44220]'
+                    ? 'bg-[#1E1C1A] text-[#B4B4B4] border-[#36312C] hover:border-[#5146E5]'
+                    : 'bg-[#FAF7F2] text-[#5A534E] border-[#E5DFD7] hover:border-[#5146E5]'
                   }`}
               >
                 {folder}/
@@ -193,7 +194,7 @@ export default function AdminMediaPage() {
       <div className={`rounded-lg p-5 border ${cardBg}`}>
         <div className="flex items-center justify-between mb-4">
           <span className={`text-xs ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
-            Current Directory: <span className="font-mono text-[#B44220] dark:text-[#E07A5F]">{selectedFolder}/</span> ({mediaList.length} items)
+            Current Directory: <span className="font-mono text-[#5146E5] dark:text-[#818CF8]">{selectedFolder}/</span> ({mediaList.length} items)
           </span>
         </div>
 
@@ -201,7 +202,7 @@ export default function AdminMediaPage() {
           <div className={`p-12 text-center text-xs ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>Loading media library...</div>
         ) : mediaList.length === 0 ? (
           <div className={`p-16 text-center text-xs space-y-2 ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
-            <ImageIcon className="w-8 h-8 text-[#B44220] mx-auto mb-2 opacity-60" />
+            <ImageIcon className="w-8 h-8 text-[#5146E5] mx-auto mb-2 opacity-60" />
             <p>No media found in {selectedFolder}/</p>
             <p className="opacity-70">Click &ldquo;Upload Asset&rdquo; above to add images or reels.</p>
           </div>
@@ -211,13 +212,13 @@ export default function AdminMediaPage() {
               <div
                 key={item.id}
                 className={`group rounded overflow-hidden flex flex-col justify-between border transition-all ${isDark
-                  ? 'bg-[#1E1C1A] border-[#36312C] hover:border-[#B44220]'
-                  : 'bg-[#FAF7F2] border-[#E5DFD7] hover:border-[#B44220]'
+                  ? 'bg-[#1E1C1A] border-[#36312C] hover:border-[#5146E5]'
+                  : 'bg-[#FAF7F2] border-[#E5DFD7] hover:border-[#5146E5]'
                   }`}
               >
                 <div className="relative aspect-square w-full overflow-hidden flex items-center justify-center bg-black/10">
                   {item.mimeType.startsWith('video') ? (
-                    <div className="w-full h-full flex flex-col items-center justify-center text-[#B44220]">
+                    <div className="w-full h-full flex flex-col items-center justify-center text-[#5146E5]">
                       <Video className="w-8 h-8 mb-1" />
                       <span className="text-[10px] uppercase font-mono">{item.mimeType.split('/')[1]}</span>
                     </div>

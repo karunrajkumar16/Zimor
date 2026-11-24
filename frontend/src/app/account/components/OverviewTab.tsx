@@ -170,7 +170,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
                     <div className="text-xs space-y-0.5">
                       <p className="font-medium text-[#000000]">{item.name}</p>
                       <p className="text-[#777777] text-[11px]">
-                        Qty: {item.quantity} {item.color ? `• ${item.color}` : ''}
+                        Qty: {item.quantity}
                       </p>
                     </div>
                   </div>

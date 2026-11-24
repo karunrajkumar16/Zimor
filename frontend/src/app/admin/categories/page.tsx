@@ -111,7 +111,7 @@ export default function AdminCategoriesPage() {
         </div>
         <button
           onClick={handleOpenAdd}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-[#B44220] hover:bg-[#9B381B] text-[#F7F5F2] text-xs font-semibold uppercase tracking-wider rounded shadow-xs transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-[#5146E5] hover:bg-[#4338CA] text-[#F7F5F2] text-xs font-semibold uppercase tracking-wider rounded shadow-xs transition-colors"
         >
           <Plus className="w-4 h-4" />
           <span>Add New Category</span>
@@ -149,7 +149,7 @@ export default function AdminCategoriesPage() {
             >
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <div className={`w-9 h-9 rounded flex items-center justify-center border ${isDark ? 'bg-[#1E1C1A] border-[#36312C] text-[#B44220]' : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#B44220]'
+                  <div className={`w-9 h-9 rounded flex items-center justify-center border ${isDark ? 'bg-[#1E1C1A] border-[#36312C] text-[#5146E5]' : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#5146E5]'
                     }`}>
                     <Tag className="w-4 h-4" />
                   </div>
@@ -218,7 +218,7 @@ export default function AdminCategoriesPage() {
                       slug: editCategory.slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
                     });
                   }}
-                  className={`w-full rounded px-3 py-2 border focus:outline-none focus:border-[#B44220] transition-colors ${isDark
+                  className={`w-full rounded px-3 py-2 border focus:outline-none focus:border-[#5146E5] transition-colors ${isDark
                     ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA]'
                     : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F]'
                     }`}
@@ -232,7 +232,7 @@ export default function AdminCategoriesPage() {
                   required
                   value={editCategory.slug || ''}
                   onChange={(e) => setEditCategory({ ...editCategory, slug: e.target.value })}
-                  className={`w-full rounded px-3 py-2 border focus:outline-none focus:border-[#B44220] transition-colors ${isDark
+                  className={`w-full rounded px-3 py-2 border focus:outline-none focus:border-[#5146E5] transition-colors ${isDark
                     ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA]'
                     : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F]'
                     }`}
@@ -245,7 +245,7 @@ export default function AdminCategoriesPage() {
                   rows={3}
                   value={editCategory.description || ''}
                   onChange={(e) => setEditCategory({ ...editCategory, description: e.target.value })}
-                  className={`w-full rounded px-3 py-2 border focus:outline-none focus:border-[#B44220] transition-colors ${isDark
+                  className={`w-full rounded px-3 py-2 border focus:outline-none focus:border-[#5146E5] transition-colors ${isDark
                     ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA]'
                     : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F]'
                     }`}
@@ -267,7 +267,7 @@ export default function AdminCategoriesPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-1.5 bg-[#B44220] hover:bg-[#9B381B] text-[#F7F5F2] font-semibold rounded shadow-xs transition-colors"
+                  className="px-4 py-1.5 bg-[#5146E5] hover:bg-[#4338CA] text-[#F7F5F2] font-semibold rounded shadow-xs transition-colors"
                 >
                   {saving ? 'Saving...' : 'Save Category'}
                 </button>

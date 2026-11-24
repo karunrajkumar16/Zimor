@@ -124,9 +124,6 @@ export default function CartPage() {
                           </div>
 
                           <div className="text-xs text-ink-muted space-y-0.5 mt-1">
-                            <p>
-                              Color: <strong className="text-ink font-semibold">{item.selectedColor}</strong>
-                            </p>
                             <p>Size: {item.selectedSize}</p>
                           </div>
                         </div>

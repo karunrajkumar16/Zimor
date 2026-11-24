@@ -426,7 +426,7 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                     <div className="space-y-0.5">
                       <p className="font-medium text-xs sm:text-sm text-[#000000]">{item.name}</p>
                       <p className="text-[11px] text-[#777777]">
-                        {item.color ? `Color: ${item.color} • ` : ''}Quantity: {item.quantity}
+                        Quantity: {item.quantity}
                       </p>
                     </div>
                   </div>
@@ -693,9 +693,9 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                   >
                     <option value="Damaged on Arrival (Transit Damage)">Damaged on Arrival (Transit Damage)</option>
                     <option value="Manufacturing Defect / Stitching / Hardware">Manufacturing Defect / Stitching / Hardware</option>
-                    <option value="Incorrect Item / Color Delivered">Incorrect Item / Color Delivered</option>
+                    <option value="Incorrect Item Delivered">Incorrect Item Delivered</option>
                     <option value="Size / Dimension Mismatch (Exchange)">Size / Dimension Mismatch (Exchange)</option>
-                    <option value="Style / Color Preference (Exchange)">Style / Color Preference (Exchange)</option>
+                    <option value="Style Preference (Exchange)">Style Preference (Exchange)</option>
                   </select>
                 </div>
 

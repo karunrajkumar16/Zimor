@@ -27,11 +27,11 @@ const PILLARS: PolenePillar[] = [
     eyebrow: '',
     name: 'EVERYDAY',
     subtitle: 'For the everyday.',
-    silhouette: 'The Delo Collection',
+    silhouette: 'The Classic Shoulder Bag',
     href: '/shop?section=everyday#everyday',
     editorialImage: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917846/zimor/lifestyle/brandgirl3.webp',
     macroImage: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917840/zimor/products/classic-4.webp',
-    icon: Briefcase,
+    icon: Sparkles,
   },
   {
     id: 'work',
@@ -40,7 +40,7 @@ const PILLARS: PolenePillar[] = [
     eyebrow: '',
     name: 'WORK',
     subtitle: 'For what lies ahead.',
-    silhouette: 'The Rabota Collection',
+    silhouette: 'The Rabota & Delo Totes',
     href: '/shop?section=work#work',
     editorialImage: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917850/zimor/about/image.webp',
     macroImage: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917833/zimor/products/rabota-4.webp',
@@ -53,11 +53,11 @@ const PILLARS: PolenePillar[] = [
     eyebrow: '',
     name: 'TRAVEL',
     subtitle: 'For places beyond.',
-    silhouette: 'The Classic Collection',
+    silhouette: 'The Rabota & Delo Totes',
     href: '/shop?section=travel#travel',
     editorialImage: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917845/zimor/lifestyle/brandgirl2.webp',
-    macroImage: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917840/zimor/products/classic-4.webp',
-    icon: Sparkles,
+    macroImage: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp',
+    icon: Briefcase,
   },
 ];
 
@@ -135,7 +135,7 @@ export const LifestyleDiscovery: React.FC = () => {
         isVisibleRef.current = entry.isIntersecting;
         if (entry.isIntersecting) {
           updateParallax();
-          craftVideoRef.current?.play().catch(() => {});
+          craftVideoRef.current?.play().catch(() => { });
         } else {
           craftVideoRef.current?.pause();
         }
@@ -271,9 +271,8 @@ export const LifestyleDiscovery: React.FC = () => {
               key={pillar.id}
               type="button"
               onClick={() => scrollToPillar(idx)}
-              className={`h-1.5 transition-all duration-300 rounded-full ${
-                activeMobileIndex === idx ? 'w-8 bg-ink' : 'w-2 bg-line hover:bg-ink-muted'
-              }`}
+              className={`h-1.5 transition-all duration-300 rounded-full ${activeMobileIndex === idx ? 'w-8 bg-ink' : 'w-2 bg-line hover:bg-ink-muted'
+                }`}
               aria-label={`Go to slide - ${pillar.name}`}
             />
           ))}

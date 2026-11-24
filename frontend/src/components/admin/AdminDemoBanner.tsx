@@ -107,7 +107,7 @@ export default function AdminDemoBanner() {
         }`}
       >
         <div className="flex items-center gap-2.5">
-          <Database className="w-4 h-4 text-[#B44220] shrink-0" />
+          <Database className="w-4 h-4 text-[#5146E5] shrink-0" />
           <div>
             <span className="font-semibold text-[#24211F] dark:text-[#E8E1DA]">
               Production Mode Active
@@ -120,7 +120,7 @@ export default function AdminDemoBanner() {
         <button
           onClick={handleSeed}
           disabled={loading}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#B44220] text-white hover:bg-[#96371B] transition-colors font-medium text-[11px] shrink-0"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#5146E5] text-white hover:bg-[#4338CA] transition-colors font-medium text-[11px] shrink-0"
         >
           <Sparkles className="w-3.5 h-3.5" />
           <span>{loading ? 'Generating...' : 'Load 7-Day Demo Dataset'}</span>
@@ -141,14 +141,14 @@ export default function AdminDemoBanner() {
     <div
       className={`mb-6 p-4 rounded-xl border transition-all ${
         isDark
-          ? 'bg-[#2A231F] border-[#663A26]/50 text-[#E8E1DA]'
-          : 'bg-[#FDF6F0] border-[#E2B7A0] text-[#4A382A]'
+          ? 'bg-[#5146E5]/10 border-[#5146E5]/30 text-[#E0E7FF]'
+          : 'bg-[#EEF0FF] border-[#5146E5]/30 text-[#1E1B4B]'
       }`}
     >
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono tracking-wider uppercase bg-[#B44220] text-white">
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono tracking-wider uppercase bg-[#5146E5] text-white">
               7-Day Demo Dataset Active
             </span>
             <span className="flex items-center gap-1 text-[11px] font-medium opacity-80">
@@ -156,7 +156,7 @@ export default function AdminDemoBanner() {
               Auto-expires in {daysRemaining}
             </span>
             <span className="opacity-40">•</span>
-            <span className="text-[11px] font-mono text-[#B44220] dark:text-[#E07A5F] font-semibold">
+            <span className="text-[11px] font-mono text-[#5146E5] dark:text-[#818CF8] font-semibold">
               Strictly Isolated (isDemo: true)
             </span>
           </div>

@@ -5,7 +5,7 @@ export interface InventoryMovementDocument extends Document {
   id: string;
   productId: string;
   productName: string;
-  variationColor: string;
+  variationColor?: string;
   type: 'SALE_DEDUCTION' | 'RETURN_RESTOCK' | 'QUALITY_HOLD' | 'ATELIER_INWARD';
   quantity: number;
   balanceAfter: number;
@@ -20,7 +20,7 @@ const InventoryMovementSchema = new Schema(
   {
     productId: { type: String, required: true, index: true },
     productName: { type: String, required: true },
-    variationColor: { type: String, required: true },
+    variationColor: { type: String, required: false },
     type: {
       type: String,
       enum: ['SALE_DEDUCTION', 'RETURN_RESTOCK', 'QUALITY_HOLD', 'ATELIER_INWARD'],

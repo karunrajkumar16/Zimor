@@ -25,6 +25,12 @@ export interface Customer {
   avatar?: string;
   authProvider?: 'google' | 'local';
   passwordHash?: string;
+  totalSpent?: number;
+  liveSpent?: number;
+  testSpent?: number;
+  orderCount?: number;
+  liveOrderCount?: number;
+  testOrderCount?: number;
   addresses: Address[];
   orders: string[];
   createdAt: string;

@@ -29,14 +29,6 @@ import {
 import { apiFetch } from '@/lib/api';
 import { useAdminTheme } from '@/context/AdminThemeContext';
 
-interface BagColorStat {
-  name: string;
-  hex: string;
-  units: number;
-  revenue: number;
-  percentage: number;
-}
-
 interface PeriodDataPoint {
   label: string;
   date: string;
@@ -59,8 +51,6 @@ interface BagAnalyticsItem {
   marketShare: number;
   rating: number;
   stockHealth: 'Optimal' | 'Low' | 'Critical';
-  colors: BagColorStat[];
-  colorBreakdown: string;
   timeSeries: {
     daily: { label: string; date: string; units: number; revenue: number }[];
     weekly: { label: string; date: string; units: number; revenue: number }[];
@@ -268,6 +258,17 @@ export default function AdminDashboardPage() {
     }).format(val);
   };
 
+  // Concise X-axis labels to prevent chart label-to-table overlap
+  const formatComparativeChartLabel = (name: string) => {
+    const clean = name.replace(/^ZIMOR\s+/i, '');
+    if (clean.includes(' — ')) {
+      const parts = clean.split(' — ');
+      const base = parts[0].replace(/\s+(BAG|TOTE)$/i, '').replace(/^CLASSIC\s+SHOULDER$/i, 'CLASSIC');
+      return `${base} (${parts[1]})`;
+    }
+    return clean.replace(/\s+BAG$/i, '');
+  };
+
   // GRAPH 3 CLUSTERED COLUMN CALCULATIONS
   // All 6 products from MongoDB Atlas
   const allComparativeProducts = useMemo(() => {
@@ -299,7 +300,7 @@ export default function AdminDashboardPage() {
   // Color mapping using ZIMOR's palette (Terracotta, Muted Copper, Warm Taupe, Ash Grey)
   const periodColors = useMemo(() => {
     return [
-      { color: '#B44220', name: 'Terracotta', border: '#8A2E14' },
+      { color: '#5146E5', name: 'Terracotta', border: '#4338CA' },
       { color: '#C86D48', name: 'Muted Copper', border: '#A65534' },
       { color: '#8F8174', name: 'Warm Taupe', border: '#6E6257' },
       { color: isDark ? '#9E968D' : '#4A4540', name: 'Ash Grey', border: isDark ? '#7E766D' : '#332F2C' },
@@ -352,22 +353,15 @@ export default function AdminDashboardPage() {
     <div className="space-y-8 pb-12">
       {/* 1. TOP DASHBOARD CONTROL & FILTER BAR */}
       <div
-        className={`p-5 rounded-xl border flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-colors ${isDark
-          ? 'bg-[#24211F] border-[#36312C]'
-          : 'bg-[#FFFFFF] border-[#E5DFD7]'
-          }`}
+        className={`p-6 rounded-xl border flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-colors ${
+          isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-white border-[#E5DFD7]'
+        }`}
       >
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-lg font-bold tracking-tight">Executive Analytics & Intelligence</h1>
-            <span
-              className={`px-2 py-0.5 rounded text-[10px] font-mono tracking-wider font-semibold uppercase ${isDark ? 'bg-[#B44220]/20 text-[#E8A593]' : 'bg-[#B44220]/10 text-[#B44220]'
-                }`}
-            >
-              Audi CRM Framework
-            </span>
-          </div>
-          <p className={`text-xs mt-1 ${isDark ? 'text-[#8A837C]' : 'text-[#7A7269]'}`}>
+          <h1 className="text-lg font-semibold text-[#1C2434] dark:text-white tracking-tight">
+            Executive Analytics & Intelligence
+          </h1>
+          <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-1">
             Live transaction telemetry, multi-product sales performance & user metrics.
           </p>
         </div>
@@ -376,8 +370,9 @@ export default function AdminDashboardPage() {
         <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
           {/* Segmented Date Range Picker */}
           <div
-            className={`flex items-center p-1 rounded-lg border text-xs font-mono ${isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#F7F5F2] border-[#E5DFD7]'
-              }`}
+            className={`inline-flex items-center p-1 rounded-lg border text-xs ${
+              isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#F1F5F9] border-transparent'
+            }`}
           >
             {[
               { id: '7d', label: '7D' },
@@ -388,13 +383,15 @@ export default function AdminDashboardPage() {
             ].map((tab) => (
               <button
                 key={tab.id}
+                type="button"
                 onClick={() => setDateRange(tab.id as any)}
-                className={`px-2.5 py-1 rounded transition-colors text-xs font-medium ${dateRange === tab.id
-                  ? 'bg-[#B44220] text-white font-semibold'
-                  : isDark
-                    ? 'text-[#8A837C] hover:text-[#E8E1DA]'
-                    : 'text-[#6E6760] hover:text-[#24211F]'
-                  }`}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+                  dateRange === tab.id
+                    ? 'bg-[#5146E5] text-white shadow-xs font-medium'
+                    : isDark
+                    ? 'text-[#94A3B8] hover:text-white'
+                    : 'text-[#64748B] hover:text-[#1C2434]'
+                }`}
               >
                 {tab.label}
               </button>
@@ -403,16 +400,18 @@ export default function AdminDashboardPage() {
 
           {/* Sync Button */}
           <button
+            type="button"
             onClick={() => fetchStats(dateRange)}
             disabled={loading}
-            className={`p-2 rounded-lg border flex items-center justify-center transition-colors ${isDark
-              ? 'bg-[#191715] border-[#36312C] text-[#E8E1DA] hover:border-[#8A837C]'
-              : 'bg-[#F7F5F2] border-[#E5DFD7] text-[#24211F] hover:border-[#8C837A]'
-              }`}
+            className={`p-2 rounded-lg border flex items-center justify-center transition-colors cursor-pointer ${
+              isDark
+                ? 'bg-[#191715] border-[#36312C] text-[#94A3B8] hover:text-white hover:border-[#4A4540]'
+                : 'bg-white border-[#E2E8F0] text-[#64748B] hover:text-[#1C2434] hover:border-[#CBD5E1]'
+            }`}
             title="Refresh analytics telemetry"
             aria-label="Refresh analytics telemetry"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#B44220]' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-[#5146E5]' : ''}`} />
           </button>
         </div>
       </div>
@@ -436,39 +435,34 @@ export default function AdminDashboardPage() {
       {/* 2. OVERVIEW SECTION — 5 KEY BUSINESS METRICS */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2
-            className={`text-xs font-mono uppercase tracking-widest font-semibold ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'
-              }`}
-          >
+          <h2 className="text-sm font-semibold text-[#1C2434] dark:text-[#E2E8F0]">
             Executive Performance Overview
           </h2>
-          <span className={`text-[10px] font-mono ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
-            Comparison: vs. Prior Period ({dateRange.toUpperCase()})
+          <span className="text-xs text-[#64748B] dark:text-[#94A3B8]">
+            vs. prior period ({dateRange.toUpperCase()})
           </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
           {/* Metric 1: Total Revenue */}
           <div
-            className={`p-4 rounded-xl border transition-all ${isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
-              }`}
+            className={`p-5 rounded-xl border transition-all ${
+              isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-white border-[#E5DFD7]'
+            }`}
           >
             <div className="flex items-center justify-between">
-              <span className={`text-[10px] font-mono uppercase tracking-wider font-semibold ${isDark ? 'text-[#8A837C]' : 'text-[#7A7269]'}`}>
+              <span className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8]">
                 Total Revenue
               </span>
-              <span
-                className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold ${isDark ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-500/10 text-emerald-700'
-                  }`}
-              >
+              <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 tabular-nums">
                 {data?.metrics.revenueGrowth || '0.0%'}
               </span>
             </div>
-            <div className="mt-2.5">
-              <p className="text-xl font-bold font-mono tracking-tight tabular-nums">
+            <div className="mt-2">
+              <p className="text-2xl font-bold text-[#1C2434] dark:text-white tracking-tight tabular-nums">
                 {data ? formatINR(data.metrics.totalRevenue) : '₹0'}
               </p>
-              <p className={`text-[10px] mt-1 truncate ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
+              <p className="text-xs text-[#94A3B8] dark:text-[#8A837C] mt-1 truncate">
                 Verified successful payments
               </p>
             </div>
@@ -476,25 +470,23 @@ export default function AdminDashboardPage() {
 
           {/* Metric 2: Total Orders */}
           <div
-            className={`p-4 rounded-xl border transition-all ${isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
-              }`}
+            className={`p-5 rounded-xl border transition-all ${
+              isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-white border-[#E5DFD7]'
+            }`}
           >
             <div className="flex items-center justify-between">
-              <span className={`text-[10px] font-mono uppercase tracking-wider font-semibold ${isDark ? 'text-[#8A837C]' : 'text-[#7A7269]'}`}>
+              <span className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8]">
                 Total Orders
               </span>
-              <span
-                className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold ${isDark ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-500/10 text-emerald-700'
-                  }`}
-              >
+              <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 tabular-nums">
                 {data?.metrics.orderGrowth || '0.0%'}
               </span>
             </div>
-            <div className="mt-2.5">
-              <p className="text-xl font-bold font-mono tracking-tight tabular-nums">
+            <div className="mt-2">
+              <p className="text-2xl font-bold text-[#1C2434] dark:text-white tracking-tight tabular-nums">
                 {data ? data.metrics.totalOrders : '0'}
               </p>
-              <p className={`text-[10px] mt-1 truncate ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
+              <p className="text-xs text-[#94A3B8] dark:text-[#8A837C] mt-1 truncate">
                 Dispatched & confirmed units
               </p>
             </div>
@@ -502,25 +494,23 @@ export default function AdminDashboardPage() {
 
           {/* Metric 3: Average Order Value (AOV) */}
           <div
-            className={`p-4 rounded-xl border transition-all ${isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
-              }`}
+            className={`p-5 rounded-xl border transition-all ${
+              isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-white border-[#E5DFD7]'
+            }`}
           >
             <div className="flex items-center justify-between">
-              <span className={`text-[10px] font-mono uppercase tracking-wider font-semibold ${isDark ? 'text-[#8A837C]' : 'text-[#7A7269]'}`}>
+              <span className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8]">
                 Avg. Order Value
               </span>
-              <span
-                className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold ${isDark ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-500/10 text-emerald-700'
-                  }`}
-              >
+              <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 tabular-nums">
                 {data?.metrics.aovGrowth || '0.0%'}
               </span>
             </div>
-            <div className="mt-2.5">
-              <p className="text-xl font-bold font-mono tracking-tight tabular-nums">
+            <div className="mt-2">
+              <p className="text-2xl font-bold text-[#1C2434] dark:text-white tracking-tight tabular-nums">
                 {data ? formatINR(data.metrics.averageOrderValue) : '₹0'}
               </p>
-              <p className={`text-[10px] mt-1 truncate ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
+              <p className="text-xs text-[#94A3B8] dark:text-[#8A837C] mt-1 truncate">
                 Net yield per client checkout
               </p>
             </div>
@@ -528,25 +518,23 @@ export default function AdminDashboardPage() {
 
           {/* Metric 4: Total Customers */}
           <div
-            className={`p-4 rounded-xl border transition-all ${isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
-              }`}
+            className={`p-5 rounded-xl border transition-all ${
+              isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-white border-[#E5DFD7]'
+            }`}
           >
             <div className="flex items-center justify-between">
-              <span className={`text-[10px] font-mono uppercase tracking-wider font-semibold ${isDark ? 'text-[#8A837C]' : 'text-[#7A7269]'}`}>
+              <span className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8]">
                 Total Customers
               </span>
-              <span
-                className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold ${isDark ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-500/10 text-emerald-700'
-                  }`}
-              >
+              <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 tabular-nums">
                 {data?.metrics.customerGrowth || '0.0%'}
               </span>
             </div>
-            <div className="mt-2.5">
-              <p className="text-xl font-bold font-mono tracking-tight tabular-nums">
+            <div className="mt-2">
+              <p className="text-2xl font-bold text-[#1C2434] dark:text-white tracking-tight tabular-nums">
                 {data ? data.metrics.totalCustomers : '0'}
               </p>
-              <p className={`text-[10px] mt-1 truncate ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
+              <p className="text-xs text-[#94A3B8] dark:text-[#8A837C] mt-1 truncate">
                 Registered luxury users
               </p>
             </div>
@@ -554,25 +542,23 @@ export default function AdminDashboardPage() {
 
           {/* Metric 5: Conversion Rate */}
           <div
-            className={`p-4 rounded-xl border transition-all ${isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
-              }`}
+            className={`p-5 rounded-xl border transition-all ${
+              isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-white border-[#E5DFD7]'
+            }`}
           >
             <div className="flex items-center justify-between">
-              <span className={`text-[10px] font-mono uppercase tracking-wider font-semibold ${isDark ? 'text-[#8A837C]' : 'text-[#7A7269]'}`}>
+              <span className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8]">
                 Conversion Rate
               </span>
-              <span
-                className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold ${isDark ? 'bg-[#B44220]/20 text-[#E8A593]' : 'bg-[#B44220]/10 text-[#B44220]'
-                  }`}
-              >
+              <span className="text-xs font-medium text-[#5146E5] dark:text-[#818CF8] tabular-nums">
                 {data?.metrics.conversionGrowth || '0.0%'}
               </span>
             </div>
-            <div className="mt-2.5">
-              <p className="text-xl font-bold font-mono tracking-tight tabular-nums">
+            <div className="mt-2">
+              <p className="text-2xl font-bold text-[#1C2434] dark:text-white tracking-tight tabular-nums">
                 {data ? `${data.metrics.conversionRate}%` : '0.0%'}
               </p>
-              <p className={`text-[10px] mt-1 truncate ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
+              <p className="text-xs text-[#94A3B8] dark:text-[#8A837C] mt-1 truncate">
                 Atelier session-to-order ratio
               </p>
             </div>
@@ -584,25 +570,26 @@ export default function AdminDashboardPage() {
       <section className="space-y-6">
         {/* GRAPH 1: OVERALL SALES – AREA CHART */}
         <div
-          className={`p-5 rounded-xl border transition-all ${isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
-            }`}
+          className={`p-6 rounded-xl border transition-all ${
+            isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-white border-[#E5DFD7]'
+          }`}
         >
           {/* Card Header & Timeframe Switcher */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-inherit">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-[#E5DFD7] dark:border-[#36312C]">
             <div>
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#B44220]" />
-                <h3 className="text-sm font-bold tracking-tight">Overall Sales Trajectory</h3>
-              </div>
-              <p className={`text-xs mt-0.5 ${isDark ? 'text-[#8A837C]' : 'text-[#7A7269]'}`}>
+              <h3 className="text-base font-semibold text-[#1C2434] dark:text-[#E2E8F0] tracking-tight">
+                Overall Sales Trajectory
+              </h3>
+              <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-0.5">
                 Revenue performance over time with dual-curve previous period comparison.
               </p>
             </div>
 
             {/* Timeframe Filter Tabs */}
             <div
-              className={`flex items-center p-1 rounded-lg border text-xs font-mono ${isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#F7F5F2] border-[#E5DFD7]'
-                }`}
+              className={`inline-flex items-center p-1 rounded-lg border text-xs ${
+                isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#F1F5F9] border-transparent'
+              }`}
             >
               {[
                 { id: 'daily', label: 'Daily' },
@@ -612,16 +599,18 @@ export default function AdminDashboardPage() {
               ].map((tab) => (
                 <button
                   key={tab.id}
+                  type="button"
                   onClick={() => {
                     setOverallPeriod(tab.id as any);
                     setHoveredOverallIdx(null);
                   }}
-                  className={`px-3 py-1 rounded transition-colors text-xs font-medium ${overallPeriod === tab.id
-                    ? 'bg-[#B44220] text-white font-semibold'
-                    : isDark
-                      ? 'text-[#8A837C] hover:text-[#E8E1DA]'
-                      : 'text-[#6E6760] hover:text-[#24211F]'
-                    }`}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+                    overallPeriod === tab.id
+                      ? 'bg-[#5146E5] text-white shadow-xs font-medium'
+                      : isDark
+                      ? 'text-[#94A3B8] hover:text-white'
+                      : 'text-[#64748B] hover:text-[#1C2434]'
+                  }`}
                 >
                   {tab.label}
                 </button>
@@ -630,39 +619,39 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Revenue Indicators Strip */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-4 border-b border-inherit">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 py-4 border-b border-[#E5DFD7] dark:border-[#36312C]">
             <div>
-              <span className={`text-[10px] font-mono uppercase tracking-wider block ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
+              <span className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8] block">
                 Period Revenue
               </span>
-              <span className="text-sm font-bold font-mono tracking-tight tabular-nums block mt-0.5">
+              <span className="text-lg font-bold text-[#1C2434] dark:text-white tracking-tight tabular-nums block mt-0.5">
                 {formatINR(overallTotalRevenue)}
               </span>
             </div>
             <div>
-              <span className={`text-[10px] font-mono uppercase tracking-wider block ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
+              <span className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8] block">
                 Prior Period
               </span>
-              <span className={`text-sm font-mono tracking-tight tabular-nums block mt-0.5 ${isDark ? 'text-[#8A837C]' : 'text-[#7A7269]'}`}>
+              <span className="text-lg font-bold text-[#64748B] dark:text-[#94A3B8] tracking-tight tabular-nums block mt-0.5">
                 {formatINR(overallPrevTotalRevenue)}
               </span>
             </div>
             <div>
-              <span className={`text-[10px] font-mono uppercase tracking-wider block ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
+              <span className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8] block">
                 Net Variance
               </span>
-              <span className="text-sm font-bold font-mono tracking-tight text-[#B44220] block mt-0.5">
+              <span className="text-lg font-bold text-[#5146E5] dark:text-[#818CF8] tracking-tight tabular-nums block mt-0.5">
                 {overallGrowthVariance}
               </span>
             </div>
-            <div className="flex items-center gap-4 text-xs font-mono">
+            <div className="flex items-center gap-4 text-xs self-center">
               <div className="flex items-center gap-1.5">
-                <span className="w-3 h-0.5 bg-[#B44220]" />
-                <span className={isDark ? 'text-[#E8E1DA]' : 'text-[#24211F]'}>Current</span>
+                <span className="w-2.5 h-0.5 rounded-full bg-[#5146E5]" />
+                <span className="text-xs font-medium text-[#1C2434] dark:text-[#E2E8F0]">Current</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-3 h-0.5 border-t border-dashed border-[#8F8174]" />
-                <span className={isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}>Previous</span>
+                <span className="w-2.5 h-0.5 border-t border-dashed border-[#8F8174]" />
+                <span className="text-xs text-[#64748B] dark:text-[#94A3B8]">Previous</span>
               </div>
             </div>
           </div>
@@ -738,7 +727,7 @@ export default function AdminDashboardPage() {
 
                       <path
                         d={currentAreaPath}
-                        fill="#B44220"
+                        fill="#5146E5"
                         fillOpacity={isDark ? 0.12 : 0.08}
                       />
 
@@ -753,7 +742,7 @@ export default function AdminDashboardPage() {
                       <path
                         d={currentLinePath}
                         fill="none"
-                        stroke="#B44220"
+                        stroke="#5146E5"
                         strokeWidth="2.2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -766,7 +755,7 @@ export default function AdminDashboardPage() {
                           cy={c.y}
                           r={hoveredOverallIdx === i ? 4.5 : 2.5}
                           fill={isDark ? '#191715' : '#FFFFFF'}
-                          stroke="#B44220"
+                          stroke="#5146E5"
                           strokeWidth={hoveredOverallIdx === i ? 2.5 : 1.8}
                           className="transition-all cursor-pointer"
                           onMouseEnter={() => setHoveredOverallIdx(i)}
@@ -780,7 +769,7 @@ export default function AdminDashboardPage() {
                           y={chartH - 4}
                           textAnchor="middle"
                           className={`text-[10px] font-mono fill-current ${hoveredOverallIdx === i
-                            ? 'text-[#B44220] font-bold'
+                            ? 'text-[#5146E5] font-bold'
                             : isDark
                               ? 'text-[#8A837C]'
                               : 'text-[#8C837A]'
@@ -796,7 +785,7 @@ export default function AdminDashboardPage() {
                           y1={paddingY}
                           x2={activeHover.x}
                           y2={chartH - paddingY}
-                          stroke="#B44220"
+                          stroke="#5146E5"
                           strokeWidth="1"
                           strokeDasharray="2 2"
                         />
@@ -814,38 +803,31 @@ export default function AdminDashboardPage() {
             {/* Interactive Tooltip Card */}
             {hoveredOverallIdx !== null && overallSeries[hoveredOverallIdx] && (
               <div
-                className={`mt-3 p-3 rounded-lg border text-xs flex flex-wrap items-center justify-between gap-4 font-mono ${isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#FAF8F5] border-[#E8E2D9]'
-                  }`}
+                className={`mt-4 px-4 py-3 rounded-lg border text-xs flex flex-wrap items-center justify-between gap-4 ${
+                  isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#F8FAFC] border-[#E2E8F0]'
+                }`}
               >
                 <div>
-                  <span className={`text-[10px] uppercase block ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
-                    Timeline Period
-                  </span>
-                  <span className="font-bold text-sm block">
+                  <span className="text-xs text-[#64748B] dark:text-[#94A3B8] block">Timeline Period</span>
+                  <span className="font-semibold text-sm text-[#1C2434] dark:text-white block mt-0.5">
                     {overallSeries[hoveredOverallIdx].label} ({overallSeries[hoveredOverallIdx].date})
                   </span>
                 </div>
                 <div>
-                  <span className={`text-[10px] uppercase block ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
-                    Current Revenue
-                  </span>
-                  <span className="font-bold text-[#B44220] block">
+                  <span className="text-xs text-[#64748B] dark:text-[#94A3B8] block">Current Revenue</span>
+                  <span className="font-semibold text-sm text-[#5146E5] dark:text-[#818CF8] block mt-0.5 tabular-nums">
                     {formatINR(overallSeries[hoveredOverallIdx].revenue)}
                   </span>
                 </div>
                 <div>
-                  <span className={`text-[10px] uppercase block ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
-                    Prior Period
-                  </span>
-                  <span className={`block ${isDark ? 'text-[#8A837C]' : 'text-[#7A7269]'}`}>
+                  <span className="text-xs text-[#64748B] dark:text-[#94A3B8] block">Prior Period</span>
+                  <span className="font-semibold text-sm text-[#64748B] dark:text-[#94A3B8] block mt-0.5 tabular-nums">
                     {formatINR(overallSeries[hoveredOverallIdx].previousRevenue)}
                   </span>
                 </div>
                 <div>
-                  <span className={`text-[10px] uppercase block ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
-                    Order Volume
-                  </span>
-                  <span className="font-bold block">
+                  <span className="text-xs text-[#64748B] dark:text-[#94A3B8] block">Order Volume</span>
+                  <span className="font-semibold text-sm text-[#1C2434] dark:text-white block mt-0.5 tabular-nums">
                     {overallSeries[hoveredOverallIdx].orders} orders ({overallSeries[hoveredOverallIdx].units} units)
                   </span>
                 </div>
@@ -856,26 +838,23 @@ export default function AdminDashboardPage() {
 
         {/* GRAPH 2: SINGLE BAG DEEP-DIVE – BAR + LINE COMBINATION CHART */}
         <div
-          className={`p-5 rounded-xl border transition-all ${isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
-            }`}
+          className={`p-6 rounded-xl border transition-all ${
+            isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-white border-[#E5DFD7]'
+          }`}
         >
           {/* Header & Product Selector Bar */}
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b border-inherit">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b border-[#E5DFD7] dark:border-[#36312C]">
             <div>
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#8F8174]" />
-                <h3 className="text-sm font-bold tracking-tight">Single Bag Deep-Dive Analysis</h3>
-              </div>
-              <p className={`text-xs mt-0.5 ${isDark ? 'text-[#8A837C]' : 'text-[#7A7269]'}`}>
+              <h3 className="text-base font-semibold text-[#1C2434] dark:text-[#E2E8F0] tracking-tight">
+                Single Bag Deep-Dive Analysis
+              </h3>
+              <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-0.5">
                 Granular units (bars) vs. revenue (line) with color variation share.
               </p>
             </div>
 
             {/* Product Selector for All 6 ZIMOR Bags */}
-            <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-              <label htmlFor="bag-selector" className={`text-xs font-mono font-medium ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
-                Product:
-              </label>
+            <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
               <select
                 id="bag-selector"
                 value={selectedBagSlug}
@@ -883,10 +862,12 @@ export default function AdminDashboardPage() {
                   setSelectedBagSlug(e.target.value);
                   setHoveredBagIdx(null);
                 }}
-                className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors cursor-pointer ${isDark
-                  ? 'bg-[#191715] border-[#36312C] text-[#E8E1DA] focus:border-[#B44220]'
-                  : 'bg-[#F7F5F2] border-[#E5DFD7] text-[#24211F] focus:border-[#B44220]'
-                  }`}
+                aria-label="Select product"
+                className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors cursor-pointer focus:outline-none focus:border-[#5146E5] ${
+                  isDark
+                    ? 'bg-[#191715] border-[#36312C] text-[#E8E1DA]'
+                    : 'bg-white border-[#E2E8F0] text-[#1C2434]'
+                }`}
               >
                 {data?.bagAnalytics?.map((bag) => (
                   <option key={bag.slug} value={bag.slug}>
@@ -897,8 +878,9 @@ export default function AdminDashboardPage() {
 
               {/* Timeframe Filter Tabs */}
               <div
-                className={`flex items-center p-1 rounded-lg border text-xs font-mono ml-0 sm:ml-2 ${isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#F7F5F2] border-[#E5DFD7]'
-                  }`}
+                className={`inline-flex items-center p-1 rounded-lg border text-xs ${
+                  isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#F1F5F9] border-transparent'
+                }`}
               >
                 {[
                   { id: 'daily', label: 'D' },
@@ -908,16 +890,18 @@ export default function AdminDashboardPage() {
                 ].map((tab) => (
                   <button
                     key={tab.id}
+                    type="button"
                     onClick={() => {
                       setSingleBagPeriod(tab.id as any);
                       setHoveredBagIdx(null);
                     }}
-                    className={`px-2.5 py-1 rounded transition-colors text-xs font-medium ${singleBagPeriod === tab.id
-                      ? 'bg-[#B44220] text-white font-semibold'
-                      : isDark
-                        ? 'text-[#8A837C] hover:text-[#E8E1DA]'
-                        : 'text-[#6E6760] hover:text-[#24211F]'
-                      }`}
+                    className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+                      singleBagPeriod === tab.id
+                        ? 'bg-[#5146E5] text-white shadow-xs font-medium'
+                        : isDark
+                        ? 'text-[#94A3B8] hover:text-white'
+                        : 'text-[#64748B] hover:text-[#1C2434]'
+                    }`}
                   >
                     {tab.label}
                   </button>
@@ -928,51 +912,53 @@ export default function AdminDashboardPage() {
 
           {/* Active Bag Overview Strip */}
           {selectedBag && (
-            <div className="py-4 border-b border-inherit grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-center">
+            <div className="py-4 border-b border-[#E5DFD7] dark:border-[#36312C] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-center">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-lg overflow-hidden relative shrink-0 border border-inherit">
+                <div className="w-10 h-10 rounded-lg overflow-hidden relative shrink-0 border border-[#E2E8F0] dark:border-[#36312C]">
                   <Image
                     src={selectedBag.image}
                     alt={selectedBag.name}
                     fill
-                    sizes="48px"
+                    sizes="40px"
                     className="object-cover"
                   />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold leading-tight">{selectedBag.name}</h4>
-                  <p className={`text-[10px] mt-0.5 font-mono ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
+                  <h4 className="text-sm font-semibold text-[#1C2434] dark:text-white leading-tight">
+                    {selectedBag.name}
+                  </h4>
+                  <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-0.5">
                     {selectedBag.category} • Stock: {selectedBag.stock} units
                   </p>
                 </div>
               </div>
 
               <div>
-                <span className={`text-[10px] font-mono uppercase tracking-wider block ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
+                <span className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8] block">
                   Cumulative Revenue
                 </span>
-                <span className="text-sm font-bold font-mono tracking-tight tabular-nums block mt-0.5">
+                <span className="text-lg font-bold text-[#1C2434] dark:text-white tracking-tight tabular-nums block mt-0.5">
                   {formatINR(selectedBag.revenue)}
                 </span>
               </div>
 
               <div>
-                <span className={`text-[10px] font-mono uppercase tracking-wider block ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
+                <span className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8] block">
                   Units Dispatched
                 </span>
-                <span className="text-sm font-bold font-mono tracking-tight tabular-nums block mt-0.5">
+                <span className="text-lg font-bold text-[#1C2434] dark:text-white tracking-tight tabular-nums block mt-0.5">
                   {selectedBag.units} units (ASP: {formatINR(selectedBag.asp)})
                 </span>
               </div>
 
-              <div className="flex items-center gap-4 text-xs font-mono">
+              <div className="flex items-center gap-4 text-xs self-center">
                 <div className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-xs bg-[#8F8174]" />
-                  <span className={isDark ? 'text-[#E8E1DA]' : 'text-[#24211F]'}>Units (Bar)</span>
+                  <span className="w-2.5 h-2.5 rounded-xs bg-[#8F8174]" />
+                  <span className="text-xs font-medium text-[#1C2434] dark:text-[#E2E8F0]">Units (Bar)</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="w-3 h-0.5 bg-[#B44220]" />
-                  <span className="text-[#B44220]">Revenue (Line)</span>
+                  <span className="w-2.5 h-0.5 rounded-full bg-[#5146E5]" />
+                  <span className="text-xs font-medium text-[#5146E5] dark:text-[#818CF8]">Revenue (Line)</span>
                 </div>
               </div>
             </div>
@@ -1070,7 +1056,7 @@ export default function AdminDashboardPage() {
                       <path
                         d={linePath}
                         fill="none"
-                        stroke="#B44220"
+                        stroke="#5146E5"
                         strokeWidth="2.2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -1083,7 +1069,7 @@ export default function AdminDashboardPage() {
                           cy={c.y}
                           r={hoveredBagIdx === i ? 4.5 : 2.5}
                           fill={isDark ? '#191715' : '#FFFFFF'}
-                          stroke="#B44220"
+                          stroke="#5146E5"
                           strokeWidth={hoveredBagIdx === i ? 2.5 : 1.8}
                           className="transition-all cursor-pointer"
                           onMouseEnter={() => setHoveredBagIdx(i)}
@@ -1097,7 +1083,7 @@ export default function AdminDashboardPage() {
                           y={chartH - 4}
                           textAnchor="middle"
                           className={`text-[10px] font-mono fill-current ${hoveredBagIdx === i
-                            ? 'text-[#B44220] font-bold'
+                            ? 'text-[#5146E5] font-bold'
                             : isDark
                               ? 'text-[#8A837C]'
                               : 'text-[#8C837A]'
@@ -1113,7 +1099,7 @@ export default function AdminDashboardPage() {
                           y1={paddingY}
                           x2={activeHover.x}
                           y2={chartH - paddingY}
-                          stroke="#B44220"
+                          stroke="#5146E5"
                           strokeWidth="1"
                           strokeDasharray="2 2"
                         />
@@ -1131,111 +1117,53 @@ export default function AdminDashboardPage() {
             {/* Interactive Tooltip Card for Single Bag */}
             {hoveredBagIdx !== null && singleBagSeries[hoveredBagIdx] && (
               <div
-                className={`mt-3 p-3 rounded-lg border text-xs flex flex-wrap items-center justify-between gap-4 font-mono ${isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#FAF8F5] border-[#E8E2D9]'
-                  }`}
+                className={`mt-4 px-4 py-3 rounded-lg border text-xs flex flex-wrap items-center justify-between gap-4 ${
+                  isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#F8FAFC] border-[#E2E8F0]'
+                }`}
               >
                 <div>
-                  <span className={`text-[10px] uppercase block ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
-                    Period Interval
-                  </span>
-                  <span className="font-bold text-sm block">
+                  <span className="text-xs text-[#64748B] dark:text-[#94A3B8] block">Period Interval</span>
+                  <span className="font-semibold text-sm text-[#1C2434] dark:text-white block mt-0.5">
                     {singleBagSeries[hoveredBagIdx].label} ({singleBagSeries[hoveredBagIdx].date})
                   </span>
                 </div>
                 <div>
-                  <span className={`text-[10px] uppercase block ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
-                    Units Dispatched
-                  </span>
-                  <span className="font-bold block text-[#8F8174]">
+                  <span className="text-xs text-[#64748B] dark:text-[#94A3B8] block">Units Dispatched</span>
+                  <span className="font-semibold text-sm block text-[#8F8174] mt-0.5 tabular-nums">
                     {singleBagSeries[hoveredBagIdx].units} units
                   </span>
                 </div>
                 <div>
-                  <span className={`text-[10px] uppercase block ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
-                    Gross Revenue
-                  </span>
-                  <span className="font-bold text-[#B44220] block">
+                  <span className="text-xs text-[#64748B] dark:text-[#94A3B8] block">Gross Revenue</span>
+                  <span className="font-semibold text-sm text-[#5146E5] dark:text-[#818CF8] block mt-0.5 tabular-nums">
                     {formatINR(singleBagSeries[hoveredBagIdx].revenue)}
                   </span>
                 </div>
                 <div>
-                  <span className={`text-[10px] uppercase block ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
-                    Atelier Share
-                  </span>
-                  <span className="font-bold block">
+                  <span className="text-xs text-[#64748B] dark:text-[#94A3B8] block">Atelier Share</span>
+                  <span className="font-semibold text-sm text-[#1C2434] dark:text-white block mt-0.5 tabular-nums">
                     {selectedBag?.marketShare}% of catalog
                   </span>
                 </div>
               </div>
             )}
           </div>
-
-          {/* Color Variations Comparison Sub-Section */}
-          {selectedBag && selectedBag.colors && selectedBag.colors.length > 0 && (
-            <div className="mt-5 pt-4 border-t border-inherit">
-              <div className="flex items-center justify-between mb-3">
-                <span className={`text-[10px] font-mono uppercase tracking-wider font-semibold ${isDark ? 'text-[#8A837C]' : 'text-[#7A7269]'}`}>
-                  Color Variations Distribution & Market Preference
-                </span>
-                <span className={`text-[10px] font-mono ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
-                  {selectedBag.colorBreakdown}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {selectedBag.colors.map((color, cIdx) => (
-                  <div
-                    key={cIdx}
-                    className={`p-3 rounded-lg border flex items-center justify-between text-xs font-mono ${isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#FAF8F5] border-[#E8E2D9]'
-                      }`}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <span
-                        className="w-3.5 h-3.5 rounded-full border shrink-0"
-                        style={{ backgroundColor: color.hex, borderColor: isDark ? '#4A4540' : '#D1C7BD' }}
-                      />
-                      <div>
-                        <span className="font-bold block leading-tight">{color.name}</span>
-                        <span className={`text-[10px] block mt-0.5 ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
-                          {color.units} units • {formatINR(color.revenue)}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="font-bold text-sm text-[#B44220] block">
-                        {color.percentage}%
-                      </span>
-                      <span className={`text-[9px] block uppercase ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
-                        Share
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* GRAPH 3: CLUSTERED COLUMN CHART (COMPARATIVE PRODUCT ANALYSIS) */}
         {/* MATCHES ATTACHED REFERENCE: GROUPED VERTICAL COLUMNS ACROSS ALL 6 PRODUCTS */}
         <div
-          className={`p-5 rounded-xl border transition-all ${isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
-            }`}
+          className={`p-6 rounded-xl border transition-all ${
+            isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-white border-[#E5DFD7]'
+          }`}
         >
           {/* Card Header & Multi-Control Strip */}
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-4 border-b border-inherit">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-4 border-b border-[#E5DFD7] dark:border-[#36312C]">
             <div>
-              <div className="flex items-center gap-2">
-                <BarChart2 className="w-4 h-4 text-[#B44220]" />
-                <h3 className="text-sm font-bold tracking-tight">Comparative Product Analysis</h3>
-                <span
-                  className={`text-[9px] font-mono uppercase px-2 py-0.5 rounded font-semibold ${isDark ? 'bg-[#B44220]/20 text-[#E8A593]' : 'bg-[#B44220]/10 text-[#B44220]'
-                    }`}
-                >
-                  Clustered Column
-                </span>
-              </div>
-              <p className={`text-xs mt-0.5 ${isDark ? 'text-[#8A837C]' : 'text-[#7A7269]'}`}>
+              <h3 className="text-base font-semibold text-[#1C2434] dark:text-[#E2E8F0] tracking-tight">
+                Comparative Product Analysis
+              </h3>
+              <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-0.5">
                 Grouped vertical column benchmark comparing all 6 products across selected reporting periods.
               </p>
             </div>
@@ -1244,26 +1172,29 @@ export default function AdminDashboardPage() {
             <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
               {/* Metric Selector Tabs */}
               <div
-                className={`flex items-center p-1 rounded-lg border text-xs font-mono ${isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#F7F5F2] border-[#E5DFD7]'
-                  }`}
+                className={`inline-flex items-center p-1 rounded-lg border text-xs ${
+                  isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#F1F5F9] border-transparent'
+                }`}
               >
                 {[
-                  { id: 'revenue', label: 'Revenue (₹)' },
+                  { id: 'revenue', label: 'Revenue' },
                   { id: 'units', label: 'Units Sold' },
-                  { id: 'asp', label: 'ASP (₹)' },
+                  { id: 'asp', label: 'ASP' },
                 ].map((m) => (
                   <button
                     key={m.id}
+                    type="button"
                     onClick={() => {
                       setClusteredMetric(m.id as any);
                       setHoveredBar(null);
                     }}
-                    className={`px-2.5 py-1 rounded transition-colors text-xs font-medium ${clusteredMetric === m.id
-                      ? 'bg-[#B44220] text-white font-semibold'
-                      : isDark
-                        ? 'text-[#8A837C] hover:text-[#E8E1DA]'
-                        : 'text-[#6E6760] hover:text-[#24211F]'
-                      }`}
+                    className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+                      clusteredMetric === m.id
+                        ? 'bg-[#5146E5] text-white shadow-xs font-medium'
+                        : isDark
+                        ? 'text-[#94A3B8] hover:text-white'
+                        : 'text-[#64748B] hover:text-[#1C2434]'
+                    }`}
                   >
                     {m.label}
                   </button>
@@ -1272,8 +1203,9 @@ export default function AdminDashboardPage() {
 
               {/* Period Granularity Selector (Quarterly, Monthly, Weekly, Yearly) */}
               <div
-                className={`flex items-center p-1 rounded-lg border text-xs font-mono ${isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#F7F5F2] border-[#E5DFD7]'
-                  }`}
+                className={`inline-flex items-center p-1 rounded-lg border text-xs ${
+                  isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#F1F5F9] border-transparent'
+                }`}
               >
                 {[
                   { id: 'quarterly', label: 'Quarterly' },
@@ -1283,16 +1215,18 @@ export default function AdminDashboardPage() {
                 ].map((p) => (
                   <button
                     key={p.id}
+                    type="button"
                     onClick={() => {
                       setClusteredPeriod(p.id as any);
                       setHoveredBar(null);
                     }}
-                    className={`px-2.5 py-1 rounded transition-colors text-xs font-medium ${clusteredPeriod === p.id
-                      ? 'bg-[#B44220] text-white font-semibold'
-                      : isDark
-                        ? 'text-[#8A837C] hover:text-[#E8E1DA]'
-                        : 'text-[#6E6760] hover:text-[#24211F]'
-                      }`}
+                    className={`px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+                      clusteredPeriod === p.id
+                        ? 'bg-[#5146E5] text-white shadow-xs font-medium'
+                        : isDark
+                        ? 'text-[#94A3B8] hover:text-white'
+                        : 'text-[#64748B] hover:text-[#1C2434]'
+                    }`}
                   >
                     {p.label}
                   </button>
@@ -1304,10 +1238,11 @@ export default function AdminDashboardPage() {
                 value={dateRangeScope}
                 onChange={(e) => setDateRangeScope(e.target.value as any)}
                 aria-label="Filter reporting period scope"
-                className={`px-2.5 py-1.5 rounded-lg border text-xs font-mono font-medium cursor-pointer transition-colors ${isDark
-                  ? 'bg-[#191715] border-[#36312C] text-[#E8E1DA] focus:border-[#B44220]'
-                  : 'bg-[#F7F5F2] border-[#E5DFD7] text-[#24211F] focus:border-[#B44220]'
-                  }`}
+                className={`px-3 py-1.5 rounded-lg border text-xs font-medium cursor-pointer transition-colors focus:outline-none focus:border-[#5146E5] ${
+                  isDark
+                    ? 'bg-[#191715] border-[#36312C] text-[#E8E1DA]'
+                    : 'bg-white border-[#E2E8F0] text-[#1C2434]'
+                }`}
               >
                 <option value="all">Full Completed Periods</option>
                 <option value="recent">Recent Intervals (H2)</option>
@@ -1316,10 +1251,10 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Secondary Filter & Legend Strip */}
-          <div className="py-3 border-b border-inherit flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs font-mono">
+          <div className="py-3 border-b border-[#E5DFD7] dark:border-[#36312C] flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs">
             {/* Product Multi-select Chips */}
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className={`text-[10px] uppercase font-semibold mr-1 ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
+              <span className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8] mr-1">
                 Products:
               </span>
               {allComparativeProducts.map((p) => {
@@ -1327,47 +1262,41 @@ export default function AdminDashboardPage() {
                 return (
                   <button
                     key={p.slug}
+                    type="button"
                     onClick={() => toggleProductSelection(p.slug)}
-                    className={`px-2 py-0.5 rounded text-[11px] font-medium flex items-center gap-1 border transition-all ${isSelected
-                      ? isDark
-                        ? 'bg-[#B44220]/20 border-[#B44220] text-[#E8E1DA]'
-                        : 'bg-[#B44220]/10 border-[#B44220] text-[#B44220] font-semibold'
-                      : isDark
-                        ? 'bg-[#191715] border-[#36312C] text-[#8A837C] opacity-60 hover:opacity-100'
-                        : 'bg-[#FAF8F5] border-[#E5DFD7] text-[#8C837A] opacity-60 hover:opacity-100'
-                      }`}
+                    className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+                      isSelected
+                        ? 'bg-[#EEF0FF] dark:bg-[#5146E5]/15 text-[#5146E5] dark:text-[#818CF8]'
+                        : isDark
+                        ? 'text-[#94A3B8] hover:text-white hover:bg-[#25221F]'
+                        : 'text-[#64748B] hover:text-[#1C2434] hover:bg-gray-100'
+                    }`}
                   >
-                    {isSelected && <Check className="w-3 h-3 stroke-[2.5]" />}
-                    <span>{p.name.replace('ZIMOR ', '')}</span>
+                    {p.name.replace('ZIMOR ', '')}
                   </button>
                 );
               })}
 
               <button
+                type="button"
                 onClick={selectAllProducts}
-                className="text-[10px] underline ml-1 text-[#B44220] hover:opacity-80"
+                className="text-xs font-medium text-[#5146E5] hover:underline ml-1 cursor-pointer"
               >
                 Select All
               </button>
             </div>
 
-            {/* Reference-Matching Top-Right Legend Box */}
-            <div
-              className={`p-2 rounded-lg border flex items-center gap-3 self-end md:self-auto ${isDark ? 'bg-[#191715] border-[#36312C]' : 'bg-[#FAF8F5] border-[#E8E2D9]'
-                }`}
-            >
-              <span className={`text-[10px] uppercase font-semibold ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
-                Legend:
-              </span>
+            {/* Clean Inline Legend */}
+            <div className="flex items-center gap-4 text-xs self-center">
               {reportingPeriods.map((periodLabel, pIdx) => {
                 const colorConfig = periodColors[pIdx % periodColors.length];
                 return (
                   <div key={periodLabel} className="flex items-center gap-1.5">
                     <span
-                      className="w-3 h-3 rounded-xs border shrink-0"
-                      style={{ backgroundColor: colorConfig.color, borderColor: colorConfig.border }}
+                      className="w-2.5 h-2.5 rounded-xs shrink-0"
+                      style={{ backgroundColor: colorConfig.color }}
                     />
-                    <span className={`text-[11px] font-semibold ${isDark ? 'text-[#E8E1DA]' : 'text-[#24211F]'}`}>
+                    <span className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8]">
                       {periodLabel}
                     </span>
                   </div>
@@ -1378,15 +1307,15 @@ export default function AdminDashboardPage() {
 
           {/* SVG Grouped Vertical Clustered Column Chart */}
           <div className="pt-6 relative">
-            <div className="w-full h-80 sm:h-96">
+            <div className="w-full h-[360px] sm:h-[420px]">
               {activeClusteredProducts.length > 0 ? (
                 (() => {
                   const chartW = 860;
-                  const chartH = 360;
+                  const chartH = 420;
                   const paddingLeft = 70;
                   const paddingRight = 30;
-                  const paddingTop = 30;
-                  const paddingBottom = 75;
+                  const paddingTop = 24;
+                  const paddingBottom = 100;
 
                   const innerW = chartW - paddingLeft - paddingRight;
                   const innerH = chartH - paddingTop - paddingBottom;
@@ -1545,22 +1474,23 @@ export default function AdminDashboardPage() {
                               strokeWidth="1"
                             />
 
-                            {/* Angled / Readable Product Label on X-Axis (Matching Reference Chart) */}
+                            {/* Angled / Readable Product Label on X-Axis with controlled angle and safe positioning */}
                             <text
                               x={groupCenterX}
-                              y={chartH - paddingBottom + 16}
+                              y={chartH - paddingBottom + 14}
                               textAnchor="end"
-                              transform={`rotate(-35, ${groupCenterX}, ${chartH - paddingBottom + 16})`}
-                              className={`text-[10px] font-mono font-medium fill-current cursor-pointer hover:font-bold ${hoveredBar?.productSlug === prod.slug
-                                ? 'text-[#B44220] font-bold'
-                                : isDark
+                              transform={`rotate(-28, ${groupCenterX}, ${chartH - paddingBottom + 14})`}
+                              className={`text-[10px] font-mono font-medium fill-current cursor-pointer hover:font-bold ${
+                                hoveredBar?.productSlug === prod.slug
+                                  ? 'text-[#5146E5] font-bold'
+                                  : isDark
                                   ? 'text-[#E8E1DA]'
                                   : 'text-[#24211F]'
-                                }`}
+                              }`}
                               onClick={() => deselectOtherProducts(prod.slug)}
                             >
-                              <title>Click to isolate this product</title>
-                              {prod.name.replace('ZIMOR ', '')}
+                              <title>{prod.name}</title>
+                              {formatComparativeChartLabel(prod.name)}
                             </text>
                           </g>
                         );
@@ -1591,61 +1521,63 @@ export default function AdminDashboardPage() {
                       }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-md overflow-hidden relative shrink-0 border border-inherit">
+                      <div className="w-10 h-10 rounded-lg overflow-hidden relative shrink-0 border border-[#E2E8F0] dark:border-[#36312C]">
                         <Image
                           src={prod.image}
                           alt={prod.name}
                           fill
-                          sizes="36px"
+                          sizes="40px"
                           className="object-cover"
                         />
                       </div>
                       <div>
-                        <span className="font-bold block leading-tight">{prod.name}</span>
-                        <div className="flex items-center gap-2 mt-0.5">
+                        <span className="font-semibold text-sm text-[#1C2434] dark:text-white block leading-tight">
+                          {prod.name}
+                        </span>
+                        <div className="flex items-center gap-1.5 mt-0.5">
                           <span
                             className="w-2 h-2 rounded-xs inline-block"
                             style={{ backgroundColor: colorObj.color }}
                           />
-                          <span className={`text-[10px] uppercase font-bold text-[#B44220]`}>
-                            Period: {pData.label} ({pData.date || clusteredPeriod})
+                          <span className="text-xs font-medium text-[#5146E5] dark:text-[#818CF8]">
+                            {pData.label} ({pData.date || clusteredPeriod})
                           </span>
                         </div>
                       </div>
                     </div>
 
                     <div>
-                      <span className={`text-[10px] uppercase block ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
+                      <span className="text-xs text-[#64748B] dark:text-[#94A3B8] block">
                         Period Gross Revenue
                       </span>
-                      <span className="font-bold text-sm text-[#B44220] block tabular-nums">
+                      <span className="font-semibold text-sm text-[#5146E5] dark:text-[#818CF8] block tabular-nums mt-0.5">
                         {formatINR(pData.revenue)}
                       </span>
                     </div>
 
                     <div>
-                      <span className={`text-[10px] uppercase block ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
+                      <span className="text-xs text-[#64748B] dark:text-[#94A3B8] block">
                         Units Dispatched
                       </span>
-                      <span className="font-bold text-sm block tabular-nums">
+                      <span className="font-semibold text-sm text-[#1C2434] dark:text-white block tabular-nums mt-0.5">
                         {pData.units} units
                       </span>
                     </div>
 
                     <div>
-                      <span className={`text-[10px] uppercase block ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
+                      <span className="text-xs text-[#64748B] dark:text-[#94A3B8] block">
                         Period ASP
                       </span>
-                      <span className="font-bold text-sm block tabular-nums">
+                      <span className="font-semibold text-sm text-[#1C2434] dark:text-white block tabular-nums mt-0.5">
                         {formatINR(pData.asp)}
                       </span>
                     </div>
 
                     <div>
-                      <span className={`text-[10px] uppercase block ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
+                      <span className="text-xs text-[#64748B] dark:text-[#94A3B8] block">
                         Catalog Share
                       </span>
-                      <span className="font-bold text-sm block">
+                      <span className="font-semibold text-sm text-[#1C2434] dark:text-white block mt-0.5">
                         {prod.marketShare}%
                       </span>
                     </div>
@@ -1656,23 +1588,23 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Tabular Clustered Matrix Table */}
-          <div className="mt-6 pt-4 border-t border-inherit">
+          <div className="mt-8 sm:mt-12 pt-6 border-t border-[#E5DFD7] dark:border-[#36312C]">
             <div className="flex items-center justify-between mb-3">
-              <span className={`text-[10px] font-mono uppercase tracking-wider font-semibold ${isDark ? 'text-[#8A837C]' : 'text-[#7A7269]'}`}>
+              <span className="text-xs font-semibold text-[#1C2434] dark:text-[#E2E8F0]">
                 Period-over-Period Performance Matrix ({clusteredPeriod.toUpperCase()})
               </span>
-              <span className={`text-[10px] font-mono ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
-                Active Metric: {clusteredMetric.toUpperCase()}
+              <span className="text-xs text-[#64748B] dark:text-[#94A3B8]">
+                Metric: {clusteredMetric.toUpperCase()}
               </span>
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs font-mono">
+              <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className={`border-b ${isDark ? 'border-[#36312C] text-[#8A837C]' : 'border-[#E5DFD7] text-[#8C837A]'}`}>
-                    <th className="py-2 px-3 uppercase tracking-wider font-semibold">Product</th>
+                  <tr className={`border-b ${isDark ? 'border-[#36312C] text-[#8A837C]' : 'border-[#E5DFD7] text-[#64748B]'}`}>
+                    <th className="py-2.5 px-3 font-semibold">Product</th>
                     {reportingPeriods.map((periodLabel, pIdx) => (
-                      <th key={periodLabel} className="py-2 px-3 uppercase tracking-wider font-semibold text-right">
+                      <th key={periodLabel} className="py-2.5 px-3 font-semibold text-right">
                         <span className="inline-flex items-center gap-1.5 justify-end">
                           <span
                             className="w-2 h-2 rounded-xs"
@@ -1682,24 +1614,22 @@ export default function AdminDashboardPage() {
                         </span>
                       </th>
                     ))}
-                    <th className="py-2 px-3 uppercase tracking-wider font-semibold text-right">Total Vol</th>
-                    <th className="py-2 px-3 uppercase tracking-wider font-semibold text-right">Total Rev</th>
-                    <th className="py-2 px-3 uppercase tracking-wider font-semibold text-right">Stock</th>
+                    <th className="py-2.5 px-3 font-semibold text-right">Total Vol</th>
+                    <th className="py-2.5 px-3 font-semibold text-right">Total Rev</th>
+                    <th className="py-2.5 px-3 font-semibold text-right">Stock</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-inherit">
+                <tbody className={`divide-y ${isDark ? 'divide-[#36312C]' : 'divide-[#E5DFD7]'}`}>
                   {activeClusteredProducts.map((prod) => {
                     const prodPeriods = prod.periods?.[clusteredPeriod] || [];
 
                     return (
                       <tr
                         key={prod.slug}
-                        className={`transition-colors ${isDark ? 'hover:bg-[#191715]' : 'hover:bg-[#FAF8F5]'
-                          }`}
+                        className={`transition-colors ${isDark ? 'hover:bg-[#191715]' : 'hover:bg-[#FAF8F5]'}`}
                       >
-                        <td className="py-2.5 px-3 font-semibold text-xs flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#B44220]" />
-                          <span>{prod.name}</span>
+                        <td className="py-3 px-3 font-medium text-xs text-[#1C2434] dark:text-white">
+                          {prod.name}
                         </td>
                         {reportingPeriods.map((periodLabel) => {
                           const pt = prodPeriods.find((p) => p.label === periodLabel);
@@ -1711,27 +1641,28 @@ export default function AdminDashboardPage() {
                           }
 
                           return (
-                            <td key={periodLabel} className="py-2.5 px-3 text-right tabular-nums font-medium">
+                            <td key={periodLabel} className="py-3 px-3 text-right tabular-nums font-normal text-[#1C2434] dark:text-[#E2E8F0]">
                               {displayVal}
                             </td>
                           );
                         })}
-                        <td className="py-2.5 px-3 text-right tabular-nums font-semibold">
-                          {prod.units}u
+                        <td className="py-3 px-3 text-right tabular-nums font-medium text-[#1C2434] dark:text-[#E2E8F0]">
+                          {prod.units} units
                         </td>
-                        <td className="py-2.5 px-3 text-right tabular-nums font-bold text-[#B44220]">
+                        <td className="py-3 px-3 text-right tabular-nums font-semibold text-[#5146E5] dark:text-[#818CF8]">
                           {formatINR(prod.revenue)}
                         </td>
-                        <td className="py-2.5 px-3 text-right">
+                        <td className="py-3 px-3 text-right">
                           <span
-                            className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${prod.stockHealth === 'Critical'
-                              ? 'bg-red-500/15 text-red-700 dark:text-red-400'
-                              : prod.stockHealth === 'Low'
-                                ? 'bg-amber-500/15 text-amber-700 dark:text-amber-400'
-                                : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
-                              }`}
+                            className={`px-2 py-0.5 rounded text-[11px] font-medium ${
+                              prod.stockHealth === 'Critical'
+                                ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400'
+                                : prod.stockHealth === 'Low'
+                                ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400'
+                                : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400'
+                            }`}
                           >
-                            {prod.stock}u
+                            {prod.stock} units
                           </span>
                         </td>
                       </tr>
@@ -1746,73 +1677,78 @@ export default function AdminDashboardPage() {
 
       {/* 4. RECENT VERIFIED TRANSACTIONS LEDGER */}
       <section
-        className={`p-5 rounded-xl border transition-all ${isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-[#FFFFFF] border-[#E5DFD7]'
-          }`}
+        className={`p-6 rounded-xl border transition-all ${
+          isDark ? 'bg-[#24211F] border-[#36312C]' : 'bg-white border-[#E5DFD7]'
+        }`}
       >
-        <div className="flex items-center justify-between pb-3 border-b border-inherit">
+        <div className="flex items-center justify-between pb-4 border-b border-[#E5DFD7] dark:border-[#36312C]">
           <div>
-            <h3 className="text-sm font-bold tracking-tight">Recent Verified Transactions</h3>
-            <p className={`text-xs mt-0.5 ${isDark ? 'text-[#8A837C]' : 'text-[#7A7269]'}`}>
+            <h3 className="text-base font-semibold text-[#1C2434] dark:text-[#E2E8F0] tracking-tight">
+              Recent Verified Transactions
+            </h3>
+            <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-0.5">
               Live order feed persisted in MongoDB Atlas production cluster.
             </p>
           </div>
           <Link
             href="/admin/orders"
-            className="text-xs font-mono font-medium text-[#B44220] hover:underline flex items-center gap-1"
+            className="text-xs font-medium text-[#5146E5] hover:underline flex items-center gap-1"
           >
             <span>View Full Pipeline</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
-        <div className="overflow-x-auto mt-3">
-          <table className="w-full text-left text-xs font-mono">
+        <div className="overflow-x-auto mt-2">
+          <table className="w-full text-left text-xs">
             <thead>
-              <tr className={`border-b ${isDark ? 'border-[#36312C] text-[#8A837C]' : 'border-[#E5DFD7] text-[#8C837A]'}`}>
-                <th className="py-2.5 px-3 uppercase tracking-wider font-semibold">Order</th>
-                <th className="py-2.5 px-3 uppercase tracking-wider font-semibold">User</th>
-                <th className="py-2.5 px-3 uppercase tracking-wider font-semibold">Date</th>
-                <th className="py-2.5 px-3 uppercase tracking-wider font-semibold">Status</th>
-                <th className="py-2.5 px-3 uppercase tracking-wider font-semibold text-right">Total</th>
+              <tr className={`border-b ${isDark ? 'border-[#36312C] text-[#8A837C]' : 'border-[#E5DFD7] text-[#64748B]'}`}>
+                <th className="py-2.5 px-3 font-semibold">Order</th>
+                <th className="py-2.5 px-3 font-semibold">User</th>
+                <th className="py-2.5 px-3 font-semibold">Date</th>
+                <th className="py-2.5 px-3 font-semibold">Status</th>
+                <th className="py-2.5 px-3 font-semibold text-right">Total</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-inherit">
+            <tbody className={`divide-y ${isDark ? 'divide-[#36312C]' : 'divide-[#E5DFD7]'}`}>
               {data?.recentOrders && data.recentOrders.length > 0 ? (
                 data.recentOrders.map((ord: any) => (
                   <tr
                     key={ord.id || ord.orderNumber}
-                    className={`transition-colors ${isDark ? 'hover:bg-[#191715]' : 'hover:bg-[#FAF8F5]'
-                      }`}
+                    className={`transition-colors ${isDark ? 'hover:bg-[#191715]' : 'hover:bg-[#FAF8F5]'}`}
                   >
-                    <td className="py-2.5 px-3 font-semibold text-[#B44220]">
+                    <td className="py-3 px-3 font-medium text-[#5146E5]">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <span>{ord.orderNumber}</span>
                         {(ord.isDemo || ord.orderNumber?.startsWith('DEMO-')) && (
-                          <span className="px-1.5 py-0.2 rounded text-[9px] font-bold tracking-wider uppercase bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30">
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-medium uppercase bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-300">
                             DEMO
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="py-2.5 px-3 truncate max-w-[140px]">
+                    <td className="py-3 px-3 truncate max-w-[140px] text-[#1C2434] dark:text-[#E2E8F0]">
                       {ord.shippingAddress?.fullName || 'Valued User'}
                     </td>
-                    <td className="py-2.5 px-3 text-[11px] opacity-80 truncate">
+                    <td className="py-3 px-3 text-[#64748B] dark:text-[#94A3B8] truncate">
                       {ord.date}
                     </td>
-                    <td className="py-2.5 px-3">
+                    <td className="py-3 px-3">
                       <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${ord.status === 'Delivered'
-                          ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
-                          : ord.status === 'Cancelled'
-                            ? 'bg-red-500/15 text-red-700 dark:text-red-400'
-                            : 'bg-[#B44220]/15 text-[#B44220] dark:text-[#E07A5F]'
-                          }`}
+                        className={`px-2 py-0.5 rounded text-[11px] font-medium ${
+                          ord.status === 'Delivered'
+                            ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400'
+                            : ord.status === 'Cancelled'
+                            ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400'
+                            : isDark
+                            ? 'bg-[#5146E5]/15 text-[#818CF8]'
+                            : 'bg-[#EEF0FF] text-[#5146E5]'
+                        }`}
                       >
                         {ord.status}
                       </span>
                     </td>
-                    <td className="py-2.5 px-3 text-right font-bold tabular-nums">
+                    <td className="py-3 px-3 text-right font-medium text-[#1C2434] dark:text-white tabular-nums">
                       {formatINR(ord.total || 0)}
                     </td>
                   </tr>

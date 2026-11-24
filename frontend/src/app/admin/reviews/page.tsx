@@ -136,7 +136,7 @@ export default function AdminReviewsPage() {
             <span className={`text-[11px] font-semibold uppercase tracking-wider ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
               Awaiting Moderation
             </span>
-            <Sparkles className="w-4 h-4 text-[#B44220]" />
+            <Sparkles className="w-4 h-4 text-[#5146E5]" />
           </div>
           <p className="text-2xl font-bold mt-1 text-[#C07D2B] dark:text-[#E9A855]">
             {pendingCount} Pending
@@ -156,7 +156,7 @@ export default function AdminReviewsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by user name, product, review text..."
-              className={`w-full pl-9 pr-4 py-2 border rounded text-xs focus:outline-none focus:border-[#B44220] transition-colors ${isDark
+              className={`w-full pl-9 pr-4 py-2 border rounded text-xs focus:outline-none focus:border-[#5146E5] transition-colors ${isDark
                 ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA] placeholder-[#8A837C]'
                 : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F] placeholder-[#8C837A]'
                 }`}
@@ -167,7 +167,7 @@ export default function AdminReviewsPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className={`px-3 py-2 border rounded text-xs font-semibold focus:outline-none focus:border-[#B44220] transition-colors ${isDark
+              className={`px-3 py-2 border rounded text-xs font-semibold focus:outline-none focus:border-[#5146E5] transition-colors ${isDark
                 ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA]'
                 : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F]'
                 }`}
@@ -181,7 +181,7 @@ export default function AdminReviewsPage() {
             <select
               value={ratingFilter}
               onChange={(e) => setRatingFilter(e.target.value)}
-              className={`px-3 py-2 border rounded text-xs font-semibold focus:outline-none focus:border-[#B44220] transition-colors ${isDark
+              className={`px-3 py-2 border rounded text-xs font-semibold focus:outline-none focus:border-[#5146E5] transition-colors ${isDark
                 ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA]'
                 : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F]'
                 }`}
@@ -274,7 +274,7 @@ export default function AdminReviewsPage() {
                     </span>
 
                     {rev.featured && (
-                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#B44220]/15 text-[#B44220] dark:text-[#E07A5F] border border-[#B44220]/30">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#EEF0FF] dark:bg-[#5146E5]/20 text-[#5146E5] dark:text-[#818CF8] border border-[#5146E5]/30">
                         Featured PDP
                       </span>
                     )}
@@ -309,8 +309,8 @@ export default function AdminReviewsPage() {
                       <button
                         onClick={() => updateReviewStatus(rev.id, 'Hidden')}
                         className={`px-2.5 py-1 rounded font-medium text-[11px] border transition-colors ${isDark
-                          ? 'bg-[#1E1C1A] border-[#36312C] text-[#B4B4B4] hover:border-[#B44220]'
-                          : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#5A534E] hover:border-[#B44220]'
+                          ? 'bg-[#1E1C1A] border-[#36312C] text-[#B4B4B4] hover:border-[#5146E5]'
+                          : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#5A534E] hover:border-[#5146E5]'
                           }`}
                       >
                         Hide
@@ -320,10 +320,10 @@ export default function AdminReviewsPage() {
                     <button
                       onClick={() => toggleFeatured(rev.id)}
                       className={`px-2.5 py-1 rounded text-[11px] font-medium border transition-colors ${rev.featured
-                        ? 'border-[#B44220]/40 bg-[#B44220]/15 text-[#B44220] dark:text-[#E07A5F]'
+                        ? 'border-[#5146E5]/40 bg-[#EEF0FF] dark:bg-[#5146E5]/20 text-[#5146E5] dark:text-[#818CF8]'
                         : isDark
-                          ? 'border-[#36312C] bg-[#1E1C1A] text-[#B4B4B4] hover:border-[#B44220]'
-                          : 'border-[#E5DFD7] bg-[#FAF7F2] text-[#5A534E] hover:border-[#B44220]'
+                          ? 'border-[#36312C] bg-[#1E1C1A] text-[#B4B4B4] hover:border-[#5146E5]'
+                          : 'border-[#E5DFD7] bg-[#FAF7F2] text-[#5A534E] hover:border-[#5146E5]'
                         }`}
                     >
                       {rev.featured ? 'Unfeature from PDP' : 'Feature on PDP'}
