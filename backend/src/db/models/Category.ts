@@ -1,6 +1,6 @@
 // /src/lib/db/models/Category.ts
 import mongoose, { Schema, Document, Model } from 'mongoose';
-import { Category } from '../providers/interface';
+import { Category } from '../providers/interface.js';
 
 export interface CategoryDocument extends Omit<Category, 'id'>, Document {
   id: string;

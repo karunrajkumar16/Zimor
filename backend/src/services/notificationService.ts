@@ -93,6 +93,7 @@ export async function getNotifications(params?: {
   limit?: number;
   page?: number;
   unreadOnly?: boolean;
+  since?: string | Date;
 }) {
   await connectToDatabase();
 
@@ -102,6 +103,13 @@ export async function getNotifications(params?: {
 
   if (params?.unreadOnly) {
     filter.read = false;
+  }
+
+  if (params?.since) {
+    const sinceDate = new Date(params.since);
+    if (!isNaN(sinceDate.getTime())) {
+      filter.createdAt = { $gt: sinceDate };
+    }
   }
 
   const [notifications, unreadCount, total] = await Promise.all([
@@ -116,6 +124,7 @@ export async function getNotifications(params?: {
 
   return {
     notifications: notifications.map((n) => ({
+      _id: (n._id as any).toString(),
       id: (n._id as any).toString(),
       type: n.type,
       title: n.title,
@@ -133,6 +142,14 @@ export async function getNotifications(params?: {
     page,
     totalPages: Math.ceil(total / limit) || 1,
   };
+}
+
+/**
+ * Get total unread notifications count
+ */
+export async function getUnreadNotificationCount() {
+  await connectToDatabase();
+  return NotificationModel.countDocuments({ read: false });
 }
 
 /**
@@ -171,9 +188,26 @@ export async function markAllNotificationsAsRead() {
 
 /**
  * Real-time Server-Sent Events (SSE) stream handler for administrators.
- * Automatically pushes live events and unread counts, with 25s keep-alive ping.
+ * In serverless environments (Vercel/Lambda), closes connection gracefully to prevent hanging functions.
+ * In local development, automatically pushes live events and unread counts with keep-alive pings.
  */
 export async function handleNotificationStream(req: Request, res: Response) {
+  const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+
+  if (isServerless) {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'close');
+    res.write(
+      `event: fallback\ndata: ${JSON.stringify({
+        mode: 'polling',
+        message: 'SSE stream migrated to visibility-aware polling for serverless compatibility',
+      })}\n\n`
+    );
+    res.end();
+    return;
+  }
+
   await connectToDatabase();
 
   res.setHeader('Content-Type', 'text/event-stream');

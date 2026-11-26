@@ -31,7 +31,8 @@ import {
   Check,
   CheckCheck,
 } from 'lucide-react';
-import { apiFetch, apiUrl } from '@/lib/api';
+import { apiFetch } from '@/lib/api';
+import { playNotificationChime } from '@/lib/notificationSound';
 import { AdminThemeProvider, useAdminTheme } from '@/context/AdminThemeContext';
 import AdminDemoBanner from '@/components/admin/AdminDemoBanner';
 
@@ -109,6 +110,13 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
+  // Polling, deduplication, and sound refs
+  const pollTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isPollingRef = useRef<boolean>(false);
+  const hasInitialLoadedRef = useRef<boolean>(false);
+  const knownNotificationIdsRef = useRef<Set<string>>(new Set());
+  const pendingReadIdsRef = useRef<Set<string>>(new Set());
+
   // Detect touch-only devices to switch from hover to tap-based expansion
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -169,107 +177,163 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
     };
   }, [notificationsOpen]);
 
-  // Real-Time Notification Stream (SSE) & Initial Load with Fallback Polling
+  // Visibility-Aware Real-Time Notification Polling (Serverless-Compatible)
+  // Active tab: polls every 15s | Background tab: polls every 60s
+  // Instant reconciliation on tab visibility return and network reconnection
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    let eventSource: EventSource | null = null;
-    let pollInterval: NodeJS.Timeout | null = null;
+    const ACTIVE_POLL_INTERVAL = 15000;
+    const BACKGROUND_POLL_INTERVAL = 60000;
+    let isMounted = true;
 
     const fetchNotifications = async () => {
+      if (isPollingRef.current) return;
+      isPollingRef.current = true;
+
       try {
         const res = await apiFetch('/api/admin/notifications?limit=25');
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success) {
-            setNotifications(data.notifications || []);
-            setUnreadCount(typeof data.unreadCount === 'number' ? data.unreadCount : 0);
+        if (!res.ok || !isMounted) return;
+
+        const data = await res.json();
+        if (!data.success || !Array.isArray(data.notifications)) return;
+
+        const incoming = data.notifications.map((n: any) => ({
+          ...n,
+          _id: n._id || n.id,
+          id: n.id || n._id,
+        }));
+
+        // Detect genuinely NEW unread notifications to trigger the subtle luxury chime
+        if (hasInitialLoadedRef.current) {
+          const hasNewUnread = incoming.some(
+            (n: any) =>
+              !n.read &&
+              !knownNotificationIdsRef.current.has(n._id) &&
+              !pendingReadIdsRef.current.has(n._id)
+          );
+          if (hasNewUnread) {
+            playNotificationChime();
           }
         }
-      } catch (err) {
-        // quiet fallback
+
+        // Register all seen IDs in known set
+        incoming.forEach((n: any) => {
+          knownNotificationIdsRef.current.add(n._id);
+          // If server already reflects read: true, clear from pending reads
+          if (n.read) {
+            pendingReadIdsRef.current.delete(n._id);
+          }
+        });
+
+        // Reconcile list while respecting local optimistic mark-as-read
+        setNotifications(() => {
+          return incoming.map((n: any) => {
+            if (pendingReadIdsRef.current.has(n._id)) {
+              return { ...n, read: true };
+            }
+            return n;
+          });
+        });
+
+        // Reconcile unread count
+        const rawUnread = typeof data.unreadCount === 'number' ? data.unreadCount : 0;
+        const pendingCount = pendingReadIdsRef.current.size;
+        setUnreadCount(Math.max(0, rawUnread - pendingCount));
+
+        hasInitialLoadedRef.current = true;
+      } catch {
+        // Quiet fallback on network drops; retain current state without loss
+      } finally {
+        isPollingRef.current = false;
       }
     };
 
-    fetchNotifications();
+    const scheduleNextPoll = (customDelay?: number) => {
+      if (pollTimerRef.current) {
+        clearTimeout(pollTimerRef.current);
+        pollTimerRef.current = null;
+      }
 
-    // 30-second continuous background polling fallback (guarantees state reconciliation even during transient SSE disruptions)
-    pollInterval = setInterval(fetchNotifications, 30000);
+      if (!isMounted) return;
 
-    try {
-      // Connect to real-time SSE stream using secure HttpOnly cookie credentials (no query param tokens)
-      const streamUrl = apiUrl('/api/admin/notifications/stream');
-      eventSource = new EventSource(streamUrl, { withCredentials: true });
+      const isVisible = typeof document !== 'undefined' && document.visibilityState === 'visible';
+      const delay = customDelay ?? (isVisible ? ACTIVE_POLL_INTERVAL : BACKGROUND_POLL_INTERVAL);
 
-      eventSource.addEventListener('init', (e: MessageEvent) => {
-        try {
-          const payload = JSON.parse(e.data);
-          if (Array.isArray(payload.notifications)) {
-            setNotifications(payload.notifications);
-          }
-          if (typeof payload.unreadCount === 'number') {
-            setUnreadCount(payload.unreadCount);
-          }
-        } catch {}
-      });
+      pollTimerRef.current = setTimeout(async () => {
+        await fetchNotifications();
+        scheduleNextPoll();
+      }, delay);
+    };
 
-      eventSource.addEventListener('notification', (e: MessageEvent) => {
-        try {
-          const newNotif = JSON.parse(e.data);
-          setNotifications((prev) => {
-            const notifId = newNotif._id || newNotif.id;
-            if (prev.some((n) => (n._id || (n as any).id) === notifId)) return prev;
-            return [newNotif, ...prev.slice(0, 24)];
-          });
-          setUnreadCount((c) => c + 1);
-        } catch {}
-      });
+    // Initial fetch on mount
+    fetchNotifications().then(() => {
+      scheduleNextPoll();
+    });
 
-      eventSource.addEventListener('unread_count', (e: MessageEvent) => {
-        try {
-          const payload = JSON.parse(e.data);
-          const count = typeof payload.count === 'number' ? payload.count : payload.unreadCount;
-          if (typeof count === 'number') {
-            setUnreadCount(count);
-          }
-        } catch {}
-      });
-
-      eventSource.onerror = () => {
-        // SSE disconnected: immediate fetch to refresh pending state
+    // Handle visibility changes: 15s when active, 60s when hidden
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Immediately refresh when admin returns to tab, then resume 15s cadence
         fetchNotifications();
-      };
-    } catch {
-      // Fallback polling is already running
-    }
+        scheduleNextPoll(ACTIVE_POLL_INTERVAL);
+      } else {
+        // Switch to power-efficient 60s background cadence
+        scheduleNextPoll(BACKGROUND_POLL_INTERVAL);
+      }
+    };
+
+    // Handle window focus (e.g. switching back from another application)
+    const handleWindowFocus = () => {
+      fetchNotifications();
+      scheduleNextPoll(ACTIVE_POLL_INTERVAL);
+    };
+
+    // Handle network reconnection (after laptop sleep or temporary disconnect)
+    const handleOnline = () => {
+      fetchNotifications();
+      scheduleNextPoll();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleWindowFocus);
+    window.addEventListener('online', handleOnline);
 
     return () => {
-      if (eventSource) {
-        eventSource.close();
+      isMounted = false;
+      if (pollTimerRef.current) {
+        clearTimeout(pollTimerRef.current);
+        pollTimerRef.current = null;
       }
-      if (pollInterval) {
-        clearInterval(pollInterval);
-      }
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleWindowFocus);
+      window.removeEventListener('online', handleOnline);
     };
   }, [isAuthenticated]);
 
   const handleMarkAsRead = async (notifId: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
+    pendingReadIdsRef.current.add(notifId);
+    setNotifications((prev) =>
+      prev.map((n) => (n._id === notifId || (n as any).id === notifId ? { ...n, read: true } : n))
+    );
+    setUnreadCount((c) => Math.max(0, c - 1));
     try {
-      setNotifications((prev) =>
-        prev.map((n) => (n._id === notifId ? { ...n, read: true } : n))
-      );
-      setUnreadCount((c) => Math.max(0, c - 1));
       await apiFetch(`/api/admin/notifications/${notifId}/read`, { method: 'PATCH' });
-    } catch {}
+    } catch {
+      // Retain optimistic state; reconciliation will happen on next successful poll
+    }
   };
 
   const handleMarkAllAsRead = async () => {
+    notifications.forEach((n) => pendingReadIdsRef.current.add(n._id || (n as any).id));
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    setUnreadCount(0);
     try {
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-      setUnreadCount(0);
       await apiFetch('/api/admin/notifications/mark-all-read', { method: 'POST' });
-    } catch {}
+    } catch {
+      // Retain optimistic state
+    }
   };
 
   const handleNotificationClick = (notif: any) => {

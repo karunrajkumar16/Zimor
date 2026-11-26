@@ -3,8 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { apiFetch } from '@/lib/api';
-import { Save, Check, AlertCircle, Image as ImageIcon, Link as LinkIcon, RefreshCw, X } from 'lucide-react';
+import { Save, Check, AlertCircle, Image as ImageIcon, Link as LinkIcon, RefreshCw, X, Upload } from 'lucide-react';
 import { useAdminTheme } from '@/context/AdminThemeContext';
+import { uploadAndRegisterMedia } from '@/lib/cloudinaryDirectUpload';
 import { DEFAULT_REELS, type ReelItem } from '@/data/reels-config';
 
 interface HeroSlide {
@@ -35,6 +36,38 @@ export default function AdminContentHomePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [uploadingReel, setUploadingReel] = useState<{ idx: number; field: 'video' | 'poster' } | null>(null);
+
+  const handleReelMediaUpload = async (idx: number, field: 'video' | 'poster', file: File) => {
+    setUploadingReel({ idx, field });
+    try {
+      const isVideo = field === 'video';
+      const uploaded = await uploadAndRegisterMedia(file, {
+        folder: 'zimor/reels',
+        resourceType: isVideo ? 'video' : 'image',
+        alt: reels[idx].title || file.name,
+      });
+
+      const updated = [...reels];
+      if (field === 'video') {
+        updated[idx].videoUrl = uploaded.secureUrl;
+      } else {
+        updated[idx].posterUrl = uploaded.secureUrl;
+      }
+      setReels(updated);
+      setMessage({
+        type: 'success',
+        text: `Reel 0${idx + 1} ${field} uploaded directly to Cloudinary and updated!`,
+      });
+    } catch (err: any) {
+      setMessage({
+        type: 'error',
+        text: err.message || `Failed to upload reel ${field}.`,
+      });
+    } finally {
+      setUploadingReel(null);
+    }
+  };
 
   const cardBg = isDark
     ? 'bg-[#24211F] border-[#36312C]'
@@ -389,9 +422,26 @@ export default function AdminContentHomePage() {
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                          <label className={`block mb-1 font-medium ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
-                            Cloudinary Video Stream URL (.mp4)
-                          </label>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className={`font-medium ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
+                              Cloudinary Video Stream URL (.mp4)
+                            </label>
+                            <label className="text-[10px] text-[#5146E5] dark:text-[#818CF8] hover:underline cursor-pointer flex items-center gap-1 font-semibold">
+                              <Upload className="w-3 h-3" />
+                              {uploadingReel?.idx === idx && uploadingReel?.field === 'video' ? 'Uploading...' : 'Upload Video'}
+                              <input
+                                type="file"
+                                accept="video/mp4,video/webm"
+                                className="hidden"
+                                disabled={uploadingReel !== null}
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) handleReelMediaUpload(idx, 'video', file);
+                                  e.target.value = '';
+                                }}
+                              />
+                            </label>
+                          </div>
                           <input
                             type="text"
                             value={reel.videoUrl}
@@ -404,9 +454,26 @@ export default function AdminContentHomePage() {
                           />
                         </div>
                         <div>
-                          <label className={`block mb-1 font-medium ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
-                            Cloudinary Poster Image URL (.webp)
-                          </label>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className={`font-medium ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
+                              Cloudinary Poster Image URL (.webp)
+                            </label>
+                            <label className="text-[10px] text-[#5146E5] dark:text-[#818CF8] hover:underline cursor-pointer flex items-center gap-1 font-semibold">
+                              <Upload className="w-3 h-3" />
+                              {uploadingReel?.idx === idx && uploadingReel?.field === 'poster' ? 'Uploading...' : 'Upload Poster'}
+                              <input
+                                type="file"
+                                accept="image/webp,image/jpeg,image/png"
+                                className="hidden"
+                                disabled={uploadingReel !== null}
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) handleReelMediaUpload(idx, 'poster', file);
+                                  e.target.value = '';
+                                }}
+                              />
+                            </label>
+                          </div>
                           <input
                             type="text"
                             value={reel.posterUrl}

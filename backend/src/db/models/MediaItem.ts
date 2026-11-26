@@ -1,6 +1,6 @@
 // /src/lib/db/models/MediaItem.ts
 import mongoose, { Schema, Document, Model } from 'mongoose';
-import { MediaItem } from '../providers/interface';
+import { MediaItem } from '../providers/interface.js';
 
 export interface MediaItemDocument extends Omit<MediaItem, 'id'>, Document {
   id: string;

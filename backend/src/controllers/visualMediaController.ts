@@ -515,9 +515,29 @@ export async function updateVisualMedia(req: Request, res: Response) {
       return res.status(400).json({ error: `Unknown visual media item "${id}"` });
     }
 
-    const { url, alt, publicId } = req.body;
+    const { url, alt, publicId, width, height, format } = req.body;
     const db = await getDatabaseProvider();
     const adminEmail = (req as any).admin?.email || 'admin@zimor.com';
+
+    // If new asset was uploaded (url + publicId provided), record in MediaItem collection
+    if (url && publicId) {
+      const folder = targetDef.cloudinaryFolder || (targetDef.scope === 'about' ? 'zimor/about' : 'zimor/homepage');
+      const safeBaseName = targetDef.id.replace(/[^a-zA-Z0-9_-]/g, '_');
+      const ext = format ? `.${format}` : (targetDef.mediaType === 'video' ? '.mp4' : '.webp');
+      const filename = `${safeBaseName}-${Date.now()}${ext}`;
+      await db.createMediaItem({
+        filename,
+        originalName: filename,
+        url,
+        publicId,
+        mimeType: targetDef.mediaType === 'video' ? 'video/mp4' : 'image/webp',
+        size: typeof req.body.size === 'number' ? req.body.size : 0,
+        width: typeof width === 'number' ? width : undefined,
+        height: typeof height === 'number' ? height : undefined,
+        alt: alt || targetDef.alt,
+        folder,
+      }).catch(err => console.error('[VISUAL MEDIA ITEM RECORD ERROR]:', err));
+    }
 
     if (targetDef.scope === 'homepage') {
       const homeItems = await db.getContent('homepage', 'media');
@@ -532,6 +552,8 @@ export async function updateVisualMedia(req: Request, res: Response) {
         url: url !== undefined ? url : currentItem.url,
         alt: alt !== undefined ? alt : currentItem.alt,
         publicId: publicId !== undefined ? publicId : currentItem.publicId,
+        ...(typeof width === 'number' ? { width } : {}),
+        ...(typeof height === 'number' ? { height } : {}),
         updatedAt: new Date().toISOString(),
         updatedBy: adminEmail,
       };
@@ -556,6 +578,8 @@ export async function updateVisualMedia(req: Request, res: Response) {
         url: url !== undefined ? url : currentItem.url,
         alt: alt !== undefined ? alt : currentItem.alt,
         publicId: publicId !== undefined ? publicId : currentItem.publicId,
+        ...(typeof width === 'number' ? { width } : {}),
+        ...(typeof height === 'number' ? { height } : {}),
         updatedAt: new Date().toISOString(),
         updatedBy: adminEmail,
       };

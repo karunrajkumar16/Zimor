@@ -1,6 +1,6 @@
 // /src/lib/db/models/SiteContent.ts
 import mongoose, { Schema, Document, Model } from 'mongoose';
-import { SiteContent } from '../providers/interface';
+import { SiteContent } from '../providers/interface.js';
 
 export interface SiteContentDocument extends SiteContent, Document {}
 

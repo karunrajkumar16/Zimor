@@ -3,15 +3,15 @@
 // Active when USE_MOCK_DB=false and MONGODB_URI is provided
 
 import mongoose from 'mongoose';
-import { connectToDatabase } from '../mongodb';
-import { ProductModel } from '../models/Product';
-import { CategoryModel } from '../models/Category';
-import { OrderModel } from '../models/Order';
-import { CustomerModel } from '../models/Customer';
-import { SiteContentModel } from '../models/SiteContent';
-import { MediaItemModel } from '../models/MediaItem';
-import { AdminUserModel } from '../models/AdminUser';
-import { ReviewModel } from '../models/Review';
+import { connectToDatabase } from '../mongodb.js';
+import { ProductModel } from '../models/Product.js';
+import { CategoryModel } from '../models/Category.js';
+import { OrderModel } from '../models/Order.js';
+import { CustomerModel } from '../models/Customer.js';
+import { SiteContentModel } from '../models/SiteContent.js';
+import { MediaItemModel } from '../models/MediaItem.js';
+import { AdminUserModel } from '../models/AdminUser.js';
+import { ReviewModel } from '../models/Review.js';
 import { Product, Order, CustomerReview } from '../../types/index.js';
 import {
   DatabaseProvider,
@@ -21,7 +21,7 @@ import {
   MediaItem,
   SiteContent,
   CreateOrderInput,
-} from './interface';
+} from './interface.js';
 
 export class MongoDatabaseProvider implements DatabaseProvider {
   // PRODUCTS

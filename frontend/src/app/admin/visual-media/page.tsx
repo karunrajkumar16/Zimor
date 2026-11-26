@@ -16,6 +16,7 @@ import {
   Layers,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
+import { uploadDirectToCloudinary } from '@/lib/cloudinaryDirectUpload';
 import { useAdminTheme } from '@/context/AdminThemeContext';
 import { VisualMediaItem } from '@/types';
 
@@ -380,18 +381,28 @@ export default function VisualMediaManagerPage() {
   const handleFileSelection = (key: string, file: File) => {
     setNotification(null);
 
-    const isAllowed =
+    const secDef = mediaMapping[key] || INITIAL_VISUAL_MEDIA[key];
+    const isVideoExpected = secDef?.mediaType === 'video';
+
+    const isAllowedImage =
       file.type.startsWith('image/') ||
       file.name.toLowerCase().endsWith('.webp') ||
       file.name.toLowerCase().endsWith('.jpg') ||
       file.name.toLowerCase().endsWith('.png') ||
       file.name.toLowerCase().endsWith('.jpeg');
 
+    const isAllowedVideo =
+      file.type.startsWith('video/') ||
+      file.name.toLowerCase().endsWith('.mp4') ||
+      file.name.toLowerCase().endsWith('.webm');
+
+    const isAllowed = isVideoExpected ? isAllowedVideo : isAllowedImage;
+
     if (!isAllowed) {
       const ext = file.name.split('.').pop()?.toUpperCase() || 'UNKNOWN';
       setNotification({
         type: 'error',
-        text: `Invalid file format for Section ${SECTION_NUMBERS[key]}: "${file.name}" (${ext}). Please select a WebP, JPEG, or PNG image.`,
+        text: `Invalid file format for Section ${SECTION_NUMBERS[key]}: "${file.name}" (${ext}). Please select ${isVideoExpected ? 'an MP4 or WebM video' : 'a WebP, JPEG, or PNG image'}.`,
       });
       if (fileInputRefs.current[key]) {
         fileInputRefs.current[key]!.value = '';
@@ -405,18 +416,20 @@ export default function VisualMediaManagerPage() {
     }
 
     const previewUrl = URL.createObjectURL(file);
-    const img = new window.Image();
-    img.onload = () => {
-      setStagedUploads((curr) => ({
-        ...curr,
-        [key]: {
-          file,
-          previewUrl,
-          dimensions: { width: img.naturalWidth, height: img.naturalHeight },
-        },
-      }));
-    };
-    img.src = previewUrl;
+    if (!isVideoExpected) {
+      const img = new window.Image();
+      img.onload = () => {
+        setStagedUploads((curr) => ({
+          ...curr,
+          [key]: {
+            file,
+            previewUrl,
+            dimensions: { width: img.naturalWidth, height: img.naturalHeight },
+          },
+        }));
+      };
+      img.src = previewUrl;
+    }
 
     setStagedUploads((curr) => ({
       ...curr,
@@ -439,7 +452,7 @@ export default function VisualMediaManagerPage() {
     }
   };
 
-  // Upload to Cloudinary and update MongoDB
+  // Direct upload to Cloudinary and update MongoDB
   const handleUploadAndPublish = async (key: string) => {
     const staged = stagedUploads[key];
     if (!staged) return;
@@ -448,22 +461,36 @@ export default function VisualMediaManagerPage() {
     setNotification(null);
 
     try {
-      const formData = new FormData();
-      formData.append('file', staged.file);
-      formData.append('id', key);
+      const secDef = mediaMapping[key] || INITIAL_VISUAL_MEDIA[key];
+      const folder = secDef.cloudinaryFolder || (secDef.scope === 'about' ? 'zimor/about' : 'zimor/homepage');
+      const resourceType = secDef.mediaType === 'video' ? 'video' : 'image';
       const altToSubmit = altTexts[key] || mediaMapping[key]?.alt || INITIAL_VISUAL_MEDIA[key]?.alt || '';
-      if (altToSubmit) {
-        formData.append('alt', altToSubmit);
-      }
 
-      const res = await apiFetch('/api/visual-media/upload', {
-        method: 'POST',
-        body: formData,
+      // Direct browser-to-Cloudinary upload bypassing Vercel body limits
+      const uploaded = await uploadDirectToCloudinary(staged.file, {
+        folder,
+        resourceType,
+        alt: altToSubmit,
+      });
+
+      // Synchronize metadata with MongoDB
+      const res = await apiFetch(`/api/visual-media/${key}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: uploaded.secureUrl,
+          publicId: uploaded.publicId,
+          alt: altToSubmit,
+          width: uploaded.width,
+          height: uploaded.height,
+          format: uploaded.format,
+          size: uploaded.size,
+        }),
       });
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to upload image');
+        throw new Error(data.error || 'Failed to update media record');
       }
 
       const updatedItem = data.item;
@@ -885,7 +912,7 @@ export default function VisualMediaManagerPage() {
                         fileInputRefs.current[key] = el;
                       }}
                       type="file"
-                      accept="image/webp,image/jpeg,image/png"
+                      accept={sec.mediaType === 'video' ? 'video/mp4,video/webm' : 'image/webp,image/jpeg,image/png'}
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) handleFileSelection(key, file);

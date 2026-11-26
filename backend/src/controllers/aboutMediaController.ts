@@ -228,7 +228,7 @@ export async function updateAboutMedia(req: Request, res: Response) {
       });
     }
 
-    const { alt, title, subtitle, description, url } = req.body;
+    const { alt, title, subtitle, description, url, publicId, width, height } = req.body;
     if (url && !url.toLowerCase().endsWith('.webp') && !url.includes('.webp')) {
       return res.status(400).json({
         error: 'Only WebP (.webp) image URLs are permitted.',
@@ -247,9 +247,29 @@ export async function updateAboutMedia(req: Request, res: Response) {
       ...(subtitle !== undefined ? { subtitle } : {}),
       ...(description !== undefined ? { description } : {}),
       ...(url ? { url } : {}),
+      ...(publicId ? { publicId } : {}),
+      ...(typeof width === 'number' ? { width } : {}),
+      ...(typeof height === 'number' ? { height } : {}),
       updatedAt: new Date().toISOString(),
       updatedBy: (req as any).admin?.email || 'admin@zimor.com',
     };
+
+    // If new asset was uploaded (url + publicId provided), record in MediaItem collection
+    if (url && publicId) {
+      const filename = `about-${section}-${Date.now()}.webp`;
+      await db.createMediaItem({
+        filename,
+        originalName: filename,
+        url,
+        publicId,
+        mimeType: 'image/webp',
+        size: typeof req.body.size === 'number' ? req.body.size : 0,
+        width: typeof width === 'number' ? width : undefined,
+        height: typeof height === 'number' ? height : undefined,
+        alt: updatedSection.alt || currentSection.alt,
+        folder: 'zimor/about',
+      }).catch(err => console.error('[ABOUT MEDIA ITEM RECORD ERROR]:', err));
+    }
 
     const newMapping: AboutMediaMapping = {
       ...existing,

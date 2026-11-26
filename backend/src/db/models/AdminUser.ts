@@ -1,6 +1,6 @@
 // /src/lib/db/models/AdminUser.ts
 import mongoose, { Schema, Document, Model } from 'mongoose';
-import { AdminUser } from '../providers/interface';
+import { AdminUser } from '../providers/interface.js';
 
 export interface AdminUserDocument extends Omit<AdminUser, 'id'>, Document {
   id: string;

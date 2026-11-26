@@ -16,6 +16,7 @@ import {
   Smartphone,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
+import { uploadDirectToCloudinary } from '@/lib/cloudinaryDirectUpload';
 import { useAdminTheme } from '@/context/AdminThemeContext';
 import type { AboutMediaSection, AboutMediaMapping } from '@/types';
 
@@ -272,20 +273,32 @@ export default function AdminAboutMediaPage() {
     setNotification(null);
 
     try {
-      const formData = new FormData();
-      formData.append('file', staged.file);
-      formData.append('section', sectionKey);
-      formData.append('alt', currentAlt);
+      // Direct browser-to-Cloudinary upload with signed payload (strict WebP format)
+      const uploaded = await uploadDirectToCloudinary(staged.file, {
+        folder: 'zimor/about',
+        resourceType: 'image',
+        allowedFormats: ['webp'],
+        alt: currentAlt,
+      });
 
-      const res = await apiFetch('/api/about-media/upload', {
-        method: 'POST',
-        body: formData,
+      // Synchronize published image and metadata in MongoDB
+      const res = await apiFetch(`/api/about-media/${sectionKey}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: uploaded.secureUrl,
+          publicId: uploaded.publicId,
+          alt: currentAlt,
+          width: uploaded.width,
+          height: uploaded.height,
+          size: uploaded.size,
+        }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Upload failed');
+        throw new Error(data.error || 'Failed to update about section mapping');
       }
 
       if (data.media) {

@@ -1,9 +1,27 @@
 // Centralized API Client for Zimor Storefront and Admin Portal
 // Directly connects the browser to the backend API service (with credentials & auth headers)
-export const BACKEND_URL =
-  typeof window !== 'undefined'
-    ? (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001')
-    : (process.env.BACKEND_URL || 'http://localhost:5001');
+function resolveBackendUrl(): string {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const envUrl =
+    typeof window !== 'undefined'
+      ? (process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL)
+      : (process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL);
+
+  if (envUrl && envUrl.trim()) {
+    return envUrl.trim().replace(/\/+$/, '');
+  }
+
+  if (isProduction) {
+    if (typeof window !== 'undefined') {
+      console.warn('[ZIMOR CLIENT] NEXT_PUBLIC_BACKEND_URL is not set in production. Using relative origin.');
+    }
+    return '';
+  }
+
+  return 'http://localhost:5001';
+}
+
+export const BACKEND_URL = resolveBackendUrl();
 
 export function apiUrl(endpoint: string): string {
   const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;

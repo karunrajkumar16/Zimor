@@ -54,8 +54,8 @@ export async function login(req: Request, res: Response) {
     const normalizedEmail = normalizeEmail(email);
     const rateKey = `${ip}:${normalizedEmail}`;
 
-    // 1. Rate Limiting Check
-    const rateStatus = checkLoginRateLimit(rateKey);
+    // 1. Rate Limiting Check (Distributed MongoDB + Fail-Secure In-Memory)
+    const rateStatus = await checkLoginRateLimit(rateKey);
     if (rateStatus.isLimited) {
       return res.status(429).json({
         error: `Too many failed login attempts. Access temporarily locked for ${rateStatus.remainingLockoutSeconds} seconds.`,
@@ -64,14 +64,14 @@ export async function login(req: Request, res: Response) {
 
     // 2. Strict Allowlist Check: Only the 2 authorized administrator accounts can proceed
     if (!isApprovedAdminEmail(normalizedEmail)) {
-      recordFailedLogin(rateKey);
+      await recordFailedLogin(rateKey);
       return res.status(401).json({ error: 'Invalid administrator credentials' });
     }
 
     // 3. Bcrypt Password Verification against Database
     const admin = await verifyAdminCredentials(normalizedEmail, password);
     if (!admin) {
-      const lockResult = recordFailedLogin(rateKey);
+      const lockResult = await recordFailedLogin(rateKey);
       if (lockResult.isLocked) {
         return res.status(429).json({
           error: `Too many failed login attempts. Account locked for ${lockResult.remainingLockoutSeconds} seconds.`,
@@ -81,7 +81,7 @@ export async function login(req: Request, res: Response) {
     }
 
     // 4. Reset Rate Limiter on Successful Login
-    recordSuccessfulLogin(rateKey);
+    await recordSuccessfulLogin(rateKey);
 
     // 5. Issue Secure Admin Session
     const token = createSessionToken({
@@ -90,10 +90,11 @@ export async function login(req: Request, res: Response) {
       name: admin.name,
     });
 
+    const isProduction = process.env.NODE_ENV === 'production';
     res.cookie(ADMIN_COOKIE_NAME, token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -305,10 +306,11 @@ export async function googleCallback(req: Request, res: Response) {
         name: payload.name || payload.given_name || 'Zimor Executive Admin',
       });
 
+      const isProduction = process.env.NODE_ENV === 'production';
       res.cookie(ADMIN_COOKIE_NAME, adminToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
         path: '/',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
@@ -336,10 +338,11 @@ export async function googleCallback(req: Request, res: Response) {
       avatar: customer.avatar,
     });
 
+    const isProduction = process.env.NODE_ENV === 'production';
     res.cookie(CUSTOMER_COOKIE_NAME, sessionToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       path: '/',
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
@@ -390,7 +393,7 @@ export async function googleVerifyAdminCredential(req: Request, res: Response) {
     }
 
     const rateKey = `${ip}:google_admin`;
-    const rateStatus = checkLoginRateLimit(rateKey);
+    const rateStatus = await checkLoginRateLimit(rateKey);
     if (rateStatus.isLimited) {
       return res.status(429).json({
         success: false,
@@ -401,7 +404,7 @@ export async function googleVerifyAdminCredential(req: Request, res: Response) {
     // 1. Strict Google Token Verification
     const verification = await verifyGoogleIdTokenStrict(credential);
     if (!verification.valid || !verification.payload) {
-      recordFailedLogin(rateKey);
+      await recordFailedLogin(rateKey);
       return res.status(400).json({
         success: false,
         error: `Google verification failed: ${verification.error || 'Invalid identity token'}`,
@@ -414,7 +417,7 @@ export async function googleVerifyAdminCredential(req: Request, res: Response) {
     // 2. Strict Allowlist Check
     const isApproved = isApprovedAdminEmail(verifiedEmail);
     if (!isApproved) {
-      recordFailedLogin(rateKey);
+      await recordFailedLogin(rateKey);
       console.warn(`[SECURITY ALERT] Unauthorized Google admin login attempt from: ${verifiedEmail}`);
       return res.status(403).json({
         success: false,
@@ -423,7 +426,7 @@ export async function googleVerifyAdminCredential(req: Request, res: Response) {
     }
 
     // 3. Reset Rate Limiter on Success
-    recordSuccessfulLogin(rateKey);
+    await recordSuccessfulLogin(rateKey);
 
     // 4. Live Database Check
     const db = await getDatabaseProvider();
@@ -437,10 +440,11 @@ export async function googleVerifyAdminCredential(req: Request, res: Response) {
       name: adminName,
     });
 
+    const isProduction = process.env.NODE_ENV === 'production';
     res.cookie(ADMIN_COOKIE_NAME, adminToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -600,7 +604,7 @@ export async function customerLogin(req: Request, res: Response) {
     const rateKey = `${ip}:customer_login:${normalizedEmail}`;
 
     // 1. Rate Limiting Check
-    const rateStatus = checkLoginRateLimit(rateKey);
+    const rateStatus = await checkLoginRateLimit(rateKey);
     if (rateStatus.isLimited) {
       return res.status(429).json({
         error: `Too many failed login attempts. Access temporarily locked for ${rateStatus.remainingLockoutSeconds} seconds.`,
@@ -612,7 +616,7 @@ export async function customerLogin(req: Request, res: Response) {
     const customer = await CustomerModel.findOne({ email: normalizedEmail }).select('+passwordHash');
 
     if (!customer) {
-      recordFailedLogin(rateKey);
+      await recordFailedLogin(rateKey);
       return res.status(401).json({ error: 'Invalid email address or password' });
     }
 
@@ -623,14 +627,14 @@ export async function customerLogin(req: Request, res: Response) {
           error: 'This account was created with Google Sign-In. Please click "Continue with Google".',
         });
       }
-      recordFailedLogin(rateKey);
+      await recordFailedLogin(rateKey);
       return res.status(401).json({ error: 'Invalid email address or password' });
     }
 
     // 4. Verify Password Hash
     const isMatch = await bcrypt.compare(password, customer.passwordHash);
     if (!isMatch) {
-      const lockResult = recordFailedLogin(rateKey);
+      const lockResult = await recordFailedLogin(rateKey);
       if (lockResult.isLocked) {
         return res.status(429).json({
           error: `Too many failed login attempts. Account temporarily locked for ${lockResult.remainingLockoutSeconds} seconds.`,
@@ -640,7 +644,7 @@ export async function customerLogin(req: Request, res: Response) {
     }
 
     // 5. Reset Rate Limiter
-    recordSuccessfulLogin(rateKey);
+    await recordSuccessfulLogin(rateKey);
 
     // 6. Issue Customer Session
     const sessionToken = createCustomerSessionToken({
@@ -650,10 +654,11 @@ export async function customerLogin(req: Request, res: Response) {
       avatar: customer.avatar,
     });
 
+    const isProduction = process.env.NODE_ENV === 'production';
     res.cookie(CUSTOMER_COOKIE_NAME, sessionToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       path: '/',
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
@@ -708,7 +713,7 @@ export async function customerRegister(req: Request, res: Response) {
     }
 
     const rateKey = `${ip}:customer_register`;
-    const rateStatus = checkLoginRateLimit(rateKey);
+    const rateStatus = await checkLoginRateLimit(rateKey);
     if (rateStatus.isLimited) {
       return res.status(429).json({
         error: `Too many registration attempts. Please wait ${rateStatus.remainingLockoutSeconds} seconds.`,
@@ -738,10 +743,11 @@ export async function customerRegister(req: Request, res: Response) {
         avatar: existing.avatar,
       });
 
+      const isProduction = process.env.NODE_ENV === 'production';
       res.cookie(CUSTOMER_COOKIE_NAME, sessionToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
         path: '/',
         maxAge: 30 * 24 * 60 * 60 * 1000,
       });

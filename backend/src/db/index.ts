@@ -1,9 +1,9 @@
 // /src/lib/db/index.ts
 // Database factory: Selects JSON (dev) or MongoDB (production) based on environment configuration
 
-import { DatabaseProvider } from './providers/interface';
-import { JsonDatabaseProvider } from './providers/json-provider';
-import { MongoDatabaseProvider } from './providers/mongodb-provider';
+import { DatabaseProvider } from './providers/interface.js';
+import { JsonDatabaseProvider } from './providers/json-provider.js';
+import { MongoDatabaseProvider } from './providers/mongodb-provider.js';
 
 let dbProvider: DatabaseProvider | null = null;
 
@@ -24,4 +24,4 @@ export function getDatabaseProvider(): DatabaseProvider {
   return dbProvider!;
 }
 
-export * from './providers/interface';
+export * from './providers/interface.js';

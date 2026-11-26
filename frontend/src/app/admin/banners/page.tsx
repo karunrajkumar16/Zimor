@@ -22,6 +22,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
+import { uploadAndRegisterMedia } from '@/lib/cloudinaryDirectUpload';
 import { useAdminTheme } from '@/context/AdminThemeContext';
 
 interface HeroSlide {
@@ -269,41 +270,24 @@ export default function AdminHeroBannersPage() {
     setMessage(null);
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('folder', 'zimor/banners');
-
-      const res = await apiFetch('/api/media', {
-        method: 'POST',
-        body: formData,
+      const uploaded = await uploadAndRegisterMedia(file, {
+        folder: 'zimor/banners',
+        alt: slides[activeSlideIdx]?.title || file.name.replace(/\.[^/.]+$/, ''),
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        const uploadedUrl = data.media?.url || data.url;
-        if (uploadedUrl) {
-          updateActiveSlide('image', uploadedUrl);
-          setMessage({ type: 'success', text: `Image "${file.name}" uploaded and set for Slide ${activeSlideIdx + 1}!` });
-        }
-      } else {
-        // Fallback to local DataURL preview if backend media route is unavailable
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const dataUrl = event.target?.result as string;
-          if (dataUrl) {
-            updateActiveSlide('image', dataUrl);
-            setMessage({ type: 'success', text: `Local image "${file.name}" loaded for Slide ${activeSlideIdx + 1}.` });
-          }
-        };
-        reader.readAsDataURL(file);
+      if (uploaded.secureUrl) {
+        updateActiveSlide('image', uploaded.secureUrl);
+        setMessage({ type: 'success', text: `Image "${file.name}" uploaded to Cloudinary and set for Slide ${activeSlideIdx + 1}!` });
       }
-    } catch {
+    } catch (err: any) {
+      console.error('Direct Cloudinary banner upload failed, falling back:', err);
+      // Fallback to local DataURL preview if backend media route is unavailable
       const reader = new FileReader();
       reader.onload = (event) => {
         const dataUrl = event.target?.result as string;
         if (dataUrl) {
           updateActiveSlide('image', dataUrl);
-          setMessage({ type: 'success', text: `Image "${file.name}" loaded for Slide ${activeSlideIdx + 1}.` });
+          setMessage({ type: 'success', text: `Local image "${file.name}" loaded for Slide ${activeSlideIdx + 1}.` });
         }
       };
       reader.readAsDataURL(file);

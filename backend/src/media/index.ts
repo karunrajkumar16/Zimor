@@ -1,9 +1,9 @@
 // Selects media provider based on USE_MOCK_MEDIA env var
 // USE_MOCK_MEDIA=true  → local filesystem (dev only)
 // USE_MOCK_MEDIA=false → Cloudinary (production)
-import { MediaProvider } from './providers/interface';
-import { LocalMediaProvider } from './providers/local-provider';
-import { CloudinaryProvider } from './providers/cloudinary-provider';
+import { MediaProvider } from './providers/interface.js';
+import { LocalMediaProvider } from './providers/local-provider.js';
+import { CloudinaryProvider } from './providers/cloudinary-provider.js';
 
 let mediaProvider: MediaProvider | null = null;
 

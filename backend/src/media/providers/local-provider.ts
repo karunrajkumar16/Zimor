@@ -3,7 +3,7 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import { MediaProvider, UploadResult } from './interface';
+import { MediaProvider, UploadResult } from './interface.js';
 
 const UPLOADS_DIR = path.join(process.cwd(), '.local-uploads');
 const INDEX_FILE = path.join(UPLOADS_DIR, 'index.json');

@@ -1,6 +1,6 @@
 // /src/lib/db/models/Customer.ts
 import mongoose, { Schema, Document, Model } from 'mongoose';
-import { Customer } from '../providers/interface';
+import { Customer } from '../providers/interface.js';
 
 export interface CustomerDocument extends Omit<Customer, 'id'>, Document {
   id: string;

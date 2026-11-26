@@ -1,7 +1,7 @@
 // Production media provider: Cloudinary
 // Switch from local: set USE_MOCK_MEDIA=false and provide CLOUDINARY_* env vars
 import { v2 as cloudinary } from 'cloudinary';
-import { MediaProvider, UploadResult } from './interface';
+import { MediaProvider, UploadResult } from './interface.js';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,

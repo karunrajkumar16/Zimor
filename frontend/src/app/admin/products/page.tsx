@@ -35,6 +35,7 @@ import {
   Tag,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
+import { uploadAndRegisterMedia } from '@/lib/cloudinaryDirectUpload';
 import { useAdminTheme } from '@/context/AdminThemeContext';
 import type { Product } from '@/types';
 
@@ -187,33 +188,19 @@ export default function AdminProductsPage() {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       try {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('folder', 'zimor/products');
-
-        const res = await apiFetch('/api/media', {
-          method: 'POST',
-          body: formData,
+        const altText = formName || file.name.replace(/\.[^/.]+$/, '');
+        // Direct browser-to-Cloudinary upload bypassing Vercel body limits
+        const uploaded = await uploadAndRegisterMedia(file, {
+          folder: 'zimor/products',
+          alt: altText,
         });
 
-        if (res.ok) {
-          const data = await res.json();
-          const uploadedUrl = data.media?.url || data.url;
-          if (uploadedUrl) {
-            newUploadedImages.push({ url: uploadedUrl, alt: formName || file.name.replace(/\.[^/.]+$/, '') });
-          }
-        } else {
-          // Fallback to FileReader DataURL
-          const dataUrl = await new Promise<string>((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (ev) => resolve(ev.target?.result as string);
-            reader.readAsDataURL(file);
-          });
-          if (dataUrl) {
-            newUploadedImages.push({ url: dataUrl, alt: formName || file.name.replace(/\.[^/.]+$/, '') });
-          }
+        if (uploaded.secureUrl) {
+          newUploadedImages.push({ url: uploaded.secureUrl, alt: altText });
         }
-      } catch {
+      } catch (err: any) {
+        console.error('Direct Cloudinary upload failed, falling back:', err);
+        // Fallback to FileReader DataURL for local preview if network / auth offline
         const dataUrl = await new Promise<string>((resolve) => {
           const reader = new FileReader();
           reader.onload = (ev) => resolve(ev.target?.result as string);

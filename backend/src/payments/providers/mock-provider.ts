@@ -1,7 +1,7 @@
 // DEV ONLY: Mock payment provider for local testing
 // NEVER active in production — blocked by NODE_ENV check in index.ts
 import crypto from 'crypto';
-import { PaymentProvider, PaymentOrder, PaymentVerificationResult, RefundResult } from './interface';
+import { PaymentProvider, PaymentOrder, PaymentVerificationResult, RefundResult } from './interface.js';
 
 export class MockPaymentProvider implements PaymentProvider {
   async createOrder(options: {

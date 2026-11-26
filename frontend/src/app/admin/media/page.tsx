@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { apiFetch } from '@/lib/api';
+import { uploadAndRegisterMedia } from '@/lib/cloudinaryDirectUpload';
 import {
   Upload,
   Folder,
@@ -37,6 +38,7 @@ export default function AdminMediaPage() {
   const [loading, setLoading] = useState(true);
   const [selectedFolder, setSelectedFolder] = useState<string>('zimor/products');
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -69,29 +71,29 @@ export default function AdminMediaPage() {
     if (!files || files.length === 0) return;
 
     setUploading(true);
+    setUploadProgress(0);
     setMessage(null);
 
     try {
-      const formData = new FormData();
-      formData.append('file', files[0]);
-      formData.append('folder', selectedFolder);
+      const file = files[0];
+      const isVideo = file.type.startsWith('video/') || /\.(mp4|webm|mov)$/i.test(file.name);
 
-      const res = await apiFetch('/api/media', {
-        method: 'POST',
-        body: formData,
+      // Direct browser-to-Cloudinary upload bypassing Vercel body limits
+      const uploaded = await uploadAndRegisterMedia(file, {
+        folder: selectedFolder,
+        resourceType: isVideo ? 'video' : 'image',
+        onProgress: (percent) => setUploadProgress(percent),
       });
 
-      if (res.ok) {
-        setMessage({ type: 'success', text: 'Media asset uploaded successfully.' });
+      if (uploaded.secureUrl) {
+        setMessage({ type: 'success', text: `Media asset "${file.name}" uploaded successfully to Cloudinary!` });
         fetchMedia();
-      } else {
-        const data = await res.json();
-        setMessage({ type: 'error', text: data.error || 'Failed to upload media.' });
       }
-    } catch {
-      setMessage({ type: 'error', text: 'Error uploading file.' });
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message || 'Error uploading file to Cloudinary.' });
     } finally {
       setUploading(false);
+      setUploadProgress(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
@@ -143,7 +145,13 @@ export default function AdminMediaPage() {
             className="inline-flex items-center gap-2 px-4 py-2 bg-[#5146E5] hover:bg-[#4338CA] text-[#F7F5F2] text-xs font-semibold uppercase tracking-wider rounded shadow-xs transition-colors"
           >
             <Upload className="w-4 h-4" />
-            <span>{uploading ? 'Uploading...' : 'Upload Asset'}</span>
+            <span>
+              {uploading
+                ? uploadProgress !== null
+                  ? `Uploading ${uploadProgress}%...`
+                  : 'Uploading...'
+                : 'Upload Asset'}
+            </span>
           </button>
         </div>
       </div>

@@ -50,12 +50,43 @@ app.use(
 );
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Serve local upload assets in development
-const localUploadsPath = path.resolve(process.cwd(), '.local-uploads');
-app.use('/api/media/local', express.static(localUploadsPath));
+// Serve local upload assets in development only
+if (!config.isProduction) {
+  const localUploadsPath = path.resolve(process.cwd(), '.local-uploads');
+  app.use('/api/media/local', express.static(localUploadsPath));
+}
 
-// API Routes
+// Health check endpoints (available on /health, /api/health, /, and /api)
+const healthHandler = (_req: express.Request, res: express.Response) => {
+  res.json({
+    status: 'ok',
+    service: 'Zimor Luxury Backend API',
+    providers: {
+      database: config.useMockDb ? 'json' : 'mongodb',
+      media: config.useMockMedia ? 'local' : 'cloudinary',
+      payment: config.useMockPayment ? 'mock' : 'razorpay',
+    },
+    timestamp: new Date().toISOString(),
+  });
+};
+
+app.get('/health', healthHandler);
+app.get('/api/health', healthHandler);
+
+const rootHandler = (_req: express.Request, res: express.Response) => {
+  res.json({
+    name: 'Zimor Backend API Server',
+    status: 'running',
+    docs: '/api',
+  });
+};
+
+app.get('/', rootHandler);
+app.get('/api', rootHandler);
+
+// API Routes: Dual mounted to support direct /api/* calls as well as serverless rewrite paths
 app.use('/api', apiRouter);
+app.use('/', apiRouter);
 
 // Global Error Handler (Guarantees JSON response instead of plain text 500 HTML)
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
@@ -67,30 +98,11 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
   });
 });
 
-// Health check endpoint
-app.get('/health', (_req, res) => {
-  res.json({
-    status: 'ok',
-    service: 'Zimor Luxury Backend API',
-    providers: {
-      database: config.useMockDb ? 'json' : 'mongodb',
-      media: config.useMockMedia ? 'local' : 'cloudinary',
-      payment: config.useMockPayment ? 'mock' : 'razorpay',
-    },
-    timestamp: new Date().toISOString(),
-  });
-});
+// Start Server: Only start HTTP listener when running as a standalone server, never in Vercel or test environment
+const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+const isTest = process.env.NODE_ENV === 'test';
 
-app.get('/', (_req, res) => {
-  res.json({
-    name: 'Zimor Backend API Server',
-    status: 'running',
-    docs: '/api',
-  });
-});
-
-// Start Server
-if (process.env.NODE_ENV !== 'test') {
+if (!isServerless && !isTest) {
   app.listen(config.port, '0.0.0.0', () => {
     console.log(`[ZIMOR BACKEND] API server running on http://0.0.0.0:${config.port} (accessible via localhost:${config.port})`);
     console.log(`[ZIMOR BACKEND] Database provider: ${config.useMockDb ? 'Local JSON' : 'MongoDB Atlas'}`);
@@ -104,4 +116,5 @@ if (process.env.NODE_ENV !== 'test') {
   });
 }
 
+export { app };
 export default app;
