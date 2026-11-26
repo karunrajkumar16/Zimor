@@ -9,6 +9,7 @@ import {
   createCustomerSessionToken,
   verifyCustomerSessionToken,
   getGoogleOAuthClient,
+  exchangeGoogleOAuthCodeWithRetry,
   isApprovedAdminEmail,
   verifyGoogleIdTokenStrict,
   normalizeEmail,
@@ -222,8 +223,7 @@ export async function googleCallback(req: Request, res: Response) {
       return res.redirect(`${config.clientUrl}${errRedirect}?auth_error=missing_code`);
     }
 
-    const client = getGoogleOAuthClient();
-    const { tokens } = await client.getToken(code);
+    const { tokens } = await exchangeGoogleOAuthCodeWithRetry(code);
 
     if (!tokens.id_token) {
       const errRedirect = isAdminFlow ? '/admin/login' : targetPath;
@@ -308,9 +308,28 @@ export async function googleCallback(req: Request, res: Response) {
     const separator = targetPath.includes('?') ? '&' : '?';
     return res.redirect(`${config.clientUrl}${targetPath}${separator}auth=success&token=${encodeURIComponent(sessionToken)}`);
   } catch (err: any) {
-    console.error('[Google OAuth Callback Error]', err);
+    const isNetworkOrDns =
+      err.code === 'ENOTFOUND' ||
+      err.code === 'EAI_AGAIN' ||
+      err.code === 'ETIMEDOUT' ||
+      err.code === 'ECONNRESET' ||
+      err.code === 'ECONNREFUSED' ||
+      err.message?.includes('ENOTFOUND') ||
+      err.message?.includes('fetch failed') ||
+      err.message?.includes('getaddrinfo');
+
+    if (isNetworkOrDns) {
+      console.error('[Google OAuth Callback Error] Outbound DNS/network failure connecting to oauth2.googleapis.com:', err.message);
+    } else {
+      console.error('[Google OAuth Callback Error]', err);
+    }
+
     const errRedirect = targetPath.startsWith('/admin') ? '/admin/login' : targetPath;
-    return res.redirect(`${config.clientUrl}${errRedirect}?auth_error=${encodeURIComponent(err.message || 'authentication_failed')}`);
+    const userMessage = isNetworkOrDns
+      ? 'Google authentication service is temporarily unreachable. Please check your internet connection and try again.'
+      : err.message || 'authentication_failed';
+
+    return res.redirect(`${config.clientUrl}${errRedirect}?auth_error=${encodeURIComponent(userMessage)}`);
   }
 }
 

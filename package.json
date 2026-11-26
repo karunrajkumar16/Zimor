@@ -10,6 +10,7 @@
     "build:frontend": "npm --prefix frontend run build",
     "build:backend": "npm --prefix backend run build",
     "build": "npm --prefix backend run build && npm --prefix frontend run build",
+    "diagnostic:network": "npm --prefix backend run diagnostic:network",
     "start:frontend": "npm --prefix frontend run start",
     "start:backend": "npm --prefix backend run start"
   }

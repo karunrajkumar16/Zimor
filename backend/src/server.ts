@@ -1,3 +1,6 @@
+// Initialize DNS resilience and IPv4 prioritization before any network requests
+import './utils/networkDiagnostic.js';
+import { diagnoseGoogleOAuthConnectivity } from './utils/networkDiagnostic.js';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -90,6 +93,11 @@ if (process.env.NODE_ENV !== 'test') {
     console.log(`[ZIMOR BACKEND] Database provider: ${config.useMockDb ? 'Local JSON' : 'MongoDB Atlas'}`);
     console.log(`[ZIMOR BACKEND] Media provider:    ${config.useMockMedia ? 'Local Storage' : 'Cloudinary'}`);
     console.log(`[ZIMOR BACKEND] Payment provider:  ${config.useMockPayment ? 'Mock Sandbox' : 'Razorpay'}`);
+
+    // Asynchronously verify Google OAuth endpoint reachability on startup (non-blocking)
+    diagnoseGoogleOAuthConnectivity().catch((err) => {
+      console.warn('[ZIMOR BACKEND] Startup connectivity diagnostic warning:', err?.message || err);
+    });
   });
 }
 

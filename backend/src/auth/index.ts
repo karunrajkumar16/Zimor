@@ -1,7 +1,9 @@
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { OAuth2Client, TokenPayload } from 'google-auth-library';
+import { Gaxios } from 'gaxios';
 import { config } from '../config/index.js';
+import { resilientHttpsAgent } from '../utils/networkDiagnostic.js';
 
 export const ADMIN_COOKIE_NAME = 'zimor_admin_session';
 export const CUSTOMER_COOKIE_NAME = 'zimor_customer_session';
@@ -135,11 +137,77 @@ export function verifyCustomerSessionToken(token: string): CustomerSession | nul
 }
 
 export function getGoogleOAuthClient(): OAuth2Client {
-  return new OAuth2Client(
-    config.google.clientId,
-    config.google.clientSecret,
-    config.google.callbackUrl
-  );
+  const transporter = new Gaxios({
+    agent: resilientHttpsAgent,
+    retry: true,
+    retryConfig: {
+      retry: 3,
+      noResponseRetries: 3,
+      httpMethodsToRetry: ['GET', 'PUT', 'POST', 'HEAD', 'OPTIONS', 'DELETE'],
+      retryDelayMultiplier: 2,
+      retryDelay: 300,
+    },
+  });
+
+  return new OAuth2Client({
+    clientId: config.google.clientId,
+    clientSecret: config.google.clientSecret,
+    redirectUri: config.google.callbackUrl,
+    transporter,
+  });
+}
+
+/**
+ * Exchanges a Google OAuth authorization code for tokens with retry protection
+ * against transient DNS resolution glitches (ENOTFOUND, EAI_AGAIN) and socket drops.
+ */
+export async function exchangeGoogleOAuthCodeWithRetry(
+  code: string,
+  maxAttempts: number = 3,
+  delayMs: number = 500
+): Promise<{ tokens: any }> {
+  let lastError: any;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const client = getGoogleOAuthClient();
+      return await client.getToken(code);
+    } catch (err: any) {
+      lastError = err;
+
+      // Do NOT retry definitive client/protocol errors (e.g. invalid_grant, code already expired)
+      if (
+        err.response?.status &&
+        err.response.status >= 400 &&
+        err.response.status < 500 &&
+        err.response.status !== 408 &&
+        err.response.status !== 429
+      ) {
+        throw err;
+      }
+
+      const isNetworkOrDns =
+        err.code === 'ENOTFOUND' ||
+        err.code === 'EAI_AGAIN' ||
+        err.code === 'ETIMEDOUT' ||
+        err.code === 'ECONNRESET' ||
+        err.code === 'ECONNREFUSED' ||
+        err.message?.includes('ENOTFOUND') ||
+        err.message?.includes('fetch failed');
+
+      if (attempt < maxAttempts && isNetworkOrDns) {
+        console.warn(
+          `[Google OAuth] Token exchange attempt ${attempt}/${maxAttempts} encountered transient network issue (${err.code || err.message}). Retrying in ${delayMs * attempt}ms...`
+        );
+        await new Promise((resolve) => setTimeout(resolve, delayMs * attempt));
+        continue;
+      }
+
+      throw err;
+    }
+  }
+
+  throw lastError;
 }
 
 /**

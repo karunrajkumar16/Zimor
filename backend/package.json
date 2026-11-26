@@ -11,6 +11,7 @@
     "test:razorpay": "tsx test-razorpay-audit.ts",
     "demo:seed": "tsx scripts/demo-seed.ts",
     "demo:clean": "tsx scripts/demo-clean.ts",
+    "diagnostic:network": "tsx src/utils/networkDiagnostic.ts",
     "start": "node dist/server.js"
   },
   "dependencies": {
