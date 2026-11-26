@@ -9,8 +9,9 @@ export async function getContent(req: Request, res: Response) {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     const db = await getDatabaseProvider();
     const items = await db.getContent(page, section as string);
-    const content = items.length > 0 ? items[0] : null;
-    return res.json({ content });
+    const defaultSection = items.find((i) => i.section === (section || 'default'));
+    const content = defaultSection || (items.length > 0 ? items[0] : null);
+    return res.json({ content, items });
   } catch (err: any) {
     return res.status(500).json({ error: err.message || 'Failed to fetch content' });
   }

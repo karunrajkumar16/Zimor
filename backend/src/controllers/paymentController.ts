@@ -10,6 +10,7 @@ import { WebhookEventModel } from '../db/models/WebhookEvent.js';
 import { config } from '../config/index.js';
 import { processOrderFulfillment, addOrderAuditLog } from '../shipping/fulfillmentEngine.js';
 import { createNotification } from '../services/notificationService.js';
+import { calculateServerPromoDiscount } from './promotionController.js';
 
 /**
  * Public configuration endpoint for frontend Razorpay checkout.
@@ -98,9 +99,8 @@ export async function createPaymentOrder(req: Request, res: Response) {
       }
 
       // Calculate Promo Discount
-      if (promoCode && (promoCode.toUpperCase() === 'WELCOME10' || promoCode.toUpperCase() === 'ZIMOR10')) {
-        discountAmount = Math.round(calculatedSubtotal * 0.10);
-      }
+      const promoResult = await calculateServerPromoDiscount(promoCode, calculatedSubtotal);
+      discountAmount = promoResult.discountAmount;
 
       finalPayable = Math.max(0, calculatedSubtotal + shippingCharge - discountAmount);
     } else if (clientAmount && clientAmount > 0) {
@@ -263,10 +263,8 @@ export async function verifyPayment(req: Request, res: Response) {
     }
 
     const shippingCharge = shippingMethod === 'priority' ? 199 : (calculatedSubtotal >= 2000 ? 0 : 250);
-    let discountAmount = 0;
-    if (promoCode && (promoCode.toUpperCase() === 'WELCOME10' || promoCode.toUpperCase() === 'ZIMOR10')) {
-      discountAmount = Math.round(calculatedSubtotal * 0.10);
-    }
+    const promoResult = await calculateServerPromoDiscount(promoCode, calculatedSubtotal);
+    const discountAmount = promoResult.discountAmount;
     const finalTotal = Math.max(0, calculatedSubtotal + shippingCharge - discountAmount);
     const expectedAmountPaise = Math.round(finalTotal * 100);
 

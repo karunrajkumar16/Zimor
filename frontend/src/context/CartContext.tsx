@@ -2,6 +2,13 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { CartItem, Product } from '@/types';
+import { apiFetch } from '@/lib/api';
+
+interface PromoDetails {
+  code: string;
+  description: string;
+  discountPercent: number;
+}
 
 interface CartContextType {
   items: CartItem[];
@@ -16,7 +23,7 @@ interface CartContextType {
   total: number;
   appliedPromo: string | null;
   promoError: string | null;
-  applyPromoCode: (code: string) => boolean;
+  applyPromoCode: (code: string) => Promise<boolean> | boolean;
   removePromoCode: () => void;
   isCartDrawerOpen: boolean;
   openCartDrawer: () => void;
@@ -27,16 +34,12 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'zimor_cart_v1';
 const PROMO_KEY = 'zimor_promo_v1';
-
-const VALID_PROMOS: Record<string, { discountPercent: number; description: string }> = {
-  WELCOME10: { discountPercent: 10, description: '10% Welcome Discount applied' },
-  ZIMOR15: { discountPercent: 15, description: '15% Seasonal Discount applied' },
-  FIRSTBUY: { discountPercent: 10, description: '10% First Order Discount applied' },
-};
+const PROMO_DETAILS_KEY = 'zimor_promo_details_v1';
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
   const [appliedPromo, setAppliedPromo] = useState<string | null>(null);
+  const [promoDetails, setPromoDetails] = useState<PromoDetails | null>(null);
   const [promoError, setPromoError] = useState<string | null>(null);
   const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -48,8 +51,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setItems(JSON.parse(saved));
       }
       const savedPromo = localStorage.getItem(PROMO_KEY);
-      if (savedPromo && VALID_PROMOS[savedPromo]) {
+      const savedDetails = localStorage.getItem(PROMO_DETAILS_KEY);
+      if (savedPromo) {
         setAppliedPromo(savedPromo);
+      }
+      if (savedDetails) {
+        setPromoDetails(JSON.parse(savedDetails));
       }
     } catch (e) {
       console.error('Failed reading cart from localStorage', e);
@@ -62,15 +69,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!isLoaded) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-      if (appliedPromo) {
+      if (appliedPromo && promoDetails) {
         localStorage.setItem(PROMO_KEY, appliedPromo);
+        localStorage.setItem(PROMO_DETAILS_KEY, JSON.stringify(promoDetails));
       } else {
         localStorage.removeItem(PROMO_KEY);
+        localStorage.removeItem(PROMO_DETAILS_KEY);
       }
     } catch (e) {
       console.error('Failed saving cart to localStorage', e);
     }
-  }, [items, appliedPromo, isLoaded]);
+  }, [items, appliedPromo, promoDetails, isLoaded]);
 
   const addItem = useCallback((product: Product, quantity = 1, size?: string) => {
     const selectedSize = size || product.sizes?.[0] || 'Standard';
@@ -117,22 +126,51 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const clearCart = useCallback(() => {
     setItems([]);
     setAppliedPromo(null);
+    setPromoDetails(null);
   }, []);
 
-  const applyPromoCode = useCallback((code: string): boolean => {
+  const subtotal = useMemo(
+    () => items.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
+    [items]
+  );
+
+  const applyPromoCode = useCallback(async (code: string): Promise<boolean> => {
     const clean = code.trim().toUpperCase();
-    if (VALID_PROMOS[clean]) {
-      setAppliedPromo(clean);
-      setPromoError(null);
-      return true;
-    } else {
-      setPromoError('Invalid coupon code. Try WELCOME10 for 10% off.');
+    if (!clean) {
+      setPromoError('Please enter a coupon code.');
       return false;
     }
-  }, []);
+
+    try {
+      const res = await apiFetch('/api/checkout/validate-promo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: clean, subtotal }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.valid && data.promo) {
+        setAppliedPromo(data.promo.code);
+        setPromoDetails({
+          code: data.promo.code,
+          description: data.promo.description,
+          discountPercent: Number(data.promo.discountPercent || 0),
+        });
+        setPromoError(null);
+        return true;
+      } else {
+        setPromoError(data.error || 'Invalid coupon code. Try WELCOME10 for 10% off.');
+        return false;
+      }
+    } catch {
+      setPromoError('Unable to validate promotion right now. Please try again.');
+      return false;
+    }
+  }, [subtotal]);
 
   const removePromoCode = useCallback(() => {
     setAppliedPromo(null);
+    setPromoDetails(null);
     setPromoError(null);
   }, []);
 
@@ -141,12 +179,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const itemCount = useMemo(() => items.reduce((sum, item) => sum + item.quantity, 0), [items]);
 
-  const subtotal = useMemo(
-    () => items.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
-    [items]
-  );
-
-  const discountPercent = appliedPromo ? VALID_PROMOS[appliedPromo]?.discountPercent || 0 : 0;
+  const discountPercent = promoDetails?.discountPercent || 0;
   const discount = useMemo(() => Math.round((subtotal * discountPercent) / 100), [subtotal, discountPercent]);
 
   const shippingFee = 0; // Free express shipping across India

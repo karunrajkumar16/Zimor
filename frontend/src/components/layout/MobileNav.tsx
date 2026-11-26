@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useWishlist } from '@/context/WishlistContext';
 import { useCart } from '@/context/CartContext';
+import { useProducts } from '@/context/ProductContext';
 import { SOCIAL_LINKS } from '@/data/social';
 import { InstagramIcon, FacebookIcon, PinterestIcon, YoutubeIcon, ThreadsIcon } from './Footer';
 import { useWhatsAppUrl } from '@/lib/whatsapp';
@@ -40,6 +41,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
   const whatsappUrl = useWhatsAppUrl();
   const { wishlistCount } = useWishlist();
   const { itemCount } = useCart();
+  const { products, categories } = useProducts();
 
   // Progressive disclosure: only one section open at a time, initially all closed
   const [activeSection, setActiveSection] = useState<string | null>(null);
@@ -72,16 +74,24 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
     }
   };
 
+  const bagCategories = categories.length > 0
+    ? categories.filter((c) => !['everyday', 'work', 'travel'].includes(c.slug))
+    : [
+        { slug: 'tote-bags', name: 'Tote Bags' },
+        { slug: 'shoulder-bags', name: 'Shoulder Bags' },
+      ];
+
   const SECTIONS: NavSection[] = [
     {
       id: 'collections',
       label: 'Collections',
-      badge: '6 Silhouettes',
+      badge: `${products.length || 6} Silhouettes`,
       subItems: [
-        { label: 'View All Workbags (6)', href: '/shop', isFeatured: true },
-        { label: 'Tote Bags (15.6" Laptop Fit)', href: '/shop?category=tote-bags' },
-        { label: 'Laptop Bags with Crossbody Sling', href: '/shop?category=laptop-bags' },
-        { label: 'Shoulder Bags (Sculptural Crescent)', href: '/shop?category=shoulder-bags' },
+        { label: `View All Workbags (${products.length || 6})`, href: '/shop', isFeatured: true },
+        ...bagCategories.map((cat) => ({
+          label: cat.name,
+          href: `/shop?category=${cat.slug}`,
+        })),
       ],
     },
     {

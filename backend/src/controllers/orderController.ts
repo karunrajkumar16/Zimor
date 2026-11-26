@@ -9,6 +9,7 @@ import { getPaymentProvider } from '../payments/index.js';
 import { AuthenticatedRequest } from '../middleware/auth.js';
 import { createNotification } from '../services/notificationService.js';
 import { OrderReturnItem } from '../types/index.js';
+import { calculateServerPromoDiscount } from './promotionController.js';
 
 export async function getOrders(req: Request, res: Response) {
   try {
@@ -97,8 +98,9 @@ export async function createOrder(req: Request, res: Response) {
       });
     }
 
-    const shipping = orderData.shipping ?? (calculatedSubtotal > 2000 ? 0 : 250);
-    const discount = orderData.discount ?? 0;
+    const shipping = orderData.shipping ?? (calculatedSubtotal >= 2000 ? 0 : 250);
+    const promoResult = await calculateServerPromoDiscount(orderData.promoCode, calculatedSubtotal);
+    const discount = promoResult.discountAmount;
     const finalTotal = Math.max(0, calculatedSubtotal + shipping - discount);
 
     const order = await db.createOrder({

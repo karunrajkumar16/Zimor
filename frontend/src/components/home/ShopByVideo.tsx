@@ -1,60 +1,32 @@
 'use client';
 
-import React, { useRef, useEffect, useState, memo } from 'react';
+import React, { useRef, useEffect, useState, useMemo, memo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, ShoppingBag, Check } from 'lucide-react';
-import { PRODUCTS } from '@/data/products';
 import { Product } from '@/types';
 import { useCart } from '@/context/CartContext';
+import { useProducts } from '@/context/ProductContext';
 import { SOCIAL_LINKS } from '@/data/social';
+import { apiFetch } from '@/lib/api';
+
+export interface ReelConfigItem {
+  id: string;
+  title: string;
+  videoUrl: string;
+  posterUrl: string;
+  instagramUrl?: string;
+  productSlug?: string;
+}
 
 export interface ShoppableVideoItem {
   id: string;
   videoUrl: string;
   posterUrl: string;
   title: string;
+  instagramUrl?: string;
   product: Product;
 }
-
-// Database-backed local video assets (ready for admin panel management)
-export const SHOPPABLE_VIDEOS: ShoppableVideoItem[] = [
-  {
-    id: 'video-1',
-    videoUrl: 'https://res.cloudinary.com/kbeyfu3d/video/upload/v1795527022/zimor/reels/reel-1.mp4',
-    posterUrl: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1795527024/zimor/reels/poster-1.webp',
-    title: 'Workday Essentials Pack',
-    product: PRODUCTS.find((p) => p.slug === 'zimor-delo-tote' || p.id === 'zimor-delo-tote-rust') || PRODUCTS[0],
-  },
-  {
-    id: 'video-2',
-    videoUrl: 'https://res.cloudinary.com/kbeyfu3d/video/upload/v1795527163/zimor/reels/reel-2.mp4',
-    posterUrl: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1795527165/zimor/reels/poster-2.webp',
-    title: 'Café Days & Slow Afternoons',
-    product: PRODUCTS.find((p) => p.slug === 'zimor-classic-shoulder-bag' || p.id === 'zimor-classic-shoulder-bag-cream') || PRODUCTS[4],
-  },
-  {
-    id: 'video-3',
-    videoUrl: 'https://res.cloudinary.com/kbeyfu3d/video/upload/v1795527171/zimor/reels/reel-3.mp4',
-    posterUrl: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1795527173/zimor/reels/poster-3.webp',
-    title: 'Effortless Workday Carry',
-    product: PRODUCTS.find((p) => p.slug === 'zimor-rabota-tote' || p.id === 'zimor-rabota-tote-cognac') || PRODUCTS[2],
-  },
-  {
-    id: 'video-4',
-    videoUrl: 'https://res.cloudinary.com/kbeyfu3d/video/upload/v1795527175/zimor/reels/reel-4.mp4',
-    posterUrl: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1795527176/zimor/reels/poster-4.webp',
-    title: 'The Entire Day Packed',
-    product: PRODUCTS.find((p) => p.slug === 'zimor-delo-tote-noir') || PRODUCTS[1],
-  },
-  {
-    id: 'video-5',
-    videoUrl: 'https://res.cloudinary.com/kbeyfu3d/video/upload/v1795527178/zimor/reels/reel-5.mp4',
-    posterUrl: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1795527180/zimor/reels/poster-5.webp',
-    title: 'Structured Daily Essentials',
-    product: PRODUCTS.find((p) => p.slug === 'zimor-rabota-tote-espresso') || PRODUCTS[3],
-  },
-];
 
 interface ShoppableVideoCardProps {
   item: ShoppableVideoItem;
@@ -99,53 +71,32 @@ const ShoppableVideoCard = memo<ShoppableVideoCardProps>(({
     );
 
     observer.observe(cardEl);
-    return () => observer.disconnect();
+
+    return () => {
+      observer.disconnect();
+    };
   }, []);
 
   return (
     <div
       ref={cardRef}
-      className="group relative flex-none w-[160px] sm:w-[190px] md:w-[220px] lg:w-[240px] shrink-0 snap-start aspect-[9/16] rounded-xl overflow-hidden bg-ink shadow-xs hover:shadow-md transition-shadow duration-300"
+      className="group relative flex-none w-[220px] sm:w-[240px] md:w-[260px] aspect-[9/16] rounded-xl overflow-hidden bg-neutral-900 shadow-sm snap-start select-none transform-gpu isolate border border-line/40"
       style={{
-        transform: 'translateZ(0)',
-        backfaceVisibility: 'hidden',
-        contain: 'layout paint',
+        contain: 'paint layout',
+        contentVisibility: 'auto',
       }}
     >
-      {/* Full-card link for natural mobile navigation */}
-      <Link
-        href={`/product/${item.product.slug}`}
-        className="absolute inset-0 z-10 block"
-        aria-label={`View ${item.product.name}`}
-      >
-        <span className="sr-only">View {item.product.name}</span>
-      </Link>
-
-      {/* Immediate Poster Fallback: Zero layout shift & immediate visual display */}
-      <Image
-        src={item.posterUrl}
-        alt={item.title}
-        fill
-        loading="lazy"
-        decoding="async"
-        sizes="(max-width: 640px) 160px, (max-width: 1024px) 220px, 240px"
-        className={`object-cover object-center pointer-events-none transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'
-          }`}
-      />
-
-      {/* Ultra-efficient GIF-Style Silent Video Stream — Lazy Loaded with preload="none" */}
+      {/* Autoplaying Loop Video */}
       <video
         ref={videoRef}
         src={item.videoUrl}
         poster={item.posterUrl}
-        preload="none"
+        loop
         muted
         playsInline
-        loop
-        disablePictureInPicture
-        disableRemotePlayback
+        preload="none"
         aria-label={item.title}
-        className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none"
+        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
         style={{
           transform: 'translateZ(0)',
           backfaceVisibility: 'hidden',
@@ -216,8 +167,59 @@ ShoppableVideoCard.displayName = 'ShoppableVideoCard';
 
 export const ShopByVideo: React.FC = () => {
   const { addItem } = useCart();
+  const { products, getProductBySlug, isLoading: isProductsLoading } = useProducts();
   const [addedProductId, setAddedProductId] = useState<string | null>(null);
+  const [reelsConfig, setReelsConfig] = useState<ReelConfigItem[]>([]);
+  const [isLoadingReels, setIsLoadingReels] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Fetch dynamic shoppable reels from MongoDB Atlas via /api/content/homepage
+  useEffect(() => {
+    let isMounted = true;
+    apiFetch('/api/content/homepage', { cache: 'no-store' })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!isMounted) return;
+        const liveReels = data?.content?.data?.reels;
+        if (Array.isArray(liveReels) && liveReels.length > 0) {
+          setReelsConfig(liveReels);
+        }
+      })
+      .catch((err) => {
+        console.warn('[ShopByVideo] Live reels fetch notice:', err.message);
+      })
+      .finally(() => {
+        if (isMounted) setIsLoadingReels(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Map each reel dynamically to its genuine MongoDB Product document
+  const shoppableVideos: ShoppableVideoItem[] = useMemo(() => {
+    if (!reelsConfig || reelsConfig.length === 0 || products.length === 0) return [];
+
+    const items: ShoppableVideoItem[] = [];
+    for (const reel of reelsConfig) {
+      const matchedProduct =
+        (reel.productSlug ? getProductBySlug(reel.productSlug) : undefined) ||
+        products[0];
+
+      if (matchedProduct && reel.videoUrl) {
+        items.push({
+          id: reel.id || `video-${items.length + 1}`,
+          videoUrl: reel.videoUrl,
+          posterUrl: reel.posterUrl || matchedProduct.images[0]?.url || '',
+          title: reel.title || matchedProduct.name,
+          instagramUrl: reel.instagramUrl,
+          product: matchedProduct,
+        });
+      }
+    }
+    return items;
+  }, [reelsConfig, products, getProductBySlug]);
 
   const scrollTrack = (direction: 'left' | 'right') => {
     if (!scrollContainerRef.current) return;
@@ -228,12 +230,17 @@ export const ShopByVideo: React.FC = () => {
   const handleAddToCartFromVideo = (product: Product, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    addItem(product, 1, product.sizes[0]);
+    addItem(product, 1, product.sizes?.[0] || 'Standard');
     setAddedProductId(product.id);
     setTimeout(() => {
       setAddedProductId((current) => (current === product.id ? null : current));
     }, 1800);
   };
+
+  // Do not render section if there are no videos configured and loading completed
+  if (!isLoadingReels && !isProductsLoading && shoppableVideos.length === 0) {
+    return null;
+  }
 
   return (
     <section
@@ -281,7 +288,7 @@ export const ShopByVideo: React.FC = () => {
           </div>
         </div>
 
-        {/* Mobile-Optimized Horizontal Carousel (Zero Scroll Trapping, Snappy Momentum Glide) */}
+        {/* Mobile-Optimized Horizontal Carousel */}
         <div
           ref={scrollContainerRef}
           className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar gap-3 sm:gap-4 md:gap-5 pb-3 -mx-4 px-4 sm:mx-0 sm:px-0"
@@ -294,14 +301,21 @@ export const ShopByVideo: React.FC = () => {
             overscrollBehaviorY: 'auto',
           }}
         >
-          {SHOPPABLE_VIDEOS.map((item) => (
-            <ShoppableVideoCard
-              key={item.id}
-              item={item}
-              onAddToCart={handleAddToCartFromVideo}
-              isAdded={addedProductId === item.product.id}
-            />
-          ))}
+          {isLoadingReels || isProductsLoading
+            ? Array.from({ length: 4 }).map((_, idx) => (
+                <div
+                  key={`video-skeleton-${idx}`}
+                  className="flex-none w-[220px] sm:w-[240px] md:w-[260px] aspect-[9/16] rounded-xl bg-canvas-card animate-pulse border border-line/40"
+                />
+              ))
+            : shoppableVideos.map((item) => (
+                <ShoppableVideoCard
+                  key={item.id}
+                  item={item}
+                  onAddToCart={handleAddToCartFromVideo}
+                  isAdded={addedProductId === item.product.id}
+                />
+              ))}
         </div>
       </div>
     </section>

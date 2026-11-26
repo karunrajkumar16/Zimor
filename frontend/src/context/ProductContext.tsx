@@ -1,13 +1,13 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
-import { Product } from '@/types';
-import { PRODUCTS } from '@/data/products';
+import { Product, Category } from '@/types';
 import { apiFetch } from '@/lib/api';
 
 interface ProductContextType {
   products: Product[]; // Published live products from MongoDB Atlas
   allProducts: Product[]; // All products including unpublished
+  categories: Category[]; // Dynamic categories from MongoDB Atlas
   isLoading: boolean;
   error: string | null;
   getProductBySlug: (slug: string) => Product | undefined;
@@ -18,35 +18,48 @@ interface ProductContextType {
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
 
 export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [allProducts, setAllProducts] = useState<Product[]>(PRODUCTS);
-  const [isLoading, setIsLoading] = useState(false);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchProducts = useCallback(async () => {
+  const fetchCatalog = useCallback(async () => {
+    setIsLoading(true);
     try {
-      const res = await apiFetch('/api/products', { cache: 'no-store' });
-      if (res.ok) {
-        const data = await res.json();
+      const [prodRes, catRes] = await Promise.allSettled([
+        apiFetch('/api/products', { cache: 'no-store' }),
+        apiFetch('/api/categories', { cache: 'no-store' }),
+      ]);
+
+      if (prodRes.status === 'fulfilled' && prodRes.value.ok) {
+        const data = await prodRes.value.json();
         if (Array.isArray(data.products)) {
-          // Normalize IDs, booleans, and image fallbacks if missing
+          // Normalize IDs, booleans, and image structure
           const normalized: Product[] = data.products.map((p: any) => ({
             ...p,
             id: p.id || p._id?.toString() || p.slug,
             categoryLabel: p.categoryLabel || (p.category === 'tote-bags' ? 'Tote Bags' : p.category === 'laptop-bags' ? 'Laptop Bags' : 'Shoulder Bags'),
-            images: p.images && p.images.length > 0 ? p.images : [{ url: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp', alt: p.name }],
+            images: Array.isArray(p.images) ? p.images : [],
             suitableProfessions: p.suitableProfessions || [],
             isPublished: p.isPublished !== false,
             isFeatured: Boolean(p.isFeatured),
           }));
           setAllProducts(normalized);
           setError(null);
-          return;
+        }
+      } else {
+        throw new Error('Failed to load product catalog');
+      }
+
+      if (catRes.status === 'fulfilled' && catRes.value.ok) {
+        const catData = await catRes.value.json();
+        if (Array.isArray(catData.categories)) {
+          setCategories(catData.categories);
         }
       }
-      throw new Error(`Failed to load product catalog (HTTP ${res.status})`);
     } catch (err: any) {
-      console.error('[ProductContext] Live product fetch error:', err);
-      setError(err.message || 'Unable to connect to product database');
+      console.error('[ProductContext] Live catalog fetch error:', err);
+      setError(err.message || 'Unable to connect to database');
       setAllProducts([]);
     } finally {
       setIsLoading(false);
@@ -54,8 +67,8 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    fetchCatalog();
+  }, [fetchCatalog]);
 
   // Storefront products: strictly visible and published (isPublished !== false)
   const products = useMemo(() => {
@@ -86,13 +99,14 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
     () => ({
       products,
       allProducts,
+      categories,
       isLoading,
       error,
       getProductBySlug,
       getProductById,
-      refreshProducts: fetchProducts,
+      refreshProducts: fetchCatalog,
     }),
-    [products, allProducts, isLoading, error, getProductBySlug, getProductById, fetchProducts]
+    [products, allProducts, categories, isLoading, error, getProductBySlug, getProductById, fetchCatalog]
   );
 
   return <ProductContext.Provider value={value}>{children}</ProductContext.Provider>;

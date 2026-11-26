@@ -9,6 +9,7 @@
     "build": "tsc",
     "test": "tsx test-suite.ts",
     "test:razorpay": "tsx test-razorpay-audit.ts",
+    "db:migrate": "tsx scripts/migrate-seed-to-mongo.ts",
     "demo:seed": "tsx scripts/demo-seed.ts",
     "demo:clean": "tsx scripts/demo-clean.ts",
     "diagnostic:network": "tsx src/utils/networkDiagnostic.ts",

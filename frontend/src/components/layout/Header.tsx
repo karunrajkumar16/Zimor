@@ -17,7 +17,7 @@ export const Header: React.FC = () => {
   const whatsappUrl = useWhatsAppUrl();
   const { itemCount, openCartDrawer } = useCart();
   const { wishlistCount } = useWishlist();
-  const { products } = useProducts();
+  const { products, categories } = useProducts();
   const { lenis } = useLenisScroll();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -256,27 +256,22 @@ export const Header: React.FC = () => {
                           >
                             All Handbags
                           </Link>
-                          <Link
-                            href="/shop?category=tote-bags"
-                            onClick={() => setIsShopHovered(false)}
-                            className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
-                          >
-                            Tote Bags
-                          </Link>
-                          <Link
-                            href="/shop?category=laptop-bags"
-                            onClick={() => setIsShopHovered(false)}
-                            className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
-                          >
-                            Shoulder Bags
-                          </Link>
-                          <Link
-                            href="/shop?category=shoulder-bags"
-                            onClick={() => setIsShopHovered(false)}
-                            className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
-                          >
-                            Crossbody &amp; Slings
-                          </Link>
+                          {(categories.length > 0
+                            ? categories.filter((c) => !['everyday', 'work', 'travel'].includes(c.slug))
+                            : [
+                                { slug: 'tote-bags', name: 'Tote Bags' },
+                                { slug: 'shoulder-bags', name: 'Shoulder Bags' },
+                              ]
+                          ).map((cat) => (
+                            <Link
+                              key={cat.slug}
+                              href={`/shop?category=${cat.slug}`}
+                              onClick={() => setIsShopHovered(false)}
+                              className="header-dropdown-link font-primary text-[13px] font-medium text-ink/80 hover:text-ink hover:underline underline-offset-4 transition-all block py-1"
+                            >
+                              {cat.name}
+                            </Link>
+                          ))}
                         </div>
                       </div>
                     </div>

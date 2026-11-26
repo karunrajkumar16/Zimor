@@ -21,15 +21,6 @@ import { ProductCard } from '@/components/product/ProductCard';
 import { Product } from '@/types';
 import QuickViewModal from '@/components/product/QuickViewModal';
 
-// Category name mapping for active filter display
-const CATEGORY_NAMES: Record<string, string> = {
-  'office-bags': 'Office Bags',
-  'tote-bags': 'Tote Bags',
-  'laptop-bags': 'Laptop Bags',
-  'shoulder-bags': 'Shoulder Bags',
-  'crossbody-bags': 'Crossbody Bags',
-};
-
 // Three Distinct Lifestyle Subsections template metadata
 const LIFESTYLE_BASE_CONFIG = [
   {
@@ -89,7 +80,7 @@ const LIFESTYLE_BASE_CONFIG = [
 ];
 
 function ShopContent() {
-  const { products } = useProducts();
+  const { products, categories } = useProducts();
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get('category') || 'all';
   const initialProfession = searchParams.get('profession') || 'all';
@@ -104,6 +95,15 @@ function ShopContent() {
     setSelectedCategory('all');
     setSelectedProfession('all');
   };
+
+  const bagCategories = useMemo(() => {
+    return categories.length > 0
+      ? categories.filter((c) => !['everyday', 'work', 'travel'].includes(c.slug))
+      : [
+          { slug: 'tote-bags', name: 'Totes' },
+          { slug: 'shoulder-bags', name: 'Shoulder Bags' },
+        ];
+  }, [categories]);
 
   // Lifestyle Subsections resolved dynamically against current products
   const lifestyleSubsections = useMemo(() => {
@@ -250,14 +250,19 @@ function ShopContent() {
   // Human-readable active filter name
   const activeFilterTitle = useMemo(() => {
     if (selectedCategory !== 'all') {
-      return CATEGORY_NAMES[selectedCategory] || selectedCategory;
+      const match = categories.find((c) => c.slug === selectedCategory);
+      if (match) return match.name;
+      return selectedCategory
+        .split('-')
+        .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+        .join(' ');
     }
     if (selectedProfession !== 'all') {
       const match = lifestyleSubsections.find((p) => p.id === selectedProfession);
       return match ? match.archetype : selectedProfession;
     }
     return '';
-  }, [selectedCategory, selectedProfession, lifestyleSubsections]);
+  }, [selectedCategory, selectedProfession, categories, lifestyleSubsections]);
 
   // Smooth scroll to targeted lifestyle section (#everyday, #work, #travel, #lifestyle) on mount and hashchange
   React.useEffect(() => {
@@ -358,38 +363,30 @@ function ShopContent() {
                   : 'bg-white border border-line text-ink-secondary hover:text-ink hover:border-ink/40'
                   }`}
               >
-                All ({categoryCounts.total})
+                All ({products.length})
               </button>
-              <button
-                type="button"
-                onClick={() => setSelectedCategory('tote-bags')}
-                className={`px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0 transition-all ${selectedCategory === 'tote-bags'
-                  ? 'bg-ink text-white shadow-xs'
-                  : 'bg-white border border-line text-ink-secondary hover:text-ink hover:border-ink/40'
-                  }`}
-              >
-                Totes ({categoryCounts.totes})
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedCategory('laptop-bags')}
-                className={`px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0 transition-all ${selectedCategory === 'laptop-bags'
-                  ? 'bg-ink text-white shadow-xs'
-                  : 'bg-white border border-line text-ink-secondary hover:text-ink hover:border-ink/40'
-                  }`}
-              >
-                Laptop Bags ({categoryCounts.laptop})
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedCategory('shoulder-bags')}
-                className={`px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0 transition-all ${selectedCategory === 'shoulder-bags'
-                  ? 'bg-ink text-white shadow-xs'
-                  : 'bg-white border border-line text-ink-secondary hover:text-ink hover:border-ink/40'
-                  }`}
-              >
-                Shoulder Bags ({categoryCounts.shoulder})
-              </button>
+              {bagCategories.map((cat) => {
+                const count = products.filter((p) => {
+                  const pCat = (p.category || '').toLowerCase();
+                  const pLabel = (p.categoryLabel || '').toLowerCase();
+                  const pName = (p.name || '').toLowerCase();
+                  return pCat === cat.slug || pLabel.toLowerCase().includes(cat.name.toLowerCase()) || pName.toLowerCase().includes(cat.name.toLowerCase());
+                }).length;
+
+                return (
+                  <button
+                    key={cat.slug}
+                    type="button"
+                    onClick={() => setSelectedCategory(cat.slug)}
+                    className={`px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0 transition-all ${selectedCategory === cat.slug
+                      ? 'bg-ink text-white shadow-xs'
+                      : 'bg-white border border-line text-ink-secondary hover:text-ink hover:border-ink/40'
+                      }`}
+                  >
+                    {cat.name} ({count})
+                  </button>
+                );
+              })}
 
               {/* Reset active filters on Desktop */}
               {hasActiveFilters && (

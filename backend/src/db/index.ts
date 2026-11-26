@@ -13,8 +13,11 @@ export function getDatabaseProvider(): DatabaseProvider {
   const useMock = process.env.USE_MOCK_DB !== 'false' || !process.env.MONGODB_URI;
 
   if (useMock) {
-    if (process.env.NODE_ENV === 'production' && process.env.USE_MOCK_DB === 'true') {
-      console.warn('[SECURITY WARNING] Running with temporary JSON database in production. Add MONGODB_URI to connect to MongoDB.');
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error(
+        '[FATAL CONFIG ERROR] Running with local JSON database is strictly prohibited in production. ' +
+        'Set USE_MOCK_DB=false and configure MONGODB_URI in Vercel project environment variables.'
+      );
     }
     dbProvider = new JsonDatabaseProvider();
   } else {

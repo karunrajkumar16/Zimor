@@ -13,7 +13,9 @@ import reviewRoutes from './reviewRoutes.js';
 import shippingRoutes from './shippingRoutes.js';
 import aboutMediaRoutes from './aboutMediaRoutes.js';
 import visualMediaRoutes from './visualMediaRoutes.js';
+import promotionRoutes from './promotionRoutes.js';
 import { getHomepageMedia } from '../controllers/visualMediaController.js';
+import { validatePromotion } from '../controllers/promotionController.js';
 
 const apiRouter = Router();
 
@@ -21,6 +23,8 @@ apiRouter.use('/products', productRoutes);
 apiRouter.use('/categories', categoryRoutes);
 apiRouter.use('/orders', orderRoutes);
 apiRouter.use('/customers', customerRoutes);
+apiRouter.post('/checkout/validate-promo', validatePromotion);
+apiRouter.use('/promotions', promotionRoutes);
 apiRouter.use('/checkout', paymentRoutes);
 apiRouter.use('/payments', paymentRoutes);
 apiRouter.use('/shipping', shippingRoutes);

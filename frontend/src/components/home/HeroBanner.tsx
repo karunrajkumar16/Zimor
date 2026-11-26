@@ -23,47 +23,9 @@ export interface HeroSlide {
   isActive?: boolean;
 }
 
-const DEFAULT_SLIDES: HeroSlide[] = [
-  {
-    id: 'hero-slide-1',
-    badge: 'PERMANENT ATELIER COLLECTION',
-    title: 'ARCHITECTURAL FORM.\nEVERYDAY PURPOSE.',
-    subtitle:
-      'Discover our permanent collection of six sculptural products engineered with 15.6" laptop compartments.',
-    image:
-      'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917825/zimor/banners/hero-first-edit.webp',
-    ctaText: 'Shop Collection',
-    ctaLink: '/shop',
-    isActive: true,
-  },
-  {
-    id: 'hero-slide-2',
-    badge: 'NEW ATELIER EDITION',
-    title: 'TIMELESS LUXURY.\nMINIMALIST PURSUIT.',
-    subtitle:
-      'Engineered with 15.6" padded protection and solid brass accents for seamless boardroom transitions.',
-    image:
-      'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917826/zimor/banners/hero-most-loved-tote.webp',
-    ctaText: 'Shop Totes',
-    ctaLink: '/shop?category=tote-bags',
-    isActive: true,
-  },
-  {
-    id: 'hero-slide-3',
-    badge: 'WEEKEND & TRAVEL',
-    title: 'EFFORTLESS TRAVEL.\nCURATED DESIGN.',
-    subtitle:
-      'French canvas with sculpted crescent contours and luminous gold hardware.',
-    image:
-      'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917826/zimor/banners/hero-model-crescent.webp',
-    ctaText: 'Explore Shoulder Bags',
-    ctaLink: '/shop?category=shoulder-bags',
-    isActive: true,
-  },
-];
-
 export const HeroBanner: React.FC = () => {
-  const [slides, setSlides] = useState<HeroSlide[]>(DEFAULT_SLIDES);
+  const [slides, setSlides] = useState<HeroSlide[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [prevSlide, setPrevSlide] = useState(0);
   const touchStartX = useRef<number | null>(null);
@@ -77,7 +39,10 @@ export const HeroBanner: React.FC = () => {
     async function loadLiveBanners() {
       try {
         const res = await apiFetch('/api/content/homepage', { cache: 'no-store' });
-        if (!res.ok) return;
+        if (!res.ok) {
+          if (isMounted) setIsLoading(false);
+          return;
+        }
         const json = await res.json();
         const rawSlides = json.content?.data?.heroSlides || json.content?.data?.slides;
         if (Array.isArray(rawSlides) && rawSlides.length > 0) {
@@ -100,7 +65,11 @@ export const HeroBanner: React.FC = () => {
           }
         }
       } catch (err) {
-        console.warn('Fallback to default hero billboard slides:', err);
+        console.warn('Could not load hero slides from backend API:', err);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
@@ -165,6 +134,30 @@ export const HeroBanner: React.FC = () => {
     touchStartX.current = null;
   };
 
+  if (isLoading && slides.length === 0) {
+    return (
+      <section
+        className="relative w-full overflow-hidden bg-[#141312] select-none -mt-16 sm:-mt-20"
+        aria-label="Loading Editorial Hero"
+      >
+        <div className="relative w-full h-[82vh] sm:h-[90vh] lg:h-screen min-h-[580px] sm:min-h-[640px] max-h-[1020px] pt-16 sm:pt-20 bg-gradient-to-br from-[#181615] via-[#121110] to-[#0d0c0b] flex items-center">
+          <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-14 w-full">
+            <div className="max-w-2xl space-y-5 animate-pulse">
+              <div className="h-3 w-44 bg-white/20 rounded-xs" />
+              <div className="h-12 w-3/4 bg-white/20 rounded-xs" />
+              <div className="h-4 w-1/2 bg-white/10 rounded-xs" />
+              <div className="h-10 w-36 bg-white/30 rounded-full mt-6" />
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (slides.length === 0) {
+    return null;
+  }
+
   return (
     <section
       className="relative w-full overflow-hidden bg-canvas-dark select-none group -mt-16 sm:-mt-20"
@@ -181,10 +174,8 @@ export const HeroBanner: React.FC = () => {
           const badgeText = slide.badge ?? slide.eyebrow ?? 'ZIMOR ATELIER';
           const titleText = slide.title ?? slide.headline ?? '';
           const subtitleText = slide.subtitle ?? slide.description ?? '';
-          const imageUrl =
-            slide.image ||
-            slide.editorialImage ||
-            'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917825/zimor/banners/hero-first-edit.webp';
+          const imageUrl = slide.image || slide.editorialImage || '';
+          if (!imageUrl) return null;
           const ctaLink = slide.ctaLink || slide.slug || '/shop';
           const ctaText = slide.ctaText || 'Shop Now';
 
