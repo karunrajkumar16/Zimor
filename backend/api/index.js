@@ -1,5 +1,7 @@
-import app from '../dist/serverless.js';
+import handler, { app } from '../dist/serverless.js';
 
-export default function handler(req, res) {
-  return app(req, res);
+export default function(req, res) {
+  return handler(req, res);
 }
+
+export { app, handler };

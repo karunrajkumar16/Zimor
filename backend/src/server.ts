@@ -5,7 +5,7 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import { config } from './config/index.js';
 import { validateOrigin } from './auth/originValidator.js';
 import apiRouter from './routes/index.js';
@@ -98,11 +98,12 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
   });
 });
 
-// Start Server: Only start HTTP listener when running as a standalone server, never in Vercel or test environment
-const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+// Start Server: Only start HTTP listener when directly executed as standalone server, never in Vercel or test environment
+const isDirectExecution = Boolean(process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href);
+const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.VERCEL_ENV);
 const isTest = process.env.NODE_ENV === 'test';
 
-if (!isServerless && !isTest) {
+if (isDirectExecution && !isServerless && !isTest) {
   app.listen(config.port, '0.0.0.0', () => {
     console.log(`[ZIMOR BACKEND] API server running on http://0.0.0.0:${config.port} (accessible via localhost:${config.port})`);
     console.log(`[ZIMOR BACKEND] Database provider: ${config.useMockDb ? 'Local JSON' : 'MongoDB Atlas'}`);

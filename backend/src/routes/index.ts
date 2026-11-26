@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { config } from '../config/index.js';
 import productRoutes from './productRoutes.js';
 import categoryRoutes from './categoryRoutes.js';
 import orderRoutes from './orderRoutes.js';
@@ -28,6 +29,18 @@ apiRouter.use('/content', contentRoutes);
 apiRouter.use('/about-media', aboutMediaRoutes);
 apiRouter.use('/visual-media', visualMediaRoutes);
 apiRouter.get('/homepage-media', getHomepageMedia);
+apiRouter.get('/health', (_req, res) => {
+  res.json({
+    status: 'ok',
+    service: 'Zimor Luxury Backend API',
+    providers: {
+      database: config.useMockDb ? 'json' : 'mongodb',
+      media: config.useMockMedia ? 'local' : 'cloudinary',
+      payment: config.useMockPayment ? 'mock' : 'razorpay',
+    },
+    timestamp: new Date().toISOString(),
+  });
+});
 apiRouter.use('/reviews', reviewRoutes);
 apiRouter.use('/auth', authRoutes);
 apiRouter.use('/admin', adminRoutes);

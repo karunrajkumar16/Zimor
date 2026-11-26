@@ -12,16 +12,17 @@ dotenv.config();
 
 const isProduction = process.env.NODE_ENV === 'production';
 
-// Strict validation of clientUrl in production
+// Safe resolution of clientUrl: prevents module initialization crashes while enforcing production security
 function resolveClientUrl(): string {
   const rawUrl = process.env.CLIENT_URL?.trim();
 
   if (!rawUrl) {
     if (isProduction) {
-      throw new Error(
-        '[CRITICAL CONFIGURATION ERROR] Missing required CLIENT_URL in production environment. ' +
-        'Production deployments must explicitly define CLIENT_URL=https://frontend-rho-gilt-51.vercel.app.'
+      console.warn(
+        '[CONFIG NOTICE] Missing CLIENT_URL environment variable in production. ' +
+        'Defaulting safely to authorized production origin: https://frontend-rho-gilt-51.vercel.app.'
       );
+      return 'https://frontend-rho-gilt-51.vercel.app';
     }
     return 'http://localhost:3000';
   }
@@ -29,10 +30,11 @@ function resolveClientUrl(): string {
   const cleanUrl = rawUrl.replace(/\/+$/, '');
 
   if (isProduction && (cleanUrl.includes('localhost') || cleanUrl.includes('127.0.0.1'))) {
-    throw new Error(
-      `[CRITICAL CONFIGURATION ERROR] Invalid production CLIENT_URL "${cleanUrl}". ` +
-      'Production deployments must not point to localhost. Expected CLIENT_URL=https://frontend-rho-gilt-51.vercel.app.'
+    console.warn(
+      `[CONFIG WARNING] Invalid production CLIENT_URL "${cleanUrl}". ` +
+      'Production deployments must not point to localhost. Defaulting safely to https://frontend-rho-gilt-51.vercel.app.'
     );
+    return 'https://frontend-rho-gilt-51.vercel.app';
   }
 
   return cleanUrl;
