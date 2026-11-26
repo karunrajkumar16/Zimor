@@ -231,3 +231,25 @@ export interface AboutMediaSection {
 
 export type AboutMediaMapping = Record<string, AboutMediaSection>;
 
+export interface VisualMediaItem {
+  id: string;
+  scope: 'homepage' | 'about';
+  sectionGroup: string;
+  title: string;
+  label: string;
+  description: string;
+  recommendedAspect: string;
+  recommendedResolution: string;
+  url: string;
+  publicId?: string;
+  alt: string;
+  cloudinaryFolder: string;
+  mediaType?: 'image' | 'video';
+  width?: number;
+  height?: number;
+  updatedAt?: string;
+  updatedBy?: string;
+}
+
+export type VisualMediaMapping = Record<string, VisualMediaItem>;
+

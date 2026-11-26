@@ -11,6 +11,8 @@ import adminRoutes from './adminRoutes.js';
 import reviewRoutes from './reviewRoutes.js';
 import shippingRoutes from './shippingRoutes.js';
 import aboutMediaRoutes from './aboutMediaRoutes.js';
+import visualMediaRoutes from './visualMediaRoutes.js';
+import { getHomepageMedia } from '../controllers/visualMediaController.js';
 
 const apiRouter = Router();
 
@@ -24,6 +26,8 @@ apiRouter.use('/shipping', shippingRoutes);
 apiRouter.use('/media', mediaRoutes);
 apiRouter.use('/content', contentRoutes);
 apiRouter.use('/about-media', aboutMediaRoutes);
+apiRouter.use('/visual-media', visualMediaRoutes);
+apiRouter.get('/homepage-media', getHomepageMedia);
 apiRouter.use('/reviews', reviewRoutes);
 apiRouter.use('/auth', authRoutes);
 apiRouter.use('/admin', adminRoutes);

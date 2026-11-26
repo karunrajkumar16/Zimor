@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
+import { apiFetch } from '@/lib/api';
 
 interface MasonryFrame {
   id: string;
@@ -75,6 +76,60 @@ export const AboutZimor: React.FC = () => {
   const isVisibleRef = useRef(false);
   // Parallax element references for the inner images ONLY (Containers are fixed & locked)
   const imgRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Dynamic visual media state synchronized with MongoDB Visual Media Manager
+  const [frames, setFrames] = useState<MasonryFrame[]>(MASONRY_FRAMES);
+
+  useEffect(() => {
+    let isMounted = true;
+    apiFetch('/api/homepage-media')
+      .then((res) => res.json())
+      .then((data) => {
+        if (!isMounted || !data?.media) return;
+        const media = data.media;
+
+        setFrames((prev) =>
+          prev.map((frame) => {
+            if (frame.id === 'frame-craftsmanship' && media.spotlight_craftsmanship?.url) {
+              return {
+                ...frame,
+                image: media.spotlight_craftsmanship.url,
+                alt: media.spotlight_craftsmanship.alt || frame.alt,
+              };
+            }
+            if (frame.id === 'frame-details' && media.spotlight_everyday?.url) {
+              return {
+                ...frame,
+                image: media.spotlight_everyday.url,
+                alt: media.spotlight_everyday.alt || frame.alt,
+              };
+            }
+            if (frame.id === 'frame-quality' && media.spotlight_details?.url) {
+              return {
+                ...frame,
+                image: media.spotlight_details.url,
+                alt: media.spotlight_details.alt || frame.alt,
+              };
+            }
+            if (frame.id === 'frame-made-in-india' && media.spotlight_proudly_made?.url) {
+              return {
+                ...frame,
+                image: media.spotlight_proudly_made.url,
+                alt: media.spotlight_proudly_made.alt || frame.alt,
+              };
+            }
+            return frame;
+          })
+        );
+      })
+      .catch(() => {
+        // Retain factory default constants
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Smooth scroll-driven window parallax: only active when section is in viewport
   useEffect(() => {
@@ -194,7 +249,7 @@ export const AboutZimor: React.FC = () => {
 
         {/* 4 MASONRY PHOTOGRAPHY FRAMES WITH SONGMONT-STYLE OVERLAID TEXT & LOCKED WINDOW PARALLAX */}
         {/* Mobile: Completely hidden (display: none); Desktop: Exact existing grid layout, overlays & positioning */}
-        {MASONRY_FRAMES.map((frame, idx) => (
+        {frames.map((frame, idx) => (
           <div
             key={frame.id}
             className={`hidden md:block group relative overflow-hidden bg-ink rounded-none shadow-none ${frame.gridClasses}`}

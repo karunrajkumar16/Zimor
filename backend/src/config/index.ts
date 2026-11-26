@@ -10,10 +10,45 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 dotenv.config();
 
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Strict validation of clientUrl in production
+function resolveClientUrl(): string {
+  const rawUrl = process.env.CLIENT_URL?.trim();
+
+  if (!rawUrl) {
+    if (isProduction) {
+      throw new Error(
+        '[CRITICAL CONFIGURATION ERROR] Missing required CLIENT_URL in production environment. ' +
+        'Production deployments must explicitly define CLIENT_URL=https://frontend-rho-gilt-51.vercel.app.'
+      );
+    }
+    return 'http://localhost:3000';
+  }
+
+  const cleanUrl = rawUrl.replace(/\/+$/, '');
+
+  if (isProduction && (cleanUrl.includes('localhost') || cleanUrl.includes('127.0.0.1'))) {
+    throw new Error(
+      `[CRITICAL CONFIGURATION ERROR] Invalid production CLIENT_URL "${cleanUrl}". ` +
+      'Production deployments must not point to localhost. Expected CLIENT_URL=https://frontend-rho-gilt-51.vercel.app.'
+    );
+  }
+
+  return cleanUrl;
+}
+
 export const config = {
   port: parseInt(process.env.PORT || '5001', 10),
-  clientUrl: process.env.CLIENT_URL || 'http://localhost:3000',
-  isProduction: process.env.NODE_ENV === 'production',
+  clientUrl: resolveClientUrl(),
+  isProduction,
+  trustedOrigins: {
+    production: 'https://frontend-rho-gilt-51.vercel.app',
+    approvedPreviews: (process.env.APPROVED_PREVIEW_ORIGINS || '')
+      .split(',')
+      .map((s) => s.trim().replace(/\/+$/, ''))
+      .filter(Boolean),
+  },
 
   // Database
   mongoUri: process.env.MONGODB_URI || '',

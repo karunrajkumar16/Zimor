@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { config } from './config/index.js';
+import { validateOrigin } from './auth/originValidator.js';
 import apiRouter from './routes/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -25,11 +26,13 @@ app.use(
     origin: (origin, callback) => {
       // Allow requests with no origin (like mobile apps, curl, or server-to-server)
       if (!origin) return callback(null, true);
-      const allowed = [config.clientUrl, 'http://localhost:3000', 'http://127.0.0.1:3000'];
-      if (allowed.includes(origin) || origin.endsWith(':3000')) {
+      if (validateOrigin(origin)) {
         return callback(null, true);
       }
-      return callback(null, true); // Dev mode: allow client connection
+      if (!config.isProduction) {
+        return callback(null, true); // Dev mode fallback
+      }
+      return callback(new Error(`CORS blocked for untrusted origin: ${origin}`));
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

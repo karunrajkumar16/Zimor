@@ -74,6 +74,7 @@ const NAV_SECTIONS: NavSection[] = [
     title: 'STOREFRONT CMS',
     items: [
       { label: 'Hero Banners', href: '/admin/banners', icon: ImageIcon },
+      { label: 'Visual Media Manager', href: '/admin/visual-media', icon: ImagePlus },
       { label: 'Announcement Bar', href: '/admin/announcements', icon: Megaphone },
       { label: 'About Page Media', href: '/admin/about-media', icon: ImagePlus },
     ],

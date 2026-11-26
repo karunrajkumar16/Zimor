@@ -145,13 +145,13 @@ export default function AdminAboutMediaPage() {
   // File input refs per section
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
-  // Theme styling helpers
+  // Theme styling helpers matching clean luxury admin aesthetic
   const cardBg = isDark
-    ? 'bg-[#24211F] border-[#36312C]'
-    : 'bg-[#FFFFFF] border-[#E5DFD7] shadow-xs';
+    ? 'bg-[#1C1A18]/90 border-[#2E2A27]'
+    : 'bg-[#FAF9F6] border-[#E8E4DC] shadow-xs';
   const innerCardBg = isDark
-    ? 'bg-[#1E1C1A] border-[#36312C]'
-    : 'bg-[#FAF7F2] border-[#E5DFD7]';
+    ? 'bg-[#161412]/80 border-[#282420]'
+    : 'bg-[#F2EFE9]/70 border-[#E5E0D7]';
 
   // Fetch current media from MongoDB
   const fetchMedia = async () => {
@@ -361,17 +361,19 @@ export default function AdminAboutMediaPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-16">
+    <div className="space-y-8 max-w-5xl mx-auto pb-20">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b pb-5 border-line/40">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-[#EAE5DE] dark:border-[#2C2825]">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight">About Page Media Manager</h1>
-            <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#1C2434] dark:text-[#F5F5F4]">
+              About Page Media Manager
+            </h1>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
               WebP Only
             </span>
           </div>
-          <p className={`text-xs mt-1 ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
+          <p className="text-xs mt-1 text-[#78716C] dark:text-[#A8A29E]">
             All previews match the exact aspect ratio, container dimensions, and visual composition of the live About Us storefront.
           </p>
         </div>
@@ -380,11 +382,7 @@ export default function AdminAboutMediaPage() {
           <Link
             href="/about"
             target="_blank"
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold border transition-colors ${
-              isDark
-                ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA] hover:border-[#5146E5]'
-                : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F] hover:border-[#5146E5]'
-            }`}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium border border-[#E5DFD7] dark:border-[#36312C] bg-white dark:bg-[#1E1C1A] text-[#1C2434] dark:text-[#E8E1DA] hover:border-[#5146E5] hover:text-[#5146E5] transition-colors cursor-pointer"
           >
             <span>View Live Storefront</span>
             <ExternalLink className="w-3.5 h-3.5" />
@@ -393,11 +391,7 @@ export default function AdminAboutMediaPage() {
             onClick={fetchMedia}
             disabled={loading}
             title="Refresh from MongoDB Atlas"
-            className={`p-2 rounded border transition-colors ${
-              isDark
-                ? 'bg-[#1E1C1A] border-[#36312C] text-[#E8E1DA] hover:border-[#5146E5]'
-                : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#24211F] hover:border-[#5146E5]'
-            }`}
+            className="p-2 rounded-lg border border-[#E5DFD7] dark:border-[#36312C] bg-white dark:bg-[#1E1C1A] text-[#78716C] dark:text-[#A8A29E] hover:text-[#5146E5] transition-colors cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           </button>
@@ -407,12 +401,12 @@ export default function AdminAboutMediaPage() {
       {/* Notification Banner */}
       {notification && (
         <div
-          className={`p-3.5 rounded-lg text-xs flex items-start justify-between gap-3 border transition-all ${
+          className={`p-3.5 rounded-xl text-xs flex items-start justify-between gap-3 border transition-all ${
             notification.type === 'success'
-              ? 'bg-[#2E7D5A]/15 border-[#2E7D5A]/30 text-[#2E7D5A] dark:text-[#52B788]'
+              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400'
               : notification.type === 'warning'
-              ? 'bg-amber-500/15 border-amber-500/30 text-amber-700 dark:text-amber-400'
-              : 'bg-[#B9382C]/15 border-[#B9382C]/30 text-[#B9382C] dark:text-[#F28B82]'
+              ? 'bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-400'
+              : 'bg-rose-500/10 border-rose-500/20 text-rose-700 dark:text-rose-400'
           }`}
         >
           <div className="flex items-center gap-2">
@@ -425,7 +419,7 @@ export default function AdminAboutMediaPage() {
           </div>
           <button
             onClick={() => setNotification(null)}
-            className="opacity-70 hover:opacity-100 p-0.5 rounded transition-opacity"
+            className="opacity-70 hover:opacity-100 p-0.5 rounded transition-opacity cursor-pointer"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -433,11 +427,11 @@ export default function AdminAboutMediaPage() {
       )}
 
       {/* Quick Jump Bar */}
-      <div className={`p-3 rounded-lg border flex flex-wrap items-center justify-between gap-2 text-xs ${cardBg}`}>
-        <span className={`text-[11px] font-semibold uppercase tracking-wider ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
-          Jump to Section:
+      <div className="p-2 sm:p-2.5 rounded-xl bg-[#F6F4EF]/80 dark:bg-[#1C1A18]/80 border border-[#EAE5DE] dark:border-[#2C2825] flex flex-wrap items-center justify-between gap-2 text-xs">
+        <span className="text-[11px] font-medium uppercase tracking-wider text-[#8C837A] dark:text-[#78716C] pl-2">
+          Jump to Section
         </span>
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1">
           {SECTION_KEYS.map((key) => {
             const secNumber = SECTION_NUMBERS[key];
             const sec = mediaMapping[key] || FALLBACK_ABOUT_MEDIA[key];
@@ -447,15 +441,11 @@ export default function AdminAboutMediaPage() {
                 key={key}
                 type="button"
                 onClick={() => scrollToSection(key)}
-                className={`px-2.5 py-1 rounded text-[11px] font-medium border transition-colors flex items-center gap-1.5 ${
-                  isDark
-                    ? 'bg-[#1E1C1A] border-[#36312C] text-[#B4B4B4] hover:text-[#E8E1DA] hover:border-[#5146E5]'
-                    : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#5A534E] hover:text-[#24211F] hover:border-[#5146E5]'
-                }`}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 text-[#5A534E] dark:text-[#B4B4B4] hover:text-[#1C2434] dark:hover:text-[#F5F5F4] hover:bg-white dark:hover:bg-[#282420] shadow-none hover:shadow-xs cursor-pointer"
               >
-                <span className="font-mono text-[#5146E5] font-bold">Sec {secNumber}</span>
+                <span className="font-mono text-[#5146E5] dark:text-[#818CF8] font-semibold">{secNumber}</span>
                 <span>{sec.title.split(' ')[0]}</span>
-                <span className="text-[9px] opacity-60">({ratio.desktop})</span>
+                <span className="text-[10px] text-[#A8A29E] dark:text-[#78716C]">({ratio.desktop})</span>
               </button>
             );
           })}
@@ -480,33 +470,39 @@ export default function AdminAboutMediaPage() {
             <div
               key={key}
               id={`section-card-${key}`}
-              className={`rounded-lg border p-5 sm:p-6 space-y-5 transition-all scroll-mt-20 ${cardBg}`}
+              className={`rounded-2xl border p-6 sm:p-7 space-y-6 transition-all scroll-mt-20 ${cardBg}`}
             >
-              {/* 1. SECTION HEADER: Number, Title, Subtitle & Storefront Aspect Ratio Badges */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-4 border-line/30">
+              {/* 1. SECTION HEADER: Number, Title, Subtitle & Storefront Aspect Ratio */}
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 border-b border-[#EAE5DE]/60 dark:border-[#2C2825]/60 pb-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-[#5146E5] text-white">
+                    <span className="font-mono text-xs font-semibold tracking-wider text-[#5146E5] dark:text-[#818CF8]">
                       SECTION {secNumber}
                     </span>
-                    <h2 className="text-base sm:text-lg font-bold tracking-tight text-[#1C2434] dark:text-[#E2E8F0]">
+                    <span className="text-[#D6D3D1] dark:text-[#44403C]">·</span>
+                    <h2 className="text-base sm:text-lg font-semibold tracking-tight text-[#1C2434] dark:text-[#F5F5F4]">
                       {sec.title}
                     </h2>
-                    <span className={`text-xs font-normal ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
+                    <span className="text-xs text-[#8C837A] dark:text-[#78716C]">
                       — {sec.subtitle}
                     </span>
                   </div>
-                  <p className={`text-xs ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
+                  <p className="text-xs text-[#78716C] dark:text-[#A8A29E] max-w-2xl">
                     {sec.description}
                   </p>
                 </div>
 
-                {/* Aspect Ratio & Resolution Specs */}
-                <div className="flex items-center gap-2 flex-wrap shrink-0">
-                  <span className={`text-[10px] font-semibold px-2 py-1 rounded border ${innerCardBg} text-[#5146E5] dark:text-[#818CF8]`}>
-                    Desktop: {ratios.desktop} · Mobile: {ratios.mobile}
+                {/* Aspect Ratio & Resolution Specs (Clean text hierarchy instead of heavy boxed borders) */}
+                <div className="flex items-center gap-2.5 text-xs text-[#78716C] dark:text-[#A8A29E] shrink-0 pt-0.5">
+                  <span className="font-medium text-[#5146E5] dark:text-[#818CF8]">
+                    {ratios.desktop} Desktop
                   </span>
-                  <span className={`text-[10px] font-medium px-2 py-1 rounded border ${innerCardBg} ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
+                  <span className="text-[#D6D3D1] dark:text-[#44403C]">·</span>
+                  <span className="font-medium">
+                    {ratios.mobile} Mobile
+                  </span>
+                  <span className="text-[#D6D3D1] dark:text-[#44403C]">·</span>
+                  <span className="font-mono text-[11px] text-[#8C837A] dark:text-[#78716C]">
                     {sec.recommendedResolution}
                   </span>
                 </div>
@@ -517,61 +513,58 @@ export default function AdminAboutMediaPage() {
                 {/* Preview Control Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <span className={`text-[11px] font-semibold uppercase tracking-wider ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
+                    <span className="text-[11px] font-medium uppercase tracking-wider text-[#8C837A] dark:text-[#78716C]">
                       {staged ? 'Staged Replacement Preview' : 'Storefront Composition Preview'}
                     </span>
-                    <span className={`text-[9px] font-semibold px-2 py-0.5 rounded border ${
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${
                       staged
-                        ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-500/20'
-                        : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-500/20'
+                        ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400'
+                        : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
                     }`}>
-                      {staged ? 'Staged · Pending Publish' : 'Live Storefront Proportions'}
+                      {staged ? 'Staged · Pending Publish' : 'Live Storefront'}
                     </span>
                   </div>
 
                   {/* Desktop / Mobile Composition Switch */}
-                  <div className="flex items-center gap-1 p-0.5 rounded border bg-neutral-100 dark:bg-neutral-900 border-line/40 text-[10px] self-start sm:self-auto">
+                  <div className="inline-flex items-center p-0.5 rounded-lg bg-[#EFECE6]/70 dark:bg-[#141210]/70 text-xs self-start sm:self-auto">
                     <button
                       type="button"
                       onClick={() => toggleViewportMode(key, 'desktop')}
-                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded font-medium transition-all ${
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
                         mode === 'desktop'
-                          ? 'bg-white dark:bg-[#24211F] text-[#5146E5] font-bold shadow-xs'
-                          : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200'
+                          ? 'bg-white dark:bg-[#282420] text-[#1C2434] dark:text-[#F5F5F4] shadow-xs'
+                          : 'text-[#78716C] dark:text-[#A8A29E] hover:text-[#1C2434] dark:hover:text-[#F5F5F4]'
                       }`}
                     >
-                      <Monitor className="w-3 h-3" />
+                      <Monitor className="w-3.5 h-3.5" />
                       <span>Desktop ({ratios.desktop})</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => toggleViewportMode(key, 'mobile')}
-                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded font-medium transition-all ${
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
                         mode === 'mobile'
-                          ? 'bg-white dark:bg-[#24211F] text-[#5146E5] font-bold shadow-xs'
-                          : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200'
+                          ? 'bg-white dark:bg-[#282420] text-[#1C2434] dark:text-[#F5F5F4] shadow-xs'
+                          : 'text-[#78716C] dark:text-[#A8A29E] hover:text-[#1C2434] dark:hover:text-[#F5F5F4]'
                       }`}
                     >
-                      <Smartphone className="w-3 h-3" />
+                      <Smartphone className="w-3.5 h-3.5" />
                       <span>Mobile ({ratios.mobile})</span>
                     </button>
                   </div>
                 </div>
-
                 {/* ==============================================================
                     BESPOKE PREVIEW CONTAINERS PER SECTION (EXACT STOREFRONT MATCH)
                     ============================================================== */}
 
-                {/* SECTION 01: BRAND OVERVIEW PREVIEW
-                    Desktop: aspect-[21/9] or 24/9 panoramic | Mobile: aspect-[16/9] landscape
-                    Overlay: Gradient + pill badge "ZIMOR · Distinctive Silhouettes & Thoughtful Construction" */}
+                {/* SECTION 01: BRAND OVERVIEW PREVIEW */}
                 {key === 'brandOverview' && (
-                  <div className="flex justify-center p-2 rounded-lg bg-black/5 dark:bg-black/30 border border-line/30">
+                  <div className="flex justify-center">
                     <div
-                      className={`relative overflow-hidden bg-black border border-line/40 shadow-xs transition-all ${
+                      className={`relative overflow-hidden bg-[#141210] rounded-xl ring-1 ring-black/5 dark:ring-white/10 shadow-xs transition-all ${
                         mode === 'mobile'
-                          ? 'w-full max-w-[420px] aspect-[16/9] rounded-lg'
-                          : 'w-full aspect-[21/9] lg:aspect-[24/9] min-h-[220px] sm:min-h-[300px] rounded-lg'
+                          ? 'w-full max-w-[420px] aspect-[16/9]'
+                          : 'w-full aspect-[21/9] lg:aspect-[24/9] min-h-[220px] sm:min-h-[300px]'
                       }`}
                     >
                       {activeImageSrc && (
@@ -587,12 +580,12 @@ export default function AdminAboutMediaPage() {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
                       {/* Storefront bottom pill badge */}
                       <div className="absolute bottom-3 left-3 sm:bottom-5 sm:left-5 z-10 text-white">
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-white/95 text-[9px] sm:text-[10px] uppercase tracking-[0.2em] font-semibold border border-white/20">
+                        <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black/60 backdrop-blur-md text-white/95 text-[9px] sm:text-[10px] uppercase tracking-[0.2em] font-semibold border border-white/15">
                           ZIMOR · Distinctive Silhouettes &amp; Thoughtful Construction
                         </span>
                       </div>
-                      <div className="absolute top-2.5 right-2.5 z-10">
-                        <span className="px-2 py-0.5 rounded text-[9px] font-mono font-medium bg-black/70 text-white/90 border border-white/20">
+                      <div className="absolute top-3 right-3 z-10">
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-medium bg-black/60 backdrop-blur-md text-white/90 border border-white/15">
                           {mode === 'mobile' ? '16:9 Mobile' : '21:9 / 24:9 Panoramic'}
                         </span>
                       </div>
@@ -600,13 +593,11 @@ export default function AdminAboutMediaPage() {
                   </div>
                 )}
 
-                {/* SECTION 03: BRAND STORY PREVIEW
-                    Desktop: aspect-[3/4] portrait | Mobile: aspect-[4/5] portrait
-                    Layout: Contained portrait container with caption underneath */}
+                {/* SECTION 03: BRAND STORY PREVIEW */}
                 {key === 'brandStory' && (
-                  <div className="flex flex-col items-center justify-center p-4 rounded-lg bg-canvas/30 border border-line/30">
+                  <div className="flex flex-col items-center justify-center py-2">
                     <div
-                      className={`relative overflow-hidden bg-canvas rounded-lg border border-line/40 shadow-xs transition-all ${
+                      className={`relative overflow-hidden bg-[#141210] rounded-xl ring-1 ring-black/5 dark:ring-white/10 shadow-xs transition-all ${
                         mode === 'mobile'
                           ? 'w-full max-w-[340px] aspect-[4/5]'
                           : 'w-full max-w-[360px] aspect-[3/4]'
@@ -621,29 +612,27 @@ export default function AdminAboutMediaPage() {
                           className="object-cover object-center"
                         />
                       )}
-                      <div className="absolute top-2.5 right-2.5 z-10">
-                        <span className="px-2 py-0.5 rounded text-[9px] font-mono font-medium bg-black/70 text-white/90 border border-white/20">
+                      <div className="absolute top-3 right-3 z-10">
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-medium bg-black/60 backdrop-blur-md text-white/90 border border-white/15">
                           {mode === 'mobile' ? '4:5 Mobile Portrait' : '3:4 Atelier Portrait'}
                         </span>
                       </div>
                     </div>
                     {/* Exact Storefront Caption */}
-                    <p className={`text-[11px] text-center font-normal mt-2.5 max-w-sm ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
+                    <p className="text-xs text-center font-normal mt-3 max-w-sm text-[#78716C] dark:text-[#A8A29E]">
                       Crafted with care and precision · Founded by Swati Singh
                     </p>
                   </div>
                 )}
 
-                {/* SECTION 04: BRAND VISION PREVIEW
-                    Desktop: aspect-[4/3] card | Mobile: aspect-[4/5] portrait
-                    Overlay: Deep gradient with Brand Vision typography */}
+                {/* SECTION 04: BRAND VISION PREVIEW */}
                 {key === 'brandVision' && (
-                  <div className="flex justify-center p-2 rounded-lg bg-black/5 dark:bg-black/30 border border-line/30">
+                  <div className="flex justify-center">
                     <div
-                      className={`relative overflow-hidden bg-black border border-line/40 shadow-xs flex flex-col justify-end transition-all ${
+                      className={`relative overflow-hidden bg-[#141210] rounded-xl ring-1 ring-black/5 dark:ring-white/10 shadow-xs flex flex-col justify-end transition-all ${
                         mode === 'mobile'
-                          ? 'w-full max-w-[360px] aspect-[4/5] p-5 rounded-lg'
-                          : 'w-full max-w-xl aspect-[4/3] min-h-[340px] p-6 sm:p-8 rounded-lg'
+                          ? 'w-full max-w-[360px] aspect-[4/5] p-5'
+                          : 'w-full max-w-xl aspect-[4/3] min-h-[340px] p-6 sm:p-8'
                       }`}
                     >
                       {activeImageSrc && (
@@ -667,8 +656,8 @@ export default function AdminAboutMediaPage() {
                           To become a globally recognised contemporary fashion accessories brand that inspires women through distinctive design, creativity and accessible premium fashion.
                         </p>
                       </div>
-                      <div className="absolute top-2.5 right-2.5 z-10">
-                        <span className="px-2 py-0.5 rounded text-[9px] font-mono font-medium bg-black/70 text-white/90 border border-white/20">
+                      <div className="absolute top-3 right-3 z-10">
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-medium bg-black/60 backdrop-blur-md text-white/90 border border-white/15">
                           {mode === 'mobile' ? '4:5 Mobile' : '4:3 Editorial Card'}
                         </span>
                       </div>
@@ -676,16 +665,14 @@ export default function AdminAboutMediaPage() {
                   </div>
                 )}
 
-                {/* SECTION 05: BRAND MISSION PREVIEW
-                    Desktop: aspect-[4/3] card | Mobile: aspect-[4/5] portrait
-                    Overlay: Deep gradient with Brand Mission typography */}
+                {/* SECTION 05: BRAND MISSION PREVIEW */}
                 {key === 'brandMission' && (
-                  <div className="flex justify-center p-2 rounded-lg bg-black/5 dark:bg-black/30 border border-line/30">
+                  <div className="flex justify-center">
                     <div
-                      className={`relative overflow-hidden bg-black border border-line/40 shadow-xs flex flex-col justify-end transition-all ${
+                      className={`relative overflow-hidden bg-[#141210] rounded-xl ring-1 ring-black/5 dark:ring-white/10 shadow-xs flex flex-col justify-end transition-all ${
                         mode === 'mobile'
-                          ? 'w-full max-w-[360px] aspect-[4/5] p-5 rounded-lg'
-                          : 'w-full max-w-xl aspect-[4/3] min-h-[340px] p-6 sm:p-8 rounded-lg'
+                          ? 'w-full max-w-[360px] aspect-[4/5] p-5'
+                          : 'w-full max-w-xl aspect-[4/3] min-h-[340px] p-6 sm:p-8'
                       }`}
                     >
                       {activeImageSrc && (
@@ -709,8 +696,8 @@ export default function AdminAboutMediaPage() {
                           To create fashion-forward handbags and accessories that combine distinctive aesthetics, functional design and quality, empowering modern women to express their individuality confidently.
                         </p>
                       </div>
-                      <div className="absolute top-2.5 right-2.5 z-10">
-                        <span className="px-2 py-0.5 rounded text-[9px] font-mono font-medium bg-black/70 text-white/90 border border-white/20">
+                      <div className="absolute top-3 right-3 z-10">
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-medium bg-black/60 backdrop-blur-md text-white/90 border border-white/15">
                           {mode === 'mobile' ? '4:5 Mobile' : '4:3 Editorial Card'}
                         </span>
                       </div>
@@ -718,13 +705,11 @@ export default function AdminAboutMediaPage() {
                   </div>
                 )}
 
-                {/* SECTION 06: BRAND VALUES PREVIEW
-                    Desktop: aspect-[4/5] portrait | Mobile: aspect-[4/5] portrait
-                    Layout: Quiet luxury craftsmanship photography with philosophy quote */}
+                {/* SECTION 06: BRAND VALUES PREVIEW */}
                 {key === 'brandValues' && (
-                  <div className="flex flex-col items-center justify-center p-4 rounded-lg bg-canvas/30 border border-line/30">
+                  <div className="flex flex-col items-center justify-center py-2">
                     <div
-                      className={`relative overflow-hidden bg-white rounded-lg border border-line/40 shadow-xs transition-all ${
+                      className={`relative overflow-hidden bg-[#141210] rounded-xl ring-1 ring-black/5 dark:ring-white/10 shadow-xs transition-all ${
                         mode === 'mobile'
                           ? 'w-full max-w-[340px] aspect-[4/5]'
                           : 'w-full max-w-[360px] aspect-[4/5]'
@@ -739,19 +724,19 @@ export default function AdminAboutMediaPage() {
                           className="object-cover object-center"
                         />
                       )}
-                      <div className="absolute top-2.5 right-2.5 z-10">
-                        <span className="px-2 py-0.5 rounded text-[9px] font-mono font-medium bg-black/70 text-white/90 border border-white/20">
+                      <div className="absolute top-3 right-3 z-10">
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-medium bg-black/60 backdrop-blur-md text-white/90 border border-white/15">
                           4:5 Quiet Luxury Portrait
                         </span>
                       </div>
                     </div>
 
                     {/* Exact Storefront Philosophy Quote */}
-                    <div className="border-l-2 border-black dark:border-white pl-3.5 py-0.5 mt-3 max-w-sm w-full">
-                      <p className="text-[10px] uppercase tracking-[0.2em] text-black dark:text-white font-medium mb-0.5">
+                    <div className="border-l-2 border-[#1C2434] dark:border-white pl-4 py-1 mt-4 max-w-sm w-full">
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-[#1C2434] dark:text-white font-medium mb-0.5">
                         Brand Philosophy
                       </p>
-                      <blockquote className={`text-xs italic leading-relaxed ${isDark ? 'text-[#B4B4B4]' : 'text-[#5A534E]'}`}>
+                      <blockquote className="text-xs italic leading-relaxed text-[#78716C] dark:text-[#A8A29E]">
                         &ldquo;Fashion should not be limited to special occasions. Every day is an opportunity to express yourself.&rdquo;
                       </blockquote>
                     </div>
@@ -759,12 +744,12 @@ export default function AdminAboutMediaPage() {
                 )}
               </div>
 
-              {/* 3. UPLOAD AND EDITING CONTROLS (Directly Below Preview) */}
-              <div className={`p-4 sm:p-5 rounded-lg border space-y-4 ${innerCardBg}`}>
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+              {/* 3. UPLOAD AND EDITING CONTROLS */}
+              <div className={`p-5 sm:p-6 rounded-xl border space-y-5 ${innerCardBg}`}>
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
                   {/* WebP Upload Dropzone (Col 7) */}
-                  <div className="md:col-span-7 space-y-1.5">
-                    <label className={`block text-xs font-semibold ${isDark ? 'text-[#E8E1DA]' : 'text-[#24211F]'}`}>
+                  <div className="md:col-span-7 space-y-2">
+                    <label className="block text-xs font-semibold text-[#1C2434] dark:text-[#E8E1DA]">
                       Upload Replacement WebP (.webp only)
                     </label>
 
@@ -788,14 +773,14 @@ export default function AdminAboutMediaPage() {
                         }
                       }}
                       onClick={() => fileInputRefs.current[key]?.click()}
-                      className={`border-2 border-dashed rounded-lg p-4 sm:p-5 text-center cursor-pointer transition-all ${
+                      className={`border border-dashed rounded-xl p-5 text-center cursor-pointer transition-all ${
                         isDragging
-                          ? 'border-[#5146E5] bg-[#5146E5]/15'
+                          ? 'border-[#5146E5] bg-[#5146E5]/10'
                           : staged
-                          ? 'border-[#5146E5]/70 bg-[#5146E5]/5'
+                          ? 'border-[#5146E5]/50 bg-[#5146E5]/[0.04]'
                           : isDark
-                          ? 'border-[#36312C] hover:border-[#5146E5]/60 bg-[#1A1816]'
-                          : 'border-[#E5DFD7] hover:border-[#5146E5]/60 bg-[#FFFFFF]'
+                          ? 'border-[#38332E] hover:border-[#5146E5]/60 bg-[#1A1816]/60 hover:bg-[#1A1816]'
+                          : 'border-[#D8D2C8] hover:border-[#5146E5]/60 bg-white/70 hover:bg-white'
                       }`}
                     >
                       <input
@@ -812,34 +797,32 @@ export default function AdminAboutMediaPage() {
                         }}
                       />
 
-                      <div className="flex flex-col items-center justify-center space-y-1.5">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center border ${
+                      <div className="flex flex-col items-center justify-center space-y-2">
+                        <div className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${
                           staged
-                            ? 'bg-[#5146E5] text-white border-[#5146E5]'
-                            : isDark
-                            ? 'bg-[#24211F] text-[#8A837C] border-[#36312C]'
-                            : 'bg-[#EEE8DF] text-[#5A534E] border-[#E5DFD7]'
+                            ? 'bg-[#5146E5] text-white'
+                            : 'bg-[#EEF0FF] dark:bg-[#5146E5]/20 text-[#5146E5] dark:text-[#818CF8]'
                         }`}>
                           {staged ? <FileCheck className="w-4 h-4" /> : <Upload className="w-4 h-4" />}
                         </div>
 
                         {staged ? (
                           <div>
-                            <span className="font-bold text-xs text-[#5146E5] dark:text-[#818CF8] block truncate max-w-xs mx-auto">
+                            <span className="font-semibold text-xs text-[#5146E5] dark:text-[#818CF8] block truncate max-w-xs mx-auto">
                               {staged.file.name}
                             </span>
-                            <span className={`text-[10px] mt-0.5 block ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
+                            <span className="text-[10px] mt-0.5 block text-[#8C837A] dark:text-[#78716C]">
                               {(staged.file.size / 1024).toFixed(1)} KB · WebP format verified
                               {staged.dimensions && ` · ${staged.dimensions.width}×${staged.dimensions.height}px`}
                             </span>
                           </div>
                         ) : (
                           <div>
-                            <span className="font-semibold text-xs block">
+                            <span className="font-medium text-xs block text-[#1C2434] dark:text-[#E8E1DA]">
                               Click to choose or drag &amp; drop WebP file
                             </span>
-                            <span className={`text-[10px] mt-0.5 block ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
-                              Target folder: <code className="font-mono text-[#5146E5]">zimor/about/</code>
+                            <span className="text-[10px] mt-0.5 block text-[#8C837A] dark:text-[#78716C]">
+                              Target folder: <code className="font-mono text-[#5146E5] dark:text-[#818CF8]">zimor/about/</code>
                             </span>
                           </div>
                         )}
@@ -848,9 +831,9 @@ export default function AdminAboutMediaPage() {
                   </div>
 
                   {/* Alt Description & Metadata (Col 5) */}
-                  <div className="md:col-span-5 space-y-3">
-                    <div className="space-y-1">
-                      <label className={`block text-xs font-semibold ${isDark ? 'text-[#E8E1DA]' : 'text-[#24211F]'}`}>
+                  <div className="md:col-span-5 space-y-3.5">
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-semibold text-[#1C2434] dark:text-[#E8E1DA]">
                         Accessible Alt Description
                       </label>
                       <input
@@ -861,29 +844,25 @@ export default function AdminAboutMediaPage() {
                           setAltTexts((curr) => ({ ...curr, [key]: val }));
                         }}
                         placeholder="e.g. Precision craftsmanship in atelier"
-                        className={`w-full px-3 py-2 rounded border text-xs focus:outline-none focus:border-[#5146E5] transition-colors ${
-                          isDark
-                            ? 'bg-[#24211F] border-[#36312C] text-[#E8E1DA]'
-                            : 'bg-[#FFFFFF] border-[#E5DFD7] text-[#24211F]'
-                        }`}
+                        className="w-full px-3.5 py-2.5 rounded-lg border text-xs focus:outline-none focus:border-[#5146E5] focus:ring-1 focus:ring-[#5146E5]/20 transition-all bg-white dark:bg-[#1A1816] border-[#E2DDD5] dark:border-[#322E2A] text-[#1C2434] dark:text-[#F5F5F4] placeholder-[#A8A29E]"
                       />
-                      <p className={`text-[10px] ${isDark ? 'text-[#8A837C]' : 'text-[#8C837A]'}`}>
+                      <p className="text-[10px] text-[#8C837A] dark:text-[#78716C]">
                         Accessible description for screen readers and SEO.
                       </p>
                     </div>
 
                     {/* Metadata Specs */}
-                    <div className="text-[10px] space-y-1 font-mono pt-1">
-                      <div className="flex items-center justify-between text-[#8A837C]">
+                    <div className="text-xs space-y-1.5 pt-1">
+                      <div className="flex items-center justify-between text-[#78716C] dark:text-[#A8A29E]">
                         <span>Cloudinary Public ID:</span>
-                        <span className="truncate max-w-[140px] text-right font-medium text-[#5146E5]">
+                        <span className="truncate max-w-[140px] text-right font-mono text-[11px] font-medium text-[#5146E5] dark:text-[#818CF8]">
                           {sec.publicId || 'zimor/about/...'}
                         </span>
                       </div>
                       {sec.updatedAt && (
-                        <div className="flex items-center justify-between text-[#8A837C]">
+                        <div className="flex items-center justify-between text-[#78716C] dark:text-[#A8A29E]">
                           <span>Last Synced:</span>
-                          <span>{new Date(sec.updatedAt).toLocaleDateString('en-IN')}</span>
+                          <span className="font-mono text-[11px]">{new Date(sec.updatedAt).toLocaleDateString('en-IN')}</span>
                         </div>
                       )}
                     </div>
@@ -891,17 +870,17 @@ export default function AdminAboutMediaPage() {
                 </div>
 
                 {/* 4. ACTIONS ROW: Save/Publish, Discard & Reset */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-line/20">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3.5 border-t border-[#EAE5DE]/80 dark:border-[#2C2825]/80">
                   <div className="flex items-center gap-2">
                     {/* Primary Save / Publish Button */}
                     <button
                       type="button"
                       onClick={() => handleUploadAndPublish(key)}
                       disabled={isUploading || !staged}
-                      className={`px-4 py-2 rounded text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-xs ${
+                      className={`px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-xs ${
                         staged
-                          ? 'bg-[#5146E5] hover:bg-[#4338CA] text-[#F7F5F2] cursor-pointer'
-                          : 'bg-neutral-300 dark:bg-neutral-800 text-neutral-500 cursor-not-allowed'
+                          ? 'bg-[#5146E5] hover:bg-[#4338CA] text-white cursor-pointer'
+                          : 'bg-[#E5DFD7]/70 dark:bg-[#25221F] text-[#A8A29E] dark:text-[#6E6760] cursor-not-allowed'
                       }`}
                     >
                       {isUploading ? (
@@ -922,11 +901,7 @@ export default function AdminAboutMediaPage() {
                       <button
                         type="button"
                         onClick={() => handleDiscardStaged(key)}
-                        className={`px-3 py-2 rounded text-xs font-medium border transition-colors ${
-                          isDark
-                            ? 'bg-[#1E1C1A] border-[#36312C] text-[#8A837C] hover:text-[#E8E1DA]'
-                            : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#5A534E] hover:text-[#24211F]'
-                        }`}
+                        className="px-3.5 py-2 rounded-lg text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 border border-rose-200/60 dark:border-rose-900/30 transition-colors cursor-pointer"
                       >
                         Discard File
                       </button>
@@ -938,13 +913,9 @@ export default function AdminAboutMediaPage() {
                     type="button"
                     onClick={() => handleResetSection(key)}
                     disabled={isResetting || isUploading}
-                    className={`inline-flex items-center gap-1.5 px-3 py-2 rounded text-xs font-medium border transition-colors ${
-                      isDark
-                        ? 'bg-[#1E1C1A] border-[#36312C] text-[#8A837C] hover:text-[#E8E1DA] hover:border-[#5146E5]'
-                        : 'bg-[#FAF7F2] border-[#E5DFD7] text-[#5A534E] hover:text-[#24211F] hover:border-[#5146E5]'
-                    }`}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium text-[#78716C] dark:text-[#A8A29E] hover:text-[#1C2434] dark:hover:text-[#F5F5F4] hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <RotateCcw className={`w-3 h-3 ${isResetting ? 'animate-spin' : ''}`} />
+                    <RotateCcw className={`w-3.5 h-3.5 ${isResetting ? 'animate-spin' : ''}`} />
                     <span>Reset to Default</span>
                   </button>
                 </div>

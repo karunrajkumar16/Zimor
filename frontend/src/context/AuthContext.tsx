@@ -129,7 +129,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const loginWithGoogle = useCallback((redirectPath?: string) => {
     const target = redirectPath || (typeof window !== 'undefined' ? window.location.pathname : '/account');
-    const authUrl = `${BACKEND_URL}/api/auth/google?redirect=${encodeURIComponent(target)}`;
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const params = new URLSearchParams({ redirect: target });
+    if (origin) {
+      params.set('origin', origin);
+    }
+    const authUrl = `${BACKEND_URL}/api/auth/google?${params.toString()}`;
     window.location.href = authUrl;
   }, []);
 

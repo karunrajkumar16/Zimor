@@ -30,7 +30,12 @@ function AdminLoginForm() {
 
   const handleGoogleAdminLogin = () => {
     setIsLoading(true);
-    window.location.href = apiUrl('/api/auth/google?admin=true&redirect=/admin');
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const params = new URLSearchParams({ admin: 'true', redirect: '/admin' });
+    if (origin) {
+      params.set('origin', origin);
+    }
+    window.location.href = apiUrl(`/api/auth/google?${params.toString()}`);
   };
 
   const handleLogin = async (e: React.FormEvent) => {

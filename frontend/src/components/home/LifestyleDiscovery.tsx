@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Laptop, Sparkles, Briefcase } from 'lucide-react';
+import { apiFetch } from '@/lib/api';
 
 interface PolenePillar {
   id: string;
@@ -69,6 +70,57 @@ export const LifestyleDiscovery: React.FC = () => {
   // Parallax element references for the inner images ONLY (Containers are fixed, locked & borderless)
   const imgRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [activeMobileIndex, setActiveMobileIndex] = useState(0);
+
+  // Dynamic visual media state synchronized with MongoDB Visual Media Manager
+  const [pillars, setPillars] = useState<PolenePillar[]>(PILLARS);
+  const [craftPoster, setCraftPoster] = useState(
+    'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917849/zimor/about/craftsmanship-atelier.webp'
+  );
+  const [craftVideoUrl, setCraftVideoUrl] = useState(
+    'https://res.cloudinary.com/kbeyfu3d/video/upload/v1794917863/zimor/videos/cafune-craftsmanship.mp4'
+  );
+  const [craftSupportingImage, setCraftSupportingImage] = useState(
+    'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917847/zimor/about/artisan-heritage-landscape.webp'
+  );
+
+  // Dynamic media synchronization on mount
+  useEffect(() => {
+    let isMounted = true;
+    apiFetch('/api/homepage-media')
+      .then((res) => res.json())
+      .then((data) => {
+        if (!isMounted || !data?.media) return;
+        const media = data.media;
+
+        if (media.lifestyle_everyday?.url || media.lifestyle_work?.url || media.lifestyle_travel?.url) {
+          setPillars((prev) =>
+            prev.map((p) => {
+              if (p.id === 'everyday' && media.lifestyle_everyday?.url) {
+                return { ...p, editorialImage: media.lifestyle_everyday.url };
+              }
+              if (p.id === 'work' && media.lifestyle_work?.url) {
+                return { ...p, editorialImage: media.lifestyle_work.url };
+              }
+              if (p.id === 'travel' && media.lifestyle_travel?.url) {
+                return { ...p, editorialImage: media.lifestyle_travel.url };
+              }
+              return p;
+            })
+          );
+        }
+
+        if (media.craft_poster?.url) setCraftPoster(media.craft_poster.url);
+        if (media.craft_video?.url) setCraftVideoUrl(media.craft_video.url);
+        if (media.craft_supporting?.url) setCraftSupportingImage(media.craft_supporting.url);
+      })
+      .catch(() => {
+        // Retain factory default constants gracefully
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleTrackScroll = () => {
     if (!trackRef.current) return;
@@ -200,7 +252,7 @@ export const LifestyleDiscovery: React.FC = () => {
             overscrollBehaviorY: 'auto',
           }}
         >
-          {PILLARS.map((pillar, idx) => {
+          {pillars.map((pillar, idx) => {
             return (
               <Link
                 key={pillar.id}
@@ -266,7 +318,7 @@ export const LifestyleDiscovery: React.FC = () => {
 
         {/* Mobile Slide Position Indicators (01 / 02 / 03) */}
         <div className="flex md:hidden items-center justify-center gap-2 mb-8 -mt-1">
-          {PILLARS.map((pillar, idx) => (
+          {pillars.map((pillar, idx) => (
             <button
               key={pillar.id}
               type="button"
@@ -291,12 +343,11 @@ export const LifestyleDiscovery: React.FC = () => {
               muted
               playsInline
               preload="metadata"
-              poster="https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917849/zimor/about/craftsmanship-atelier.webp"
+              poster={craftPoster}
               className="w-full h-full object-cover object-center"
               aria-label="Artisanal leather craftsmanship and luxury handbag creation in India"
             >
-              <source src="https://res.cloudinary.com/kbeyfu3d/video/upload/v1794917863/zimor/videos/cafune-craftsmanship.mp4" type="video/mp4" />
-              <source src="https://res.cloudinary.com/kbeyfu3d/video/upload/v1794917866/zimor/videos/craftsmanship.mp4" type="video/mp4" />
+              <source src={craftVideoUrl} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           </div>
@@ -311,7 +362,7 @@ export const LifestyleDiscovery: React.FC = () => {
             {/* Inset Landscape Photograph */}
             <div className="relative w-full max-w-[460px] aspect-[3/2] overflow-hidden mb-7 sm:mb-9">
               <Image
-                src="https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917847/zimor/about/artisan-heritage-landscape.webp"
+                src={craftSupportingImage}
                 alt="Crafted in India artisan heritage"
                 fill
                 sizes="(max-width: 768px) 100vw, 460px"

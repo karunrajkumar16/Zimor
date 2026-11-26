@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import {
   verifyAdminCredentials,
@@ -14,6 +15,12 @@ import {
   verifyGoogleIdTokenStrict,
   normalizeEmail,
 } from '../auth/index.js';
+import {
+  validateOrigin,
+  getSafeRedirectOrigin,
+  createSignedOAuthState,
+  verifySignedOAuthState,
+} from '../auth/originValidator.js';
 import {
   checkLoginRateLimit,
   recordFailedLogin,
@@ -161,16 +168,31 @@ export async function me(req: AuthenticatedRequest, res: Response) {
 
 /**
  * Initiates the Google OAuth 2.0 flow
- * Supports ?admin=true or ?redirect=/admin to trigger the Admin authorization flow
+ * Supports ?admin=true or ?redirect=/admin to trigger the Admin authorization flow.
+ * Captures, validates, and cryptographically signs client origin in OAuth state.
  */
 export async function googleAuth(req: Request, res: Response) {
   try {
     const client = getGoogleOAuthClient();
     const isAdmin = req.query.admin === 'true' || String(req.query.scope) === 'admin';
-    const redirect = (req.query.redirect as string) || (isAdmin ? '/admin' : '/account');
-    const scopeType = isAdmin || redirect.startsWith('/admin') ? 'admin' : 'customer';
+    const redirectParam = typeof req.query.redirect === 'string' ? req.query.redirect : '';
+    const redirect = redirectParam && redirectParam.startsWith('/')
+      ? redirectParam
+      : (isAdmin ? '/admin' : '/account');
+    const scopeType: 'admin' | 'customer' = isAdmin || redirect.startsWith('/admin') ? 'admin' : 'customer';
 
-    const state = Buffer.from(JSON.stringify({ redirect, scope: scopeType })).toString('base64url');
+    // Strictly validate initiating origin (query parameter) against explicit trusted allowlist
+    const rawOrigin = typeof req.query.origin === 'string' ? req.query.origin : undefined;
+    const validatedOrigin = validateOrigin(rawOrigin);
+
+    // Cryptographically signed and integrity-protected state payload
+    const state = createSignedOAuthState({
+      redirect,
+      scope: scopeType,
+      origin: validatedOrigin || undefined,
+      nonce: crypto.randomBytes(16).toString('hex'),
+      timestamp: Date.now(),
+    });
 
     const authUrl = client.generateAuthUrl({
       access_type: 'offline',
@@ -189,25 +211,42 @@ export async function googleAuth(req: Request, res: Response) {
 /**
  * Handles Google OAuth 2.0 Authorization Code callback
  * Strictly isolates Admin and Customer flows.
+ * Validates HMAC signature on state; rejects tampered or expired states.
+ * Consistently redirects using the validated client origin (or safe fallback).
  * Unauthorized Google admin attempts are rejected with HTTP 403 / unauthorized redirect.
  */
 export async function googleCallback(req: Request, res: Response) {
   let targetPath = '/account';
-  let scopeType = 'customer';
+  let scopeType: 'admin' | 'customer' = 'customer';
+  // Default to safe fallback origin (e.g. production Vercel domain in prod, localhost in dev)
+  let clientBaseUrl = getSafeRedirectOrigin();
 
   try {
     const { code, state, error } = req.query;
 
     if (state && typeof state === 'string') {
-      try {
-        const parsed = JSON.parse(Buffer.from(state, 'base64url').toString('utf-8'));
-        if (parsed.redirect && typeof parsed.redirect === 'string' && parsed.redirect.startsWith('/')) {
-          targetPath = parsed.redirect;
+      const verifiedState = verifySignedOAuthState(state);
+      if (verifiedState) {
+        if (verifiedState.redirect && typeof verifiedState.redirect === 'string' && verifiedState.redirect.startsWith('/')) {
+          targetPath = verifiedState.redirect;
         }
-        if (parsed.scope === 'admin') {
+        if (verifiedState.scope === 'admin') {
           scopeType = 'admin';
         }
-      } catch { }
+        if (verifiedState.origin) {
+          // Re-validate origin strictly against allowlist
+          const revalidated = validateOrigin(verifiedState.origin);
+          if (revalidated) {
+            clientBaseUrl = revalidated;
+          } else {
+            console.warn('[Google OAuth Callback] Signed origin failed current allowlist validation, falling back to safe default');
+          }
+        }
+      } else {
+        console.warn('[Google OAuth Callback] Tampered, malformed, or expired OAuth state detected. Discarding untrusted state payload.');
+      }
+    } else {
+      console.warn('[Google OAuth Callback] Missing state parameter in OAuth callback');
     }
 
     const isAdminFlow = scopeType === 'admin' || targetPath.startsWith('/admin');
@@ -215,19 +254,19 @@ export async function googleCallback(req: Request, res: Response) {
     if (error) {
       console.warn('[Google OAuth Consent Denied/Error]', error);
       const errRedirect = isAdminFlow ? '/admin/login' : targetPath;
-      return res.redirect(`${config.clientUrl}${errRedirect}?auth_error=${encodeURIComponent(String(error))}`);
+      return res.redirect(`${clientBaseUrl}${errRedirect}?auth_error=${encodeURIComponent(String(error))}`);
     }
 
     if (!code || typeof code !== 'string') {
       const errRedirect = isAdminFlow ? '/admin/login' : targetPath;
-      return res.redirect(`${config.clientUrl}${errRedirect}?auth_error=missing_code`);
+      return res.redirect(`${clientBaseUrl}${errRedirect}?auth_error=missing_code`);
     }
 
     const { tokens } = await exchangeGoogleOAuthCodeWithRetry(code);
 
     if (!tokens.id_token) {
       const errRedirect = isAdminFlow ? '/admin/login' : targetPath;
-      return res.redirect(`${config.clientUrl}${errRedirect}?auth_error=missing_id_token`);
+      return res.redirect(`${clientBaseUrl}${errRedirect}?auth_error=missing_id_token`);
     }
 
     // Strict ID token verification (issuer, audience, expiry, email_verified)
@@ -235,7 +274,7 @@ export async function googleCallback(req: Request, res: Response) {
     if (!verification.valid || !verification.payload) {
       const errRedirect = isAdminFlow ? '/admin/login' : targetPath;
       return res.redirect(
-        `${config.clientUrl}${errRedirect}?auth_error=${encodeURIComponent(verification.error || 'invalid_token')}`
+        `${clientBaseUrl}${errRedirect}?auth_error=${encodeURIComponent(verification.error || 'invalid_token')}`
       );
     }
 
@@ -248,7 +287,7 @@ export async function googleCallback(req: Request, res: Response) {
       if (!isApproved) {
         console.warn(`[SECURITY ALERT] Unauthorized Google admin login attempt from: ${verifiedEmail}`);
         return res.redirect(
-          `${config.clientUrl}/admin/login?error=unauthorized_admin&email=${encodeURIComponent(verifiedEmail)}`
+          `${clientBaseUrl}/admin/login?error=unauthorized_admin&email=${encodeURIComponent(verifiedEmail)}`
         );
       }
 
@@ -275,7 +314,7 @@ export async function googleCallback(req: Request, res: Response) {
       });
 
       return res.redirect(
-        `${config.clientUrl}/admin?auth=success&admin_token=${encodeURIComponent(adminToken)}`
+        `${clientBaseUrl}/admin?auth=success&admin_token=${encodeURIComponent(adminToken)}`
       );
     }
 
@@ -306,7 +345,7 @@ export async function googleCallback(req: Request, res: Response) {
     });
 
     const separator = targetPath.includes('?') ? '&' : '?';
-    return res.redirect(`${config.clientUrl}${targetPath}${separator}auth=success&token=${encodeURIComponent(sessionToken)}`);
+    return res.redirect(`${clientBaseUrl}${targetPath}${separator}auth=success&token=${encodeURIComponent(sessionToken)}`);
   } catch (err: any) {
     const isNetworkOrDns =
       err.code === 'ENOTFOUND' ||
@@ -329,7 +368,7 @@ export async function googleCallback(req: Request, res: Response) {
       ? 'Google authentication service is temporarily unreachable. Please check your internet connection and try again.'
       : err.message || 'authentication_failed';
 
-    return res.redirect(`${config.clientUrl}${errRedirect}?auth_error=${encodeURIComponent(userMessage)}`);
+    return res.redirect(`${clientBaseUrl}${errRedirect}?auth_error=${encodeURIComponent(userMessage)}`);
   }
 }
 
