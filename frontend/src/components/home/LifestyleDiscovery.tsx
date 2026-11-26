@@ -3,118 +3,75 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Laptop, Sparkles, Briefcase } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 
-interface PolenePillar {
+export interface LifestyleCardItem {
   id: string;
-  topTitle: string;
-  number: string;
-  eyebrow: string;
   name: string;
   subtitle: string;
   silhouette: string;
   href: string;
   editorialImage: string;
-  macroImage: string;
-  icon: React.ElementType;
+  topTitle?: string;
+  eyebrow?: string;
+  order: number;
+  isPublished?: boolean;
 }
 
-const PILLARS: PolenePillar[] = [
-  {
-    id: 'everyday',
-    topTitle: '',
-    number: '',
-    eyebrow: '',
-    name: 'EVERYDAY',
-    subtitle: 'For the everyday.',
-    silhouette: 'The Classic Shoulder Bag',
-    href: '/shop?section=everyday#everyday',
-    editorialImage: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917846/zimor/lifestyle/brandgirl3.webp',
-    macroImage: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917840/zimor/products/classic-4.webp',
-    icon: Sparkles,
-  },
-  {
-    id: 'work',
-    topTitle: '',
-    number: '',
-    eyebrow: '',
-    name: 'WORK',
-    subtitle: 'For what lies ahead.',
-    silhouette: 'The Rabota & Delo Totes',
-    href: '/shop?section=work#work',
-    editorialImage: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917850/zimor/about/image.webp',
-    macroImage: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917833/zimor/products/rabota-4.webp',
-    icon: Laptop,
-  },
-  {
-    id: 'travel',
-    topTitle: '',
-    number: '',
-    eyebrow: '',
-    name: 'TRAVEL',
-    subtitle: 'For places beyond.',
-    silhouette: 'The Rabota & Delo Totes',
-    href: '/shop?section=travel#travel',
-    editorialImage: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917845/zimor/lifestyle/brandgirl2.webp',
-    macroImage: 'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917827/zimor/products/delo-1.webp',
-    icon: Briefcase,
-  },
-];
+export interface LifestyleSectionData {
+  isPublished?: boolean;
+  eyebrow?: string;
+  heading?: string;
+  subheading?: string;
+  exploreLink?: string;
+  exploreText?: string;
+  cards: LifestyleCardItem[];
+}
+
+export interface CraftedSectionData {
+  isPublished?: boolean;
+  heading?: string;
+  description?: string;
+  videoUrl?: string;
+  posterUrl?: string;
+  supportingImage?: string;
+  supportingAlt?: string;
+  ctaText?: string;
+  ctaLink?: string;
+}
 
 export const LifestyleDiscovery: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const craftVideoRef = useRef<HTMLVideoElement>(null);
   const isVisibleRef = useRef(false);
-  // Parallax element references for the inner images ONLY (Containers are fixed, locked & borderless)
   const imgRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [activeMobileIndex, setActiveMobileIndex] = useState(0);
 
-  // Dynamic visual media state synchronized with MongoDB Visual Media Manager
-  const [pillars, setPillars] = useState<PolenePillar[]>(PILLARS);
-  const [craftPoster, setCraftPoster] = useState(
-    'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917849/zimor/about/craftsmanship-atelier.webp'
-  );
-  const [craftVideoUrl, setCraftVideoUrl] = useState(
-    'https://res.cloudinary.com/kbeyfu3d/video/upload/v1794917863/zimor/videos/cafune-craftsmanship.mp4'
-  );
-  const [craftSupportingImage, setCraftSupportingImage] = useState(
-    'https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917847/zimor/about/artisan-heritage-landscape.webp'
-  );
+  const [loading, setLoading] = useState(true);
+  const [lifestyle, setLifestyle] = useState<LifestyleSectionData | null>(null);
+  const [crafted, setCrafted] = useState<CraftedSectionData | null>(null);
 
-  // Dynamic media synchronization on mount
   useEffect(() => {
     let isMounted = true;
-    apiFetch('/api/homepage-media')
+    apiFetch('/api/content/homepage')
       .then((res) => res.json())
       .then((data) => {
-        if (!isMounted || !data?.media) return;
-        const media = data.media;
-
-        if (media.lifestyle_everyday?.url || media.lifestyle_work?.url || media.lifestyle_travel?.url) {
-          setPillars((prev) =>
-            prev.map((p) => {
-              if (p.id === 'everyday' && media.lifestyle_everyday?.url) {
-                return { ...p, editorialImage: media.lifestyle_everyday.url };
-              }
-              if (p.id === 'work' && media.lifestyle_work?.url) {
-                return { ...p, editorialImage: media.lifestyle_work.url };
-              }
-              if (p.id === 'travel' && media.lifestyle_travel?.url) {
-                return { ...p, editorialImage: media.lifestyle_travel.url };
-              }
-              return p;
-            })
-          );
+        if (!isMounted || !data?.content?.data) return;
+        const pageData = data.content.data;
+        if (pageData.lifestyle) {
+          setLifestyle(pageData.lifestyle);
         }
-
-        if (media.craft_poster?.url) setCraftPoster(media.craft_poster.url);
-        if (media.craft_video?.url) setCraftVideoUrl(media.craft_video.url);
-        if (media.craft_supporting?.url) setCraftSupportingImage(media.craft_supporting.url);
+        if (pageData.craftedInIndia) {
+          setCrafted(pageData.craftedInIndia);
+        }
       })
-      .catch(() => {
-        // Retain factory default constants gracefully
+      .catch((err) => {
+        console.error('Failed to load homepage lifestyle content:', err);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
       });
 
     return () => {
@@ -122,15 +79,19 @@ export const LifestyleDiscovery: React.FC = () => {
     };
   }, []);
 
+  const visibleCards = (lifestyle?.cards || [])
+    .filter((card) => card.isPublished !== false)
+    .sort((a, b) => (a.order || 0) - (b.order || 0));
+
   const handleTrackScroll = () => {
     if (!trackRef.current) return;
     const { scrollLeft, clientWidth } = trackRef.current;
-    if (clientWidth === 0) return;
+    if (clientWidth === 0 || visibleCards.length === 0) return;
     const firstCard = trackRef.current.firstElementChild as HTMLElement;
     const cardWidth = firstCard?.clientWidth || clientWidth * 0.82;
     const gap = 14;
     const index = Math.round(scrollLeft / (cardWidth + gap));
-    setActiveMobileIndex(Math.min(PILLARS.length - 1, Math.max(0, index)));
+    setActiveMobileIndex(Math.min(visibleCards.length - 1, Math.max(0, index)));
   };
 
   const scrollToPillar = (idx: number) => {
@@ -141,7 +102,6 @@ export const LifestyleDiscovery: React.FC = () => {
     }
   };
 
-  // Smooth, scroll-driven window parallax: only active when section is in viewport
   useEffect(() => {
     let isTicking = false;
 
@@ -156,17 +116,14 @@ export const LifestyleDiscovery: React.FC = () => {
         if (!parentCard) return;
 
         const rect = parentCard.getBoundingClientRect();
-
-        // Calculate card position relative to viewport center
         const elementCenter = rect.top + rect.height / 2;
         const viewportCenter = windowHeight / 2;
         const totalSpan = (windowHeight + rect.height) / 2;
         const rawProgress = (viewportCenter - elementCenter) / (totalSpan || 1);
         const p = Math.max(-1.15, Math.min(1.15, rawProgress));
 
-        // Travel speeds for inner image scrolling inside locked container
         const speeds = isDesktop ? [85, 110, 90] : [55, 70, 60];
-        const offset = p * speeds[idx];
+        const offset = p * (speeds[idx % speeds.length] || 85);
         imgEl.style.transform = `translate3d(0, ${offset.toFixed(1)}px, 0)`;
       });
     };
@@ -187,7 +144,7 @@ export const LifestyleDiscovery: React.FC = () => {
         isVisibleRef.current = entry.isIntersecting;
         if (entry.isIntersecting) {
           updateParallax();
-          craftVideoRef.current?.play().catch(() => { });
+          craftVideoRef.current?.play().catch(() => {});
         } else {
           craftVideoRef.current?.pause();
         }
@@ -207,55 +164,94 @@ export const LifestyleDiscovery: React.FC = () => {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleScroll);
     };
-  }, []);
+  }, [visibleCards.length, crafted]);
+
+  if (loading) {
+    return (
+      <section className="pt-10 sm:pt-16 pb-0 bg-canvas content-auto" aria-label="Loading Lifestyle Discovery">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-6 sm:mb-10 space-y-2">
+            <div className="h-3 w-36 bg-gray-200/70 dark:bg-neutral-800 animate-pulse rounded" />
+            <div className="h-8 w-64 bg-gray-200/70 dark:bg-neutral-800 animate-pulse rounded" />
+            <div className="h-4 w-96 max-w-full bg-gray-200/70 dark:bg-neutral-800 animate-pulse rounded" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mb-3 sm:mb-8 md:mb-12">
+            {[1, 2, 3].map((n) => (
+              <div
+                key={n}
+                className="h-[380px] sm:h-[460px] md:h-[520px] lg:h-[600px] w-full rounded-xl md:rounded-xs bg-gray-200/60 dark:bg-neutral-800 animate-pulse"
+              />
+            ))}
+          </div>
+        </div>
+        <div className="w-full grid grid-cols-1 lg:grid-cols-2 min-h-[520px] lg:min-h-[640px]">
+          <div className="bg-gray-200/70 dark:bg-neutral-800 animate-pulse min-h-[360px]" />
+          <div className="bg-gray-100/70 dark:bg-neutral-900 animate-pulse min-h-[360px]" />
+        </div>
+      </section>
+    );
+  }
+
+  const showLifestyle = lifestyle?.isPublished !== false && visibleCards.length > 0;
+  const showCrafted = crafted?.isPublished !== false && crafted?.heading;
+
+  if (!showLifestyle && !showCrafted) {
+    return null;
+  }
 
   return (
     <section ref={sectionRef} className="pt-10 sm:pt-16 pb-0 bg-canvas content-auto" aria-label="Shop by Lifestyle">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="mb-6 sm:mb-10">
-          <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-[#000000] font-bold mb-1.5 font-primary">
-            Find Your Everyday Match
-          </p>
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
-            <div>
-              <h2 className="font-primary text-2xl sm:text-3xl lg:text-4xl font-normal text-ink tracking-tight leading-tight">
-                Shop by Lifestyle
-              </h2>
-              <p className="text-xs sm:text-sm text-ink-secondary mt-1 font-normal max-w-xl leading-relaxed">
-                Select your lifestyle to explore the silhouette engineered for your everyday rhythm, work focus, and travel escapes.
+      {showLifestyle && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Section Header */}
+          <div className="mb-6 sm:mb-10">
+            {lifestyle?.eyebrow && (
+              <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-[#000000] font-bold mb-1.5 font-primary">
+                {lifestyle.eyebrow}
               </p>
+            )}
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+              <div>
+                <h2 className="font-primary text-2xl sm:text-3xl lg:text-4xl font-normal text-ink tracking-tight leading-tight">
+                  {lifestyle?.heading}
+                </h2>
+                {lifestyle?.subheading && (
+                  <p className="text-xs sm:text-sm text-ink-secondary mt-1 font-normal max-w-xl leading-relaxed">
+                    {lifestyle.subheading}
+                  </p>
+                )}
+              </div>
+              {lifestyle?.exploreLink && (
+                <Link
+                  href={lifestyle.exploreLink}
+                  className="inline-flex items-center gap-1.5 font-primary text-xs sm:text-sm font-medium tracking-normal text-ink hover:text-[#b4b4b4] transition-colors shrink-0"
+                >
+                  <span>{lifestyle.exploreText || 'Explore All Silhouettes'}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              )}
             </div>
-            <Link
-              href="/shop"
-              className="inline-flex items-center gap-1.5 font-primary text-xs sm:text-sm font-medium tracking-normal text-ink hover:text-[#b4b4b4] transition-colors shrink-0"
-            >
-              <span>Explore All Silhouettes</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
           </div>
-        </div>
 
-        {/* Editorial Photography Cards:
-            - Mobile: Comfortable horizontal swipable carousel with natural peek (~68vw) & snap
-            - Desktop: Pure 3-Column Luxury Grid (md:grid-cols-3) */}
-        <div
-          ref={trackRef}
-          onScroll={handleTrackScroll}
-          className="flex md:grid md:grid-cols-3 overflow-x-auto md:overflow-visible snap-x snap-mandatory scroll-smooth no-scrollbar gap-3 sm:gap-4 lg:gap-4 pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 mb-3 sm:mb-8 md:mb-12"
-          style={{
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-            WebkitOverflowScrolling: 'touch',
-            touchAction: 'pan-x pan-y',
-            overscrollBehaviorX: 'contain',
-            overscrollBehaviorY: 'auto',
-          }}
-        >
-          {pillars.map((pillar, idx) => {
-            return (
+          {/* Editorial Photography Cards:
+              - Mobile: Comfortable horizontal swipable carousel with natural peek (~68vw) & snap
+              - Desktop: Pure 3-Column Luxury Grid (md:grid-cols-3) */}
+          <div
+            ref={trackRef}
+            onScroll={handleTrackScroll}
+            className="flex md:grid md:grid-cols-3 overflow-x-auto md:overflow-visible snap-x snap-mandatory scroll-smooth no-scrollbar gap-3 sm:gap-4 lg:gap-4 pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 mb-3 sm:mb-8 md:mb-12"
+            style={{
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              WebkitOverflowScrolling: 'touch',
+              touchAction: 'pan-x pan-y',
+              overscrollBehaviorX: 'contain',
+              overscrollBehaviorY: 'auto',
+            }}
+          >
+            {visibleCards.map((pillar, idx) => (
               <Link
-                key={pillar.id}
+                key={pillar.id || idx}
                 href={pillar.href}
                 className="group relative h-[380px] sm:h-[460px] md:h-[520px] lg:h-[600px] w-[68vw] min-w-[245px] max-w-[290px] sm:w-[320px] sm:max-w-none md:w-full shrink-0 snap-start rounded-xl md:rounded-xs overflow-hidden text-left transition-all duration-500 cursor-pointer block border-none outline-none ring-0 shadow-sm hover:shadow-lg"
               >
@@ -272,7 +268,7 @@ export const LifestyleDiscovery: React.FC = () => {
                     fill
                     sizes="(max-width: 768px) 70vw, 33vw"
                     className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
-                    priority={pillar.id === 'everyday'}
+                    priority={idx === 0}
                   />
                 </div>
 
@@ -290,9 +286,11 @@ export const LifestyleDiscovery: React.FC = () => {
 
                 {/* Bottom Overlay Content */}
                 <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 text-white z-10 space-y-1.5 sm:space-y-2 pointer-events-none drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.85)]">
-                  <p className="font-primary text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-white/80 font-medium">
-                    {pillar.eyebrow}
-                  </p>
+                  {pillar.eyebrow && (
+                    <p className="font-primary text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-white/80 font-medium">
+                      {pillar.eyebrow}
+                    </p>
+                  )}
                   <h3 className="font-primary font-semibold text-white text-lg sm:text-xl lg:text-2xl leading-tight tracking-tight">
                     {pillar.name}
                   </h3>
@@ -300,7 +298,7 @@ export const LifestyleDiscovery: React.FC = () => {
                     {pillar.subtitle}
                   </p>
 
-                  {/* Bottom Action Line: Unified design for all 3 cards */}
+                  {/* Bottom Action Line: Unified design for cards */}
                   <div className="pt-2 sm:pt-2.5 border-t border-white/20 flex items-center justify-between text-xs pointer-events-auto">
                     <span className="font-primary font-medium text-white/90 flex items-center gap-1 group-hover:text-white text-[11px] sm:text-xs">
                       <span>{pillar.silhouette}</span>
@@ -312,80 +310,103 @@ export const LifestyleDiscovery: React.FC = () => {
                   </div>
                 </div>
               </Link>
-            );
-          })}
-        </div>
-
-        {/* Mobile Slide Position Indicators (01 / 02 / 03) */}
-        <div className="flex md:hidden items-center justify-center gap-2 mb-8 -mt-1">
-          {pillars.map((pillar, idx) => (
-            <button
-              key={pillar.id}
-              type="button"
-              onClick={() => scrollToPillar(idx)}
-              className={`h-1.5 transition-all duration-300 rounded-full ${activeMobileIndex === idx ? 'w-8 bg-ink' : 'w-2 bg-line hover:bg-ink-muted'
-                }`}
-              aria-label={`Go to slide - ${pillar.name}`}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Strathberry/Cafuné-Style 50/50 Full-Width Split Showcase (Clean & Static) */}
-      <div className="w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-2 w-full min-h-[520px] lg:min-h-[640px]">
-          {/* Left 50%: Full Bleed Craftsmanship Video */}
-          <div className="relative w-full h-[360px] sm:h-[480px] lg:h-full min-h-[360px] lg:min-h-[640px] bg-canvas-alt overflow-hidden">
-            <video
-              ref={craftVideoRef}
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload="metadata"
-              poster={craftPoster}
-              className="w-full h-full object-cover object-center"
-              aria-label="Artisanal leather craftsmanship and luxury handbag creation in India"
-            >
-              <source src={craftVideoUrl} type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
+            ))}
           </div>
 
-          {/* Right 50%: Seamless Continuous Clean Editorial Panel */}
-          <div className="p-8 sm:p-14 lg:p-20 xl:p-24 flex flex-col items-center justify-center text-center bg-white">
-            {/* Title: Crafted in India */}
-            <h3 className="font-primary text-[38px] sm:text-[46px] md:text-[52px] font-normal text-ink tracking-tight mb-7 sm:mb-9 leading-none">
-              Crafted in India
-            </h3>
+          {/* Mobile Slide Position Indicators */}
+          {visibleCards.length > 1 && (
+            <div className="flex md:hidden items-center justify-center gap-2 mb-8 -mt-1">
+              {visibleCards.map((pillar, idx) => (
+                <button
+                  key={pillar.id || idx}
+                  type="button"
+                  onClick={() => scrollToPillar(idx)}
+                  className={`h-1.5 transition-all duration-300 rounded-full ${
+                    activeMobileIndex === idx ? 'w-8 bg-ink' : 'w-2 bg-line hover:bg-ink-muted'
+                  }`}
+                  aria-label={`Go to slide - ${pillar.name}`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
-            {/* Inset Landscape Photograph */}
-            <div className="relative w-full max-w-[460px] aspect-[3/2] overflow-hidden mb-7 sm:mb-9">
-              <Image
-                src={craftSupportingImage}
-                alt="Crafted in India artisan heritage"
-                fill
-                sizes="(max-width: 768px) 100vw, 460px"
-                className="object-cover object-center"
-                priority
-              />
+      {/* Strathberry/Cafuné-Style 50/50 Full-Width Split Showcase */}
+      {showCrafted && (
+        <div className="w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-2 w-full min-h-[520px] lg:min-h-[640px]">
+            {/* Left 50%: Full Bleed Craftsmanship Video */}
+            <div className="relative w-full h-[360px] sm:h-[480px] lg:h-full min-h-[360px] lg:min-h-[640px] bg-canvas-alt overflow-hidden">
+              {crafted.videoUrl ? (
+                <video
+                  ref={craftVideoRef}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload="metadata"
+                  poster={crafted.posterUrl}
+                  className="w-full h-full object-cover object-center"
+                  aria-label={crafted.heading}
+                >
+                  <source src={crafted.videoUrl} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              ) : (
+                crafted.posterUrl && (
+                  <Image
+                    src={crafted.posterUrl}
+                    alt={crafted.heading || 'Crafted in India'}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className="object-cover object-center"
+                  />
+                )
+              )}
             </div>
 
-            {/* Editorial Body Paragraph */}
-            <p className="font-secondary text-[13px] sm:text-[14px] text-ink-secondary font-normal leading-[1.8] max-w-[440px] mx-auto text-center mb-6 sm:mb-8">
-              Rooted in centuries of master leatherworking traditions, every Zimor silhouette is meticulously crafted in the renowned artisan clusters of India. Combining generational hand-stitching with refined architectural precision, our craftsmen transform premium materials into enduring modern heirlooms.
-            </p>
+            {/* Right 50%: Seamless Continuous Clean Editorial Panel */}
+            <div className="p-8 sm:p-14 lg:p-20 xl:p-24 flex flex-col items-center justify-center text-center bg-white">
+              {/* Title: Crafted in India */}
+              <h3 className="font-primary text-[38px] sm:text-[46px] md:text-[52px] font-normal text-ink tracking-tight mb-7 sm:mb-9 leading-none">
+                {crafted.heading}
+              </h3>
 
-            {/* Underlined Call to Action */}
-            <Link
-              href="/about"
-              className="font-primary text-xs sm:text-sm font-medium tracking-normal text-ink hover:text-[#b4b4b4] underline underline-offset-8 transition-colors"
-            >
-              Discover More
-            </Link>
+              {/* Inset Landscape Photograph */}
+              {crafted.supportingImage && (
+                <div className="relative w-full max-w-[460px] aspect-[3/2] overflow-hidden mb-7 sm:mb-9">
+                  <Image
+                    src={crafted.supportingImage}
+                    alt={crafted.supportingAlt || crafted.heading || 'Crafted in India artisan heritage'}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 460px"
+                    className="object-cover object-center"
+                    priority
+                  />
+                </div>
+              )}
+
+              {/* Editorial Body Paragraph */}
+              {crafted.description && (
+                <p className="font-secondary text-[13px] sm:text-[14px] text-ink-secondary font-normal leading-[1.8] max-w-[440px] mx-auto text-center mb-6 sm:mb-8">
+                  {crafted.description}
+                </p>
+              )}
+
+              {/* Underlined Call to Action */}
+              {crafted.ctaLink && (
+                <Link
+                  href={crafted.ctaLink}
+                  className="font-primary text-xs sm:text-sm font-medium tracking-normal text-ink hover:text-[#b4b4b4] underline underline-offset-8 transition-colors"
+                >
+                  {crafted.ctaText || 'Discover More'}
+                </Link>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </section>
   );
 };
