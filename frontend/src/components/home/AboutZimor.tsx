@@ -11,8 +11,8 @@ export interface SpotlightFrame {
   title: string;
   linkText: string;
   linkHref: string;
-  image: string;
-  alt: string;
+  image?: string;
+  alt?: string;
   gridClasses?: string;
   objectPosition?: string;
   order: number;
@@ -38,27 +38,32 @@ const DEFAULT_GRID_CLASSES = [
   'col-span-2 md:col-start-6 md:col-end-13 md:row-start-2 md:row-end-3 min-h-[280px] md:min-h-0',
 ];
 
-export const AboutZimor: React.FC = () => {
+interface AboutZimorProps {
+  initialSpotlight?: SpotlightSectionData | null;
+}
+
+export const AboutZimor: React.FC<AboutZimorProps> = ({
+  initialSpotlight,
+}) => {
   const sectionRef = useRef<HTMLElement>(null);
   const isVisibleRef = useRef(false);
   const imgRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  const [loading, setLoading] = useState(true);
-  const [spotlight, setSpotlight] = useState<SpotlightSectionData | null>(null);
+  const [spotlight, setSpotlight] = useState<SpotlightSectionData | null>(initialSpotlight || null);
 
   useEffect(() => {
     let isMounted = true;
     apiFetch('/api/content/homepage')
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) return null;
+        return res.json();
+      })
       .then((data) => {
         if (!isMounted || !data?.content?.data?.spotlight) return;
         setSpotlight(data.content.data.spotlight);
       })
       .catch((err) => {
         console.error('Failed to load spotlight content:', err);
-      })
-      .finally(() => {
-        if (isMounted) setLoading(false);
       });
 
     return () => {
@@ -131,29 +136,7 @@ export const AboutZimor: React.FC = () => {
     };
   }, [visibleFrames.length]);
 
-  if (loading) {
-    return (
-      <section
-        className="pt-6 sm:pt-10 lg:pt-14 pb-10 sm:pb-14 lg:pb-18 bg-white overflow-hidden w-full content-auto"
-        aria-label="Loading Spotlight"
-      >
-        <div className="w-full grid grid-cols-1 md:grid-cols-12 md:grid-rows-[360px_390px] gap-0 md:gap-2 md:h-[750px] p-0 bg-white">
-          <div className="col-span-1 md:col-start-1 md:col-end-6 md:row-start-1 md:row-end-2 w-full bg-white px-5 py-7 sm:px-8 sm:py-9 md:p-6 lg:p-9 xl:p-10 space-y-4">
-            <div className="h-3 w-28 bg-gray-200/70 animate-pulse rounded" />
-            <div className="h-10 w-64 bg-gray-200/70 animate-pulse rounded" />
-            <div className="h-4 w-full bg-gray-200/70 animate-pulse rounded" />
-            <div className="h-4 w-3/4 bg-gray-200/70 animate-pulse rounded" />
-          </div>
-          <div className="hidden md:block col-start-6 col-end-10 row-start-1 row-end-2 bg-gray-200/50 animate-pulse" />
-          <div className="hidden md:block col-start-10 col-end-13 row-start-1 row-end-2 bg-gray-200/60 animate-pulse" />
-          <div className="hidden md:block col-start-1 col-end-6 row-start-2 row-end-3 bg-gray-200/55 animate-pulse" />
-          <div className="hidden md:block col-start-6 col-end-13 row-start-2 row-end-3 bg-gray-200/65 animate-pulse" />
-        </div>
-      </section>
-    );
-  }
-
-  if (!spotlight || spotlight.isPublished === false || (!spotlight.heading && visibleFrames.length === 0)) {
+  if (spotlight?.isPublished === false) {
     return null;
   }
 
@@ -170,32 +153,32 @@ export const AboutZimor: React.FC = () => {
         <div className="col-span-1 md:col-start-1 md:col-end-6 md:row-start-1 md:row-end-2 w-full bg-white px-5 py-7 sm:px-8 sm:py-9 md:p-6 lg:p-9 xl:p-10 flex flex-col justify-between">
           <div className="space-y-4 sm:space-y-4.5">
             <div>
-              {spotlight.tag && (
+              {spotlight?.tag && (
                 <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.28em] text-[#000000] font-semibold mb-2 font-primary">
                   {spotlight.tag}
                 </p>
               )}
-              {spotlight.heading && (
+              {spotlight?.heading && (
                 <h2 className="font-primary text-[30px] sm:text-[38px] md:text-[42px] lg:text-[48px] font-normal text-ink tracking-tight leading-[1.15]">
                   {spotlight.heading}
                 </h2>
               )}
             </div>
 
-            {spotlight.leadText && (
+            {spotlight?.leadText && (
               <p className="font-secondary text-sm sm:text-[15px] text-ink-secondary font-normal leading-[1.8] max-w-xl">
                 {spotlight.leadText}
               </p>
             )}
 
             <div className="space-y-3 pt-0.5">
-              {spotlight.supportingText && (
+              {spotlight?.supportingText && (
                 <p className="font-secondary text-xs sm:text-[13.5px] text-ink-secondary font-normal leading-[1.75] max-w-xl">
                   {spotlight.supportingText}
                 </p>
               )}
 
-              {Array.isArray(spotlight.badges) && spotlight.badges.length > 0 && (
+              {Array.isArray(spotlight?.badges) && spotlight.badges.length > 0 && (
                 <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-[10.5px] sm:text-[11px] font-secondary uppercase tracking-[0.2em] text-ink-muted/80 font-normal">
                   {spotlight.badges.map((badge, bIdx) => (
                     <React.Fragment key={badge}>
@@ -208,7 +191,7 @@ export const AboutZimor: React.FC = () => {
             </div>
           </div>
 
-          {spotlight.ctaLink && (
+          {spotlight?.ctaLink && (
             <div className="pt-6 sm:pt-6 md:pt-4 lg:pt-5">
               <Link
                 href={spotlight.ctaLink}
@@ -225,10 +208,12 @@ export const AboutZimor: React.FC = () => {
         {/* Mobile: Completely hidden (display: none); Desktop: Exact existing grid layout, overlays & positioning */}
         {visibleFrames.map((frame, idx) => {
           const gridClass = frame.gridClasses || DEFAULT_GRID_CLASSES[idx % DEFAULT_GRID_CLASSES.length];
+          const hasImage = Boolean(frame.image && frame.image.trim());
+
           return (
             <div
               key={frame.id || idx}
-              className={`hidden md:block group relative overflow-hidden bg-ink rounded-none shadow-none ${gridClass}`}
+              className={`hidden md:block group relative overflow-hidden bg-[#1A1816] rounded-none shadow-none ${gridClass}`}
             >
               {/* Inner Oversized Image Canvas: Only this scrolls inside the locked container */}
               <div
@@ -237,17 +222,19 @@ export const AboutZimor: React.FC = () => {
                 }}
                 className="absolute -top-[25%] -bottom-[25%] left-0 right-0 h-[150%] w-full will-change-transform pointer-events-none"
               >
-                <Image
-                  src={frame.image}
-                  alt={frame.alt || frame.title}
-                  fill
-                  loading="lazy"
-                  decoding="async"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  className={`object-cover ${
-                    frame.objectPosition || 'object-center'
-                  } transition-transform duration-700 ease-out group-hover:scale-105`}
-                />
+                {hasImage && (
+                  <Image
+                    src={frame.image!}
+                    alt={frame.alt || frame.title}
+                    fill
+                    loading="lazy"
+                    decoding="async"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className={`object-cover ${
+                      frame.objectPosition || 'object-center'
+                    } transition-transform duration-700 ease-out group-hover:scale-105`}
+                  />
+                )}
               </div>
 
               {/* Subtle Gradient Tint for Text Legibility */}
