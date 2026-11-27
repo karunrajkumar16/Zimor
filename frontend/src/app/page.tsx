@@ -24,7 +24,9 @@ export default async function HomePage() {
 
   return (
     <main>
-      <HeroBanner />
+      <HeroBanner
+        initialSlides={data?.heroSlides || data?.slides}
+      />
       <FeaturedProducts />
       <LifestyleDiscovery
         initialLifestyle={data?.lifestyle}

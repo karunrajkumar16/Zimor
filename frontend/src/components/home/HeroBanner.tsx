@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowUpRight, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 
 export interface HeroSlide {
@@ -14,18 +14,69 @@ export interface HeroSlide {
   headline?: string;
   subtitle: string;
   description?: string;
-  image: string;
+  image?: string;
   editorialImage?: string;
   editorialAlt?: string;
   ctaText?: string;
   ctaLink?: string;
   slug?: string;
   isActive?: boolean;
+  order?: number;
 }
 
-export const HeroBanner: React.FC = () => {
-  const [slides, setSlides] = useState<HeroSlide[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+// ============================================================================
+// 1. HARD-CODED STATIC FRONTEND PRESENTATION & STRUCTURAL FALLBACK
+// Renders immediately with zero API latency; holds zero hardcoded media URLs.
+// ============================================================================
+export const STATIC_HERO_SLIDES: HeroSlide[] = [
+  {
+    id: 'hero-slide-1',
+    badge: 'PERMANENT ATELIER COLLECTION',
+    title: 'ARCHITECTURAL FORM.\nEVERYDAY PURPOSE.',
+    subtitle:
+      'Discover our permanent collection of six sculptural silhouettes engineered with 15.6" laptop compartments.',
+    image: '',
+    ctaText: 'Shop Collection',
+    ctaLink: '/shop',
+    isActive: true,
+    order: 1,
+  },
+  {
+    id: 'hero-slide-2',
+    badge: 'NEW ATELIER EDITION',
+    title: 'TIMELESS LUXURY.\nMINIMALIST PURSUIT.',
+    subtitle:
+      'Engineered with 15.6" padded protection and solid brass hardware for seamless boardroom transitions.',
+    image: '',
+    ctaText: 'Shop Totes',
+    ctaLink: '/shop?category=tote-bags',
+    isActive: true,
+    order: 2,
+  },
+  {
+    id: 'hero-slide-3',
+    badge: 'WEEKEND & TRAVEL',
+    title: 'EFFORTLESS TRAVEL.\nCURATED SILHOUETTE.',
+    subtitle:
+      'French canvas with sculpted crescent contours and luminous gold hardware.',
+    image: '',
+    ctaText: 'Explore Shoulder Bags',
+    ctaLink: '/shop?category=shoulder-bags',
+    isActive: true,
+    order: 3,
+  },
+];
+
+interface HeroBannerProps {
+  initialSlides?: HeroSlide[] | null;
+}
+
+export const HeroBanner: React.FC<HeroBannerProps> = ({ initialSlides }) => {
+  // Dynamic CMS state initialized with SSR props or null
+  const [dynamicSlides, setDynamicSlides] = useState<HeroSlide[] | null>(
+    initialSlides && initialSlides.length > 0 ? initialSlides : null
+  );
+
   const [currentSlide, setCurrentSlide] = useState(0);
   const [prevSlide, setPrevSlide] = useState(0);
   const touchStartX = useRef<number | null>(null);
@@ -33,43 +84,21 @@ export const HeroBanner: React.FC = () => {
   // Auto-advance slide every 5 seconds
   const SLIDE_DURATION = 5000;
 
+  // Hydrate dynamic slides from backend API without blocking initial render
   useEffect(() => {
     let isMounted = true;
 
     async function loadLiveBanners() {
       try {
         const res = await apiFetch('/api/content/homepage', { cache: 'no-store' });
-        if (!res.ok) {
-          if (isMounted) setIsLoading(false);
-          return;
-        }
+        if (!res.ok) return;
         const json = await res.json();
         const rawSlides = json.content?.data?.heroSlides || json.content?.data?.slides;
-        if (Array.isArray(rawSlides) && rawSlides.length > 0) {
-          // Filter active slides (isActive !== false) with valid image
-          const active = rawSlides.filter(
-            (s: any) => s.isActive !== false && (s.image || s.editorialImage)
-          );
-          if (isMounted && active.length > 0) {
-            const normalized: HeroSlide[] = active.map((s: any, idx: number) => ({
-              id: s.id || `hero-slide-${idx + 1}`,
-              badge: s.badge ?? s.eyebrow ?? 'ZIMOR ATELIER',
-              title: s.title ?? s.headline ?? '',
-              subtitle: s.subtitle ?? s.description ?? '',
-              image: s.image || s.editorialImage || '',
-              ctaText: s.ctaText || 'Shop Now',
-              ctaLink: s.ctaLink || s.slug || '/shop',
-              isActive: s.isActive !== false,
-            }));
-            setSlides(normalized);
-          }
+        if (Array.isArray(rawSlides) && rawSlides.length > 0 && isMounted) {
+          setDynamicSlides(rawSlides);
         }
       } catch (err) {
-        console.warn('Could not load hero slides from backend API:', err);
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        console.warn('[HeroBanner] Offline or API unavailable; using static layout:', err);
       }
     }
 
@@ -80,7 +109,34 @@ export const HeroBanner: React.FC = () => {
     };
   }, []);
 
-  const totalSlides = slides.length;
+  // ==========================================================================
+  // HYBRID CONTENT MERGING
+  // Merge dynamic CMS slides over static structural base
+  // ==========================================================================
+  const activeDynamic = (dynamicSlides || []).filter((s) => s.isActive !== false);
+
+  const effectiveSlides: HeroSlide[] = (
+    activeDynamic.length > 0 ? activeDynamic : STATIC_HERO_SLIDES
+  ).map((s, idx) => {
+    const staticBase =
+      STATIC_HERO_SLIDES.find((b) => b.id === s.id) ||
+      STATIC_HERO_SLIDES[idx] ||
+      STATIC_HERO_SLIDES[0];
+
+    return {
+      id: s.id || staticBase.id || `hero-slide-${idx + 1}`,
+      badge: s.badge ?? s.eyebrow ?? staticBase.badge ?? 'ZIMOR ATELIER',
+      title: s.title ?? s.headline ?? staticBase.title ?? '',
+      subtitle: s.subtitle ?? s.description ?? staticBase.subtitle ?? '',
+      image: s.image || s.editorialImage || '',
+      ctaText: s.ctaText || staticBase.ctaText || 'Shop Collection',
+      ctaLink: s.ctaLink || s.slug || staticBase.ctaLink || '/shop',
+      isActive: s.isActive !== false,
+      order: s.order ?? staticBase.order ?? idx + 1,
+    };
+  });
+
+  const totalSlides = effectiveSlides.length;
 
   const goToSlide = useCallback((nextIdx: number) => {
     setCurrentSlide((curr) => {
@@ -134,30 +190,6 @@ export const HeroBanner: React.FC = () => {
     touchStartX.current = null;
   };
 
-  if (isLoading && slides.length === 0) {
-    return (
-      <section
-        className="relative w-full overflow-hidden bg-[#141312] select-none -mt-16 sm:-mt-20"
-        aria-label="Loading Editorial Hero"
-      >
-        <div className="relative w-full h-[82vh] sm:h-[90vh] lg:h-screen min-h-[580px] sm:min-h-[640px] max-h-[1020px] pt-16 sm:pt-20 bg-gradient-to-br from-[#181615] via-[#121110] to-[#0d0c0b] flex items-center">
-          <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-14 w-full">
-            <div className="max-w-2xl space-y-5 animate-pulse">
-              <div className="h-3 w-44 bg-white/20 rounded-xs" />
-              <div className="h-12 w-3/4 bg-white/20 rounded-xs" />
-              <div className="h-4 w-1/2 bg-white/10 rounded-xs" />
-              <div className="h-10 w-36 bg-white/30 rounded-full mt-6" />
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (slides.length === 0) {
-    return null;
-  }
-
   return (
     <section
       className="relative w-full overflow-hidden bg-canvas-dark select-none group -mt-16 sm:-mt-20"
@@ -168,56 +200,75 @@ export const HeroBanner: React.FC = () => {
       {/* Viewport Canvas (Tucks under the transparent Cafuné header with pt-16 sm:pt-20) */}
       <div className="relative w-full h-[82vh] sm:h-[90vh] lg:h-screen min-h-[580px] sm:min-h-[640px] max-h-[1020px] pt-16 sm:pt-20">
         {/* Coordinated Slide Layers with Smooth Cross-Dissolve */}
-        {slides.map((slide, index) => {
+        {effectiveSlides.map((slide, index) => {
           const isCurrent = index === currentSlide;
           const isPrevious = index === prevSlide && prevSlide !== currentSlide;
-          const badgeText = slide.badge ?? slide.eyebrow ?? 'ZIMOR ATELIER';
-          const titleText = slide.title ?? slide.headline ?? '';
-          const subtitleText = slide.subtitle ?? slide.description ?? '';
-          const imageUrl = slide.image || slide.editorialImage || '';
-          if (!imageUrl) return null;
-          const ctaLink = slide.ctaLink || slide.slug || '/shop';
-          const ctaText = slide.ctaText || 'Shop Now';
+          const badgeText = slide.badge || 'ZIMOR ATELIER';
+          const titleText = slide.title || '';
+          const subtitleText = slide.subtitle || '';
+          const imageUrl = (slide.image || slide.editorialImage || '').trim();
+          const hasImage = Boolean(imageUrl);
+          const ctaLink = slide.ctaLink || '/shop';
+          const ctaText = slide.ctaText || 'Shop Collection';
 
           return (
             <div
               key={slide.id || index}
-              className={`absolute inset-0 transition-opacity ease-in-out ${isCurrent
-                ? 'z-20 opacity-100 pointer-events-auto'
-                : isPrevious
+              className={`absolute inset-0 transition-opacity ease-in-out ${
+                isCurrent
+                  ? 'z-20 opacity-100 pointer-events-auto'
+                  : isPrevious
                   ? 'z-10 opacity-100 pointer-events-none'
                   : 'z-0 opacity-0 pointer-events-none'
-                }`}
+              }`}
               style={{
                 transitionDuration: '1800ms',
                 transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
               }}
             >
-              {/* Background Editorial Image with Gentle Cinematic Zoom */}
-              <div className="absolute inset-0 overflow-hidden">
-                <Image
-                  src={imageUrl}
-                  alt={titleText || 'Zimor India Editorial Campaign'}
-                  fill
-                  priority={index === 0}
-                  loading={index === 0 ? undefined : 'lazy'}
-                  decoding="async"
-                  sizes="100vw"
-                  className="object-cover object-center scale-100 transition-transform duration-[5000ms] ease-out"
-                  style={{
-                    transform: isCurrent ? 'scale(1.035)' : 'scale(1.0)',
-                  }}
-                />
-                {/* Balanced gradient so transparent header and bottom-left typography remain crisp while banner artwork stays luminous */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-black/30" />
+              {/* Background Editorial Image or Neutral Luxury Fallback */}
+              <div className="absolute inset-0 overflow-hidden bg-[#141312]">
+                {hasImage ? (
+                  <Image
+                    src={imageUrl}
+                    alt={titleText || 'Zimor India Editorial Campaign'}
+                    fill
+                    priority={index === 0}
+                    loading={index === 0 ? undefined : 'lazy'}
+                    decoding="async"
+                    sizes="100vw"
+                    className="object-cover object-center scale-100 transition-transform duration-[5000ms] ease-out"
+                    style={{
+                      transform: isCurrent ? 'scale(1.035)' : 'scale(1.0)',
+                    }}
+                  />
+                ) : (
+                  /* Neutral Media Fallback: Preserves container & visual design when image is unavailable */
+                  <div
+                    className="w-full h-full bg-gradient-to-br from-[#1C1A18] via-[#141312] to-[#0E0D0C] flex items-center justify-center select-none"
+                    aria-label={titleText || 'Zimor Atelier Campaign'}
+                  >
+                    <div className="text-center opacity-25 pointer-events-none transform -translate-y-6">
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full border border-white/20 flex items-center justify-center mb-3">
+                        <Sparkles className="w-7 h-7 sm:w-8 sm:h-8 text-white/40" />
+                      </div>
+                      <span className="font-primary text-[10px] sm:text-xs uppercase tracking-[0.3em] text-white/50">
+                        Zimor Atelier
+                      </span>
+                    </div>
+                  </div>
+                )}
+                {/* Balanced gradient overlay so header and bottom-left typography remain crisp */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-black/30 pointer-events-none" />
               </div>
 
               {/* Bottom-Left Editorial Headline, Description & Pill CTA */}
               <div
-                className={`absolute bottom-6 left-4 sm:bottom-10 sm:left-8 md:bottom-14 md:left-12 lg:left-16 z-20 max-w-xl sm:max-w-2xl text-white transition-all ${isCurrent
-                  ? 'opacity-100 translate-y-0 duration-[1200ms] delay-[250ms] ease-out'
-                  : 'opacity-0 -translate-y-2 duration-[500ms] ease-in pointer-events-none'
-                  }`}
+                className={`absolute bottom-6 left-4 sm:bottom-10 sm:left-8 md:bottom-14 md:left-12 lg:left-16 z-20 max-w-xl sm:max-w-2xl text-white transition-all ${
+                  isCurrent
+                    ? 'opacity-100 translate-y-0 duration-[1200ms] delay-[250ms] ease-out'
+                    : 'opacity-0 -translate-y-2 duration-[500ms] ease-in pointer-events-none'
+                }`}
                 style={{
                   transitionTimingFunction: isCurrent
                     ? 'cubic-bezier(0.25, 1, 0.5, 1)'
@@ -261,15 +312,16 @@ export const HeroBanner: React.FC = () => {
         {/* Subtle Slide Indicator Dots */}
         {totalSlides > 1 && (
           <div className="absolute bottom-3 sm:bottom-5 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2">
-            {slides.map((slide, idx) => (
+            {effectiveSlides.map((slide, idx) => (
               <button
                 key={slide.id || idx}
                 onClick={() => goToSlide(idx)}
                 aria-label={`Go to slide ${idx + 1}`}
-                className={`h-1 rounded-full transition-all duration-700 cursor-pointer ${idx === currentSlide
-                  ? 'w-7 bg-white shadow-sm'
-                  : 'w-2 bg-white/40 hover:bg-white/70'
-                  }`}
+                className={`h-1 rounded-full transition-all duration-700 cursor-pointer ${
+                  idx === currentSlide
+                    ? 'w-7 bg-white shadow-sm'
+                    : 'w-2 bg-white/40 hover:bg-white/70'
+                }`}
               />
             ))}
           </div>
