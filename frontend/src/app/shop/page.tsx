@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -20,8 +20,10 @@ import { useProducts } from '@/context/ProductContext';
 import { ProductCard } from '@/components/product/ProductCard';
 import { Product } from '@/types';
 import QuickViewModal from '@/components/product/QuickViewModal';
+import { apiFetch } from '@/lib/api';
 
 // Three Distinct Lifestyle Subsections template metadata
+// Zero hardcoded media URLs; dynamic media is populated through the Admin CMS & MongoDB Atlas
 const LIFESTYLE_BASE_CONFIG = [
   {
     id: "everyday",
@@ -35,8 +37,8 @@ const LIFESTYLE_BASE_CONFIG = [
       "Superior faux leather with refined trim",
       "Secure top zip & magnetic flap closure",
     ],
-    horizontalImage: "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917844/zimor/lifestyle/corporate-workspace-horizontal.webp",
-    editorialImage: "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917843/zimor/lifestyle/corporate-executive-editorial.webp",
+    horizontalImage: "",
+    editorialImage: "",
     subtitleFilterText: "Everyday Carry · Classic Silhouette",
     icon: Sparkles,
     slugs: ["zimor-classic-shoulder-bag"],
@@ -53,8 +55,8 @@ const LIFESTYLE_BASE_CONFIG = [
       "Dual grab handles + detachable crossbody sling",
       "Structured silhouette with protective base studs",
     ],
-    horizontalImage: "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917844/zimor/lifestyle/tech-commute-workspace-horizontal.webp",
-    editorialImage: "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917842/zimor/lifestyle/tech-commute-editorial.webp",
+    horizontalImage: "",
+    editorialImage: "",
     subtitleFilterText: "Work & Focus · 15.6\" Laptop Totes",
     icon: Laptop,
     slugs: ["zimor-rabota-tote", "zimor-delo-tote"],
@@ -71,8 +73,8 @@ const LIFESTYLE_BASE_CONFIG = [
       "Fits up to 15.6\" laptops & travel essentials",
       "Upright stability with solid protective bottom studs",
     ],
-    horizontalImage: "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917847/zimor/about/artisan-heritage-landscape.webp",
-    editorialImage: "https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917845/zimor/lifestyle/brandgirl2.webp",
+    horizontalImage: "",
+    editorialImage: "",
     subtitleFilterText: "Travel & Transit · Structured Totes",
     icon: Briefcase,
     slugs: ["zimor-rabota-tote", "zimor-delo-tote"],
@@ -91,6 +93,45 @@ function ShopContent() {
   const [columns, setColumns] = useState<2 | 3>(3);
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
 
+  // Dynamic media mapping hydrated from MongoDB Atlas CMS
+  const [dynamicLifestyle, setDynamicLifestyle] = useState<
+    Record<string, { horizontalImage?: string; editorialImage?: string }>
+  >({});
+
+  useEffect(() => {
+    let isMounted = true;
+    apiFetch('/api/content/homepage')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (!isMounted || !json?.content?.data?.lifestyle) return;
+        const ls = json.content.data.lifestyle;
+        const mapping: Record<string, { horizontalImage?: string; editorialImage?: string }> = {};
+        if (Array.isArray(ls.cards)) {
+          ls.cards.forEach((c: any) => {
+            if (c.id) {
+              mapping[c.id] = {
+                editorialImage: c.editorialImage || '',
+                horizontalImage: c.horizontalImage || '',
+              };
+            }
+          });
+        }
+        if (ls.subsections) {
+          Object.keys(ls.subsections).forEach((k) => {
+            mapping[k] = { ...mapping[k], ...ls.subsections[k] };
+          });
+        }
+        setDynamicLifestyle(mapping);
+      })
+      .catch((err) => {
+        console.warn('[ShopPage] Offline or API unavailable; using static layout:', err);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const clearAllFilters = () => {
     setSelectedCategory('all');
     setSelectedProfession('all');
@@ -105,7 +146,7 @@ function ShopContent() {
         ];
   }, [categories]);
 
-  // Lifestyle Subsections resolved dynamically against current products
+  // Lifestyle Subsections resolved dynamically against current products and CMS media
   const lifestyleSubsections = useMemo(() => {
     return LIFESTYLE_BASE_CONFIG.map((cfg) => {
       const matched = cfg.slugs
@@ -124,13 +165,19 @@ function ShopContent() {
       // Fallback to first available products if exact slugs aren't matched
       const fallbackProducts = matched.length > 0 ? matched : products.slice(0, cfg.slugs.length);
 
+      const dynamicMedia = dynamicLifestyle[cfg.id];
+      const horizontalImage = (dynamicMedia?.horizontalImage || cfg.horizontalImage || '').trim();
+      const editorialImage = (dynamicMedia?.editorialImage || cfg.editorialImage || '').trim();
+
       return {
         ...cfg,
+        horizontalImage,
+        editorialImage,
         number: "",
         products: fallbackProducts,
       };
     });
-  }, [products]);
+  }, [products, dynamicLifestyle]);
 
   // Category counts calculated dynamically from live products
   const categoryCounts = useMemo(() => {
@@ -581,15 +628,32 @@ function ShopContent() {
                     <div className="lg:col-span-6 flex flex-col justify-between space-y-6 sm:space-y-8">
                       {/* TOP LEFT: ONE HORIZONTAL FRAMELESS IMAGE OVERLAID WITH CINEMATIC HEADING & CONCISE DESCRIPTION */}
                       <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] lg:aspect-[16/9] min-h-[220px] sm:min-h-[250px] overflow-hidden border-0 bg-ink group rounded-none">
-                        <Image
-                          src={subsection.horizontalImage}
-                          alt={`${subsection.archetype}`}
-                          fill
-                          loading="lazy"
-                          decoding="async"
-                          sizes="(max-width: 1024px) 100vw, 50vw"
-                          className="object-cover object-center"
-                        />
+                        {Boolean(subsection.horizontalImage) ? (
+                          <Image
+                            src={subsection.horizontalImage}
+                            alt={`${subsection.archetype}`}
+                            fill
+                            loading="lazy"
+                            decoding="async"
+                            sizes="(max-width: 1024px) 100vw, 50vw"
+                            className="object-cover object-center"
+                          />
+                        ) : (
+                          /* Neutral Media Fallback: Preserves container dimensions when image is empty */
+                          <div
+                            className="w-full h-full bg-gradient-to-br from-[#1C1A18] via-[#141312] to-[#0E0D0C] flex items-center justify-center select-none"
+                            aria-label={`${subsection.archetype} Lifestyle`}
+                          >
+                            <div className="text-center opacity-25 pointer-events-none transform -translate-y-4">
+                              <div className="w-12 h-12 mx-auto rounded-full border border-white/20 flex items-center justify-center mb-2">
+                                <IconComp className="w-5 h-5 text-white/50" />
+                              </div>
+                              <span className="font-primary text-[10px] uppercase tracking-[0.25em] text-white/50">
+                                {subsection.archetype}
+                              </span>
+                            </div>
+                          </div>
+                        )}
                         {/* Cinematic Lighting Scrims */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/55 to-black/25 pointer-events-none" />
                         <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-transparent pointer-events-none" />
@@ -653,15 +717,32 @@ function ShopContent() {
 
                     {/* RIGHT HALF (lg:col-span-6): FULL HEIGHT BORDERLESS IMAGE COVERING RIGHT HALF */}
                     <div className="lg:col-span-6 relative w-full h-full min-h-[480px] sm:min-h-[560px] lg:min-h-[660px] overflow-hidden border-0 bg-ink group rounded-none">
-                      <Image
-                        src={subsection.editorialImage}
-                        alt={`${subsection.archetype} - ${subsection.tagline}`}
-                        fill
-                        loading="lazy"
-                        decoding="async"
-                        sizes="(max-width: 1024px) 100vw, 50vw"
-                        className="object-cover object-[center_24%]"
-                      />
+                      {Boolean(subsection.editorialImage) ? (
+                        <Image
+                          src={subsection.editorialImage}
+                          alt={`${subsection.archetype} - ${subsection.tagline}`}
+                          fill
+                          loading="lazy"
+                          decoding="async"
+                          sizes="(max-width: 1024px) 100vw, 50vw"
+                          className="object-cover object-[center_24%]"
+                        />
+                      ) : (
+                        /* Neutral Media Fallback: Preserves container dimensions when image is empty */
+                        <div
+                          className="w-full h-full bg-gradient-to-br from-[#1C1A18] via-[#141312] to-[#0E0D0C] flex items-center justify-center select-none"
+                          aria-label={`${subsection.archetype} Editorial`}
+                        >
+                          <div className="text-center opacity-25 pointer-events-none">
+                            <div className="w-16 h-16 mx-auto rounded-full border border-white/20 flex items-center justify-center mb-3">
+                              <IconComp className="w-7 h-7 text-white/50" />
+                            </div>
+                            <span className="font-primary text-[10px] uppercase tracking-[0.25em] text-white/50">
+                              {subsection.archetype} Editorial
+                            </span>
+                          </div>
+                        </div>
+                      )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
 
                       {/* Floating Base Badge */}

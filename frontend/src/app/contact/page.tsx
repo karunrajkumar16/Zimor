@@ -1,11 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import { SOCIAL_LINKS } from '@/data/social';
 import { useWhatsAppUrl } from '@/lib/whatsapp';
+import { apiFetch } from '@/lib/api';
 import {
   InstagramIcon,
   PinterestIcon,
@@ -75,6 +76,32 @@ const SOCIAL_CHANNELS = [
 
 export default function ContactPage() {
   const whatsappUrl = useWhatsAppUrl();
+  const [heroImage, setHeroImage] = useState<string>('');
+
+  // Hydrate dynamic contact hero image from MongoDB CMS
+  useEffect(() => {
+    let isMounted = true;
+    apiFetch('/api/content/contact')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!isMounted || !data?.content?.data) return;
+        const d = data.content.data;
+        const dynamicUrl = d.heroImage || d.heroBackgroundImage || d.bannerImage || '';
+        if (dynamicUrl) {
+          setHeroImage(dynamicUrl);
+        }
+      })
+      .catch((err) => {
+        console.warn('[ContactPage] Offline or API unavailable; using static layout:', err);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const hasHeroImage = Boolean(heroImage && heroImage.trim());
+
   return (
     <div className="bg-white min-h-screen">
       {/* 1. Breadcrumb Strip */}
@@ -93,15 +120,23 @@ export default function ContactPage() {
       {/* 2. Editorial Hero Banner — "At Your Service" */}
       <section className="relative w-full overflow-hidden min-h-[300px] sm:min-h-[360px] md:min-h-[420px] flex items-center bg-black">
         <div className="absolute inset-0">
-          <Image
-            src="https://res.cloudinary.com/kbeyfu3d/image/upload/v1794917844/zimor/lifestyle/corporate-workspace-horizontal.webp"
-            alt="Zimor Client Support"
-            fill
-            priority
-            className="object-cover object-center opacity-65 scale-105"
-          />
+          {hasHeroImage ? (
+            <Image
+              src={heroImage}
+              alt="Zimor Client Support"
+              fill
+              priority
+              className="object-cover object-center opacity-65 scale-105"
+            />
+          ) : (
+            /* Neutral Media Fallback: Preserves container dimensions when image is empty */
+            <div
+              className="w-full h-full bg-gradient-to-br from-[#1C1A18] via-[#121110] to-[#0A0908] select-none"
+              aria-label="Zimor Client Support"
+            />
+          )}
           {/* Subtle cinematic gradient overlay for editorial typography readability */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/40" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/40 pointer-events-none" />
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 md:py-24 w-full">
