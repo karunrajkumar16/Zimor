@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Layers } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 
 export interface SpotlightFrame {
@@ -38,6 +38,73 @@ const DEFAULT_GRID_CLASSES = [
   'col-span-2 md:col-start-6 md:col-end-13 md:row-start-2 md:row-end-3 min-h-[280px] md:min-h-0',
 ];
 
+// ============================================================================
+// 1. HARD-CODED STATIC FRONTEND PRESENTATION & MASONRY GALLERY STRUCTURE
+// These elements never depend on an API response or MongoDB to render.
+// ============================================================================
+export const STATIC_SPOTLIGHT_CONFIG: SpotlightSectionData = {
+  isPublished: true,
+  tag: 'About Zimor',
+  heading: 'In the Spotlight',
+  leadText:
+    'A curated visual campaign capturing the convergence of Indian craftsmanship, architectural utility, and contemporary executive presence.',
+  supportingText:
+    'Sculpted for ambitious professional women across Mumbai, Delhi, and Bengaluru—built to carry modern tech without compromising architectural form.',
+  badges: ['Cruelty-Free Craft', '15.6" Tech Protection', 'Crafted in India'],
+  ctaText: 'The Zimor Story',
+  ctaLink: '/about',
+  frames: [
+    {
+      id: 'frame-craftsmanship',
+      title: 'Rooted in\nCraftsmanship',
+      linkText: 'Discover More',
+      linkHref: '/about',
+      alt: 'Artisan hand-stitching luxury leather with needle and waxed thread',
+      gridClasses:
+        'col-span-1 md:col-start-6 md:col-end-10 md:row-start-1 md:row-end-2 min-h-[260px] md:min-h-0',
+      objectPosition: 'object-center',
+      order: 1,
+      isPublished: true,
+    },
+    {
+      id: 'frame-details',
+      title: 'Designed for\nEveryday',
+      linkText: 'Shop Now',
+      linkHref: '/product/zimor-rabota-tote',
+      alt: 'Macro texture of Zimor Rabota luxury bag showing zipper and grain',
+      gridClasses:
+        'col-span-1 md:col-start-10 md:col-end-13 md:row-start-1 md:row-end-2 min-h-[260px] md:min-h-0',
+      objectPosition: 'object-top',
+      order: 2,
+      isPublished: true,
+    },
+    {
+      id: 'frame-quality',
+      title: 'Details That\nMatter',
+      linkText: 'Explore Details',
+      linkHref: '/product/zimor-delo-tote',
+      alt: 'Luxury cruelty-free leather handbag detailing with refined brass hardware',
+      gridClasses:
+        'col-span-2 md:col-start-1 md:col-end-6 md:row-start-2 md:row-end-3 min-h-[280px] md:min-h-0',
+      objectPosition: 'object-center',
+      order: 3,
+      isPublished: true,
+    },
+    {
+      id: 'frame-made-in-india',
+      title: 'Proudly Made\nin India',
+      linkText: 'Our Heritage',
+      linkHref: '/about',
+      alt: 'Master artisan in Indian leathercraft atelier surrounded by leather rolls and hand tools',
+      gridClasses:
+        'col-span-2 md:col-start-6 md:col-end-13 md:row-start-2 md:row-end-3 min-h-[280px] md:min-h-0',
+      objectPosition: 'object-center',
+      order: 4,
+      isPublished: true,
+    },
+  ],
+};
+
 interface AboutZimorProps {
   initialSpotlight?: SpotlightSectionData | null;
 }
@@ -49,8 +116,12 @@ export const AboutZimor: React.FC<AboutZimorProps> = ({
   const isVisibleRef = useRef(false);
   const imgRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  const [spotlight, setSpotlight] = useState<SpotlightSectionData | null>(initialSpotlight || null);
+  // Dynamic CMS state initialized with SSR props or null
+  const [dynamicSpotlight, setDynamicSpotlight] = useState<SpotlightSectionData | null>(
+    initialSpotlight || null
+  );
 
+  // Hydrate dynamic data from backend API without blocking initial static render
   useEffect(() => {
     let isMounted = true;
     apiFetch('/api/content/homepage')
@@ -60,10 +131,10 @@ export const AboutZimor: React.FC<AboutZimorProps> = ({
       })
       .then((data) => {
         if (!isMounted || !data?.content?.data?.spotlight) return;
-        setSpotlight(data.content.data.spotlight);
+        setDynamicSpotlight(data.content.data.spotlight);
       })
       .catch((err) => {
-        console.error('Failed to load spotlight content:', err);
+        console.warn('[AboutZimor] Offline or API unavailable; using static layout:', err);
       });
 
     return () => {
@@ -71,10 +142,49 @@ export const AboutZimor: React.FC<AboutZimorProps> = ({
     };
   }, []);
 
-  const visibleFrames = (spotlight?.frames || [])
+  // ==========================================================================
+  // HYBRID CONTENT MERGING
+  // Combines static frontend layout/text with dynamic CMS media and overrides
+  // ==========================================================================
+  const isPublished = dynamicSpotlight?.isPublished ?? STATIC_SPOTLIGHT_CONFIG.isPublished;
+
+  const tag = dynamicSpotlight?.tag || STATIC_SPOTLIGHT_CONFIG.tag;
+  const heading = dynamicSpotlight?.heading || STATIC_SPOTLIGHT_CONFIG.heading;
+  const leadText = dynamicSpotlight?.leadText || STATIC_SPOTLIGHT_CONFIG.leadText;
+  const supportingText = dynamicSpotlight?.supportingText || STATIC_SPOTLIGHT_CONFIG.supportingText;
+  const badges =
+    dynamicSpotlight?.badges && dynamicSpotlight.badges.length > 0
+      ? dynamicSpotlight.badges
+      : STATIC_SPOTLIGHT_CONFIG.badges;
+  const ctaText = dynamicSpotlight?.ctaText || STATIC_SPOTLIGHT_CONFIG.ctaText;
+  const ctaLink = dynamicSpotlight?.ctaLink || STATIC_SPOTLIGHT_CONFIG.ctaLink;
+
+  // Merge masonry frames: dynamic frames override static, or static frames serve as permanent base
+  const mergedFrames: SpotlightFrame[] = (
+    dynamicSpotlight?.frames && dynamicSpotlight.frames.length > 0
+      ? dynamicSpotlight.frames
+      : STATIC_SPOTLIGHT_CONFIG.frames
+  ).map((frame, idx) => {
+    const staticBase = STATIC_SPOTLIGHT_CONFIG.frames.find((f) => f.id === frame.id) || STATIC_SPOTLIGHT_CONFIG.frames[idx];
+    return {
+      id: frame.id || staticBase?.id || `frame-${idx}`,
+      title: frame.title || staticBase?.title || 'Editorial Frame',
+      linkText: frame.linkText || staticBase?.linkText || 'Discover More',
+      linkHref: frame.linkHref || staticBase?.linkHref || '/about',
+      alt: frame.alt || staticBase?.alt || 'Editorial frame',
+      image: frame.image || '',
+      gridClasses: frame.gridClasses || staticBase?.gridClasses || DEFAULT_GRID_CLASSES[idx % DEFAULT_GRID_CLASSES.length],
+      objectPosition: frame.objectPosition || staticBase?.objectPosition || 'object-center',
+      order: frame.order ?? staticBase?.order ?? idx + 1,
+      isPublished: frame.isPublished ?? staticBase?.isPublished ?? true,
+    };
+  });
+
+  const visibleFrames = mergedFrames
     .filter((f) => f.isPublished !== false)
     .sort((a, b) => (a.order || 0) - (b.order || 0));
 
+  // Multi-speed parallax calculation per masonry frame
   useEffect(() => {
     let isTicking = false;
 
@@ -136,7 +246,7 @@ export const AboutZimor: React.FC<AboutZimorProps> = ({
     };
   }, [visibleFrames.length]);
 
-  if (spotlight?.isPublished === false) {
+  if (!isPublished) {
     return null;
   }
 
@@ -153,34 +263,34 @@ export const AboutZimor: React.FC<AboutZimorProps> = ({
         <div className="col-span-1 md:col-start-1 md:col-end-6 md:row-start-1 md:row-end-2 w-full bg-white px-5 py-7 sm:px-8 sm:py-9 md:p-6 lg:p-9 xl:p-10 flex flex-col justify-between">
           <div className="space-y-4 sm:space-y-4.5">
             <div>
-              {spotlight?.tag && (
+              {tag && (
                 <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.28em] text-[#000000] font-semibold mb-2 font-primary">
-                  {spotlight.tag}
+                  {tag}
                 </p>
               )}
-              {spotlight?.heading && (
+              {heading && (
                 <h2 className="font-primary text-[30px] sm:text-[38px] md:text-[42px] lg:text-[48px] font-normal text-ink tracking-tight leading-[1.15]">
-                  {spotlight.heading}
+                  {heading}
                 </h2>
               )}
             </div>
 
-            {spotlight?.leadText && (
+            {leadText && (
               <p className="font-secondary text-sm sm:text-[15px] text-ink-secondary font-normal leading-[1.8] max-w-xl">
-                {spotlight.leadText}
+                {leadText}
               </p>
             )}
 
             <div className="space-y-3 pt-0.5">
-              {spotlight?.supportingText && (
+              {supportingText && (
                 <p className="font-secondary text-xs sm:text-[13.5px] text-ink-secondary font-normal leading-[1.75] max-w-xl">
-                  {spotlight.supportingText}
+                  {supportingText}
                 </p>
               )}
 
-              {Array.isArray(spotlight?.badges) && spotlight.badges.length > 0 && (
+              {Array.isArray(badges) && badges.length > 0 && (
                 <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-[10.5px] sm:text-[11px] font-secondary uppercase tracking-[0.2em] text-ink-muted/80 font-normal">
-                  {spotlight.badges.map((badge, bIdx) => (
+                  {badges.map((badge, bIdx) => (
                     <React.Fragment key={badge}>
                       {bIdx > 0 && <span className="text-ink-muted/80">•</span>}
                       <span>{badge}</span>
@@ -191,13 +301,13 @@ export const AboutZimor: React.FC<AboutZimorProps> = ({
             </div>
           </div>
 
-          {spotlight?.ctaLink && (
+          {ctaLink && (
             <div className="pt-6 sm:pt-6 md:pt-4 lg:pt-5">
               <Link
-                href={spotlight.ctaLink}
+                href={ctaLink}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-ink text-white font-primary text-xs sm:text-[13px] font-medium tracking-normal shadow-xs hover:bg-ink-secondary transition-colors"
               >
-                <span>{spotlight.ctaText || 'The Zimor Story'}</span>
+                <span>{ctaText || 'The Zimor Story'}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
@@ -222,7 +332,7 @@ export const AboutZimor: React.FC<AboutZimorProps> = ({
                 }}
                 className="absolute -top-[25%] -bottom-[25%] left-0 right-0 h-[150%] w-full will-change-transform pointer-events-none"
               >
-                {hasImage && (
+                {hasImage ? (
                   <Image
                     src={frame.image!}
                     alt={frame.alt || frame.title}
@@ -234,6 +344,19 @@ export const AboutZimor: React.FC<AboutZimorProps> = ({
                       frame.objectPosition || 'object-center'
                     } transition-transform duration-700 ease-out group-hover:scale-105`}
                   />
+                ) : (
+                  /* Neutral Frame Media Fallback: Preserves masonry tile without crashing */
+                  <div
+                    className="w-full h-full bg-[#181614] flex flex-col items-center justify-center p-6 text-center select-none"
+                    aria-label={frame.alt || frame.title}
+                  >
+                    <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/20 mb-2">
+                      <Layers className="w-5 h-5 stroke-[1.5]" />
+                    </div>
+                    <span className="text-[10px] uppercase tracking-[0.25em] text-white/30 font-primary">
+                      Zimor Atelier
+                    </span>
+                  </div>
                 )}
               </div>
 

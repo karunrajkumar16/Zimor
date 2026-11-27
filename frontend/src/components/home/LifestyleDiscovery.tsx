@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Sparkles, Video, Image as ImageIcon } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 
 export interface LifestyleCardItem {
@@ -15,7 +15,7 @@ export interface LifestyleCardItem {
   editorialImage?: string;
   topTitle?: string;
   eyebrow?: string;
-  order: number;
+  order?: number;
   isPublished?: boolean;
 }
 
@@ -46,6 +46,65 @@ interface LifestyleDiscoveryProps {
   initialCrafted?: CraftedSectionData | null;
 }
 
+// ============================================================================
+// 1. HARD-CODED STATIC FRONTEND PRESENTATION & STRUCTURAL CONTENT
+// These elements never depend on an API response or MongoDB to render.
+// ============================================================================
+export const STATIC_LIFESTYLE_CONFIG: LifestyleSectionData = {
+  isPublished: true,
+  eyebrow: 'FIND YOUR EVERYDAY MATCH',
+  heading: 'Shop by Lifestyle',
+  subheading:
+    'Select your lifestyle to explore the silhouette engineered for your everyday rhythm, work focus, and travel escapes.',
+  exploreLink: '/shop',
+  exploreText: 'Explore All Silhouettes',
+  cards: [
+    {
+      id: 'everyday',
+      name: 'EVERYDAY',
+      subtitle: 'For the everyday.',
+      silhouette: 'The Classic Shoulder Bag',
+      href: '/shop?section=everyday#everyday',
+      topTitle: '',
+      eyebrow: '',
+      order: 1,
+      isPublished: true,
+    },
+    {
+      id: 'work',
+      name: 'WORK',
+      subtitle: 'For what lies ahead.',
+      silhouette: 'The Rabota & Delo Totes',
+      href: '/shop?section=work#work',
+      topTitle: '',
+      eyebrow: '',
+      order: 2,
+      isPublished: true,
+    },
+    {
+      id: 'travel',
+      name: 'TRAVEL',
+      subtitle: 'For places beyond.',
+      silhouette: 'The Rabota & Delo Totes',
+      href: '/shop?section=travel#travel',
+      topTitle: '',
+      eyebrow: '',
+      order: 3,
+      isPublished: true,
+    },
+  ],
+};
+
+export const STATIC_CRAFTED_CONFIG: CraftedSectionData = {
+  isPublished: true,
+  heading: 'Crafted in India',
+  description:
+    'Rooted in centuries of master leatherworking traditions, every Zimor silhouette is meticulously crafted in the renowned artisan clusters of India. Combining generational hand-stitching with refined architectural precision, our craftsmen transform premium materials into enduring modern heirlooms.',
+  ctaText: 'Discover More',
+  ctaLink: '/about',
+  supportingAlt: 'Crafted in India artisan heritage and leatherwork atelier',
+};
+
 export const LifestyleDiscovery: React.FC<LifestyleDiscoveryProps> = ({
   initialLifestyle,
   initialCrafted,
@@ -57,9 +116,15 @@ export const LifestyleDiscovery: React.FC<LifestyleDiscoveryProps> = ({
   const imgRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [activeMobileIndex, setActiveMobileIndex] = useState(0);
 
-  const [lifestyle, setLifestyle] = useState<LifestyleSectionData | null>(initialLifestyle || null);
-  const [crafted, setCrafted] = useState<CraftedSectionData | null>(initialCrafted || null);
+  // Dynamic CMS state initialized with SSR props or null
+  const [dynamicLifestyle, setDynamicLifestyle] = useState<LifestyleSectionData | null>(
+    initialLifestyle || null
+  );
+  const [dynamicCrafted, setDynamicCrafted] = useState<CraftedSectionData | null>(
+    initialCrafted || null
+  );
 
+  // Hydrate dynamic data from backend API without blocking initial static render
   useEffect(() => {
     let isMounted = true;
     apiFetch('/api/content/homepage')
@@ -71,14 +136,14 @@ export const LifestyleDiscovery: React.FC<LifestyleDiscoveryProps> = ({
         if (!isMounted || !data?.content?.data) return;
         const pageData = data.content.data;
         if (pageData.lifestyle) {
-          setLifestyle(pageData.lifestyle);
+          setDynamicLifestyle(pageData.lifestyle);
         }
         if (pageData.craftedInIndia) {
-          setCrafted(pageData.craftedInIndia);
+          setDynamicCrafted(pageData.craftedInIndia);
         }
       })
       .catch((err) => {
-        console.error('Failed to load homepage lifestyle content:', err);
+        console.warn('[LifestyleDiscovery] Offline or API unavailable; using static layout:', err);
       });
 
     return () => {
@@ -86,9 +151,53 @@ export const LifestyleDiscovery: React.FC<LifestyleDiscoveryProps> = ({
     };
   }, []);
 
-  const visibleCards = (lifestyle?.cards || [])
+  // ==========================================================================
+  // HYBRID CONTENT MERGING
+  // Combines static frontend layout/text with dynamic CMS media and overrides
+  // ==========================================================================
+  const isLifestylePublished = dynamicLifestyle?.isPublished ?? STATIC_LIFESTYLE_CONFIG.isPublished;
+  const isCraftedPublished = dynamicCrafted?.isPublished ?? STATIC_CRAFTED_CONFIG.isPublished;
+
+  const lifestyleHeading = dynamicLifestyle?.heading || STATIC_LIFESTYLE_CONFIG.heading;
+  const lifestyleEyebrow = dynamicLifestyle?.eyebrow || STATIC_LIFESTYLE_CONFIG.eyebrow;
+  const lifestyleSubheading = dynamicLifestyle?.subheading || STATIC_LIFESTYLE_CONFIG.subheading;
+  const lifestyleExploreLink = dynamicLifestyle?.exploreLink || STATIC_LIFESTYLE_CONFIG.exploreLink;
+  const lifestyleExploreText = dynamicLifestyle?.exploreText || STATIC_LIFESTYLE_CONFIG.exploreText;
+
+  // Merge cards: dynamic cards override static cards, or static cards serve as permanent base
+  const mergedCards: LifestyleCardItem[] = (
+    dynamicLifestyle?.cards && dynamicLifestyle.cards.length > 0
+      ? dynamicLifestyle.cards
+      : STATIC_LIFESTYLE_CONFIG.cards
+  ).map((card, idx) => {
+    const staticBase = STATIC_LIFESTYLE_CONFIG.cards.find((c) => c.id === card.id) || STATIC_LIFESTYLE_CONFIG.cards[idx];
+    return {
+      id: card.id || staticBase?.id || `lifestyle-${idx}`,
+      name: card.name || staticBase?.name || 'LIFESTYLE',
+      subtitle: card.subtitle || staticBase?.subtitle || '',
+      silhouette: card.silhouette || staticBase?.silhouette || '',
+      href: card.href || staticBase?.href || '/shop',
+      editorialImage: card.editorialImage || '',
+      topTitle: card.topTitle ?? staticBase?.topTitle ?? '',
+      eyebrow: card.eyebrow ?? staticBase?.eyebrow ?? '',
+      order: card.order ?? staticBase?.order ?? idx + 1,
+      isPublished: card.isPublished ?? staticBase?.isPublished ?? true,
+    };
+  });
+
+  const visibleCards = mergedCards
     .filter((card) => card.isPublished !== false)
     .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+  // Crafted in India merged fields
+  const craftedHeading = dynamicCrafted?.heading || STATIC_CRAFTED_CONFIG.heading;
+  const craftedDescription = dynamicCrafted?.description || STATIC_CRAFTED_CONFIG.description;
+  const craftedCtaText = dynamicCrafted?.ctaText || STATIC_CRAFTED_CONFIG.ctaText;
+  const craftedCtaLink = dynamicCrafted?.ctaLink || STATIC_CRAFTED_CONFIG.ctaLink;
+  const craftedVideoUrl = dynamicCrafted?.videoUrl || '';
+  const craftedPosterUrl = dynamicCrafted?.posterUrl || '';
+  const craftedSupportingImage = dynamicCrafted?.supportingImage || '';
+  const craftedSupportingAlt = dynamicCrafted?.supportingAlt || STATIC_CRAFTED_CONFIG.supportingAlt;
 
   const handleTrackScroll = () => {
     if (!trackRef.current) return;
@@ -109,6 +218,7 @@ export const LifestyleDiscovery: React.FC<LifestyleDiscoveryProps> = ({
     }
   };
 
+  // Parallax animation: preserves exact travel speeds and responsive offsets
   useEffect(() => {
     let isTicking = false;
 
@@ -171,45 +281,43 @@ export const LifestyleDiscovery: React.FC<LifestyleDiscoveryProps> = ({
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleScroll);
     };
-  }, [visibleCards.length, crafted]);
+  }, [visibleCards.length]);
 
-  const showLifestyle = lifestyle?.isPublished !== false;
-  const showCrafted = crafted?.isPublished !== false;
-
-  if (!showLifestyle && !showCrafted) {
+  if (!isLifestylePublished && !isCraftedPublished) {
     return null;
   }
 
   return (
     <section ref={sectionRef} className="pt-10 sm:pt-16 pb-0 bg-canvas content-auto" aria-label="Shop by Lifestyle">
-      {showLifestyle && (
+      {/* 1. SHOP BY LIFESTYLE */}
+      {isLifestylePublished && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Section Header */}
+          {/* Section Header: Static layout & typography */}
           <div className="mb-6 sm:mb-10">
-            {lifestyle?.eyebrow && (
+            {lifestyleEyebrow && (
               <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-[#000000] font-bold mb-1.5 font-primary">
-                {lifestyle.eyebrow}
+                {lifestyleEyebrow}
               </p>
             )}
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
               <div>
-                {lifestyle?.heading && (
+                {lifestyleHeading && (
                   <h2 className="font-primary text-2xl sm:text-3xl lg:text-4xl font-normal text-ink tracking-tight leading-tight">
-                    {lifestyle.heading}
+                    {lifestyleHeading}
                   </h2>
                 )}
-                {lifestyle?.subheading && (
+                {lifestyleSubheading && (
                   <p className="text-xs sm:text-sm text-ink-secondary mt-1 font-normal max-w-xl leading-relaxed">
-                    {lifestyle.subheading}
+                    {lifestyleSubheading}
                   </p>
                 )}
               </div>
-              {lifestyle?.exploreLink && (
+              {lifestyleExploreLink && (
                 <Link
-                  href={lifestyle.exploreLink}
+                  href={lifestyleExploreLink}
                   className="inline-flex items-center gap-1.5 font-primary text-xs sm:text-sm font-medium tracking-normal text-ink hover:text-[#b4b4b4] transition-colors shrink-0"
                 >
-                  <span>{lifestyle.exploreText || 'Explore All Silhouettes'}</span>
+                  <span>{lifestyleExploreText}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               )}
@@ -248,7 +356,7 @@ export const LifestyleDiscovery: React.FC<LifestyleDiscoveryProps> = ({
                     }}
                     className="absolute -top-[20%] -bottom-[20%] left-0 right-0 h-[140%] w-full will-change-transform pointer-events-none"
                   >
-                    {hasImage && (
+                    {hasImage ? (
                       <Image
                         src={pillar.editorialImage!}
                         alt={pillar.name || 'Lifestyle Silhouette'}
@@ -257,6 +365,19 @@ export const LifestyleDiscovery: React.FC<LifestyleDiscoveryProps> = ({
                         className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
                         priority={idx === 0}
                       />
+                    ) : (
+                      /* Neutral Media Fallback: Preserves container & parallax without crashing */
+                      <div
+                        className="w-full h-full bg-[#181614] flex flex-col items-center justify-center p-6 text-center select-none"
+                        aria-label={`${pillar.name} - ${pillar.silhouette}`}
+                      >
+                        <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-white/20 mb-2">
+                          <Sparkles className="w-5 h-5" />
+                        </div>
+                        <span className="text-[10px] uppercase tracking-[0.25em] text-white/30 font-primary">
+                          {pillar.name}
+                        </span>
+                      </div>
                     )}
                   </div>
 
@@ -272,7 +393,7 @@ export const LifestyleDiscovery: React.FC<LifestyleDiscoveryProps> = ({
                     </div>
                   )}
 
-                  {/* Bottom Overlay Content */}
+                  {/* Bottom Overlay Content: Fully hardcoded typography & structure */}
                   <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 text-white z-10 space-y-1.5 sm:space-y-2 pointer-events-none drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.85)]">
                     {pillar.eyebrow && (
                       <p className="font-primary text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-white/80 font-medium">
@@ -286,7 +407,7 @@ export const LifestyleDiscovery: React.FC<LifestyleDiscoveryProps> = ({
                       {pillar.subtitle}
                     </p>
 
-                    {/* Bottom Action Line: Unified design for cards */}
+                    {/* Bottom Action Line: Unified design & static "Explore" label */}
                     <div className="pt-2 sm:pt-2.5 border-t border-white/20 flex items-center justify-between text-xs pointer-events-auto">
                       <span className="font-primary font-medium text-white/90 flex items-center gap-1 group-hover:text-white text-[11px] sm:text-xs">
                         <span>{pillar.silhouette}</span>
@@ -321,13 +442,13 @@ export const LifestyleDiscovery: React.FC<LifestyleDiscoveryProps> = ({
         </div>
       )}
 
-      {/* Strathberry/Cafuné-Style 50/50 Full-Width Split Showcase */}
-      {showCrafted && (
+      {/* 2. CRAFTED IN INDIA: Strathberry/Cafuné-Style 50/50 Full-Width Split Showcase */}
+      {isCraftedPublished && (
         <div className="w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 w-full min-h-[520px] lg:min-h-[640px]">
-            {/* Left 50%: Full Bleed Craftsmanship Video Container (Always maintains layout) */}
+            {/* Left 50%: Full Bleed Craftsmanship Video Container (Dimensions strictly preserved) */}
             <div className="relative w-full h-[360px] sm:h-[480px] lg:h-full min-h-[360px] lg:min-h-[640px] bg-[#1A1816] overflow-hidden">
-              {crafted?.videoUrl && crafted.videoUrl.trim() ? (
+              {craftedVideoUrl && craftedVideoUrl.trim() ? (
                 <video
                   ref={craftVideoRef}
                   autoPlay
@@ -335,61 +456,81 @@ export const LifestyleDiscovery: React.FC<LifestyleDiscoveryProps> = ({
                   muted
                   playsInline
                   preload="metadata"
-                  poster={crafted.posterUrl && crafted.posterUrl.trim() ? crafted.posterUrl : undefined}
+                  poster={craftedPosterUrl && craftedPosterUrl.trim() ? craftedPosterUrl : undefined}
                   className="w-full h-full object-cover object-center"
-                  aria-label={crafted.heading || 'Crafted in India video'}
+                  aria-label={craftedHeading || 'Crafted in India video'}
                 >
-                  <source src={crafted.videoUrl} type="video/mp4" />
+                  <source src={craftedVideoUrl} type="video/mp4" />
                   Your browser does not support the video tag.
                 </video>
-              ) : crafted?.posterUrl && crafted.posterUrl.trim() ? (
+              ) : craftedPosterUrl && craftedPosterUrl.trim() ? (
                 <Image
-                  src={crafted.posterUrl}
-                  alt={crafted.heading || 'Crafted in India'}
+                  src={craftedPosterUrl}
+                  alt={craftedHeading || 'Crafted in India'}
                   fill
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   className="object-cover object-center"
                 />
-              ) : null}
+              ) : (
+                /* Neutral Video Placeholder: Preserves 50% split dimensions when video is empty */
+                <div
+                  className="w-full h-full bg-[#161412] flex flex-col items-center justify-center p-8 text-center select-none"
+                  aria-label="Artisanal Leather Craftsmanship"
+                >
+                  <div className="w-16 h-16 rounded-full border border-white/15 flex items-center justify-center text-white/30 mb-3">
+                    <Video className="w-7 h-7 stroke-[1.5]" />
+                  </div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-white/40 font-primary">
+                    Atelier Craftsmanship
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Right 50%: Seamless Continuous Clean Editorial Panel */}
             <div className="p-8 sm:p-14 lg:p-20 xl:p-24 flex flex-col items-center justify-center text-center bg-white">
-              {/* Title: Crafted in India */}
-              {crafted?.heading && (
-                <h3 className="font-primary text-[38px] sm:text-[46px] md:text-[52px] font-normal text-ink tracking-tight mb-7 sm:mb-9 leading-none">
-                  {crafted.heading}
-                </h3>
-              )}
+              {/* Title: Crafted in India (Static Heading) */}
+              <h3 className="font-primary text-[38px] sm:text-[46px] md:text-[52px] font-normal text-ink tracking-tight mb-7 sm:mb-9 leading-none">
+                {craftedHeading}
+              </h3>
 
-              {/* Inset Landscape Photograph Container (Always maintains dimensions to prevent layout shifts) */}
+              {/* Inset Landscape Photograph Container: Dimensions strictly preserved to prevent layout shift */}
               <div className="relative w-full max-w-[460px] aspect-[3/2] overflow-hidden mb-7 sm:mb-9 bg-neutral-100 dark:bg-neutral-900 rounded-xs">
-                {crafted?.supportingImage && crafted.supportingImage.trim() ? (
+                {craftedSupportingImage && craftedSupportingImage.trim() ? (
                   <Image
-                    src={crafted.supportingImage}
-                    alt={crafted.supportingAlt || crafted.heading || 'Crafted in India artisan heritage'}
+                    src={craftedSupportingImage}
+                    alt={craftedSupportingAlt || 'Crafted in India artisan heritage'}
                     fill
                     sizes="(max-width: 768px) 100vw, 460px"
                     className="object-cover object-center"
                     priority
                   />
-                ) : null}
+                ) : (
+                  /* Neutral Image Placeholder: Preserves aspect-[3/2] and margins */
+                  <div
+                    className="w-full h-full bg-[#F5F2EC] dark:bg-[#1E1C1A] flex flex-col items-center justify-center text-neutral-400 select-none"
+                    aria-label="Artisan Heritage Atelier"
+                  >
+                    <ImageIcon className="w-8 h-8 opacity-40 stroke-[1.5] mb-2" />
+                    <span className="text-[11px] uppercase tracking-wider text-neutral-400 font-primary">
+                      Artisan Heritage
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Editorial Body Paragraph */}
-              {crafted?.description && (
-                <p className="font-secondary text-[13px] sm:text-[14px] text-ink-secondary font-normal leading-[1.8] max-w-[440px] mx-auto text-center mb-6 sm:mb-8">
-                  {crafted.description}
-                </p>
-              )}
+              <p className="font-secondary text-[13px] sm:text-[14px] text-ink-secondary font-normal leading-[1.8] max-w-[440px] mx-auto text-center mb-6 sm:mb-8">
+                {craftedDescription}
+              </p>
 
-              {/* Underlined Call to Action */}
-              {crafted?.ctaLink && (
+              {/* Underlined Call to Action: Static label & dynamic destination */}
+              {craftedCtaLink && (
                 <Link
-                  href={crafted.ctaLink}
+                  href={craftedCtaLink}
                   className="font-primary text-xs sm:text-sm font-medium tracking-normal text-ink hover:text-[#b4b4b4] underline underline-offset-8 transition-colors"
                 >
-                  {crafted.ctaText || 'Discover More'}
+                  {craftedCtaText || 'Discover More'}
                 </Link>
               )}
             </div>
