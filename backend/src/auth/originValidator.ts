@@ -14,7 +14,8 @@ export interface OAuthStatePayload {
  * Prevents arbitrary origin redirection, open redirects, and wildcard *.vercel.app abuse.
  */
 export const TRUSTED_ORIGINS = {
-  production: 'https://frontend-rho-gilt-51.vercel.app',
+  production: 'https://zimor-frontend.vercel.app',
+  customDomain: 'https://zimorworld.com',
   localDevelopment: [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
@@ -81,9 +82,9 @@ export function validateOrigin(rawOrigin: string | undefined | null): string | n
     return null;
   }
 
-  // 2. Exact match against configured production frontend
-  if (trimmed === TRUSTED_ORIGINS.production) {
-    return TRUSTED_ORIGINS.production;
+  // 2. Exact match against configured production frontend or custom domain
+  if (trimmed === TRUSTED_ORIGINS.production || trimmed === TRUSTED_ORIGINS.customDomain) {
+    return trimmed;
   }
 
   // 3. Exact match against config.clientUrl

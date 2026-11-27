@@ -20,9 +20,9 @@ function resolveClientUrl(): string {
     if (isProduction) {
       console.warn(
         '[CONFIG NOTICE] Missing CLIENT_URL environment variable in production. ' +
-        'Defaulting safely to authorized production origin: https://frontend-rho-gilt-51.vercel.app.'
+        'Defaulting safely to authorized production origin: https://zimorworld.com.'
       );
-      return 'https://frontend-rho-gilt-51.vercel.app';
+      return 'https://zimorworld.com';
     }
     return 'http://localhost:3000';
   }
@@ -32,9 +32,9 @@ function resolveClientUrl(): string {
   if (isProduction && (cleanUrl.includes('localhost') || cleanUrl.includes('127.0.0.1'))) {
     console.warn(
       `[CONFIG WARNING] Invalid production CLIENT_URL "${cleanUrl}". ` +
-      'Production deployments must not point to localhost. Defaulting safely to https://frontend-rho-gilt-51.vercel.app.'
+      'Production deployments must not point to localhost. Defaulting safely to https://zimorworld.com.'
     );
-    return 'https://frontend-rho-gilt-51.vercel.app';
+    return 'https://zimorworld.com';
   }
 
   return cleanUrl;
@@ -45,7 +45,8 @@ export const config = {
   clientUrl: resolveClientUrl(),
   isProduction,
   trustedOrigins: {
-    production: 'https://frontend-rho-gilt-51.vercel.app',
+    production: 'https://zimor-frontend.vercel.app',
+    customDomain: 'https://zimorworld.com',
     approvedPreviews: (process.env.APPROVED_PREVIEW_ORIGINS || '')
       .split(',')
       .map((s) => s.trim().replace(/\/+$/, ''))

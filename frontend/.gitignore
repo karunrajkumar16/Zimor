@@ -26,9 +26,9 @@ next-env.d.ts
 .vercel
 
 # Environment variables
-.env*.local
 .env
-.env.local
+.env.*
+!.env.example
 .local-uploads/
 *.local
 

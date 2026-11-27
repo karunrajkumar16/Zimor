@@ -5,23 +5,6 @@ const nextConfig = {
   reactStrictMode: true,
   devIndicators: false,
   allowedDevOrigins: ['192.168.0.103', '192.168.0.104', 'localhost:3000'],
-  async rewrites() {
-    const isProduction = process.env.NODE_ENV === 'production';
-    const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
-
-    if (isProduction && !backendUrl) {
-      console.warn('[ZIMOR NEXT CONFIG] Production notice: BACKEND_URL is not set. API rewrites disabled to prevent localhost leak.');
-      return [];
-    }
-
-    const resolvedBackendUrl = (backendUrl || 'http://localhost:5001').replace(/\/+$/, '');
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${resolvedBackendUrl}/api/:path*`,
-      },
-    ];
-  },
   async redirects() {
     return [
       {

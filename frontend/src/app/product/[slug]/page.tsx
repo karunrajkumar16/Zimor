@@ -2,13 +2,13 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { ProductDetailView } from '@/components/product/ProductDetailView';
 import { Product } from '@/types';
-import { BACKEND_URL } from '@/lib/api';
+import { BACKEND_URL, apiUrl } from '@/lib/api';
 
 export const dynamicParams = true;
 
 async function fetchProduct(slug: string): Promise<Product | null> {
   try {
-    const res = await fetch(`${BACKEND_URL}/api/products/slug/${slug}`, {
+    const res = await fetch(apiUrl(`/api/products/slug/${slug}`), {
       cache: 'no-store',
     });
     if (res.ok) {
@@ -30,7 +30,7 @@ async function fetchProduct(slug: string): Promise<Product | null> {
 
 export async function generateStaticParams() {
   try {
-    const res = await fetch(`${BACKEND_URL}/api/products`, { cache: 'no-store' });
+    const res = await fetch(apiUrl('/api/products'), { cache: 'no-store' });
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data?.products)) {

@@ -1,34 +1,23 @@
 // Centralized API Client for Zimor Storefront and Admin Portal
-// Directly connects the browser to the backend API service (with credentials & auth headers)
-function resolveBackendUrl(): string {
-  const isProduction = process.env.NODE_ENV === 'production';
-  const envUrl =
-    typeof window !== 'undefined'
-      ? (process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL)
-      : (process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL);
+// In the browser: Requests use same-origin relative paths (/api/...) routed through Next.js server-side API proxy.
+// On the server (SSR / Route Handlers): Requests directly call BACKEND_URL without public exposure.
 
-  if (envUrl && envUrl.trim()) {
-    return envUrl.trim().replace(/\/+$/, '');
+export function resolveBackendUrl(): string {
+  if (typeof window === 'undefined') {
+    return (process.env.BACKEND_URL || 'http://localhost:5001').trim().replace(/\/+$/, '');
   }
-
-  if (isProduction) {
-    if (typeof window !== 'undefined') {
-      console.warn('[ZIMOR CLIENT] NEXT_PUBLIC_BACKEND_URL is not set in production. Using relative origin.');
-    }
-    return '';
-  }
-
-  return 'http://localhost:5001';
+  return '';
 }
 
 export const BACKEND_URL = resolveBackendUrl();
 
 export function apiUrl(endpoint: string): string {
   const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const base = resolveBackendUrl();
   if (path.startsWith('/api')) {
-    return `${BACKEND_URL}${path}`;
+    return `${base}${path}`;
   }
-  return `${BACKEND_URL}/api${path}`;
+  return `${base}/api${path}`;
 }
 
 export async function apiFetch(endpoint: string, options: RequestInit = {}): Promise<Response> {

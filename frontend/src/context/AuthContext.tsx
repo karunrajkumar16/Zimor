@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { Order } from '@/types';
-import { apiFetch, BACKEND_URL } from '@/lib/api';
+import { apiFetch, apiUrl, BACKEND_URL } from '@/lib/api';
 
 export interface UserAddress {
   id: string;
@@ -134,7 +134,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (origin) {
       params.set('origin', origin);
     }
-    const authUrl = `${BACKEND_URL}/api/auth/google?${params.toString()}`;
+    const authUrl = apiUrl(`/api/auth/google?${params.toString()}`);
     window.location.href = authUrl;
   }, []);
 
